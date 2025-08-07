@@ -32,7 +32,16 @@ function parseXMLToGame(xmlText: string): any[] {
       .replace(/&#039;/g, "'")
       .replace(/&ldquo;/g, '"')
       .replace(/&rdquo;/g, '"')
-      .replace(/&#10;/g, '\n')
+      .replace(/&nbsp;/g, ' ')        // Non-breaking space to regular space
+      .replace(/&mdash;/g, '—')       // Em dash
+      .replace(/&ndash;/g, '–')       // En dash
+      .replace(/&hellip;/g, '...')    // Ellipsis
+      .replace(/&lsquo;/g, "'")       // Left single quote
+      .replace(/&rsquo;/g, "'")       // Right single quote
+      .replace(/&quot;/g, '"')        // Double quote
+      .replace(/&#10;/g, '\n')        // Line break
+      .replace(/&#13;/g, '\r')        // Carriage return
+      .replace(/\s+/g, ' ')           // Normalize multiple spaces to single space
       .trim();
   };
 
@@ -79,6 +88,18 @@ function parseXMLToGame(xmlText: string): any[] {
       const rankMatch = itemMatch.match(/<rank[^>]+name="boardgame"[^>]+value="(\d+)"/);
 
       if (bggIdMatch && nameMatch) {
+        // ✅ Process description and extract summary
+        const fullDescription = descriptionMatch ? sanitizeXMLText(descriptionMatch[1]) : null;
+        let summary = null;
+        
+        if (fullDescription) {
+          // Extract first sentence using regex: ^(.+?[.!?])(\s|$)
+          const summaryMatch = fullDescription.match(/^(.+?[.!?])(\s|$)/);
+          if (summaryMatch) {
+            summary = summaryMatch[1].trim();
+          }
+        }
+        
         const game = {
           bgg_id: parseInt(bggIdMatch[1]),
           name: sanitizeXMLText(nameMatch[1]),
@@ -89,7 +110,10 @@ function parseXMLToGame(xmlText: string): any[] {
           thumbnail_url: thumbnailMatch?.[1] || null,
           
           // ✅ Description - properly sanitized
-          description: descriptionMatch ? sanitizeXMLText(descriptionMatch[1]) : null,
+          description: fullDescription,
+          
+          // ➕ TODO: Summary - first sentence from description (column needs to be added to DB)
+          // summary: summary,
           
           // ✅ Arrays - always return arrays, even empty ones (for current schema)
           categories: categories.length > 0 ? categories : [],
@@ -116,6 +140,8 @@ function parseXMLToGame(xmlText: string): any[] {
         console.log(`   Categories: [${game.categories.slice(0,3).join(', ')}${game.categories.length > 3 ? '...' : ''}] (${game.categories.length})`);
         console.log(`   Mechanics: [${game.mechanics.slice(0,3).join(', ')}${game.mechanics.length > 3 ? '...' : ''}] (${game.mechanics.length})`);
         console.log(`   Images: ${game.image_url ? '✅' : '❌'} Description: ${game.description ? '✅' : '❌'}`);
+        // TODO: Add summary logging when column is added to DB
+        // console.log(`   Summary: "${summary}"`);
       } else {
         console.warn(`⚠️ Could not parse game from XML segment (missing ID or name)`);
       }

@@ -37,6 +37,7 @@ CREATE TABLE public.games (
   weight numeric(3,2) NULL,  -- Game complexity rating (1.0-5.0)
   publisher text NULL,
   description text NULL,
+  summary text NULL,         -- First sentence from description
   rank integer NULL,         -- BGG rank
   rating numeric NULL,       -- BGG average rating
   num_ratings integer NULL,  -- Number of ratings

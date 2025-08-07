@@ -2,6 +2,17 @@
 
 A comprehensive board game collection manager built with Next.js, TypeScript, Tailwind CSS, and Supabase.
 
+## 📂 Project Organization
+
+- **`/src/`** - Next.js application source code
+- **`/supabase/`** - Database schema and edge functions
+- **`/scripts/`** - Utility scripts organized by purpose
+  - `database/` - Database utilities and migrations
+  - `bgg-testing/` - BoardGameGeek API testing tools
+  - `archive/` - Old scripts kept for reference
+- **`/docs/`** - Project documentation
+- **`run-bgg-import.sh`** - Main BGG import script
+
 ## Features
 
 ### 🏠 **Home Dashboard**
