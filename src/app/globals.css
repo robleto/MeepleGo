@@ -1,0 +1,74 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 0, 0, 0;
+    --background-end-rgb: 0, 0, 0;
+  }
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Smooth transitions for drag and drop */
+.dragging {
+  opacity: 0.5;
+  transform: rotate(5deg);
+}
+
+.drop-zone {
+  transition: all 0.2s ease;
+}
+
+.drop-zone.drag-over {
+  background-color: #f0f9ff;
+  border-color: #3b82f6;
+}
+
+/* Rating colors */
+.rating-1 { @apply bg-red-600 text-white; }
+.rating-2 { @apply bg-orange-600 text-white; }
+.rating-3 { @apply bg-amber-600 text-white; }
+.rating-4 { @apply bg-yellow-600 text-white; }
+.rating-5 { @apply bg-lime-600 text-white; }
+.rating-6 { @apply bg-green-600 text-white; }
+.rating-7 { @apply bg-emerald-600 text-white; }
+.rating-8 { @apply bg-teal-600 text-white; }
+.rating-9 { @apply bg-cyan-600 text-white; }
+.rating-10 { @apply bg-sky-600 text-white; }
