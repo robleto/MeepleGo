@@ -45,7 +45,7 @@ export default function GameCard({ game, viewMode }: GameCardProps) {
         <div className="flex items-center space-x-4">
           <div className="flex-shrink-0">
             <Image
-              src={game.thumbnail_url || '/placeholder-game-thumb.jpg'}
+              src={game.thumbnail_url || '/placeholder-game.svg'}
               alt={game.name}
               width={60}
               height={60}
@@ -60,7 +60,7 @@ export default function GameCard({ game, viewMode }: GameCardProps) {
             <div className="flex items-center space-x-4 text-sm text-gray-500">
               <span>{formatYear(game.year_published)}</span>
               <span>{formatPlayerCount(game.min_players, game.max_players)}</span>
-              <span>{formatPlayingTime(game.playing_time)}</span>
+              <span>{formatPlayingTime(game.playtime_minutes)}</span>
             </div>
           </div>
 
@@ -74,11 +74,11 @@ export default function GameCard({ game, viewMode }: GameCardProps) {
             <button
               onClick={handlePlayedToggle}
               className={`p-2 rounded-md ${
-                game.ranking?.played
+                game.ranking?.played_it
                   ? 'bg-green-100 text-green-600'
                   : 'bg-gray-100 text-gray-400 hover:text-gray-600'
               }`}
-              title={game.ranking?.played ? 'Played' : 'Mark as played'}
+              title={game.ranking?.played_it ? 'Played' : 'Mark as played'}
             >
               <PlayIcon className="h-4 w-4" />
             </button>
@@ -97,7 +97,7 @@ export default function GameCard({ game, viewMode }: GameCardProps) {
       {/* Game Image */}
       <div className="aspect-square relative">
         <Image
-          src={game.image_url || '/placeholder-game.jpg'}
+          src={game.image_url || '/placeholder-game.svg'}
           alt={game.name}
           fill
           className="object-cover"
@@ -109,11 +109,11 @@ export default function GameCard({ game, viewMode }: GameCardProps) {
             <button
               onClick={handlePlayedToggle}
               className={`p-2 rounded-full ${
-                game.ranking?.played
+                game.ranking?.played_it
                   ? 'bg-green-500 text-white'
                   : 'bg-white text-gray-700 hover:bg-gray-100'
               }`}
-              title={game.ranking?.played ? 'Played' : 'Mark as played'}
+              title={game.ranking?.played_it ? 'Played' : 'Mark as played'}
             >
               <PlayIcon className="h-5 w-5" />
             </button>
@@ -143,7 +143,7 @@ export default function GameCard({ game, viewMode }: GameCardProps) {
         )}
 
         {/* Played Badge */}
-        {game.ranking?.played && (
+        {game.ranking?.played_it && (
           <div className="absolute top-2 left-2 bg-green-500 text-white p-1 rounded">
             <PlayIcon className="h-4 w-4" />
           </div>
@@ -156,16 +156,16 @@ export default function GameCard({ game, viewMode }: GameCardProps) {
           {game.name}
         </h3>
         
-        <div className="space-y-1 text-sm text-gray-500">
-          <div className="flex items-center space-x-1">
-            <span>{formatYear(game.year_published)}</span>
-            {game.designer && (
-              <>
-                <span>•</span>
-                <span>{truncate(game.designer, 20)}</span>
-              </>
-            )}
-          </div>
+          <div className="space-y-1 text-sm text-gray-500">
+            <div className="flex items-center space-x-1">
+              <span>{formatYear(game.year_published)}</span>
+              {game.publisher && (
+                <>
+                  <span>•</span>
+                  <span>{truncate(game.publisher, 20)}</span>
+                </>
+              )}
+            </div>
           
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-1">
@@ -175,7 +175,7 @@ export default function GameCard({ game, viewMode }: GameCardProps) {
             
             <div className="flex items-center space-x-1">
               <ClockIcon className="h-4 w-4" />
-              <span>{formatPlayingTime(game.playing_time)}</span>
+              <span>{formatPlayingTime(game.playtime_minutes)}</span>
             </div>
           </div>
         </div>

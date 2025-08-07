@@ -3,65 +3,65 @@ export interface Database {
     Tables: {
       games: {
         Row: {
-          id: number
+          id: string
+          bgg_id: number
           name: string
-          description: string | null
           year_published: number | null
-          min_players: number | null
-          max_players: number | null
-          playing_time: number | null
-          min_age: number | null
-          designer: string | null
-          publisher: string | null
           image_url: string | null
           thumbnail_url: string | null
-          bgg_id: number | null
           categories: string[] | null
           mechanics: string[] | null
-          average_rating: number | null
-          complexity: number | null
+          min_players: number | null
+          max_players: number | null
+          playtime_minutes: number | null
+          publisher: string | null
+          description: string | null
+          rank: number | null
+          rating: number | null
+          num_ratings: number | null
+          cached_at: string | null
           created_at: string
           updated_at: string
         }
         Insert: {
-          id?: number
+          id?: string
+          bgg_id: number
           name: string
-          description?: string | null
           year_published?: number | null
-          min_players?: number | null
-          max_players?: number | null
-          playing_time?: number | null
-          min_age?: number | null
-          designer?: string | null
-          publisher?: string | null
           image_url?: string | null
           thumbnail_url?: string | null
-          bgg_id?: number | null
           categories?: string[] | null
           mechanics?: string[] | null
-          average_rating?: number | null
-          complexity?: number | null
+          min_players?: number | null
+          max_players?: number | null
+          playtime_minutes?: number | null
+          publisher?: string | null
+          description?: string | null
+          rank?: number | null
+          rating?: number | null
+          num_ratings?: number | null
+          cached_at?: string | null
           created_at?: string
           updated_at?: string
         }
         Update: {
-          id?: number
+          id?: string
+          bgg_id?: number
           name?: string
-          description?: string | null
           year_published?: number | null
-          min_players?: number | null
-          max_players?: number | null
-          playing_time?: number | null
-          min_age?: number | null
-          designer?: string | null
-          publisher?: string | null
           image_url?: string | null
           thumbnail_url?: string | null
-          bgg_id?: number | null
           categories?: string[] | null
           mechanics?: string[] | null
-          average_rating?: number | null
-          complexity?: number | null
+          min_players?: number | null
+          max_players?: number | null
+          playtime_minutes?: number | null
+          publisher?: string | null
+          description?: string | null
+          rank?: number | null
+          rating?: number | null
+          num_ratings?: number | null
+          cached_at?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -69,161 +69,161 @@ export interface Database {
       profiles: {
         Row: {
           id: string
-          email: string
-          username: string | null
-          display_name: string | null
+          username: string
+          full_name: string | null
           avatar_url: string | null
           bio: string | null
-          favorite_genres: string[] | null
-          created_at: string
-          updated_at: string
+          created_at: string | null
+          updated_at: string | null
+          email: string | null
         }
         Insert: {
           id: string
-          email: string
-          username?: string | null
-          display_name?: string | null
+          username: string
+          full_name?: string | null
           avatar_url?: string | null
           bio?: string | null
-          favorite_genres?: string[] | null
-          created_at?: string
-          updated_at?: string
+          created_at?: string | null
+          updated_at?: string | null
+          email?: string | null
         }
         Update: {
           id?: string
-          email?: string
-          username?: string | null
-          display_name?: string | null
+          username?: string
+          full_name?: string | null
           avatar_url?: string | null
           bio?: string | null
-          favorite_genres?: string[] | null
-          created_at?: string
-          updated_at?: string
+          created_at?: string | null
+          updated_at?: string | null
+          email?: string | null
         }
       }
       rankings: {
         Row: {
-          id: number
-          profile_id: string
-          game_id: number
-          rating: number | null
-          played: boolean
+          id: string
+          user_id: string | null
+          game_id: string | null
+          played_it: boolean | null
+          ranking: number | null
           notes: string | null
-          date_played: string | null
-          created_at: string
-          updated_at: string
+          created_at: string | null
+          imported_from: string | null
+          updated_at: string | null
         }
         Insert: {
-          id?: number
-          profile_id: string
-          game_id: number
-          rating?: number | null
-          played?: boolean
+          id?: string
+          user_id?: string | null
+          game_id?: string | null
+          played_it?: boolean | null
+          ranking?: number | null
           notes?: string | null
-          date_played?: string | null
-          created_at?: string
-          updated_at?: string
+          created_at?: string | null
+          imported_from?: string | null
+          updated_at?: string | null
         }
         Update: {
-          id?: number
-          profile_id?: string
-          game_id?: number
-          rating?: number | null
-          played?: boolean
+          id?: string
+          user_id?: string | null
+          game_id?: string | null
+          played_it?: boolean | null
+          ranking?: number | null
           notes?: string | null
-          date_played?: string | null
-          created_at?: string
-          updated_at?: string
+          created_at?: string | null
+          imported_from?: string | null
+          updated_at?: string | null
         }
       }
-      lists: {
+      game_lists: {
         Row: {
-          id: number
-          profile_id: string
+          id: string
+          user_id: string
           name: string
           description: string | null
-          is_public: boolean
-          created_at: string
-          updated_at: string
+          is_public: boolean | null
+          created_at: string | null
+          updated_at: string | null
         }
         Insert: {
-          id?: number
-          profile_id: string
+          id?: string
+          user_id: string
           name: string
           description?: string | null
-          is_public?: boolean
-          created_at?: string
-          updated_at?: string
+          is_public?: boolean | null
+          created_at?: string | null
+          updated_at?: string | null
         }
         Update: {
-          id?: number
-          profile_id?: string
+          id?: string
+          user_id?: string
           name?: string
           description?: string | null
-          is_public?: boolean
-          created_at?: string
-          updated_at?: string
+          is_public?: boolean | null
+          created_at?: string | null
+          updated_at?: string | null
         }
       }
-      list_items: {
+      game_list_items: {
         Row: {
-          id: number
-          list_id: number
-          game_id: number
-          notes: string | null
-          order_index: number
-          created_at: string
-          updated_at: string
+          id: string
+          list_id: string
+          game_id: string
+          ranking: number | null
+          played_it: boolean | null
+          score: number | null
+          created_at: string | null
+          updated_at: string | null
         }
         Insert: {
-          id?: number
-          list_id: number
-          game_id: number
-          notes?: string | null
-          order_index?: number
-          created_at?: string
-          updated_at?: string
+          id?: string
+          list_id: string
+          game_id: string
+          ranking?: number | null
+          played_it?: boolean | null
+          score?: number | null
+          created_at?: string | null
+          updated_at?: string | null
         }
         Update: {
-          id?: number
-          list_id?: number
-          game_id?: number
-          notes?: string | null
-          order_index?: number
-          created_at?: string
-          updated_at?: string
+          id?: string
+          list_id?: string
+          game_id?: string
+          ranking?: number | null
+          played_it?: boolean | null
+          score?: number | null
+          created_at?: string | null
+          updated_at?: string | null
         }
       }
       awards: {
         Row: {
-          id: number
-          profile_id: string
+          id: string
+          user_id: string | null
           year: number
           category: string
-          nominees: number[]
-          winner_id: number | null
-          created_at: string
-          updated_at: string
+          winner_id: string | null
+          created_at: string | null
+          updated_at: string | null
+          nominee_ids: string[] | null
         }
         Insert: {
-          id?: number
-          profile_id: string
+          id?: string
+          user_id?: string | null
           year: number
-          category: string
-          nominees?: number[]
-          winner_id?: number | null
-          created_at?: string
-          updated_at?: string
+          category?: string
+          winner_id?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+          nominee_ids?: string[] | null
         }
         Update: {
-          id?: number
-          profile_id?: string
+          id?: string
+          user_id?: string | null
           year?: number
           category?: string
-          nominees?: number[]
-          winner_id?: number | null
-          created_at?: string
-          updated_at?: string
+          winner_id?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+          nominee_ids?: string[] | null
         }
       }
     }
@@ -246,16 +246,16 @@ export interface Database {
 export type Game = Database['public']['Tables']['games']['Row']
 export type Profile = Database['public']['Tables']['profiles']['Row']
 export type Ranking = Database['public']['Tables']['rankings']['Row']
-export type List = Database['public']['Tables']['lists']['Row']
-export type ListItem = Database['public']['Tables']['list_items']['Row']
+export type GameList = Database['public']['Tables']['game_lists']['Row']
+export type GameListItem = Database['public']['Tables']['game_list_items']['Row']
 export type Award = Database['public']['Tables']['awards']['Row']
 
 export type GameWithRanking = Game & {
-  ranking?: Ranking
+  ranking?: Ranking | null
 }
 
-export type ListWithItems = List & {
-  list_items: (ListItem & { game: Game })[]
+export type GameListWithItems = GameList & {
+  game_list_items: (GameListItem & { game: Game })[]
 }
 
 export type AwardWithGames = Award & {
