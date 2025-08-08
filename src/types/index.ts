@@ -4,7 +4,7 @@ export type ViewMode = 'grid' | 'list'
 export type SortOption = 'name' | 'year' | 'rating' | 'date_added' | 'playing_time'
 
 export type GameWithRanking = Game & {
-  ranking?: Ranking
+  ranking?: Ranking | null
 }
 
 export type FilterState = {

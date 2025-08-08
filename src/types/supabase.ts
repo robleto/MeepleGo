@@ -16,6 +16,7 @@ export interface Database {
           playtime_minutes: number | null
           publisher: string | null
           description: string | null
+          summary: string | null
           rank: number | null
           rating: number | null
           num_ratings: number | null
@@ -37,6 +38,7 @@ export interface Database {
           playtime_minutes?: number | null
           publisher?: string | null
           description?: string | null
+          summary?: string | null
           rank?: number | null
           rating?: number | null
           num_ratings?: number | null
@@ -58,6 +60,7 @@ export interface Database {
           playtime_minutes?: number | null
           publisher?: string | null
           description?: string | null
+          summary?: string | null
           rank?: number | null
           rating?: number | null
           num_ratings?: number | null

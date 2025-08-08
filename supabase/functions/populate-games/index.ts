@@ -232,7 +232,7 @@ async function fetchAndStoreGames(supabase: any, ids: number[]) {
         const xmlText = await res.text();
         
         // Check for valid XML response
-        if (!xmlText.includes('<items>')) {
+        if (!xmlText.includes('<item')) {
           console.warn(`⚠️ Invalid XML response for batch ${batchNumber}`);
           errorCount++;
           break;

@@ -47,8 +47,8 @@ export default function GameCard({ game, viewMode }: GameCardProps) {
             <Image
               src={game.thumbnail_url || '/placeholder-game.svg'}
               alt={game.name}
-              width={60}
-              height={60}
+              width={80}
+              height={80}
               className="rounded-md object-cover"
             />
           </div>
@@ -65,9 +65,9 @@ export default function GameCard({ game, viewMode }: GameCardProps) {
           </div>
 
           <div className="flex items-center space-x-2">
-            {game.ranking?.rating && (
-              <div className={`px-2 py-1 rounded text-white text-sm font-medium ${getRatingColor(game.ranking.rating)}`}>
-                {game.ranking.rating}
+            {game.ranking?.ranking && (
+              <div className={`px-2 py-1 rounded text-white text-sm font-medium ${getRatingColor(game.ranking.ranking)}`}>
+                {game.ranking.ranking}
               </div>
             )}
             
@@ -95,102 +95,95 @@ export default function GameCard({ game, viewMode }: GameCardProps) {
       onMouseLeave={() => setShowOverlay(false)}
     >
       {/* Game Image */}
-      <div className="aspect-square relative">
+      <div className="aspect-square relative w-full mx-auto">
         <Image
           src={game.image_url || '/placeholder-game.svg'}
           alt={game.name}
           fill
-          className="object-cover"
+          className="object-cover rounded-t-lg"
+          sizes="(max-width: 640px) 150px, (max-width: 768px) 150px, (max-width: 1024px) 150px, 150px"
         />
         
         {/* Overlay */}
         {showOverlay && (
-          <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center space-x-2 transition-opacity">
+          <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center space-x-1 transition-opacity">
             <button
               onClick={handlePlayedToggle}
-              className={`p-2 rounded-full ${
+              className={`p-1.5 rounded-full text-xs ${
                 game.ranking?.played_it
                   ? 'bg-green-500 text-white'
                   : 'bg-white text-gray-700 hover:bg-gray-100'
               }`}
               title={game.ranking?.played_it ? 'Played' : 'Mark as played'}
             >
-              <PlayIcon className="h-5 w-5" />
+              <PlayIcon className="h-3 w-3" />
             </button>
             
             <button
               onClick={() => setIsRating(!isRating)}
-              className="p-2 rounded-full bg-white text-gray-700 hover:bg-gray-100"
+              className="p-1.5 rounded-full bg-white text-gray-700 hover:bg-gray-100 text-xs"
               title="Rate this game"
             >
-              <StarIcon className="h-5 w-5" />
+              <StarIcon className="h-3 w-3" />
             </button>
             
             <button
-              className="p-2 rounded-full bg-white text-gray-700 hover:bg-gray-100"
+              className="p-1.5 rounded-full bg-white text-gray-700 hover:bg-gray-100 text-xs"
               title="View details"
             >
-              <EyeIcon className="h-5 w-5" />
+              <EyeIcon className="h-3 w-3" />
             </button>
-          </div>
-        )}
-
-        {/* Rating Badge */}
-        {game.ranking?.rating && (
-          <div className={`absolute top-2 right-2 px-2 py-1 rounded text-white text-sm font-medium ${getRatingColor(game.ranking.rating)}`}>
-            {game.ranking.rating}
           </div>
         )}
 
         {/* Played Badge */}
         {game.ranking?.played_it && (
           <div className="absolute top-2 left-2 bg-green-500 text-white p-1 rounded">
-            <PlayIcon className="h-4 w-4" />
+            <PlayIcon className="h-3 w-3" />
           </div>
         )}
       </div>
 
       {/* Game Info */}
-      <div className="p-4">
-        <h3 className="font-medium text-gray-900 mb-2 line-clamp-2">
+      <div className="p-3">
+        <h3 className="font-medium text-gray-900 mb-1 text-sm line-clamp-2 leading-tight">
           {game.name}
         </h3>
         
-          <div className="space-y-1 text-sm text-gray-500">
-            <div className="flex items-center space-x-1">
-              <span>{formatYear(game.year_published)}</span>
-              {game.publisher && (
-                <>
-                  <span>•</span>
-                  <span>{truncate(game.publisher, 20)}</span>
-                </>
-              )}
-            </div>
+        <div className="space-y-1 text-xs text-gray-500">
+          <div className="flex items-center justify-between">
+            <span>{formatYear(game.year_published)}</span>
+            {game.ranking?.ranking && (
+              <div className={`px-1.5 py-0.5 rounded text-white text-xs font-medium ${getRatingColor(game.ranking.ranking)}`}>
+                {game.ranking.ranking}
+              </div>
+            )}
+          </div>
           
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center justify-between text-xs">
             <div className="flex items-center space-x-1">
-              <UserGroupIcon className="h-4 w-4" />
+              <UserGroupIcon className="h-3 w-3" />
               <span>{formatPlayerCount(game.min_players, game.max_players)}</span>
             </div>
             
             <div className="flex items-center space-x-1">
-              <ClockIcon className="h-4 w-4" />
+              <ClockIcon className="h-3 w-3" />
               <span>{formatPlayingTime(game.playtime_minutes)}</span>
             </div>
           </div>
         </div>
 
-        {/* Categories */}
+        {/* Categories - More compact */}
         {game.categories && game.categories.length > 0 && (
           <div className="mt-2 flex flex-wrap gap-1">
-            {game.categories.slice(0, 2).map((category) => (
-              <span key={category} className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">
+            {game.categories.slice(0, 1).map((category) => (
+              <span key={category} className="px-1.5 py-0.5 bg-gray-100 text-gray-600 text-xs rounded truncate">
                 {category}
               </span>
             ))}
-            {game.categories.length > 2 && (
-              <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">
-                +{game.categories.length - 2}
+            {game.categories.length > 1 && (
+              <span className="px-1.5 py-0.5 bg-gray-100 text-gray-600 text-xs rounded">
+                +{game.categories.length - 1}
               </span>
             )}
           </div>
@@ -200,14 +193,14 @@ export default function GameCard({ game, viewMode }: GameCardProps) {
       {/* Rating Popup */}
       {isRating && (
         <div className="absolute inset-0 bg-white bg-opacity-95 flex items-center justify-center">
-          <div className="text-center p-4">
-            <p className="text-sm text-gray-600 mb-2">Rate this game</p>
-            <div className="flex space-x-1">
+          <div className="text-center p-2">
+            <p className="text-xs text-gray-600 mb-2">Rate this game</p>
+            <div className="grid grid-cols-5 gap-1">
               {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((rating) => (
                 <button
                   key={rating}
                   onClick={() => handleRatingClick(rating)}
-                  className={`w-8 h-8 rounded-full text-sm font-medium text-white ${getRatingColor(rating)} hover:scale-110 transition-transform`}
+                  className={`w-6 h-6 rounded-full text-xs font-medium text-white ${getRatingColor(rating)} hover:scale-110 transition-transform`}
                 >
                   {rating}
                 </button>
@@ -215,7 +208,7 @@ export default function GameCard({ game, viewMode }: GameCardProps) {
             </div>
             <button
               onClick={() => setIsRating(false)}
-              className="text-xs text-gray-500 mt-2 hover:text-gray-700"
+              className="text-xs text-gray-500 mt-1 hover:text-gray-700"
             >
               Cancel
             </button>
