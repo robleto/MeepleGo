@@ -3,7 +3,7 @@ import { GameWithRanking } from '@/types'
 
 export type SortKey = 'name' | 'year_published' | 'rating' | 'ranking' | 'playtime_minutes' | 'min_players' | 'max_players'
 export type SortOrder = 'asc' | 'desc'
-export type GroupKey = 'none' | 'year_published' | 'publisher' | 'min_players'
+export type GroupKey = 'none' | 'year_published' | 'publisher' | 'min_players' | 'categories' | 'mechanics'
 
 export const SORT_OPTIONS = [
   { value: 'name' as SortKey, label: 'Name' },
@@ -20,6 +20,8 @@ export const GROUP_OPTIONS = [
   { value: 'year_published' as GroupKey, label: 'Year' },
   { value: 'publisher' as GroupKey, label: 'Publisher' },
   { value: 'min_players' as GroupKey, label: 'Min Players' },
+  { value: 'categories' as GroupKey, label: 'Category' },
+  { value: 'mechanics' as GroupKey, label: 'Mechanic' },
 ]
 
 export function useViewMode(defaultMode: 'grid' | 'list' = 'grid') {
@@ -69,7 +71,7 @@ export function useGameFilters(games: GameWithRanking[], options?: { disableClie
     return 'year_published'
   })
 
-  const [filterType, setFilterType] = useState<'none' | 'year' | 'publisher' | 'players' | 'game'>('none')
+  const [filterType, setFilterType] = useState<'none' | 'year' | 'publisher' | 'players' | 'category' | 'mechanic' | 'game'>('none')
   const [filterValue, setFilterValue] = useState<string>('all')
 
   useEffect(() => {
@@ -98,6 +100,16 @@ export function useGameFilters(games: GameWithRanking[], options?: { disableClie
       if (filterValue === 'all') return true
       return game.min_players !== null && game.max_players !== null && 
              game.min_players <= players && game.max_players >= players
+    }
+    if (filterType === 'category') {
+      if (filterValue === 'all') return true
+      const cats = game.categories || []
+      return cats.includes(filterValue)
+    }
+    if (filterType === 'mechanic') {
+      if (filterValue === 'all') return true
+      const mechs = game.mechanics || []
+      return mechs.includes(filterValue)
     }
     if (filterType === 'game') {
       return String(game.id) === filterValue
@@ -234,6 +246,44 @@ export function useGameFilters(games: GameWithRanking[], options?: { disableClie
         }))
     }
 
+    if (groupBy === 'categories') {
+      const groups = new Map<string, GameWithRanking[]>()
+      filteredGames.forEach(game => {
+        const cats = (game.categories && game.categories.length > 0) ? game.categories : ['Uncategorized']
+        cats.forEach(cat => {
+          const key = cat || 'Uncategorized'
+          if (!groups.has(key)) groups.set(key, [])
+          groups.get(key)!.push(game)
+        })
+      })
+
+      return Array.from(groups.entries())
+        .sort(([a], [b]) => a.localeCompare(b)) // alphabetical
+        .map(([cat, games]) => ({
+          key: cat,
+          games: disableClientSorting ? games : games.sort((a, b) => a.name.localeCompare(b.name))
+        }))
+    }
+
+    if (groupBy === 'mechanics') {
+      const groups = new Map<string, GameWithRanking[]>()
+      filteredGames.forEach(game => {
+        const mechs = (game.mechanics && game.mechanics.length > 0) ? game.mechanics : ['No Mechanic']
+        mechs.forEach(mech => {
+          const key = mech || 'No Mechanic'
+          if (!groups.has(key)) groups.set(key, [])
+          groups.get(key)!.push(game)
+        })
+      })
+
+      return Array.from(groups.entries())
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([mech, games]) => ({
+          key: mech,
+          games: disableClientSorting ? games : games.sort((a, b) => a.name.localeCompare(b.name))
+        }))
+    }
+
     return [{ key: 'All Games', games: filteredGames }]
   })()
 
@@ -242,14 +292,22 @@ export function useGameFilters(games: GameWithRanking[], options?: { disableClie
   const uniquePublishers = Array.from(new Set(games.map(g => g.publisher).filter((pub): pub is string => pub !== null))).sort()
   const uniquePlayerCounts = Array.from(new Set(
     games.flatMap(g => {
-      if (!g.min_players || !g.max_players) return []
-      const counts = []
+      if (!g.min_players || !g.max_players) return [] as number[]
+      const counts: number[] = []
       for (let i = g.min_players; i <= g.max_players; i++) {
         counts.push(i)
       }
       return counts
     })
   )).sort((a, b) => a - b)
+
+  const uniqueCategories = Array.from(new Set(
+    games.flatMap(g => (g.categories || [])).filter((c): c is string => !!c)
+  )).sort((a, b) => a.localeCompare(b))
+
+  const uniqueMechanics = Array.from(new Set(
+    games.flatMap(g => (g.mechanics || [])).filter((m): m is string => !!m)
+  )).sort((a, b) => a.localeCompare(b))
 
   return {
     // State
@@ -271,5 +329,7 @@ export function useGameFilters(games: GameWithRanking[], options?: { disableClie
     uniqueYears,
     uniquePublishers,
     uniquePlayerCounts,
+    uniqueCategories,
+    uniqueMechanics,
   }
 }

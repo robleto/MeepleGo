@@ -43,13 +43,13 @@ export default function GameCard({ game, viewMode }: GameCardProps) {
     return (
       <div className="bg-white rounded-lg shadow p-4 hover:shadow-md transition-shadow">
         <div className="flex items-center space-x-4">
-          <div className="flex-shrink-0">
+          <div className="flex-shrink-0 w-20 h-20 bg-gray-50 rounded-md overflow-hidden flex items-center justify-center">
             <Image
               src={game.thumbnail_url || '/placeholder-game.svg'}
               alt={game.name}
               width={80}
               height={80}
-              className="rounded-md object-cover"
+              className="object-contain"
             />
           </div>
           
@@ -95,12 +95,12 @@ export default function GameCard({ game, viewMode }: GameCardProps) {
       onMouseLeave={() => setShowOverlay(false)}
     >
       {/* Game Image */}
-      <div className="aspect-square relative w-full mx-auto">
+      <div className="aspect-square relative w-full mx-auto bg-gray-300 ">
         <Image
           src={game.image_url || '/placeholder-game.svg'}
           alt={game.name}
           fill
-          className="object-cover rounded-t-lg"
+          className="object-contain rounded-t-lg"
           sizes="(max-width: 640px) 150px, (max-width: 768px) 150px, (max-width: 1024px) 150px, 150px"
         />
         
@@ -173,21 +173,6 @@ export default function GameCard({ game, viewMode }: GameCardProps) {
           </div>
         </div>
 
-        {/* Categories - More compact */}
-        {game.categories && game.categories.length > 0 && (
-          <div className="mt-2 flex flex-wrap gap-1">
-            {game.categories.slice(0, 1).map((category) => (
-              <span key={category} className="px-1.5 py-0.5 bg-gray-100 text-gray-600 text-xs rounded truncate">
-                {category}
-              </span>
-            ))}
-            {game.categories.length > 1 && (
-              <span className="px-1.5 py-0.5 bg-gray-100 text-gray-600 text-xs rounded">
-                +{game.categories.length - 1}
-              </span>
-            )}
-          </div>
-        )}
       </div>
 
       {/* Rating Popup */}

@@ -1,8 +1,6 @@
-import React, { useState, useRef } from 'react'
+import React, { useState } from 'react'
 import { SORT_OPTIONS, GROUP_OPTIONS } from '@/utils/gameFilters'
 import type { SortKey, GroupKey, SortOrder } from '@/utils/gameFilters'
-import { supabase } from '@/lib/supabase'
-import type { Game } from '@/types/supabase'
 import { 
   MagnifyingGlassIcon,
   FunnelIcon,
@@ -21,19 +19,23 @@ interface GameFiltersProps {
   setSortOrder: (order: SortOrder) => void
   groupBy: GroupKey
   setGroupBy: (group: GroupKey) => void
-  filterType: 'none' | 'year' | 'publisher' | 'players' | 'game'
-  setFilterType: (type: 'none' | 'year' | 'publisher' | 'players' | 'game') => void
+  filterType: 'none' | 'year' | 'publisher' | 'players' | 'category' | 'mechanic' | 'game'
+  setFilterType: (type: 'none' | 'year' | 'publisher' | 'players' | 'category' | 'mechanic' | 'game') => void
   filterValue: string
   setFilterValue: (value: string) => void
   uniqueYears: number[]
   uniquePublishers: string[]
   uniquePlayerCounts: number[]
+  uniqueCategories?: string[]
+  uniqueMechanics?: string[]
+  searchTerm: string
+  setSearchTerm: (value: string) => void
   defaults?: {
     viewMode?: 'grid' | 'list'
     sortBy?: SortKey
     sortOrder?: SortOrder
     groupBy?: GroupKey
-    filterType?: 'none' | 'year' | 'publisher' | 'players' | 'game'
+    filterType?: 'none' | 'year' | 'publisher' | 'players' | 'category' | 'mechanic' | 'game'
     filterValue?: string
   }
 }
@@ -54,6 +56,10 @@ export default function GameFilters({
   uniqueYears,
   uniquePublishers,
   uniquePlayerCounts,
+  uniqueCategories = [],
+  uniqueMechanics = [],
+  searchTerm,
+  setSearchTerm,
   defaults = {
     viewMode: 'grid',
     sortBy: 'name',
@@ -63,41 +69,7 @@ export default function GameFilters({
     filterValue: 'all'
   }
 }: GameFiltersProps) {
-  // --- Game search state ---
-  const [searchTerm, setSearchTerm] = useState('')
-  const [suggestions, setSuggestions] = useState<Game[]>([])
-  const [showSuggestions, setShowSuggestions] = useState(false)
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
-  const searchTimeout = useRef<NodeJS.Timeout | null>(null)
-
-  // Fetch game suggestions as user types
-  const handleSearchChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value
-    setSearchTerm(value)
-    setShowSuggestions(!!value)
-    if (searchTimeout.current) clearTimeout(searchTimeout.current)
-    if (!value) {
-      setSuggestions([])
-      return
-    }
-    searchTimeout.current = setTimeout(async () => {
-      const { data, error } = await supabase
-        .from('games')
-        .select('id, name, year_published, image_url, thumbnail_url')
-        .ilike('name', `%${value}%`)
-        .limit(7)
-      if (!error && data) setSuggestions(data as Game[])
-      else setSuggestions([])
-    }, 200)
-  }
-
-  // Handle suggestion selection
-  const handleSuggestionClick = (game: Game) => {
-    setSearchTerm(game.name)
-    setShowSuggestions(false)
-    setFilterType('game') // Use a dedicated filter type for game search
-    setFilterValue(String(game.id))
-  }
 
   // Clear All handler
   const isDefault =
@@ -120,59 +92,32 @@ export default function GameFilters({
 
   return (
     <div className="mb-6">
-      {/* Main Row - Responsive, Search Expands, Controls Shift */}
+      {/* Main Row - In-page search that filters as you type */}
       <div className="flex items-center gap-4 mb-4">
-        {/* Search Bar: Compact, Expands on Focus/Input */}
-        <div className="relative transition-all duration-300" style={{ minWidth: 0 }}>
-          <div className="relative">
-            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-            <input
-              type="text"
-              placeholder="Search games..."
-              value={searchTerm}
-              onChange={handleSearchChange}
-              onFocus={() => setShowSuggestions(!!searchTerm)}
-              onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
-              className={`pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white text-gray-900 placeholder-gray-500 transition-all duration-300
-                ${searchTerm.length > 0 || showSuggestions ? 'w-64 sm:w-80 md:w-96' : 'w-28 sm:w-36 md:w-44'}
-              `}
-            />
-          </div>
-
-          {/* Search Suggestions Dropdown */}
-          {showSuggestions && suggestions.length > 0 && (
-            <ul className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto">
-              {suggestions.map((game) => (
-                <li 
-                  key={game.id}
-                  className="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
-                  onClick={() => handleSuggestionClick(game)}
-                >
-                  <div className="flex items-center gap-3">
-                    {game.thumbnail_url && (
-                      <img 
-                        src={game.thumbnail_url} 
-                        alt={game.name}
-                        className="w-8 h-8 rounded object-cover"
-                      />
-                    )}
-                    <div>
-                      <div className="font-medium text-gray-900">{game.name}</div>
-                      {game.year_published && (
-                        <div className="text-xs text-gray-500">({game.year_published})</div>
-                      )}
-                    </div>
-                  </div>
-                </li>
-              ))}
-              <li className="px-4 py-3 text-xs text-gray-500 border-t border-gray-200 bg-gray-50">
-                Can't find your game? <a href="/help/add-game" className="text-primary-600 underline hover:text-primary-800">Learn how to add it</a>
-              </li>
-            </ul>
+        {/* Simple in-page Search (no suggestions) */}
+        <div className="relative" style={{ minWidth: 0 }}>
+          <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
+          <input
+            type="text"
+            placeholder="Search games"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10 pr-8 py-2.5 border border-gray-300 rounded-md text-sm leading-5 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-primary-500 focus:border-primary-500 bg-white text-gray-900 placeholder-gray-500 w-64 sm:w-80 md:w-96"
+          />
+          {searchTerm && (
+            <button
+              type="button"
+              onClick={() => setSearchTerm('')}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              aria-label="Clear search"
+              title="Clear search"
+            >
+              <XMarkIcon className="w-4 h-4" />
+            </button>
           )}
         </div>
 
-        {/* Filters/Sort & View Toggle: Always flush left, shift as search expands */}
+        {/* Filters/Sort & View Toggle */}
         <div className="flex items-center gap-2 flex-shrink-0 ml-auto">
           {/* Filters Toggle */}
           <button
@@ -261,13 +206,15 @@ export default function GameFilters({
               <div className="flex gap-2">
                 <select
                   value={filterType}
-                  onChange={(e) => setFilterType(e.target.value as 'none' | 'year' | 'publisher' | 'players' | 'game')}
+                  onChange={(e) => setFilterType(e.target.value as 'none' | 'year' | 'publisher' | 'players' | 'category' | 'mechanic' | 'game')}
                   className="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white text-gray-900"
                 >
                   <option value="none">None</option>
                   <option value="year">Year</option>
                   <option value="publisher">Publisher</option>
                   <option value="players">Players</option>
+                  <option value="category">Category</option>
+                  <option value="mechanic">Mechanic</option>
                 </select>
 
                 {filterType === 'year' && (
@@ -310,6 +257,36 @@ export default function GameFilters({
                     {uniquePlayerCounts.map((count) => (
                       <option key={count} value={count}>
                         {count} {count === 1 ? 'Player' : 'Players'}
+                      </option>
+                    ))}
+                  </select>
+                )}
+
+                {filterType === 'category' && (
+                  <select
+                    value={filterValue}
+                    onChange={(e) => setFilterValue(e.target.value)}
+                    className="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white text-gray-900"
+                  >
+                    <option value="all">All Categories</option>
+                    {uniqueCategories.map((cat) => (
+                      <option key={cat} value={cat}>
+                        {cat}
+                      </option>
+                    ))}
+                  </select>
+                )}
+
+                {filterType === 'mechanic' && (
+                  <select
+                    value={filterValue}
+                    onChange={(e) => setFilterValue(e.target.value)}
+                    className="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white text-gray-900"
+                  >
+                    <option value="all">All Mechanics</option>
+                    {uniqueMechanics.map((mech) => (
+                      <option key={mech} value={mech}>
+                        {mech}
                       </option>
                     ))}
                   </select>

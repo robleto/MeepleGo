@@ -384,4 +384,19 @@ class BGGRankBasedImporter {
 
 // Create and run the rank-based importer
 const importer = new BGGRankBasedImporter();
-importer.importGamesByRankRange(1001, 2500).catch(console.error);
+
+// Allow CLI args: node import-by-rank-range.js <startRank> <endRank>
+const [, , startArg, endArg] = process.argv;
+const startRank = Number(startArg);
+const endRank = Number(endArg);
+
+if (!Number.isFinite(startRank)) {
+  console.log('ℹ️ Usage: node scripts/bgg-testing/import-by-rank-range.js <startRank> [endRank]');
+  console.log('   Example: node scripts/bgg-testing/import-by-rank-range.js 2501 5000');
+}
+
+const resolvedStart = Number.isFinite(startRank) ? startRank : 1001;
+// If end not provided, fetch 100 pages (~10,000 ranks) by default
+const resolvedEnd = Number.isFinite(endRank) ? endRank : (resolvedStart + 100 * 100 - 1);
+
+importer.importGamesByRankRange(resolvedStart, resolvedEnd).catch(console.error);
