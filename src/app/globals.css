@@ -22,34 +22,139 @@ body {
   color: rgb(var(--foreground-rgb));
 }
 
-/* Animated gradient background inspired by ChatGPT */
+/* Animated blob background inspired by ChatGPT */
 .gradient-background {
-  background: linear-gradient(
-    -45deg, 
-    #ffb8bb, 
-    #fedff4, 
-    #fedff4, 
-    #ffd4b8, 
-    #ffc8d1, 
-    #c4f2ef, 
-    #fee5ed, 
-    #e6b8d4, 
-    #ffe4b8, 
-    #5a7fa3
-  );
-  background-size: 400% 400%;
-  animation: gradientShift 15s ease infinite;
+  position: relative;
+  background: #f8fafc;
+  overflow: hidden;
 }
 
-@keyframes gradientShift {
-  0% {
-    background-position: 0% 50%;
+.gradient-background::before,
+.gradient-background::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.7;
+  z-index: -1;
+}
+
+/* Pink blob */
+.gradient-background::before {
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, #ff9aa2 0%, #ffc2d1 40%, transparent 70%);
+  top: -200px;
+  left: -200px;
+  animation: floatBlob1 20s ease-in-out infinite;
+}
+
+/* Blue blob */
+.gradient-background::after {
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, #a8e6cf 0%, #c4f2ef 40%, transparent 70%);
+  bottom: -150px;
+  right: -150px;
+  animation: floatBlob2 25s ease-in-out infinite;
+}
+
+/* Additional blobs using pseudo-elements won't work, so we'll create a wrapper */
+.blob-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  opacity: 0.6;
+}
+
+.blob-1 {
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, #ffd93d 0%, #ffe4b8 40%, transparent 70%);
+  top: 10%;
+  right: 20%;
+  animation: floatBlob3 18s ease-in-out infinite;
+}
+
+.blob-2 {
+  width: 350px;
+  height: 350px;
+  background: radial-gradient(circle, #b8d4ff 0%, #d1e7ff 40%, transparent 70%);
+  bottom: 30%;
+  left: 10%;
+  animation: floatBlob4 22s ease-in-out infinite;
+}
+
+.blob-3 {
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, #e4c1f9 0%, #f8e6ff 40%, transparent 70%);
+  top: 40%;
+  left: 40%;
+  animation: floatBlob5 16s ease-in-out infinite;
+}
+
+@keyframes floatBlob1 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(200px, 100px) scale(1.1);
+  }
+  66% {
+    transform: translate(-100px, 200px) scale(0.9);
+  }
+}
+
+@keyframes floatBlob2 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(-150px, -100px) scale(1.2);
+  }
+  66% {
+    transform: translate(100px, -150px) scale(0.8);
+  }
+}
+
+@keyframes floatBlob3 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
   }
   50% {
-    background-position: 100% 50%;
+    transform: translate(-200px, 150px) scale(1.1);
   }
-  100% {
-    background-position: 0% 50%;
+}
+
+@keyframes floatBlob4 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(150px, -100px) scale(1.3);
+  }
+}
+
+@keyframes floatBlob5 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  25% {
+    transform: translate(100px, 100px) scale(0.9);
+  }
+  75% {
+    transform: translate(-100px, -50px) scale(1.1);
   }
 }
 

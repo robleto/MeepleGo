@@ -49,48 +49,6 @@ function ForgotPasswordForm({ email, setEmail, loading, error, message, onSubmit
   );
 }
 
-// --- ForgotPasswordForm: fixes input focus loss on every keystroke ---
-interface ForgotPasswordFormProps {
-  email: string;
-  setEmail: (v: string) => void;
-  loading: boolean;
-  error: string | null;
-  message: string | null;
-  onSubmit: (e: React.FormEvent) => void;
-  onBackToSignIn: () => void;
-}
-function ForgotPasswordForm({ email, setEmail, loading, error, message, onSubmit, onBackToSignIn }: ForgotPasswordFormProps) {
-  const inputRef = useRef<HTMLInputElement>(null);
-  useEffect(() => {
-    if (inputRef.current) inputRef.current.focus();
-  }, []);
-  return (
-    <form onSubmit={onSubmit} className="space-y-4 mt-2">
-      <div>
-        <label className="block text-sm text-gray-700 mb-1">Email</label>
-        <input
-          ref={inputRef}
-          type="email"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-          required
-          autoComplete="email"
-          className="w-full border border-gray-300 bg-white text-gray-900 rounded-md px-3 py-2 text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-          placeholder="Enter your email"
-        />
-      </div>
-      {error && <p className="text-sm text-red-600">{error}</p>}
-      {message && <p className="text-sm text-green-600">{message}</p>}
-      <button type="submit" disabled={loading} className="w-full inline-flex justify-center items-center px-4 py-2 rounded-md bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50">
-        {loading ? 'Sending…' : 'Send reset link'}
-      </button>
-      <div className="text-sm text-gray-600 text-center mt-2">
-        Remembered it?{' '}
-        <button type="button" onClick={onBackToSignIn} className="text-primary-600 hover:text-primary-700">Back to sign in</button>
-      </div>
-    </form>
-  );
-}
 import {
   HomeIcon,
   TrophyIcon,
@@ -236,7 +194,7 @@ export default function Navigation() {
     setForgotMessage(null)
     setForgotLoading(true)
     const { error } = await supabase.auth.resetPasswordForEmail(forgotEmail, {
-      redirectTo: `${window.location.origin}/update-password`,
+      redirectTo: `${window.location.origin}/auth/callback/handle?next=/update-password`,
     })
     setForgotLoading(false)
     if (error) setForgotError(error.message)
@@ -668,49 +626,6 @@ export default function Navigation() {
           onBackToSignIn={() => { setShowForgotModal(false); setShowLoginModal(true) }}
         />
       </ModalShell>
-// --- ForgotPasswordForm: fixes input focus loss on every keystroke ---
-import { useRef, useEffect } from 'react'
-interface ForgotPasswordFormProps {
-  email: string
-  setEmail: (v: string) => void
-  loading: boolean
-  error: string | null
-  message: string | null
-  onSubmit: (e: React.FormEvent) => void
-  onBackToSignIn: () => void
-}
-function ForgotPasswordForm({ email, setEmail, loading, error, message, onSubmit, onBackToSignIn }: ForgotPasswordFormProps) {
-  const inputRef = useRef<HTMLInputElement>(null)
-  useEffect(() => {
-    if (inputRef.current) inputRef.current.focus()
-  }, [])
-  return (
-    <form onSubmit={onSubmit} className="space-y-4 mt-2">
-      <div>
-        <label className="block text-sm text-gray-700 mb-1">Email</label>
-        <input
-          ref={inputRef}
-          type="email"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-          required
-          autoComplete="email"
-          className="w-full border border-gray-300 bg-white text-gray-900 rounded-md px-3 py-2 text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-          placeholder="Enter your email"
-        />
-      </div>
-      {error && <p className="text-sm text-red-600">{error}</p>}
-      {message && <p className="text-sm text-green-600">{message}</p>}
-      <button type="submit" disabled={loading} className="w-full inline-flex justify-center items-center px-4 py-2 rounded-md bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50">
-        {loading ? 'Sending…' : 'Send reset link'}
-      </button>
-      <div className="text-sm text-gray-600 text-center mt-2">
-        Remembered it?{' '}
-        <button type="button" onClick={onBackToSignIn} className="text-primary-600 hover:text-primary-700">Back to sign in</button>
-      </div>
-    </form>
-  )
-}
     </nav>
   )
 }
