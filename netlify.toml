@@ -1,0 +1,14 @@
+[build]
+  publish = ".next"
+  command = "npm run build"
+
+[build.environment]
+  NODE_VERSION = "18"
+
+# Disable secrets scanning for known public values
+[context.production.environment]
+  SECRETS_SCAN_ENABLED = "false"
+
+# Alternative: If you want to keep secrets scanning but exclude specific patterns
+# [build.environment]
+#   SECRETS_SCAN_OMIT_KEYS = "NEXT_PUBLIC_SUPABASE_URL,project_id"

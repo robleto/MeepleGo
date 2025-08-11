@@ -4,7 +4,15 @@
 # This script triggers the edge function to import BoardGameGeek's current hot games
 
 echo "🚀 Starting BGG Hot Games Import..."
-echo "📡 Function URL: https://dsqceuerzoeotrcatxvb.supabase.co/functions/v1/populate-games"
+
+# Get the Supabase URL from .env.local
+SUPABASE_URL=$(grep "NEXT_PUBLIC_SUPABASE_URL=" .env.local | cut -d'=' -f2)
+if [ -z "$SUPABASE_URL" ]; then
+    echo "❌ Error: Could not find NEXT_PUBLIC_SUPABASE_URL in .env.local"
+    exit 1
+fi
+
+echo "📡 Function URL: ${SUPABASE_URL}/functions/v1/populate-games"
 echo ""
 
 # Get the service role key from .env.local
@@ -25,7 +33,7 @@ response=$(curl -s -w "HTTPSTATUS:%{http_code}" \
   -X POST \
   -H "Authorization: Bearer $SERVICE_KEY" \
   -H "Content-Type: application/json" \
-  "https://dsqceuerzoeotrcatxvb.supabase.co/functions/v1/populate-games")
+  "${SUPABASE_URL}/functions/v1/populate-games")
 
 # Extract HTTP status and body
 http_code=$(echo $response | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')

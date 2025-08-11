@@ -18,6 +18,23 @@ dist/
 .railway/
 .render/
 
+# Development scripts and tools
+scripts/
+migrations/
+*.sql
+run-bgg-import.sh
+test-*.js
+import-*.js
+add-*.js
+check-*.js
+debug-*.js
+analyze-*.js
+populate-*.js
+
+# Supabase
+supabase/.temp/
+.supabase/
+
 # Environment variables
 .env
 .env.local

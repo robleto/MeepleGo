@@ -41,7 +41,7 @@ This will create:
 
 3. Link your project:
    ```bash
-   supabase link --project-ref dsqceuerzoeotrcatxvb
+   supabase link --project-ref YOUR_PROJECT_REF
    ```
 
 4. Deploy the edge function:

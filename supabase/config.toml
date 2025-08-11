@@ -1,5 +1,5 @@
 # Supabase Configuration
-project_id = "dsqceuerzoeotrcatxvb"
+project_id = "YOUR_PROJECT_REF"
 
 [api]
 enabled = true
