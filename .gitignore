@@ -9,6 +9,9 @@ yarn-error.log*
 out/
 build/
 
+# Netlify
+.netlify/
+
 # Environment variables
 .env
 .env.local
