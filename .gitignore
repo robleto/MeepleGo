@@ -8,9 +8,15 @@ yarn-error.log*
 .next/
 out/
 build/
+dist/
 
 # Netlify
 .netlify/
+
+# Deployment platforms
+.vercel/
+.railway/
+.render/
 
 # Environment variables
 .env
