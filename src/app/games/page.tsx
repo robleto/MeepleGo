@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { supabase } from '@/lib/supabase'
 import PageLayout from '@/components/PageLayout'
 import GameCard from '@/components/GameCard'
@@ -9,8 +9,9 @@ import { GameWithRanking } from '@/types'
 import { useViewMode, useGameFilters } from '@/utils/gameFilters'
 import { Squares2X2Icon } from '@heroicons/react/24/outline'
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
+import { getMembershipSets } from '@/lib/lists'
 
-export default function GamesPage() {
+function GamesPageContent() {
   const [games, setGames] = useState<GameWithRanking[]>([])
   const [loading, setLoading] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
@@ -139,6 +140,10 @@ export default function GamesPage() {
       setLoadingMore(true)
       setError(null)
 
+      // Get current user for rankings
+      const { data: { session } } = await supabase.auth.getSession()
+      const userId = session?.user?.id
+
       // Build query with search
       let query = supabase
         .from('games')
@@ -146,6 +151,11 @@ export default function GamesPage() {
           *,
           rankings(*)
         `)
+
+      // Filter rankings by current user if logged in
+      if (userId) {
+        query = query.eq('rankings.user_id', userId)
+      }
 
       // Add search filter if provided
       if (searchTerm.trim()) {
@@ -201,6 +211,10 @@ export default function GamesPage() {
         setLoading(true)
         setError(null)
 
+        // Get current user for rankings
+        const { data: { session } } = await supabase.auth.getSession()
+        const userId = session?.user?.id
+
         // Build query with search
         let query = supabase
           .from('games')
@@ -208,6 +222,11 @@ export default function GamesPage() {
             *,
             rankings(*)
           `)
+
+        // Filter rankings by current user if logged in
+        if (userId) {
+          query = query.eq('rankings.user_id', userId)
+        }
 
         // Add search filter if provided
         if (searchTerm.trim()) {
@@ -268,6 +287,10 @@ export default function GamesPage() {
                 *,
                 rankings(*)
               `)
+            // Filter rankings by current user if logged in
+            if (userId) {
+              q = q.eq('rankings.user_id', userId)
+            }
             if (searchTerm.trim()) {
               q = q.ilike('name', `%${searchTerm.trim()}%`)
             }
@@ -321,6 +344,59 @@ export default function GamesPage() {
 
     initialLoad()
   }, [searchTerm, sortBy, sortOrder, groupBy, filterType, filterValue])
+
+  const [membershipSets, setMembershipSets] = useState<{ library: Set<string>; wishlist: Set<string> } | null>(null)
+  const [membershipMap, setMembershipMap] = useState<Record<string, { library: boolean; wishlist: boolean }>>({})
+
+  // Fetch membership once after initial games load (and when games list changes substantially)
+  useEffect(() => {
+    (async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) return
+      const sets = await getMembershipSets()
+      if (sets) {
+        setMembershipSets(sets)
+        // initialize membershipMap from sets
+        const map: Record<string, { library: boolean; wishlist: boolean }> = {}
+        games.forEach(g => {
+          map[g.id] = {
+            library: sets.library.has(g.id),
+            wishlist: sets.wishlist.has(g.id)
+          }
+        })
+        setMembershipMap(map)
+      }
+    })()
+  }, [games.length])
+
+  const handleMembershipChange = (gameId: string, change: { library?: boolean; wishlist?: boolean }) => {
+    setMembershipMap(prev => ({
+      ...prev,
+      [gameId]: {
+        library: change.library !== undefined ? change.library : prev[gameId]?.library || false,
+        wishlist: change.wishlist !== undefined ? change.wishlist : prev[gameId]?.wishlist || false,
+      }
+    }))
+  }
+
+  // Local slugify mirroring server mg_slugify (must stay in sync)
+  const slugify = (input: string) => input.toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')
+
+  const taxonomyLinkForGroup = (groupKey: string) => {
+    if (groupBy === 'categories') {
+      if (groupKey === 'Uncategorized') return null
+      return `/categories/${slugify(groupKey)}`
+    }
+    if (groupBy === 'mechanics') {
+      if (groupKey === 'No Mechanic') return null
+      return `/mechanics/${slugify(groupKey)}`
+    }
+    if (groupBy === 'publisher') {
+      if (groupKey === 'Unknown Publisher') return null
+      return `/publishers/${slugify(groupKey)}`
+    }
+    return null
+  }
 
   if (!hasMounted) {
     return (
@@ -418,9 +494,17 @@ export default function GamesPage() {
             {groupedGames.map(({ key, games: groupGames }) => (
               <div key={key} className="mb-10">
                 {groupBy !== 'none' && (
-                  <h2 className="mb-6 text-2xl font-bold text-gray-900">
-                    {key}
-                  </h2>
+                  <div className="mb-6 flex items-center justify-between">
+                    <h2 className="text-2xl font-bold text-gray-900">{key}</h2>
+                    {['categories','mechanics','publisher'].includes(groupBy) && taxonomyLinkForGroup(key) && (
+                      <a
+                        href={taxonomyLinkForGroup(key)!}
+                        className="text-sm font-medium text-primary-600 hover:underline focus:outline-none focus:ring-2 focus:ring-primary-500 rounded"
+                      >
+                        See all →
+                      </a>
+                    )}
+                  </div>
                 )}
                 
                 <div className={
@@ -431,8 +515,12 @@ export default function GamesPage() {
                   {groupGames.map((game) => (
                     <GameCard 
                       key={game.id} 
-                      game={game} 
+                      game={{...game, list_membership: membershipMap[game.id] || {
+                        library: membershipSets ? membershipSets.library.has(game.id) : false,
+                        wishlist: membershipSets ? membershipSets.wishlist.has(game.id) : false,
+                      }}} 
                       viewMode={viewMode}
+                      onMembershipChange={handleMembershipChange}
                     />
                   ))}
                 </div>
@@ -493,5 +581,20 @@ export default function GamesPage() {
         )}
       </div>
     </PageLayout>
+  )
+}
+
+export default function GamesPage() {
+  return (
+    <Suspense fallback={
+      <PageLayout>
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+          <span className="ml-2 text-gray-600">Loading...</span>
+        </div>
+      </PageLayout>
+    }>
+      <GamesPageContent />
+    </Suspense>
   )
 }

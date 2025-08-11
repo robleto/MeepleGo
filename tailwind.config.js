@@ -1,10 +1,22 @@
 /** @type {import('tailwindcss').Config} */
-/** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
     './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
+  ],
+  safelist: [
+    // Ensure rating colors are never purged - Reawarding color scheme
+    'bg-[#e5dbf3]', 'text-[#4c2c65]', // 10 - Purple
+    'bg-[#d5e7f2]', 'text-[#1a3448]', // 9 - Blue
+    'bg-[#dcebe3]', 'text-[#1f3c30]', // 8 - Green
+    'bg-[#f8e7ba]', 'text-[#5b3d00]', // 7 - Yellow
+    'bg-[#f4d8c7]', 'text-[#7b3f00]', // 6 - Orange
+    'bg-[#f5d9e8]', 'text-[#6a1f45]', // 5 - Pink
+    'bg-[#f6d4d4]', 'text-[#7b1818]', // 4 - Red
+    'bg-[#eee0d6]', 'text-[#7b5c42]', // 3 - Beige
+    'bg-[#e2e2e2]', 'text-[#474747]', // 2 - Gray
+    'bg-[#f5f5f5]', 'text-[#474747]', // 1 - Light Gray
   ],
   theme: {
     extend: {

@@ -244,19 +244,24 @@ async function fetchAndStoreGames(supabase: any, ids: number[]) {
         // Store games in database
         for (const game of games) {
           try {
-            const { error } = await supabase.from("games").upsert({
+            const { data: upserted, error } = await supabase.from("games").upsert({
               ...game,
               cached_at: new Date().toISOString()
             }, {
               onConflict: "bgg_id",
               ignoreDuplicates: false
-            });
+            }).select('id, categories, mechanics, publisher').single();
 
             if (error) {
               console.error(`❌ Error saving game ${game.bgg_id}:`, error.message);
               errorCount++;
             } else {
               storedCount++;
+              // Bridge phase: maintain taxonomy links (will remove array reliance later)
+              const gameId = upserted.id;
+              await ensureCategoryLinks(supabase, gameId, (upserted.categories||[]) as string[]);
+              await ensureMechanicLinks(supabase, gameId, (upserted.mechanics||[]) as string[]);
+              await ensurePublisherLink(supabase, gameId, upserted.publisher as string | null);
             }
           } catch (dbError) {
             console.error(`❌ Database error for game ${game.bgg_id}:`, dbError);
@@ -287,6 +292,67 @@ async function fetchAndStoreGames(supabase: any, ids: number[]) {
   return { storedCount, errorCount };
 }
 
+function slugify(input: string): string {
+  return input.toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+}
+
+async function ensureCategoryLinks(supabase: any, gameId: string, categoryNames: string[]) {
+  for (const name of categoryNames) {
+    try {
+      const slug = slugify(name);
+      const { data: catRows, error: catErr } = await supabase
+        .from('categories')
+        .upsert({ name, slug }, { onConflict: 'name' })
+        .select('id')
+        .single();
+      if (catErr) { console.warn('Category upsert failed', name, catErr.message); continue; }
+      const category_id = catRows.id;
+      const { error: linkErr } = await supabase
+        .from('game_categories')
+        .upsert({ game_id: gameId, category_id }, { onConflict: 'game_id,category_id' });
+      if (linkErr) console.warn('game_category link failed', name, linkErr.message);
+    } catch (e) { console.warn('ensureCategoryLinks exception', e); }
+  }
+}
+
+async function ensureMechanicLinks(supabase: any, gameId: string, mechanicNames: string[]) {
+  for (const name of mechanicNames) {
+    try {
+      const slug = slugify(name);
+      const { data: mechRows, error: mechErr } = await supabase
+        .from('mechanics')
+        .upsert({ name, slug }, { onConflict: 'name' })
+        .select('id')
+        .single();
+      if (mechErr) { console.warn('Mechanic upsert failed', name, mechErr.message); continue; }
+      const mechanic_id = mechRows.id;
+      const { error: linkErr } = await supabase
+        .from('game_mechanics')
+        .upsert({ game_id: gameId, mechanic_id }, { onConflict: 'game_id,mechanic_id' });
+      if (linkErr) console.warn('game_mechanic link failed', name, linkErr.message);
+    } catch (e) { console.warn('ensureMechanicLinks exception', e); }
+  }
+}
+
+async function ensurePublisherLink(supabase: any, gameId: string, publisherName: string | null) {
+  if (!publisherName) return;
+  try {
+    const slug = slugify(publisherName);
+    const { data: pubRow, error: pubErr } = await supabase
+      .from('publishers')
+      .upsert({ name: publisherName, slug }, { onConflict: 'name' })
+      .select('id')
+      .single();
+    if (pubErr) { console.warn('Publisher upsert failed', publisherName, pubErr.message); return; }
+    const publisher_id = pubRow.id;
+    const { error: linkErr } = await supabase
+      .from('game_publishers')
+      .upsert({ game_id: gameId, publisher_id }, { onConflict: 'game_id,publisher_id' });
+    if (linkErr) console.warn('game_publisher link failed', publisherName, linkErr.message);
+  } catch (e) { console.warn('ensurePublisherLink exception', e); }
+}
+
+// Restore serve handler (previously truncated by edit)
 serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -294,9 +360,9 @@ serve(async (req: Request) => {
 
   try {
     const supabase = createClient(
-      // @ts-ignore: Deno global is available in edge functions
+      // @ts-ignore Deno env
       Deno.env.get("SUPABASE_URL") ?? "",
-      // @ts-ignore: Deno global is available in edge functions  
+      // @ts-ignore Deno env
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
@@ -314,26 +380,18 @@ serve(async (req: Request) => {
       errors: result.errorCount,
       timestamp: new Date().toISOString()
     }), {
-      headers: {
-        ...corsHeaders,
-        "Content-Type": "application/json"
-      },
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200
     });
-
   } catch (error) {
     console.error("❌ Error in handler:", error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-    
     return new Response(JSON.stringify({
       success: false,
       error: errorMessage,
       timestamp: new Date().toISOString()
     }), {
-      headers: {
-        ...corsHeaders,
-        "Content-Type": "application/json"
-      },
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500
     });
   }

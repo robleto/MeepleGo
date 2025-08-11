@@ -20,12 +20,37 @@
 
 body {
   color: rgb(var(--foreground-rgb));
+}
+
+/* Animated gradient background inspired by ChatGPT */
+.gradient-background {
   background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+    -45deg, 
+    #ffb8bb, 
+    #fedff4, 
+    #fedff4, 
+    #ffd4b8, 
+    #ffc8d1, 
+    #c4f2ef, 
+    #fee5ed, 
+    #e6b8d4, 
+    #ffe4b8, 
+    #5a7fa3
+  );
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 /* Custom scrollbar */

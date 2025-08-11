@@ -31,22 +31,22 @@ export function formatPlayerCount(min: number | null, max: number | null): strin
 }
 
 export function getRatingColor(rating: number | null): string {
-  if (!rating) return 'bg-gray-400'
+  if (!rating) return 'bg-white text-black border border-gray-300'
   
   const colorMap: Record<number, string> = {
-    1: 'bg-red-600',
-    2: 'bg-orange-600',
-    3: 'bg-amber-600',
-    4: 'bg-yellow-600',
-    5: 'bg-lime-600',
-    6: 'bg-green-600',
-    7: 'bg-emerald-600',
-    8: 'bg-teal-600',
-    9: 'bg-cyan-600',
-    10: 'bg-sky-600',
+    10: 'bg-[#e5dbf3] text-[#4c2c65]', // Purple
+    9: 'bg-[#d5e7f2] text-[#1a3448]',  // Blue
+    8: 'bg-[#dcebe3] text-[#1f3c30]',  // Green
+    7: 'bg-[#f8e7ba] text-[#5b3d00]',  // Yellow
+    6: 'bg-[#f4d8c7] text-[#7b3f00]',  // Orange
+    5: 'bg-[#f5d9e8] text-[#6a1f45]',  // Pink
+    4: 'bg-[#f6d4d4] text-[#7b1818]',  // Red
+    3: 'bg-[#eee0d6] text-[#7b5c42]',  // Beige
+    2: 'bg-[#e2e2e2] text-[#474747]',  // Gray
+    1: 'bg-[#f5f5f5] text-[#474747]',  // Light Gray
   }
   
-  return colorMap[Math.round(rating)] || 'bg-gray-400'
+  return colorMap[Math.round(rating)] || 'bg-white text-black border border-gray-300'
 }
 
 export function getRatingLabel(rating: number | null): string {

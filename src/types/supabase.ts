@@ -145,6 +145,7 @@ export interface Database {
           is_public: boolean | null
           created_at: string | null
           updated_at: string | null
+          list_type: 'library' | 'wishlist' | 'custom' // added
         }
         Insert: {
           id?: string
@@ -154,6 +155,7 @@ export interface Database {
           is_public?: boolean | null
           created_at?: string | null
           updated_at?: string | null
+          list_type?: 'library' | 'wishlist' | 'custom' // added
         }
         Update: {
           id?: string
@@ -163,6 +165,7 @@ export interface Database {
           is_public?: boolean | null
           created_at?: string | null
           updated_at?: string | null
+          list_type?: 'library' | 'wishlist' | 'custom' // added
         }
       }
       game_list_items: {
@@ -229,6 +232,36 @@ export interface Database {
           nominee_ids?: string[] | null
         }
       }
+      categories: {
+        Row: { id: string; name: string; slug: string; created_at: string }
+        Insert: { id?: string; name: string; slug: string; created_at?: string }
+        Update: { id?: string; name?: string; slug?: string; created_at?: string }
+      }
+      mechanics: {
+        Row: { id: string; name: string; slug: string; created_at: string }
+        Insert: { id?: string; name: string; slug: string; created_at?: string }
+        Update: { id?: string; name?: string; slug?: string; created_at?: string }
+      }
+      publishers: {
+        Row: { id: string; name: string; slug: string; created_at: string }
+        Insert: { id?: string; name: string; slug: string; created_at?: string }
+        Update: { id?: string; name?: string; slug?: string; created_at?: string }
+      }
+      game_categories: {
+        Row: { game_id: string; category_id: string }
+        Insert: { game_id: string; category_id: string }
+        Update: { game_id?: string; category_id?: string }
+      }
+      game_mechanics: {
+        Row: { game_id: string; mechanic_id: string }
+        Insert: { game_id: string; mechanic_id: string }
+        Update: { game_id?: string; mechanic_id?: string }
+      }
+      game_publishers: {
+        Row: { game_id: string; publisher_id: string }
+        Insert: { game_id: string; publisher_id: string }
+        Update: { game_id?: string; publisher_id?: string }
+      }
     }
     Views: {
       [_ in never]: never
@@ -252,6 +285,9 @@ export type Ranking = Database['public']['Tables']['rankings']['Row']
 export type GameList = Database['public']['Tables']['game_lists']['Row']
 export type GameListItem = Database['public']['Tables']['game_list_items']['Row']
 export type Award = Database['public']['Tables']['awards']['Row']
+export type Category = Database['public']['Tables']['categories']['Row']
+export type Mechanic = Database['public']['Tables']['mechanics']['Row']
+export type Publisher = Database['public']['Tables']['publishers']['Row']
 
 export type GameWithRanking = Game & {
   ranking?: Ranking | null
