@@ -114,12 +114,13 @@ export default function GameCard({ game, viewMode, onMembershipChange }: GameCar
     }
   }
 
-  const handleAddTo = async (type: 'library' | 'wishlist' | 'new') => {
-    if (type === 'new') {
-      // TODO: open create list modal
+  // Toggle add/remove instead of only add
+  const handleToggle = async (type: 'library' | 'wishlist' | 'new') => {
+    if (type === 'new') return
+    if (membership[type]) {
+      await handleRemove(type)
       return
     }
-    if (membership[type]) return
     const prev = { ...membership }
     setMembership(p => ({ ...p, [type]: true }))
     onMembershipChange?.(game.id, { [type]: true })
@@ -221,16 +222,26 @@ export default function GameCard({ game, viewMode, onMembershipChange }: GameCar
     >
       {/* Bookmark overlay (top-right) */}
       {(membership.library || membership.wishlist) && (
-        <div className="absolute top-0 right-0 z-30 flex pointer-events-none">
+        <div className="absolute top-0 right-0 z-30 flex">
           {membership.library && (
-            <div className="w-8 h-10 bg-green-600 text-white flex items-center justify-center rounded-bl-md shadow">
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); handleToggle('library') }}
+              title="Remove from Library"
+              className="w-8 h-10 bg-green-600 text-white flex items-center justify-center rounded-bl-md shadow hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-green-500"
+            >
               <BookmarkIcon className="h-5 w-5" />
-            </div>
+            </button>
           )}
           {membership.wishlist && (
-            <div className="w-8 h-10 bg-teal-600 text-white flex items-center justify-center rounded-bl-md shadow -ml-px">
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); handleToggle('wishlist') }}
+              title="Remove from Wishlist"
+              className="w-8 h-10 bg-teal-600 text-white flex items-center justify-center rounded-bl-md shadow -ml-px hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-teal-500"
+            >
               <BookmarkIcon className="h-5 w-5" />
-            </div>
+            </button>
           )}
         </div>
       )}
@@ -294,20 +305,20 @@ export default function GameCard({ game, viewMode, onMembershipChange }: GameCar
 
         {/* Add to list menu */}
         {showAddMenu && (
-          <div className="absolute top-2 left-2 bg-white rounded-md shadow-lg border border-gray-200 w-40 py-1 text-sm z-50">
+          <div className="absolute top-2 left-2 bg-white rounded-md shadow-lg border border-gray-200 w-44 py-1 text-sm z-50">
             <button 
-              disabled={membership.library} 
-              onClick={(e) => { e.stopPropagation(); handleAddTo('library'); setShowAddMenu(false) }} 
-              className={`w-full text-left px-3 py-2 hover:bg-gray-50 disabled:opacity-50 ${membership.library ? 'text-green-600' : ''}`}
+              onClick={(e) => { e.stopPropagation(); handleToggle('library'); setShowAddMenu(false) }} 
+              className={`w-full text-left px-3 py-2 hover:bg-gray-50 flex items-center justify-between ${membership.library ? 'text-green-600' : ''}`}
             >
-              Library {membership.library && '✓'}
+              <span>{membership.library ? 'Remove from Library' : 'Add to Library'}</span>
+              {membership.library && <span className="ml-2">✓</span>}
             </button>
             <button 
-              disabled={membership.wishlist} 
-              onClick={(e) => { e.stopPropagation(); handleAddTo('wishlist'); setShowAddMenu(false) }} 
-              className={`w-full text-left px-3 py-2 hover:bg-gray-50 disabled:opacity-50 ${membership.wishlist ? 'text-teal-600' : ''}`}
+              onClick={(e) => { e.stopPropagation(); handleToggle('wishlist'); setShowAddMenu(false) }} 
+              className={`w-full text-left px-3 py-2 hover:bg-gray-50 flex items-center justify-between ${membership.wishlist ? 'text-teal-600' : ''}`}
             >
-              Wishlist {membership.wishlist && '✓'}
+              <span>{membership.wishlist ? 'Remove from Wishlist' : 'Add to Wishlist'}</span>
+              {membership.wishlist && <span className="ml-2">✓</span>}
             </button>
           </div>
         )}

@@ -32,76 +32,77 @@ body {
 .gradient-background::before,
 .gradient-background::after {
   content: '';
-  position: absolute;
+  position: fixed;
   border-radius: 50%;
   filter: blur(120px);
-  opacity: 0.7;
-  z-index: -1;
+  opacity: 0.6;
+  z-index: 0;
 }
 
 /* Pink blob */
 .gradient-background::before {
-  width: 600px;
-  height: 600px;
+  width: 800px;
+  height: 800px;
   background: radial-gradient(circle, #ff9aa2 0%, #ffc2d1 40%, transparent 70%);
-  top: -200px;
-  left: -200px;
-  animation: floatBlob1 20s ease-in-out infinite;
+  top: -300px;
+  left: -300px;
+  animation: floatBlob1 25s ease-in-out infinite;
 }
 
 /* Blue blob */
 .gradient-background::after {
-  width: 500px;
-  height: 500px;
+  width: 700px;
+  height: 700px;
   background: radial-gradient(circle, #a8e6cf 0%, #c4f2ef 40%, transparent 70%);
-  bottom: -150px;
-  right: -150px;
-  animation: floatBlob2 25s ease-in-out infinite;
+  bottom: -250px;
+  right: -250px;
+  animation: floatBlob2 30s ease-in-out infinite;
 }
 
 /* Additional blobs using pseudo-elements won't work, so we'll create a wrapper */
 .blob-container {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 100vh;
   pointer-events: none;
-  z-index: -1;
+  z-index: 1;
+  overflow: hidden;
 }
 
 .blob {
   position: absolute;
   border-radius: 50%;
-  filter: blur(100px);
-  opacity: 0.6;
+  filter: blur(80px);
+  opacity: 0.7;
 }
 
 .blob-1 {
-  width: 400px;
-  height: 400px;
+  width: 600px;
+  height: 600px;
   background: radial-gradient(circle, #ffd93d 0%, #ffe4b8 40%, transparent 70%);
-  top: 10%;
-  right: 20%;
-  animation: floatBlob3 18s ease-in-out infinite;
+  top: 5%;
+  right: 15%;
+  animation: floatBlob3 20s ease-in-out infinite;
 }
 
 .blob-2 {
-  width: 350px;
-  height: 350px;
+  width: 550px;
+  height: 550px;
   background: radial-gradient(circle, #b8d4ff 0%, #d1e7ff 40%, transparent 70%);
-  bottom: 30%;
-  left: 10%;
-  animation: floatBlob4 22s ease-in-out infinite;
+  bottom: 25%;
+  left: 5%;
+  animation: floatBlob4 28s ease-in-out infinite;
 }
 
 .blob-3 {
-  width: 300px;
-  height: 300px;
+  width: 500px;
+  height: 500px;
   background: radial-gradient(circle, #e4c1f9 0%, #f8e6ff 40%, transparent 70%);
-  top: 40%;
-  left: 40%;
-  animation: floatBlob5 16s ease-in-out infinite;
+  top: 35%;
+  left: 35%;
+  animation: floatBlob5 22s ease-in-out infinite;
 }
 
 @keyframes floatBlob1 {

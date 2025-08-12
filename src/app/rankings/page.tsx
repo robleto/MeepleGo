@@ -6,7 +6,7 @@ import { useGameDataWithGuest, useViewMode, sortGames, groupGames, SortKey, Sort
 import RankingsEmptyStateGames from '@/components/rankings/RankingsEmptyStateGames'
 import GameRowCard from '@/components/rankings/GameRowCard'
 import GamePosterCard from '@/components/rankings/GamePosterCard'
-import GameFilters from '@/components/rankings/GameFilters'
+import RankingsFilters from '@/components/rankings/RankingsFilters'
 
 export default function RankingsPage() {
   const { games, loading, isGuest, updateGameRanking } = useGameDataWithGuest()
@@ -14,9 +14,23 @@ export default function RankingsPage() {
   const [sortBy, setSortBy] = useState<SortKey>('ranking')
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc')
   const [groupBy, setGroupBy] = useState<GroupKey>('none')
+  const [searchTerm, setSearchTerm] = useState('')
 
   const rankedGames = useMemo(() => games.filter(g => typeof g.ranking?.ranking === 'number'), [games])
-  const sorted = useMemo(() => sortGames(rankedGames, sortBy, sortOrder), [rankedGames, sortBy, sortOrder])
+  
+  // Filter by search term
+  const searchFiltered = useMemo(() => {
+    if (!searchTerm.trim()) return rankedGames
+    const term = searchTerm.toLowerCase().trim()
+    return rankedGames.filter(game => 
+      game.name.toLowerCase().includes(term) ||
+      game.publisher?.toLowerCase().includes(term) ||
+      game.categories?.some(cat => cat.toLowerCase().includes(term)) ||
+      game.mechanics?.some(mech => mech.toLowerCase().includes(term))
+    )
+  }, [rankedGames, searchTerm])
+  
+  const sorted = useMemo(() => sortGames(searchFiltered, sortBy, sortOrder), [searchFiltered, sortBy, sortOrder])
   const grouped = useMemo(() => groupGames(sorted, groupBy), [sorted, groupBy])
 
   if (loading) {
@@ -31,7 +45,7 @@ export default function RankingsPage() {
     <PageLayout>
       <div className="max-w-screen-xl mx-auto">
         <h1 className="text-3xl font-bold text-gray-900 mb-6">My Rankings</h1>
-        <GameFilters
+        <RankingsFilters
           viewMode={viewMode}
           setViewMode={setViewMode}
           sortBy={sortBy}
@@ -40,7 +54,9 @@ export default function RankingsPage() {
           setSortOrder={setSortOrder}
           groupBy={groupBy}
           setGroupBy={setGroupBy}
-          total={rankedGames.length}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          total={searchFiltered.length}
         />
         {grouped.map(section => (
           <div key={section.group ?? 'all'} className="mb-10">

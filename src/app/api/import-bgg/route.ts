@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 import { XMLParser } from 'fast-xml-parser'
+import { decodeHtmlEntities } from '@/utils/csvParser'
 
 // Lightweight server-side Supabase client (use service role via env var if needed)
 function serverClient() {
@@ -37,7 +38,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'BGG item not found' }, { status: 404 })
     }
 
-    // Name: choose primary name
+    // Name: choose primary name and decode HTML entities
     let name: string | null = null
     if (Array.isArray(item.name)) {
       const primary = item.name.find((n: any) => n['@_type'] === 'primary')
@@ -46,6 +47,9 @@ export async function POST(req: NextRequest) {
       name = item.name['@_value'] || item.name
     }
     if (!name) return NextResponse.json({ error: 'Name missing' }, { status: 422 })
+    
+    // Decode HTML entities in the name
+    name = decodeHtmlEntities(name)
 
     const year_published = item.yearpublished ? Number(item.yearpublished['@_value'] || item.yearpublished) : null
     const min_players = item.minplayers ? Number(item.minplayers['@_value'] || item.minplayers) : null
@@ -54,13 +58,21 @@ export async function POST(req: NextRequest) {
     const image_url = item.image || null
     const thumbnail_url = item.thumbnail || null
 
-    // Categories & mechanics from link elements
+    // Categories & mechanics from link elements (decode HTML entities)
     const links = Array.isArray(item.link) ? item.link : (item.link ? [item.link] : [])
-    const categories: string[] = links.filter((l: any) => l['@_type'] === 'boardgamecategory').map((l: any) => l['@_value']).filter(Boolean)
-    const mechanics: string[] = links.filter((l: any) => l['@_type'] === 'boardgamemechanic').map((l: any) => l['@_value']).filter(Boolean)
-    const publisher = (links.find((l: any) => l['@_type'] === 'boardgamepublisher')?.['@_value']) || null
+    const categories: string[] = links
+      .filter((l: any) => l['@_type'] === 'boardgamecategory')
+      .map((l: any) => decodeHtmlEntities(l['@_value']))
+      .filter(Boolean)
+    const mechanics: string[] = links
+      .filter((l: any) => l['@_type'] === 'boardgamemechanic')
+      .map((l: any) => decodeHtmlEntities(l['@_value']))
+      .filter(Boolean)
+    const rawPublisher = links.find((l: any) => l['@_type'] === 'boardgamepublisher')?.['@_value']
+    const publisher = rawPublisher ? decodeHtmlEntities(rawPublisher) : null
 
-    const description = item.description ? (item.description['@_value'] || item.description) : null
+    const rawDescription = item.description ? (item.description['@_value'] || item.description) : null
+    const description = rawDescription ? decodeHtmlEntities(rawDescription) : null
 
     const client = serverClient()
 

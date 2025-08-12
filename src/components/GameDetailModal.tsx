@@ -129,7 +129,10 @@ export default function GameDetailModal({ game, open, onClose, onMembershipChang
   }
 
   const handleAddTo = async (type: 'library' | 'wishlist') => {
-    if (membership[type]) return
+    if (membership[type]) {
+      await handleRemoveFrom(type)
+      return
+    }
     const prev = { ...membership }
     setMembership(p => ({ ...p, [type]: true }))
     onMembershipChange?.(game.id, { [type]: true })
@@ -303,37 +306,26 @@ export default function GameDetailModal({ game, open, onClose, onMembershipChang
                     
                     {/* List Membership */}
                     <div className="flex items-center space-x-2">
-                      {membership.library ? (
-                        <button
-                          onClick={() => handleRemoveFrom('library')}
-                          className="px-3 py-1 bg-green-100 text-green-700 rounded-md text-sm font-medium hover:bg-green-200"
-                        >
-                          In Library ✓
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => handleAddTo('library')}
-                          className="px-3 py-1 bg-gray-100 text-gray-700 rounded-md text-sm font-medium hover:bg-gray-200"
-                        >
-                          Add to Library
-                        </button>
-                      )}
-                      
-                      {membership.wishlist ? (
-                        <button
-                          onClick={() => handleRemoveFrom('wishlist')}
-                          className="px-3 py-1 bg-teal-100 text-teal-700 rounded-md text-sm font-medium hover:bg-teal-200"
-                        >
-                          In Wishlist ✓
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => handleAddTo('wishlist')}
-                          className="px-3 py-1 bg-gray-100 text-gray-700 rounded-md text-sm font-medium hover:bg-gray-200"
-                        >
-                          Add to Wishlist
-                        </button>
-                      )}
+                      <button
+                        onClick={() => handleAddTo('library')}
+                        className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+                          membership.library
+                            ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        {membership.library ? 'In Library ✓' : 'Add to Library'}
+                      </button>
+                      <button
+                        onClick={() => handleAddTo('wishlist')}
+                        className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+                          membership.wishlist
+                            ? 'bg-teal-100 text-teal-700 hover:bg-teal-200'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        {membership.wishlist ? 'In Wishlist ✓' : 'Add to Wishlist'}
+                      </button>
                     </div>
                   </div>
 

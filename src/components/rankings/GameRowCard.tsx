@@ -2,7 +2,8 @@
 
 import { GameWithRanking } from '@/types'
 import { getRatingColor, formatYear, formatPlayingTime, formatPlayerCount } from '@/utils/helpers'
-import { PlayIcon, StarIcon } from '@heroicons/react/24/outline'
+import { PlayIcon, StarIcon, BookmarkIcon } from '@heroicons/react/24/outline'
+import { EyeIcon } from '@heroicons/react/24/solid'
 import { useState } from 'react'
 
 interface GameRowCardProps {
@@ -35,27 +36,64 @@ export default function GameRowCard({ game, index, onUpdate, onClick }: GameRowC
   }
 
   return (
-    <div className="flex items-center gap-4 py-2 px-3 rounded-md hover:bg-gray-50 text-sm cursor-pointer relative" onClick={onClick}>
-      <div className="w-8 text-gray-400 tabular-nums text-xs">{index + 1}</div>
+    <div className="flex items-center gap-4 py-3 px-4 rounded-md hover:bg-gray-50 cursor-pointer relative" onClick={onClick}>
+      <div className="w-8 text-gray-400 tabular-nums text-sm font-medium">{index + 1}</div>
+      
+      {/* Game thumbnail */}
+      <div className="w-12 h-12 flex-shrink-0">
+        {game.thumbnail_url ? (
+          <img 
+            src={game.thumbnail_url} 
+            alt={`${game.name} thumbnail`}
+            className="w-12 h-12 rounded object-cover border border-gray-200"
+          />
+        ) : (
+          <div className="w-12 h-12 bg-gray-100 rounded border border-gray-200 flex items-center justify-center">
+            <span className="text-gray-400 text-xs">?</span>
+          </div>
+        )}
+      </div>
+      
       <div className="flex-1 min-w-0">
-        <div className="font-medium text-gray-900 truncate">{game.name}</div>
-        <div className="text-[11px] text-gray-500 flex gap-3">
+        <div className="font-semibold text-gray-900 truncate text-base">{game.name}</div>
+        <div className="text-sm text-gray-500 flex gap-3 mt-1">
           <span>{formatYear(game.year_published)}</span>
           <span>{formatPlayerCount(game.min_players, game.max_players)}</span>
-            <span>{formatPlayingTime(game.playtime_minutes)}</span>
+          <span>{formatPlayingTime(game.playtime_minutes)}</span>
         </div>
       </div>
-      <div className="flex items-center gap-2">
-        <button
-          onClick={(e) => { e.stopPropagation(); togglePlayed() }}
-          className={`p-1.5 rounded ${r?.played_it ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400 hover:text-gray-600'}`}
-          title={r?.played_it ? 'Played' : 'Mark as played'}
-        >
-          <PlayIcon className="h-4 w-4" />
-        </button>
+      
+      {/* Status indicators */}
+      <div className="flex items-center gap-3">
+        {/* Played It Status */}
+        <div className="flex items-center gap-2">
+          {r?.played_it ? (
+            <div className="flex items-center gap-1 text-blue-600">
+              <EyeIcon className="h-4 w-4" />
+              <span className="text-sm font-medium hidden md:inline">Played It</span>
+            </div>
+          ) : (
+            <button
+              onClick={(e) => { e.stopPropagation(); togglePlayed() }}
+              className="flex items-center gap-1 text-gray-400 hover:text-blue-600 transition-colors"
+              title="Mark as played"
+            >
+              <EyeIcon className="h-4 w-4" />
+              <span className="text-sm hidden md:inline">Played It</span>
+            </button>
+          )}
+        </div>
+        
+        {/* Own It Status - placeholder for future library functionality */}
+        <div className="flex items-center gap-1 text-gray-400">
+          <BookmarkIcon className="h-4 w-4" />
+          <span className="text-sm hidden md:inline">Own It</span>
+        </div>
+        
+        {/* Rating */}
         <button
           onClick={(e) => { e.stopPropagation(); setIsRating(true) }}
-          className={`px-2 py-1 rounded text-xs font-semibold flex items-center gap-1 ${ratingTone(r?.ranking)} hover:brightness-95 transition`}
+          className={`px-3 py-1.5 rounded-lg text-sm font-bold flex items-center gap-1 ${ratingTone(r?.ranking)} hover:brightness-95 transition min-w-[3rem] justify-center`}
           aria-label={r?.ranking ? `Rating ${r.ranking}` : 'Rate game'}
         >
           {r?.ranking ? r.ranking : <StarIcon className="h-4 w-4" />}

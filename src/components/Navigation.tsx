@@ -1,10 +1,11 @@
 'use client'
 
+import React, { useEffect, useRef, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { useEffect, useRef, useState, useCallback } from 'react'
 import { cn } from '@/utils/helpers'
 import { supabase } from '@/lib/supabase'
+import { fuzzySearchGames } from '@/utils/fuzzySearch'
 
 // --- ForgotPasswordForm: fixes input focus loss on every keystroke ---
 interface ForgotPasswordFormProps {
@@ -15,12 +16,13 @@ interface ForgotPasswordFormProps {
   message: string | null;
   onSubmit: (e: React.FormEvent) => void;
   onBackToSignIn: () => void;
+  open: boolean; // NEW
 }
-function ForgotPasswordForm({ email, setEmail, loading, error, message, onSubmit, onBackToSignIn }: ForgotPasswordFormProps) {
+function ForgotPasswordForm({ email, setEmail, loading, error, message, onSubmit, onBackToSignIn, open }: ForgotPasswordFormProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
-    if (inputRef.current) inputRef.current.focus();
-  }, []);
+    if (open && inputRef.current) inputRef.current.focus();
+  }, [open]);
   return (
     <form onSubmit={onSubmit} className="space-y-4 mt-2">
       <div>
@@ -76,13 +78,17 @@ const sideActions = [
   { name: 'Profile', href: '/profile', icon: UserIcon },
 ]
 
-export default function Navigation() {
+function NavigationComponent() {
   const pathname = usePathname()
   const router = useRouter()
 
   // Auth state
   const [session, setSession] = useState<import('@supabase/supabase-js').Session | null>(null)
   const [showUserMenu, setShowUserMenu] = useState(false)
+
+  // Scroll state for hiding/showing nav
+  const [isVisible, setIsVisible] = useState(true)
+  const [lastScrollY, setLastScrollY] = useState(0)
 
   // Desktop auth modals
   const [showLoginModal, setShowLoginModal] = useState(false)
@@ -111,6 +117,7 @@ export default function Navigation() {
         setShowForgotModal(false)
       }
     })
+    
     const onEsc = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         setShowLoginModal(false)
@@ -118,18 +125,42 @@ export default function Navigation() {
         setShowForgotModal(false)
       }
     }
+
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY
+      
+      // Always show nav when at top of page
+      if (currentScrollY < 10) {
+        setIsVisible(true)
+      } 
+      // Hide nav when scrolling down, show when scrolling up
+      else if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        setIsVisible(false)
+      } else if (currentScrollY < lastScrollY) {
+        setIsVisible(true)
+      }
+      
+      setLastScrollY(currentScrollY)
+    }
+
     window.addEventListener('keydown', onEsc)
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    
     return () => {
       sub?.subscription?.unsubscribe()
       window.removeEventListener('keydown', onEsc)
+      window.removeEventListener('scroll', handleScroll)
     }
-  }, [])
+  }, [lastScrollY])
 
   // Top-nav advanced search state
+  const navSearchRef = useRef('')
   const [navSearch, setNavSearch] = useState('')
   const [navSuggestions, setNavSuggestions] = useState<Array<{ id: number; name: string; year_published: number | null; thumbnail_url: string | null }>>([])
   const [showNavSuggestions, setShowNavSuggestions] = useState(false)
   const debounceRef = useRef<NodeJS.Timeout | null>(null)
+  const desktopSearchRef = useRef<HTMLInputElement | null>(null)
+  const mobileSearchRef = useRef<HTMLInputElement | null>(null)
 
   // Keep input in sync with URL search param when on /games
   useEffect(() => {
@@ -137,27 +168,38 @@ export default function Navigation() {
       if (typeof window !== 'undefined' && pathname?.startsWith('/games')) {
         const params = new URLSearchParams(window.location.search)
         const q = params.get('search') || ''
+        navSearchRef.current = q
         setNavSearch(q)
+        if (desktopSearchRef.current) desktopSearchRef.current.value = q
+        if (mobileSearchRef.current) mobileSearchRef.current.value = q
       }
     } catch {}
   }, [pathname])
 
-  const fetchSuggestions = async (value: string) => {
+  const fetchSuggestions = useCallback(async (value: string) => {
     if (!value) {
       setNavSuggestions([])
       return
     }
+    
+    // Fetch more games for better fuzzy matching
     const { data, error } = await supabase
       .from('games')
       .select('id, name, year_published, thumbnail_url')
-      .ilike('name', `%${value}%`)
-      .limit(7)
-    if (!error && data) setNavSuggestions(data as any)
-    else setNavSuggestions([])
-  }
+      .limit(50) // Get more results to filter through
+    
+    if (!error && data) {
+      // Use fuzzy search to find the best matches
+      const matches = fuzzySearchGames(data, value, 7)
+      setNavSuggestions(matches as any)
+    } else {
+      setNavSuggestions([])
+    }
+  }, [])
 
-  const onNavChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onNavChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
+    navSearchRef.current = value
     setNavSearch(value)
     setShowNavSuggestions(!!value)
     if (debounceRef.current) clearTimeout(debounceRef.current)
@@ -166,21 +208,29 @@ export default function Navigation() {
       return
     }
     debounceRef.current = setTimeout(() => fetchSuggestions(value), 200)
-  }
+  }, [fetchSuggestions])
 
-  const onSelectSuggestion = (id: number) => {
-    setShowNavSuggestions(false)
-    setNavSuggestions([])
-    router.push(`/games?gameId=${id}`)
-  }
+  // Reduce re-renders from scroll: useRef for lastScrollY to avoid cascading state updates
+  const lastScrollYRef = useRef(0)
+  const handleScroll = useCallback(() => {
+    const current = window.scrollY
+    const last = lastScrollYRef.current
+    if (current < 10) {
+      if (!isVisible) setIsVisible(true)
+    } else if (current > last && current > 100) {
+      if (isVisible) setIsVisible(false)
+    } else if (current < last) {
+      if (!isVisible) setIsVisible(true)
+    }
+    lastScrollYRef.current = current
+  }, [isVisible])
 
-  const onSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    const q = navSearch.trim()
-    router.push(q ? `/games?search=${encodeURIComponent(q)}` : '/games')
-    setShowNavSuggestions(false)
-  }
+  useEffect(() => {
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [handleScroll])
 
+  // Sign in / sign up functions
   const signInWithOAuth = async (provider: 'google' | 'facebook' | 'github') => {
     await supabase.auth.signInWithOAuth({
       provider,
@@ -402,8 +452,25 @@ export default function Navigation() {
     )
   }
 
+  // Select a suggestion (navigate to specific game)
+  const onSelectSuggestion = useCallback((id: number) => {
+    setShowNavSuggestions(false)
+    setNavSuggestions([])
+    router.push(`/games?gameId=${id}`)
+  }, [router])
+
+  // Submit full search query
+  const onSubmit = useCallback((e: React.FormEvent) => {
+    e.preventDefault()
+    const q = navSearch.trim()
+    router.push(q ? `/games?search=${encodeURIComponent(q)}` : '/games')
+    setShowNavSuggestions(false)
+  }, [navSearch, router])
+
   return (
-    <nav className="bg-white shadow-lg border-b border-gray-200">
+    <nav className={`bg-white shadow-lg border-b border-gray-200 fixed top-0 left-0 right-0 z-50 transition-transform duration-300 ease-in-out ${
+      isVisible ? 'translate-y-0' : '-translate-y-full'
+    }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 gap-4">
           {/* Logo */}
@@ -444,14 +511,15 @@ export default function Navigation() {
                   <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
+                  ref={desktopSearchRef}
                   type="text"
                   aria-label="Search games"
                   placeholder="Search games"
                   value={navSearch}
+                  autoComplete="off"
                   onChange={onNavChange}
-                  onFocus={() => setShowNavSuggestions(!!navSearch)}
-                  onBlur={() => setTimeout(() => setShowNavSuggestions(false), 150)}
-                  className={`pl-10 pr-3 py-2 border border-gray-300 rounded-md  text-sm font-medium leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-primary-500 focus:border-primary-500 transition-all duration-300 ${
+                  onBlur={() => { setTimeout(() => setShowNavSuggestions(false), 150) }}
+                  className={`pl-10 pr-3 py-2 border border-gray-300 rounded-md  text-sm font-medium leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 ${
                     navSearch.length > 0 || showNavSuggestions ? 'w-96' : 'w-56'
                   }`}
                 />
@@ -518,6 +586,7 @@ export default function Navigation() {
                   <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-50">
                     <Link href="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">My Profile</Link>
                     <Link href="/library" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">My Library</Link>
+                    <Link href="/import" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Import CSV</Link>
                     <Link href="/wishlist" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">My Wishlist</Link>
                     <Link href="/settings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Settings</Link>
                     <button
@@ -543,14 +612,15 @@ export default function Navigation() {
                 <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
               </div>
               <input
+                ref={mobileSearchRef}
                 type="text"
                 aria-label="Search games"
                 placeholder="Search games"
                 value={navSearch}
+                autoComplete="off"
                 onChange={onNavChange}
-                onFocus={() => setShowNavSuggestions(!!navSearch)}
-                onBlur={() => setTimeout(() => setShowNavSuggestions(false), 150)}
-                className={`pl-10 pr-3 py-2 border border-gray-300  text-sm font-medium rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-primary-500 focus:border-primary-500 transition-all duration-300 ${
+                onBlur={() => { setTimeout(() => setShowNavSuggestions(false), 150) }}
+                className={`pl-10 pr-3 py-2 border border-gray-300  text-sm font-medium rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 ${
                   navSearch.length > 0 || showNavSuggestions ? 'w-full' : 'w-64'
                 }`}
               />
@@ -617,6 +687,7 @@ export default function Navigation() {
       {/* Forgot Password Modal */}
       <ModalShell open={showForgotModal} onClose={handleCloseForgotModal} title="Reset your password" id="forgot-modal">
         <ForgotPasswordForm
+          open={showForgotModal}
           email={forgotEmail}
           setEmail={setForgotEmail}
           loading={forgotLoading}
@@ -629,3 +700,8 @@ export default function Navigation() {
     </nav>
   )
 }
+
+// Wrap original export with React.memo preserving name for devtools
+const _Navigation = NavigationComponent
+const MemoNavigation = React.memo(_Navigation)
+export default MemoNavigation
