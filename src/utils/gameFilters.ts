@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { GameWithRanking } from '@/types'
+import { fuzzySearchGames, isGameMatch } from './fuzzySearch'
 
 export type SortKey = 'name' | 'year_published' | 'rating' | 'ranking' | 'playtime_minutes' | 'min_players' | 'max_players'
 export type SortOrder = 'asc' | 'desc'
@@ -46,6 +47,9 @@ export function useGameFilters(games: GameWithRanking[], options?: { disableClie
   const { disableClientSorting = false } = options || {}
   const [hasMounted, setHasMounted] = useState(false)
 
+  // Search state
+  const [searchTerm, setSearchTerm] = useState('')
+
   // Initialize state from localStorage
   const [sortBy, setSortBy] = useState<SortKey>(() => {
     if (typeof window !== 'undefined') {
@@ -87,35 +91,54 @@ export function useGameFilters(games: GameWithRanking[], options?: { disableClie
     }
   }, [sortBy, sortOrder, groupBy])
 
-  // Filter games based on current filter settings
-  const filteredGames = games.filter((game) => {
-    if (filterType === 'year') {
-      return filterValue === 'all' || game.year_published === Number(filterValue)
+  // Filter games based on current filter settings and search term
+  const filteredGames = (() => {
+    let filtered = games
+    
+    // Apply search term first using fuzzy search
+    if (searchTerm.trim()) {
+      const searchResults = fuzzySearchGames(games, searchTerm.trim())
+      // If fuzzy search finds results, use those; otherwise fall back to basic filtering
+      if (searchResults.length > 0) {
+        filtered = searchResults
+      } else {
+        // Fallback: basic name matching
+        filtered = games.filter(game => 
+          isGameMatch(searchTerm.trim(), game.name, 0.3) // Lower threshold for fallback
+        )
+      }
     }
-    if (filterType === 'publisher') {
-      return filterValue === 'all' || game.publisher === filterValue
-    }
-    if (filterType === 'players') {
-      const players = Number(filterValue)
-      if (filterValue === 'all') return true
-      return game.min_players !== null && game.max_players !== null && 
-             game.min_players <= players && game.max_players >= players
-    }
-    if (filterType === 'category') {
-      if (filterValue === 'all') return true
-      const cats = game.categories || []
-      return cats.includes(filterValue)
-    }
-    if (filterType === 'mechanic') {
-      if (filterValue === 'all') return true
-      const mechs = game.mechanics || []
-      return mechs.includes(filterValue)
-    }
-    if (filterType === 'game') {
-      return String(game.id) === filterValue
-    }
-    return true
-  })
+    
+    // Apply additional filters
+    return filtered.filter((game) => {
+      if (filterType === 'year') {
+        return filterValue === 'all' || game.year_published === Number(filterValue)
+      }
+      if (filterType === 'publisher') {
+        return filterValue === 'all' || game.publisher === filterValue
+      }
+      if (filterType === 'players') {
+        const players = Number(filterValue)
+        if (filterValue === 'all') return true
+        return game.min_players !== null && game.max_players !== null && 
+               game.min_players <= players && game.max_players >= players
+      }
+      if (filterType === 'category') {
+        if (filterValue === 'all') return true
+        const cats = game.categories || []
+        return cats.includes(filterValue)
+      }
+      if (filterType === 'mechanic') {
+        if (filterValue === 'all') return true
+        const mechs = game.mechanics || []
+        return mechs.includes(filterValue)
+      }
+      if (filterType === 'game') {
+        return String(game.id) === filterValue
+      }
+      return true
+    })
+  })()
 
   // Group and sort logic for games
   const groupedGames = (() => {
@@ -312,6 +335,8 @@ export function useGameFilters(games: GameWithRanking[], options?: { disableClie
   return {
     // State
     hasMounted,
+    searchTerm,
+    setSearchTerm,
     sortBy,
     setSortBy,
     sortOrder,
