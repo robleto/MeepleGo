@@ -4,14 +4,21 @@ A comprehensive board game collection manager built with Next.js, TypeScript, Ta
 
 ## 📂 Project Organization
 
-- **`/src/`** - Next.js application source code
-- **`/supabase/`** - Database schema and edge functions
-- **`/scripts/`** - Utility scripts organized by purpose
-  - `database/` - Database utilities and migrations
-  - `bgg-testing/` - BoardGameGeek API testing tools
-  - `archive/` - Old scripts kept for reference
-- **`/docs/`** - Project documentation
-- **`run-bgg-import.sh`** - Main BGG import script
+- **`/src/`** – Next.js application source code
+- **`/docs/`** – Project and data pipeline documentation
+- **`/database/`** – SQL schema (`supabase-schema.sql`) and migrations
+- **`/data/`** – Data workspace
+  - `raw/` (gitignored) large imported or debug artifacts
+  - `derived/` (gitignored) normalized/intermediate artifacts
+  - `examples/` small sampled JSON files committed for reference/tests
+- **`/scripts/`** – Organized automation & utilities
+  - `maintenance/` recurring hygiene & enrichment tasks
+  - `audit/` validation / diagnostic scripts (was test-* helpers)
+  - `legacy/` historical one‑off scripts retained for reference
+- **`/supabase/`** – Supabase generated types / edge functions
+- **`/public/`** – Static assets
+
+Legacy ad-hoc root scripts and large JSON artifacts have been relocated into the structure above for clarity.
 
 ## Features
 
@@ -133,33 +140,27 @@ npm run format
 npm run type-check
 ```
 
-## Project Structure
+## Project Structure (Key Directories)
 
 ```
 src/
-├── app/                    # Next.js App Router pages
-│   ├── globals.css        # Global styles with Tailwind
-│   ├── layout.tsx         # Root layout
-│   ├── page.tsx           # Home page
-│   ├── games/             # Games collection page
-│   ├── rankings/          # Rankings page
-│   ├── awards/            # Awards page
-│   ├── lists/             # Lists page
-│   ├── add/               # Add game page
-│   ├── search/            # Search page
-│   └── profile/           # Profile page
-├── components/            # Reusable React components
-│   ├── Navigation.tsx     # Main navigation
-│   ├── PageLayout.tsx     # Page wrapper
-│   ├── GameCard.tsx       # Game display component
-│   └── GameFilters.tsx    # Filtering component
-├── lib/                   # Utility libraries
-│   └── supabase.ts        # Supabase client setup
-├── types/                 # TypeScript type definitions
-│   ├── supabase.ts        # Database types
-│   └── index.ts           # App-specific types
-└── utils/                 # Utility functions
-    └── helpers.ts         # Common helper functions
+  app/            # App Router routes & layouts
+  components/     # Reusable UI components
+  lib/            # Clients & singletons (e.g. Supabase)
+  types/          # Shared TypeScript types
+  utils/          # Pure utilities & helpers
+scripts/
+  maintenance/    # Current hygiene & enrichment scripts
+  audit/          # Data validation / diagnostic scripts
+  legacy/         # Historical one-offs (not for active use)
+data/
+  raw/            # Large imports (ignored)
+  derived/        # Intermediate outputs (ignored)
+  examples/       # Small committed samples
+database/
+  supabase-schema.sql  # Canonical schema
+  migrations/          # (If present) migration files
+docs/                 # Additional project & pipeline docs
 ```
 
 ## Database Schema

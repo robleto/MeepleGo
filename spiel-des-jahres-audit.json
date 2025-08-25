@@ -1,0 +1,3038 @@
+{
+  "generated_at": "2025-08-23T03:45:37.791Z",
+  "sourceCount": 959,
+  "sourcePairs": 890,
+  "dbAssoc": 430,
+  "dbPairs": 396,
+  "missingInDb": [
+    {
+      "key": "17785|1979",
+      "sourceCategories": [
+        "Winner"
+      ]
+    },
+    {
+      "key": "2043|1979",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "361|1979",
+      "sourceCategories": [
+        "Winner"
+      ]
+    },
+    {
+      "key": "539|1980",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "811|1980",
+      "sourceCategories": [
+        "Winner"
+      ]
+    },
+    {
+      "key": "5986|1981",
+      "sourceCategories": [
+        "Winner"
+      ]
+    },
+    {
+      "key": "41|1981",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "17815|1982",
+      "sourceCategories": [
+        "Winner"
+      ]
+    },
+    {
+      "key": "41|1982",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "438|1983",
+      "sourceCategories": [
+        "Winner"
+      ]
+    },
+    {
+      "key": "539|1984",
+      "sourceCategories": [
+        "Winner"
+      ]
+    },
+    {
+      "key": "1012|1985",
+      "sourceCategories": [
+        "Winner"
+      ]
+    },
+    {
+      "key": "382|1985",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "443|1986",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "1219|1986",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "382|1986",
+      "sourceCategories": [
+        "Winner"
+      ]
+    },
+    {
+      "key": "2363|1987",
+      "sourceCategories": [
+        "Winner"
+      ]
+    },
+    {
+      "key": "196|1987",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "433|1987",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "110|1987",
+      "sourceCategories": [
+        "Winner"
+      ]
+    },
+    {
+      "key": "466|1988",
+      "sourceCategories": [
+        "Winner"
+      ]
+    },
+    {
+      "key": "1231|1988",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "302|1988",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "550|1988",
+      "sourceCategories": [
+        "Winner"
+      ]
+    },
+    {
+      "key": "526|1989",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "923|1989",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "444|1989",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "766|1989",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "214|1989",
+      "sourceCategories": [
+        "Winner"
+      ]
+    },
+    {
+      "key": "120|1990",
+      "sourceCategories": [
+        "Winner"
+      ]
+    },
+    {
+      "key": "437|1991",
+      "sourceCategories": [
+        "Winner"
+      ]
+    },
+    {
+      "key": "3377|1991",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "697|1991",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "19|1991",
+      "sourceCategories": [
+        "Winner"
+      ]
+    },
+    {
+      "key": "485|1992",
+      "sourceCategories": [
+        "Winner"
+      ]
+    },
+    {
+      "key": "442|1992",
+      "sourceCategories": [
+        "Winner"
+      ]
+    },
+    {
+      "key": "1703|1993",
+      "sourceCategories": [
+        "Winner"
+      ]
+    },
+    {
+      "key": "118|1993",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "681|1993",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "300|1993",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "45|1993",
+      "sourceCategories": [
+        "Winner"
+      ]
+    },
+    {
+      "key": "327|1994",
+      "sourceCategories": [
+        "Winner"
+      ]
+    },
+    {
+      "key": "115|1994",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "128|1994",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "199|1994",
+      "sourceCategories": [
+        "Winner"
+      ]
+    },
+    {
+      "key": "46|1995",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "321|1995",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "13|1995",
+      "sourceCategories": [
+        "Winner"
+      ]
+    },
+    {
+      "key": "1910|1996",
+      "sourceCategories": [
+        "Winner"
+      ]
+    },
+    {
+      "key": "9597|1996",
+      "sourceCategories": [
+        "Winner"
+      ]
+    },
+    {
+      "key": "150|1996",
+      "sourceCategories": [
+        "Winner"
+      ]
+    },
+    {
+      "key": "1197|1996",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "247|1996",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "152|1996",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "932|1996",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "93|1996",
+      "sourceCategories": [
+        "Winner"
+      ]
+    },
+    {
+      "key": "1071|1997",
+      "sourceCategories": [
+        "Winner"
+      ]
+    },
+    {
+      "key": "10508|1997",
+      "sourceCategories": [
+        "Winner"
+      ]
+    },
+    {
+      "key": "20834|1997",
+      "sourceCategories": [
+        "Winner"
+      ]
+    },
+    {
+      "key": "11|1997",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "278|1997",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "2558|1997",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "1451|1997",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "73|1997",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "536|1997",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "256|1997",
+      "sourceCategories": [
+        "Winner"
+      ]
+    },
+    {
+      "key": "14|1998",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "132|1998",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "436|1998",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "44|1998",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "503|1998",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "42|1998",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "10|1998",
+      "sourceCategories": [
+        "Winner"
+      ]
+    },
+    {
+      "key": "59|1999",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "54|1999",
+      "sourceCategories": [
+        "Nominee",
+        "Winner"
+      ]
+    },
+    {
+      "key": "47|1999",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "394|1999",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "135|1999",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "49|1999",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "125|1999",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "117|1999",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "481|2000",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "88|2000",
+      "sourceCategories": [
+        "Nominee",
+        "Winner"
+      ]
+    },
+    {
+      "key": "554|2000",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "60|2000",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "491|2000",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "1753|2001",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "1702|2001",
+      "sourceCategories": [
+        "Nominee",
+        "Winner"
+      ]
+    },
+    {
+      "key": "822|2001",
+      "sourceCategories": [
+        "Nominee",
+        "Winner"
+      ]
+    },
+    {
+      "key": "986|2001",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "634|2001",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "4522|2002",
+      "sourceCategories": [
+        "Nominee",
+        "Winner"
+      ]
+    },
+    {
+      "key": "8964|2002",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "21827|2002",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "3141|2002",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "8299|2003",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "8195|2003",
+      "sourceCategories": [
+        "Nominee",
+        "Winner"
+      ]
+    },
+    {
+      "key": "6249|2003",
+      "sourceCategories": [
+        "Nominee",
+        "Winner"
+      ]
+    },
+    {
+      "key": "925|2003",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "9989|2004",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "12346|2004",
+      "sourceCategories": [
+        "Nominee",
+        "Winner"
+      ]
+    },
+    {
+      "key": "7483|2004",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "26178|2004",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "13926|2004",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "72406|2004",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "11973|2004",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "8262|2004",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "31976|2004",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "10814|2004",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "9440|2004",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "11971|2004",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "8172|2004",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "8946|2004",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "18880|2005",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "16369|2005",
+      "sourceCategories": [
+        "Nominee",
+        "Winner"
+      ]
+    },
+    {
+      "key": "9441|2005",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "18881|2005",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "17329|2005",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "16767|2005",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "16151|2005",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "11231|2005",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "20548|2005",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "16149|2005",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "16140|2005",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "72392|2005",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "3800|2005",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "12002|2005",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "13308|2005",
+      "sourceCategories": [
+        "Nominee",
+        "Winner"
+      ]
+    },
+    {
+      "key": "10997|2005",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "13005|2005",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "15512|2005",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "963|2005",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "18602|2006",
+      "sourceCategories": [
+        "Winner"
+      ]
+    },
+    {
+      "key": "15062|2006",
+      "sourceCategories": [
+        "Winner"
+      ]
+    },
+    {
+      "key": "21985|2006",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "21854|2006",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "19996|2006",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "20953|2006",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "23890|2006",
+      "sourceCategories": [
+        "Nominee",
+        "Winner"
+      ]
+    },
+    {
+      "key": "21636|2006",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "19877|2006",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "26182|2006",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "21987|2006",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "25358|2006",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "23891|2006",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "20622|2006",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "21986|2006",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "25760|2006",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "20080|2006",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "21882|2006",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "22287|2006",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "22237|2006",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "691|2006",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "29411|2007",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "29637|2007",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "29638|2007",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "28565|2007",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "28856|2007",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "29641|2007",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "29017|2007",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "28834|2007",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "27536|2007",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "26233|2007",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "29639|2007",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "25721|2007",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "29642|2007",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "22278|2007",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "22345|2007",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "27588|2007",
+      "sourceCategories": [
+        "Nominee",
+        "Winner"
+      ]
+    },
+    {
+      "key": "28089|2007",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "24480|2007",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "27173|2007",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "31260|2008",
+      "sourceCategories": [
+        "Winner"
+      ]
+    },
+    {
+      "key": "36727|2008",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "32465|2008",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "36729|2008",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "33643|2008",
+      "sourceCategories": [
+        "Nominee",
+        "Winner"
+      ]
+    },
+    {
+      "key": "36730|2008",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "36732|2008",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "36731|2008",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "36725|2008",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "36728|2008",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "32423|2008",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "27940|2008",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "35812|2008",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "29223|2008",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "34635|2008",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "31481|2008",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "34707|2008",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "38437|2009",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "40941|2009",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "41916|2009",
+      "sourceCategories": [
+        "Nominee",
+        "Winner"
+      ]
+    },
+    {
+      "key": "40619|2009",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "40935|2009",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "40837|2009",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "4107|2009",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "41301|2009",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "40790|2009",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "39095|2009",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "43023|2009",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "39192|2009",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "35481|2009",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "38453|2009",
+      "sourceCategories": [
+        "Winner"
+      ]
+    },
+    {
+      "key": "35497|2009",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "40393|2009",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "37907|2009",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "37120|2009",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "40769|2009",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "59223|2010",
+      "sourceCategories": [
+        "Nominee",
+        "Winner"
+      ]
+    },
+    {
+      "key": "66825|2010",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "58565|2010",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "65599|2010",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "57349|2010",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "60451|2010",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "68561|2010",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "72374|2010",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "71820|2010",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "60574|2010",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "72368|2010",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "60245|2010",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "59776|2010",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "70264|2010",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "39856|2010",
+      "sourceCategories": [
+        "Nominee",
+        "Winner"
+      ]
+    },
+    {
+      "key": "37380|2010",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "33160|2010",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "43015|2010",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "54043|2010",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "42215|2010",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "68448|2011",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "96913|2011",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "91873|2011",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "91671|2011",
+      "sourceCategories": [
+        "Nominee",
+        "Winner"
+      ]
+    },
+    {
+      "key": "85245|2011",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "98122|2011",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "93997|2011",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "93551|2011",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "87603|2011",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "99316|2011",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "90692|2011",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "84671|2011",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "112897|2011",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "99379|2011",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "105153|2011",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "89076|2011",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "91653|2011",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "72991|2011",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "25669|2011",
+      "sourceCategories": [
+        "Nominee",
+        "Winner"
+      ]
+    },
+    {
+      "key": "84876|2011",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "83195|2011",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "91523|2011",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "90870|2011",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "66849|2011",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "43570|2012",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "106217|2012",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "70149|2012",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "104006|2012",
+      "sourceCategories": [
+        "Special",
+        "Nominee"
+      ]
+    },
+    {
+      "key": "73761|2012",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "118048|2012",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "92644|2012",
+      "sourceCategories": [
+        "Nominee",
+        "Winner"
+      ]
+    },
+    {
+      "key": "118051|2012",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "128123|2012",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "105593|2012",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "105305|2012",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "132783|2012",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "91514|2012",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "90009|2012",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "117959|2012",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "108831|2012",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "118610|2012",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "130792|2013",
+      "sourceCategories": [
+        "Nominee",
+        "Winner"
+      ]
+    },
+    {
+      "key": "126749|2013",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "140743|2013",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "136712|2013",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "142437|2013",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "116981|2013",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "136280|2013",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "118418|2013",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "125618|2013",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "118695|2013",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "129614|2013",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "133620|2013",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "136888|2013",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "127398|2013",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "129948|2013",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "120677|2013",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "126163|2013",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "131260|2013",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "124361|2014",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "148949|2014",
+      "sourceCategories": [
+        "Nominee",
+        "Winner"
+      ]
+    },
+    {
+      "key": "132372|2014",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "144733|2014",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "148767|2014",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "146312|2014",
+      "sourceCategories": [
+        "Nominee",
+        "Winner"
+      ]
+    },
+    {
+      "key": "148764|2014",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "153753|2014",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "148228|2014",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "129622|2014",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "137155|2014",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "172308|2015",
+      "sourceCategories": [
+        "Nominee",
+        "Winner"
+      ]
+    },
+    {
+      "key": "163968|2015",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "164928|2015",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "162082|2015",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "171623|2015",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "129492|2015",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "172543|2015",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "168534|2015",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "158708|2015",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "162191|2015",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "171561|2015",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "172542|2015",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "171129|2015",
+      "sourceCategories": [
+        "Nominee",
+        "Winner"
+      ]
+    },
+    {
+      "key": "143884|2015",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "163930|2015",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "176494|2016",
+      "sourceCategories": [
+        "Nominee",
+        "Winner"
+      ]
+    },
+    {
+      "key": "161936|2016",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "173346|2016",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "172386|2016",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "191538|2016",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "191004|2016",
+      "sourceCategories": [
+        "Nominee",
+        "Winner"
+      ]
+    },
+    {
+      "key": "172550|2016",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "191687|2016",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "184490|2016",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "183401|2016",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "191862|2016",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "203420|2017",
+      "sourceCategories": [
+        "Nominee",
+        "Winner"
+      ]
+    },
+    {
+      "key": "203416|2017",
+      "sourceCategories": [
+        "Nominee",
+        "Winner"
+      ]
+    },
+    {
+      "key": "170042|2017",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "167791|2017",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "171668|2017",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "219509|2017",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "177524|2017",
+      "sourceCategories": [
+        "Nominee",
+        "Winner"
+      ]
+    },
+    {
+      "key": "204592|2017",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "41496|2017",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "206938|2017",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "191681|2017",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "209578|2017",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "172931|2017",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "17053|2017",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "204583|2017",
+      "sourceCategories": [
+        "Nominee",
+        "Winner"
+      ]
+    },
+    {
+      "key": "209778|2017",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "217372|2017",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "217321|2017",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "206939|2017",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "203427|2017",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "165722|2017",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "199611|2017",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "206915|2017",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "203411|2017",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "227789|2018",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "244521|2018",
+      "sourceCategories": [
+        "Nominee",
+        "Winner"
+      ]
+    },
+    {
+      "key": "244522|2018",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "232520|2018",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "192283|2018",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "232045|2018",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "235927|2018",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "213491|2018",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "218333|2018",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "231045|2018",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "230802|2018",
+      "sourceCategories": [
+        "Nominee",
+        "Winner"
+      ]
+    },
+    {
+      "key": "245643|2018",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "244992|2018",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "207830|2018",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "236484|2018",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "230080|2018",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "230383|2018",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "194655|2018",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "247313|2018",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "221107|2018",
+      "sourceCategories": [
+        "Winner"
+      ]
+    },
+    {
+      "key": "223321|2019",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "266192|2019",
+      "sourceCategories": [
+        "Nominee",
+        "Winner"
+      ]
+    },
+    {
+      "key": "244711|2019",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "217861|2019",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "270140|2019",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "269526|2019",
+      "sourceCategories": [
+        "Nominee",
+        "Winner"
+      ]
+    },
+    {
+      "key": "269624|2019",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "247314|2019",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "242740|2019",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "261265|2019",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "286569|2019",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "269596|2019",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "254640|2019",
+      "sourceCategories": [
+        "Nominee",
+        "Winner"
+      ]
+    },
+    {
+      "key": "266083|2019",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "219215|2019",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "259374|2019",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "269199|2019",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "255674|2019",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "244228|2019",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "250779|2019",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "250780|2019",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "247436|2019",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "241491|2019",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "263918|2020",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "284083|2020",
+      "sourceCategories": [
+        "Nominee",
+        "Winner"
+      ]
+    },
+    {
+      "key": "245655|2020",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "266810|2020",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "247763|2020",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "259830|2020",
+      "sourceCategories": [
+        "Nominee",
+        "Winner"
+      ]
+    },
+    {
+      "key": "296514|2020",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "285526|2020",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "288969|2020",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "271785|2020",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "256952|2020",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "283073|2020",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "295486|2020",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "284435|2020",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "284108|2020",
+      "sourceCategories": [
+        "Nominee",
+        "Winner"
+      ]
+    },
+    {
+      "key": "264055|2020",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "221965|2020",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "223953|2020",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "241266|2020",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "299169|2020",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "223040|2021",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "312484|2021",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "300531|2021",
+      "sourceCategories": [
+        "Nominee",
+        "Winner"
+      ]
+    },
+    {
+      "key": "191189|2021",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "251247|2021",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "291457|2021",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "300010|2021",
+      "sourceCategories": [
+        "Nominee",
+        "Winner"
+      ]
+    },
+    {
+      "key": "302417|2021",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "299028|2021",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "339489|2021",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "330602|2021",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "327838|2021",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "320840|2021",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "318977|2021",
+      "sourceCategories": [
+        "Nominee",
+        "Winner"
+      ]
+    },
+    {
+      "key": "310448|2021",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "318195|2021",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "267378|2021",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "322039|2021",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "274960|2021",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "317311|2021",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "246784|2022",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "316554|2022",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "328479|2022",
+      "sourceCategories": [
+        "Nominee",
+        "Winner"
+      ]
+    },
+    {
+      "key": "342942|2022",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "318560|2022",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "341919|2022",
+      "sourceCategories": [
+        "Nominee",
+        "Winner"
+      ]
+    },
+    {
+      "key": "354886|2022",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "354892|2022",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "341914|2022",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "358095|2022",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "355274|2022",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "295947|2022",
+      "sourceCategories": [
+        "Nominee",
+        "Winner"
+      ]
+    },
+    {
+      "key": "291453|2022",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "300905|2022",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "346703|2022",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "342207|2022",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "303669|2022",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "331571|2022",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "329839|2022",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "303672|2022",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "177478|2023",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "258779|2023",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "368954|2023",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "345584|2023",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "170969|2023",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "367206|2023",
+      "sourceCategories": [
+        "Nominee",
+        "Winner"
+      ]
+    },
+    {
+      "key": "375737|2023",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "271162|2023",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "249768|2023",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "307733|2023",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "362010|2023",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "307361|2023",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "362008|2023",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "361983|2023",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "343833|2023",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "370591|2023",
+      "sourceCategories": [
+        "Nominee",
+        "Winner"
+      ]
+    },
+    {
+      "key": "357563|2023",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "318243|2023",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "266830|2023",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "350933|2024",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "390092|2024",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "389102|2024",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "409498|2024",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "368899|2024",
+      "sourceCategories": [
+        "Nominee",
+        "Winner"
+      ]
+    },
+    {
+      "key": "392491|2024",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "402360|2024",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "399094|2024",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "402457|2024",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "376683|2024",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "373106|2024",
+      "sourceCategories": [
+        "Nominee",
+        "Winner"
+      ]
+    },
+    {
+      "key": "414317|2024",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "330592|2024",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "367966|2025",
+      "sourceCategories": [
+        "Nominee",
+        "Winner"
+      ]
+    },
+    {
+      "key": "385761|2025",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "410991|2025",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "415036|2025",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "424219|2025",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "396822|2025",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    },
+    {
+      "key": "423232|2025",
+      "sourceCategories": [
+        "Nominee",
+        "Winner"
+      ]
+    },
+    {
+      "key": "446631|2025",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "406911|2025",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "391849|2025",
+      "sourceCategories": [
+        "Special"
+      ]
+    },
+    {
+      "key": "413246|2025",
+      "sourceCategories": [
+        "Nominee",
+        "Winner"
+      ]
+    },
+    {
+      "key": "420087|2025",
+      "sourceCategories": [
+        "Nominee"
+      ]
+    }
+  ],
+  "downgraded": [],
+  "extraInDb": [
+    {
+      "key": "147183|2023",
+      "db": "Nominee"
+    }
+  ]
+}

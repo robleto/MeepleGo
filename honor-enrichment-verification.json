@@ -1,0 +1,23 @@
+{
+  "summary": {
+    "processedGames": 9483,
+    "totalGames": 9483,
+    "totalHonors": 17817,
+    "honorsWithSubcategory": 17817,
+    "winners": 2560,
+    "subcategoryCoveragePct": "100.00",
+    "winnerGroups": 896,
+    "winnerGroupsWithPrimary": 896,
+    "winnerGroupsPrimaryPct": "100.00",
+    "anomalies": {
+      "missingPrimary": 0,
+      "multiplePrimary": 0,
+      "noSubcategory": 0
+    }
+  },
+  "anomalies": {
+    "missingPrimary": [],
+    "multiplePrimary": [],
+    "noSubcategory": []
+  }
+}

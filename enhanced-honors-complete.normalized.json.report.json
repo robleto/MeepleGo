@@ -1,0 +1,1979 @@
+{
+  "stats": {
+    "total": 5995,
+    "winners": 2108,
+    "nominees": 1257,
+    "specials": 2630,
+    "groups": 1171,
+    "groupsWithPrimary": 954,
+    "multiEqualGroups": 64,
+    "subcategoryCoveragePct": "100.00"
+  },
+  "anomalies": {
+    "missingPrimary": [
+      {
+        "award_type": "Charles S. Roberts",
+        "year": 1982,
+        "winners": 0
+      },
+      {
+        "award_type": "Charles S. Roberts",
+        "year": 1983,
+        "winners": 0
+      },
+      {
+        "award_type": "Charles S. Roberts",
+        "year": 1984,
+        "winners": 0
+      },
+      {
+        "award_type": "Charles S. Roberts",
+        "year": 1985,
+        "winners": 0
+      },
+      {
+        "award_type": "Charles S. Roberts",
+        "year": 1986,
+        "winners": 0
+      },
+      {
+        "award_type": "Charles S. Roberts",
+        "year": 1987,
+        "winners": 0
+      },
+      {
+        "award_type": "Charles S. Roberts",
+        "year": 1988,
+        "winners": 0
+      },
+      {
+        "award_type": "Charles S. Roberts",
+        "year": 1989,
+        "winners": 0
+      },
+      {
+        "award_type": "Charles S. Roberts",
+        "year": 1990,
+        "winners": 0
+      },
+      {
+        "award_type": "Origins Awards",
+        "year": 1990,
+        "winners": 0
+      },
+      {
+        "award_type": "Charles S. Roberts",
+        "year": 1991,
+        "winners": 0
+      },
+      {
+        "award_type": "Games Magazine Game of the Year",
+        "year": 1991,
+        "winners": 0
+      },
+      {
+        "award_type": "Origins Awards",
+        "year": 1991,
+        "winners": 0
+      },
+      {
+        "award_type": "Charles S. Roberts",
+        "year": 1992,
+        "winners": 0
+      },
+      {
+        "award_type": "Origins Awards",
+        "year": 1992,
+        "winners": 0
+      },
+      {
+        "award_type": "Charles S. Roberts",
+        "year": 1993,
+        "winners": 0
+      },
+      {
+        "award_type": "Charles S. Roberts",
+        "year": 1994,
+        "winners": 0
+      },
+      {
+        "award_type": "1994/Fall Lucca Games Best of Show",
+        "year": 1994,
+        "winners": 0
+      },
+      {
+        "award_type": "Charles S. Roberts",
+        "year": 1995,
+        "winners": 0
+      },
+      {
+        "award_type": "1995/Spring Lucca Games Best of Show",
+        "year": 1995,
+        "winners": 0
+      },
+      {
+        "award_type": "Charles S. Roberts",
+        "year": 1996,
+        "winners": 0
+      },
+      {
+        "award_type": "1996/Fall Lucca Games Best of Show",
+        "year": 1996,
+        "winners": 0
+      },
+      {
+        "award_type": "1996/Sping Lucca Games Best of Show",
+        "year": 1996,
+        "winners": 0
+      },
+      {
+        "award_type": "Charles S. Roberts",
+        "year": 1997,
+        "winners": 0
+      },
+      {
+        "award_type": "1997/Fall Lucca Games Best of Show",
+        "year": 1997,
+        "winners": 0
+      },
+      {
+        "award_type": "1997/Spring Lucca Games Best of Show",
+        "year": 1997,
+        "winners": 0
+      },
+      {
+        "award_type": "Australian Games Association Game and Puzzle of the Year",
+        "year": 1998,
+        "winners": 0
+      },
+      {
+        "award_type": "Charles S. Roberts",
+        "year": 1998,
+        "winners": 0
+      },
+      {
+        "award_type": "1999/Fall Lucca Games Best of Show",
+        "year": 1998,
+        "winners": 0
+      },
+      {
+        "award_type": "1998/Fall Lucca Games Best of Show",
+        "year": 1998,
+        "winners": 0
+      },
+      {
+        "award_type": "1998/Sping Lucca Games Best of Show",
+        "year": 1998,
+        "winners": 0
+      },
+      {
+        "award_type": "1999/Fall Lucca Games Best of Show",
+        "year": 1999,
+        "winners": 0
+      },
+      {
+        "award_type": "1998/Fall Lucca Games Best of Show",
+        "year": 1999,
+        "winners": 0
+      },
+      {
+        "award_type": "Australian Games Association Game and Puzzle of the Year",
+        "year": 2000,
+        "winners": 0
+      },
+      {
+        "award_type": "International Gamers Award",
+        "year": 2000,
+        "winners": 0
+      },
+      {
+        "award_type": "Lucca Games Best of Show",
+        "year": 2000,
+        "winners": 0
+      },
+      {
+        "award_type": "Australian Games Association Game and Puzzle of the Year",
+        "year": 2001,
+        "winners": 0
+      },
+      {
+        "award_type": "Diana Jones Award for Excellence in Gaming",
+        "year": 2001,
+        "winners": 0
+      },
+      {
+        "award_type": "International Gamers Award",
+        "year": 2001,
+        "winners": 0
+      },
+      {
+        "award_type": "Lucca Games Best of Show",
+        "year": 2001,
+        "winners": 0
+      },
+      {
+        "award_type": "Tric Trac awards",
+        "year": 2001,
+        "winners": 0
+      },
+      {
+        "award_type": "Australian Games Association Game and Puzzle of the Year",
+        "year": 2002,
+        "winners": 0
+      },
+      {
+        "award_type": "Diana Jones Award for Excellence in Gaming",
+        "year": 2002,
+        "winners": 0
+      },
+      {
+        "award_type": "International Gamers Award",
+        "year": 2002,
+        "winners": 0
+      },
+      {
+        "award_type": "Lucca Games Best of Show",
+        "year": 2002,
+        "winners": 0
+      },
+      {
+        "award_type": "Tric Trac awards",
+        "year": 2002,
+        "winners": 0
+      },
+      {
+        "award_type": "Australian Games Association Game and Puzzle of the Year",
+        "year": 2003,
+        "winners": 0
+      },
+      {
+        "award_type": "Deutscher Lernspielpreis",
+        "year": 2003,
+        "winners": 0
+      },
+      {
+        "award_type": "International Gamers Award",
+        "year": 2003,
+        "winners": 0
+      },
+      {
+        "award_type": "Lucca Games Best Original Game",
+        "year": 2003,
+        "winners": 0
+      },
+      {
+        "award_type": "Tric Trac awards",
+        "year": 2003,
+        "winners": 0
+      },
+      {
+        "award_type": "Australian Games Association Game and Puzzle of the Year",
+        "year": 2004,
+        "winners": 0
+      },
+      {
+        "award_type": "Deutscher Lernspielpreis",
+        "year": 2004,
+        "winners": 0
+      },
+      {
+        "award_type": "International Gamers Award",
+        "year": 2004,
+        "winners": 0
+      },
+      {
+        "award_type": "Lucca Games Best of Show",
+        "year": 2004,
+        "winners": 0
+      },
+      {
+        "award_type": "Tric Trac awards",
+        "year": 2004,
+        "winners": 0
+      },
+      {
+        "award_type": "Australian Games Association Game and Puzzle of the Year",
+        "year": 2005,
+        "winners": 0
+      },
+      {
+        "award_type": "Deutscher Lernspielpreis",
+        "year": 2005,
+        "winners": 0
+      },
+      {
+        "award_type": "Diana Jones Award for Excellence in Gaming",
+        "year": 2005,
+        "winners": 0
+      },
+      {
+        "award_type": "International Gamers Award",
+        "year": 2005,
+        "winners": 0
+      },
+      {
+        "award_type": "Lucca Games Best of Show",
+        "year": 2005,
+        "winners": 0
+      },
+      {
+        "award_type": "Tric Trac awards",
+        "year": 2005,
+        "winners": 0
+      },
+      {
+        "award_type": "Tric Trac",
+        "year": 2005,
+        "winners": 0
+      },
+      {
+        "award_type": "Australian Games Association Game and Puzzle of the Year",
+        "year": 2006,
+        "winners": 0
+      },
+      {
+        "award_type": "Deutscher Lernspielpreis",
+        "year": 2006,
+        "winners": 0
+      },
+      {
+        "award_type": "Diana Jones Award for Excellence in Gaming",
+        "year": 2006,
+        "winners": 0
+      },
+      {
+        "award_type": "International Gamers Award",
+        "year": 2006,
+        "winners": 0
+      },
+      {
+        "award_type": "Spiel Portugal Jogo do Ano",
+        "year": 2006,
+        "winners": 0
+      },
+      {
+        "award_type": "Lucca Games Best of Show",
+        "year": 2006,
+        "winners": 0
+      },
+      {
+        "award_type": "Tric Trac awards",
+        "year": 2006,
+        "winners": 0
+      },
+      {
+        "award_type": "Australian Games Association Game and Puzzle of the Year",
+        "year": 2007,
+        "winners": 0
+      },
+      {
+        "award_type": "Deutscher Lernspielpreis",
+        "year": 2007,
+        "winners": 0
+      },
+      {
+        "award_type": "Diana Jones Award for Excellence in Gaming",
+        "year": 2007,
+        "winners": 0
+      },
+      {
+        "award_type": "International Gamers Award",
+        "year": 2007,
+        "winners": 0
+      },
+      {
+        "award_type": "Lucca Games Best of Show",
+        "year": 2007,
+        "winners": 0
+      },
+      {
+        "award_type": "Origins Awards",
+        "year": 2007,
+        "winners": 0
+      },
+      {
+        "award_type": "Tric Trac awards",
+        "year": 2007,
+        "winners": 0
+      },
+      {
+        "award_type": "Australian Games Association Game and Puzzle of the Year",
+        "year": 2008,
+        "winners": 0
+      },
+      {
+        "award_type": "Boardgames Australia Awards",
+        "year": 2008,
+        "winners": 0
+      },
+      {
+        "award_type": "Deutscher Lernspielpreis",
+        "year": 2008,
+        "winners": 0
+      },
+      {
+        "award_type": "International Gamers Award",
+        "year": 2008,
+        "winners": 0
+      },
+      {
+        "award_type": "Lucca Games Best in Show",
+        "year": 2008,
+        "winners": 0
+      },
+      {
+        "award_type": "Tric Trac awards",
+        "year": 2008,
+        "winners": 0
+      },
+      {
+        "award_type": "Boardgames Australia Awards",
+        "year": 2009,
+        "winners": 0
+      },
+      {
+        "award_type": "Deutscher Lernspielpreis",
+        "year": 2009,
+        "winners": 0
+      },
+      {
+        "award_type": "Diana Jones Award for Excellence in Gaming",
+        "year": 2009,
+        "winners": 0
+      },
+      {
+        "award_type": "International Gamers Award",
+        "year": 2009,
+        "winners": 0
+      },
+      {
+        "award_type": "Jogo do Ano",
+        "year": 2009,
+        "winners": 0
+      },
+      {
+        "award_type": "JoTa Awards",
+        "year": 2009,
+        "winners": 0
+      },
+      {
+        "award_type": "Tric Trac awards",
+        "year": 2009,
+        "winners": 0
+      },
+      {
+        "award_type": "Australian Games Association Game and Puzzle of the Year",
+        "year": 2010,
+        "winners": 0
+      },
+      {
+        "award_type": "Boardgames Australia Awards",
+        "year": 2010,
+        "winners": 0
+      },
+      {
+        "award_type": "Deutscher Lernspielpreis",
+        "year": 2010,
+        "winners": 0
+      },
+      {
+        "award_type": "Diana Jones Award for Excellence in Gaming",
+        "year": 2010,
+        "winners": 0
+      },
+      {
+        "award_type": "International Gamers Award",
+        "year": 2010,
+        "winners": 0
+      },
+      {
+        "award_type": "Jogo do Ano",
+        "year": 2010,
+        "winners": 0
+      },
+      {
+        "award_type": "JoTa Awards",
+        "year": 2010,
+        "winners": 0
+      },
+      {
+        "award_type": "Lucca Games Best of Show",
+        "year": 2010,
+        "winners": 0
+      },
+      {
+        "award_type": "Tric Trac awards",
+        "year": 2010,
+        "winners": 0
+      },
+      {
+        "award_type": "Deutscher Lernspielpreis",
+        "year": 2011,
+        "winners": 0
+      },
+      {
+        "award_type": "Diana Jones Award for Excellence in Gaming",
+        "year": 2011,
+        "winners": 0
+      },
+      {
+        "award_type": "International Gamers Award",
+        "year": 2011,
+        "winners": 0
+      },
+      {
+        "award_type": "JoTa Awards",
+        "year": 2011,
+        "winners": 0
+      },
+      {
+        "award_type": "Kennerspiel des Jahres",
+        "year": 2011,
+        "winners": 0
+      },
+      {
+        "award_type": "Tric Trac awards",
+        "year": 2011,
+        "winners": 0
+      },
+      {
+        "award_type": "2011/2012 Boardgames Australia Awards",
+        "year": 2011,
+        "winners": 0
+      },
+      {
+        "award_type": "JoTa Awards",
+        "year": 2012,
+        "winners": 0
+      },
+      {
+        "award_type": "Deutscher Lernspielpreis",
+        "year": 2012,
+        "winners": 0
+      },
+      {
+        "award_type": "Diana Jones Award for Excellence in Gaming",
+        "year": 2012,
+        "winners": 0
+      },
+      {
+        "award_type": "ENnies",
+        "year": 2012,
+        "winners": 0
+      },
+      {
+        "award_type": "International Gamers Award",
+        "year": 2012,
+        "winners": 0
+      },
+      {
+        "award_type": "Kennerspiel des Jahres",
+        "year": 2012,
+        "winners": 0
+      },
+      {
+        "award_type": "Tric Trac awards",
+        "year": 2012,
+        "winners": 0
+      },
+      {
+        "award_type": "Boardgames Australia Awards",
+        "year": 2013,
+        "winners": 0
+      },
+      {
+        "award_type": "Diana Jones Award for Excellence in Gaming",
+        "year": 2013,
+        "winners": 0
+      },
+      {
+        "award_type": "International Gamers Award",
+        "year": 2013,
+        "winners": 0
+      },
+      {
+        "award_type": "Nederlandse Spellenprijs",
+        "year": 2013,
+        "winners": 0
+      },
+      {
+        "award_type": "Kennerspiel des Jahres",
+        "year": 2013,
+        "winners": 0
+      },
+      {
+        "award_type": "Golden Elephant Award",
+        "year": 2013,
+        "winners": 0
+      },
+      {
+        "award_type": "Boardgames Australia Awards",
+        "year": 2014,
+        "winners": 0
+      },
+      {
+        "award_type": "Diana Jones Award for Excellence in Gaming",
+        "year": 2014,
+        "winners": 0
+      },
+      {
+        "award_type": "International Gamers Award",
+        "year": 2014,
+        "winners": 0
+      },
+      {
+        "award_type": "Kinderspielexperten",
+        "year": 2014,
+        "winners": 0
+      },
+      {
+        "award_type": "Nederlandse Spellenprijs",
+        "year": 2014,
+        "winners": 0
+      },
+      {
+        "award_type": "Golden Elephant Award",
+        "year": 2014,
+        "winners": 0
+      },
+      {
+        "award_type": "Tric Trac awards",
+        "year": 2014,
+        "winners": 0
+      },
+      {
+        "award_type": "Boardgames Australia",
+        "year": 2015,
+        "winners": 0
+      },
+      {
+        "award_type": "Diana Jones Award for Excellence in Gaming",
+        "year": 2015,
+        "winners": 0
+      },
+      {
+        "award_type": "International Gamers Award",
+        "year": 2015,
+        "winners": 0
+      },
+      {
+        "award_type": "Nederlandse Spellenprijs",
+        "year": 2015,
+        "winners": 0
+      },
+      {
+        "award_type": "Origins Awards",
+        "year": 2015,
+        "winners": 0
+      },
+      {
+        "award_type": "Origins Awards Best Children S Family and Par",
+        "year": 2015,
+        "winners": 0
+      },
+      {
+        "award_type": "Golden Elephant Award",
+        "year": 2015,
+        "winners": 0
+      },
+      {
+        "award_type": "Dragon Awards",
+        "year": 2016,
+        "winners": 0
+      },
+      {
+        "award_type": "Boardgames Australia",
+        "year": 2016,
+        "winners": 0
+      },
+      {
+        "award_type": "Diana Jones Award for Excellence in Gaming",
+        "year": 2016,
+        "winners": 0
+      },
+      {
+        "award_type": "International Gamers Award",
+        "year": 2016,
+        "winners": 0
+      },
+      {
+        "award_type": "Nederlandse Spellenprijs",
+        "year": 2016,
+        "winners": 0
+      },
+      {
+        "award_type": "Golden Elephant Award",
+        "year": 2016,
+        "winners": 0
+      },
+      {
+        "award_type": "Tric Trac awards",
+        "year": 2016,
+        "winners": 0
+      },
+      {
+        "award_type": "Dragon Awards",
+        "year": 2017,
+        "winners": 0
+      },
+      {
+        "award_type": "Boardgames Australia",
+        "year": 2017,
+        "winners": 0
+      },
+      {
+        "award_type": "Deutscher Spiele Preis",
+        "year": 2017,
+        "winners": 0
+      },
+      {
+        "award_type": "Diana Jones Award for Excellence in Gaming",
+        "year": 2017,
+        "winners": 0
+      },
+      {
+        "award_type": "International Gamers Award",
+        "year": 2017,
+        "winners": 0
+      },
+      {
+        "award_type": "Nederlandse Spellenprijs",
+        "year": 2017,
+        "winners": 0
+      },
+      {
+        "award_type": "Golden Elephant Award",
+        "year": 2017,
+        "winners": 0
+      },
+      {
+        "award_type": "Tric Trac awards",
+        "year": 2017,
+        "winners": 0
+      },
+      {
+        "award_type": "Boardgames Australia",
+        "year": 2018,
+        "winners": 0
+      },
+      {
+        "award_type": "Deutscher Spiele Preis",
+        "year": 2018,
+        "winners": 0
+      },
+      {
+        "award_type": "Diana Jones Award for Excellence in Gaming",
+        "year": 2018,
+        "winners": 0
+      },
+      {
+        "award_type": "International Gamers Award",
+        "year": 2018,
+        "winners": 0
+      },
+      {
+        "award_type": "Nederlandse Spellenprijs",
+        "year": 2018,
+        "winners": 0
+      },
+      {
+        "award_type": "Golden Elephant Award",
+        "year": 2018,
+        "winners": 0
+      },
+      {
+        "award_type": "Tric Trac awards",
+        "year": 2018,
+        "winners": 0
+      },
+      {
+        "award_type": "UK Games Expo Awards",
+        "year": 2018,
+        "winners": 0
+      },
+      {
+        "award_type": "Board Game Quest Awards",
+        "year": 2019,
+        "winners": 0
+      },
+      {
+        "award_type": "Boardgames Australia",
+        "year": 2019,
+        "winners": 0
+      },
+      {
+        "award_type": "Charles S. Roberts",
+        "year": 2019,
+        "winners": 0
+      },
+      {
+        "award_type": "Deutscher Spiele Preis",
+        "year": 2019,
+        "winners": 0
+      },
+      {
+        "award_type": "Diana Jones Award for Excellence in Gaming",
+        "year": 2019,
+        "winners": 0
+      },
+      {
+        "award_type": "Dragon Awards",
+        "year": 2019,
+        "winners": 0
+      },
+      {
+        "award_type": "International Gamers Award",
+        "year": 2019,
+        "winners": 0
+      },
+      {
+        "award_type": "Nederlandse Spellenprijs",
+        "year": 2019,
+        "winners": 0
+      },
+      {
+        "award_type": "Origins Awards",
+        "year": 2019,
+        "winners": 0
+      },
+      {
+        "award_type": "Palmes des Jeux",
+        "year": 2019,
+        "winners": 0
+      },
+      {
+        "award_type": "Golden Elephant Award",
+        "year": 2019,
+        "winners": 0
+      },
+      {
+        "award_type": "Tric Trac awards",
+        "year": 2019,
+        "winners": 0
+      },
+      {
+        "award_type": "UK Games Expo Awards",
+        "year": 2019,
+        "winners": 0
+      },
+      {
+        "award_type": "5 Seasons Best International Strategy",
+        "year": 2020,
+        "winners": 0
+      },
+      {
+        "award_type": "Arets Spel Best Adult Game",
+        "year": 2020,
+        "winners": 0
+      },
+      {
+        "award_type": "Board Game Quest Awards",
+        "year": 2020,
+        "winners": 0
+      },
+      {
+        "award_type": "Board Game Quest Awards Best Game From A Smal",
+        "year": 2020,
+        "winners": 0
+      },
+      {
+        "award_type": "Deutscher Spiele Preis",
+        "year": 2020,
+        "winners": 0
+      },
+      {
+        "award_type": "Dragon Awards",
+        "year": 2020,
+        "winners": 0
+      },
+      {
+        "award_type": "Golden Geek Best Solo Board Game",
+        "year": 2020,
+        "winners": 0
+      },
+      {
+        "award_type": "Gra Roku Best Expansion",
+        "year": 2020,
+        "winners": 0
+      },
+      {
+        "award_type": "International Gamers Award",
+        "year": 2020,
+        "winners": 0
+      },
+      {
+        "award_type": "Nederlandse Spellenprijs",
+        "year": 2020,
+        "winners": 0
+      },
+      {
+        "award_type": "Palmes des Jeux",
+        "year": 2020,
+        "winners": 0
+      },
+      {
+        "award_type": "UK Games Expo Awards",
+        "year": 2020,
+        "winners": 0
+      },
+      {
+        "award_type": "Board Game Quest Awards Best Strategyeuro Gam",
+        "year": 2021,
+        "winners": 0
+      },
+      {
+        "award_type": "Bulgarian Board Game Awards",
+        "year": 2021,
+        "winners": 0
+      },
+      {
+        "award_type": "Deutscher Spiele Preis",
+        "year": 2021,
+        "winners": 0
+      },
+      {
+        "award_type": "Dragon Awards",
+        "year": 2021,
+        "winners": 0
+      },
+      {
+        "award_type": "Nederlandse Spellenprijs",
+        "year": 2021,
+        "winners": 0
+      },
+      {
+        "award_type": "Palmes des Jeux",
+        "year": 2021,
+        "winners": 0
+      },
+      {
+        "award_type": "Tric Trac Awards",
+        "year": 2021,
+        "winners": 0
+      },
+      {
+        "award_type": "Uk Games Expo Best New Boardgame Euro Style P",
+        "year": 2021,
+        "winners": 0
+      },
+      {
+        "award_type": "Bulgarian Board Game Awards",
+        "year": 2022,
+        "winners": 0
+      },
+      {
+        "award_type": "Deutscher Spiele Preis",
+        "year": 2022,
+        "winners": 0
+      },
+      {
+        "award_type": "Dragon Awards",
+        "year": 2022,
+        "winners": 0
+      },
+      {
+        "award_type": "Geek Media Awards",
+        "year": 2022,
+        "winners": 0
+      },
+      {
+        "award_type": "Nederlandse Spellenprijs",
+        "year": 2022,
+        "winners": 0
+      },
+      {
+        "award_type": "Nederlandse Spellenprijs Best Family Game Win",
+        "year": 2022,
+        "winners": 0
+      },
+      {
+        "award_type": "Premio Alfonso X Categoría 2019/20",
+        "year": 2022,
+        "winners": 0
+      },
+      {
+        "award_type": "Premio Alfonso X Categoría 2021",
+        "year": 2022,
+        "winners": 0
+      },
+      {
+        "award_type": "Tric Trac Awards",
+        "year": 2022,
+        "winners": 0
+      },
+      {
+        "award_type": "Tric Trac d'or",
+        "year": 2022,
+        "winners": 0
+      },
+      {
+        "award_type": "UK Games Expo Awards",
+        "year": 2022,
+        "winners": 0
+      },
+      {
+        "award_type": "Uk Games Expo Best Boardgame American Style J",
+        "year": 2022,
+        "winners": 0
+      },
+      {
+        "award_type": "Uk Games Expo Best Boardgame Strategic Style",
+        "year": 2022,
+        "winners": 0
+      },
+      {
+        "award_type": "Bulgarian Board Game Awards",
+        "year": 2023,
+        "winners": 0
+      },
+      {
+        "award_type": "Deutscher Spiele Preis",
+        "year": 2023,
+        "winners": 0
+      },
+      {
+        "award_type": "Dragon Awards",
+        "year": 2023,
+        "winners": 0
+      },
+      {
+        "award_type": "Geek Media Awards",
+        "year": 2023,
+        "winners": 0
+      },
+      {
+        "award_type": "Nederlandse Spellenprijs",
+        "year": 2023,
+        "winners": 0
+      },
+      {
+        "award_type": "UK Games Expo Awards",
+        "year": 2023,
+        "winners": 0
+      },
+      {
+        "award_type": "Bulgarian Board Game Awards",
+        "year": 2024,
+        "winners": 0
+      },
+      {
+        "award_type": "Deutscher Spiele Preis",
+        "year": 2024,
+        "winners": 0
+      },
+      {
+        "award_type": "Geek Media Awards",
+        "year": 2024,
+        "winners": 0
+      },
+      {
+        "award_type": "Nederlandse Spellenprijs",
+        "year": 2024,
+        "winners": 0
+      },
+      {
+        "award_type": "Premio Juego Argentino del Año",
+        "year": 2024,
+        "winners": 0
+      },
+      {
+        "award_type": "UK Games Expo Awards",
+        "year": 2024,
+        "winners": 0
+      },
+      {
+        "award_type": "Zenobia Award",
+        "year": 2024,
+        "winners": 0
+      },
+      {
+        "award_type": "BoardGameGeek Hall of Fame",
+        "year": 2025,
+        "winners": 0
+      },
+      {
+        "award_type": "Prix des Lys",
+        "year": 2025,
+        "winners": 0
+      }
+    ],
+    "multiplePrimary": [],
+    "missingWinnerYears": [
+      {
+        "award_type": "Charles S. Roberts",
+        "year": 1982
+      },
+      {
+        "award_type": "Charles S. Roberts",
+        "year": 1983
+      },
+      {
+        "award_type": "Charles S. Roberts",
+        "year": 1984
+      },
+      {
+        "award_type": "Charles S. Roberts",
+        "year": 1985
+      },
+      {
+        "award_type": "Charles S. Roberts",
+        "year": 1986
+      },
+      {
+        "award_type": "Charles S. Roberts",
+        "year": 1987
+      },
+      {
+        "award_type": "Charles S. Roberts",
+        "year": 1988
+      },
+      {
+        "award_type": "Charles S. Roberts",
+        "year": 1989
+      },
+      {
+        "award_type": "Charles S. Roberts",
+        "year": 1990
+      },
+      {
+        "award_type": "Origins Awards",
+        "year": 1990
+      },
+      {
+        "award_type": "Charles S. Roberts",
+        "year": 1991
+      },
+      {
+        "award_type": "Games Magazine Game of the Year",
+        "year": 1991
+      },
+      {
+        "award_type": "Origins Awards",
+        "year": 1991
+      },
+      {
+        "award_type": "Charles S. Roberts",
+        "year": 1992
+      },
+      {
+        "award_type": "Origins Awards",
+        "year": 1992
+      },
+      {
+        "award_type": "Charles S. Roberts",
+        "year": 1993
+      },
+      {
+        "award_type": "Charles S. Roberts",
+        "year": 1994
+      },
+      {
+        "award_type": "1994/Fall Lucca Games Best of Show",
+        "year": 1994
+      },
+      {
+        "award_type": "Charles S. Roberts",
+        "year": 1995
+      },
+      {
+        "award_type": "1995/Spring Lucca Games Best of Show",
+        "year": 1995
+      },
+      {
+        "award_type": "Charles S. Roberts",
+        "year": 1996
+      },
+      {
+        "award_type": "1996/Fall Lucca Games Best of Show",
+        "year": 1996
+      },
+      {
+        "award_type": "1996/Sping Lucca Games Best of Show",
+        "year": 1996
+      },
+      {
+        "award_type": "Charles S. Roberts",
+        "year": 1997
+      },
+      {
+        "award_type": "1997/Fall Lucca Games Best of Show",
+        "year": 1997
+      },
+      {
+        "award_type": "1997/Spring Lucca Games Best of Show",
+        "year": 1997
+      },
+      {
+        "award_type": "Australian Games Association Game and Puzzle of the Year",
+        "year": 1998
+      },
+      {
+        "award_type": "Charles S. Roberts",
+        "year": 1998
+      },
+      {
+        "award_type": "1999/Fall Lucca Games Best of Show",
+        "year": 1998
+      },
+      {
+        "award_type": "1998/Fall Lucca Games Best of Show",
+        "year": 1998
+      },
+      {
+        "award_type": "1998/Sping Lucca Games Best of Show",
+        "year": 1998
+      },
+      {
+        "award_type": "1999/Fall Lucca Games Best of Show",
+        "year": 1999
+      },
+      {
+        "award_type": "1998/Fall Lucca Games Best of Show",
+        "year": 1999
+      },
+      {
+        "award_type": "Australian Games Association Game and Puzzle of the Year",
+        "year": 2000
+      },
+      {
+        "award_type": "International Gamers Award",
+        "year": 2000
+      },
+      {
+        "award_type": "Lucca Games Best of Show",
+        "year": 2000
+      },
+      {
+        "award_type": "Australian Games Association Game and Puzzle of the Year",
+        "year": 2001
+      },
+      {
+        "award_type": "Diana Jones Award for Excellence in Gaming",
+        "year": 2001
+      },
+      {
+        "award_type": "International Gamers Award",
+        "year": 2001
+      },
+      {
+        "award_type": "Lucca Games Best of Show",
+        "year": 2001
+      },
+      {
+        "award_type": "Tric Trac awards",
+        "year": 2001
+      },
+      {
+        "award_type": "Australian Games Association Game and Puzzle of the Year",
+        "year": 2002
+      },
+      {
+        "award_type": "Diana Jones Award for Excellence in Gaming",
+        "year": 2002
+      },
+      {
+        "award_type": "International Gamers Award",
+        "year": 2002
+      },
+      {
+        "award_type": "Lucca Games Best of Show",
+        "year": 2002
+      },
+      {
+        "award_type": "Tric Trac awards",
+        "year": 2002
+      },
+      {
+        "award_type": "Australian Games Association Game and Puzzle of the Year",
+        "year": 2003
+      },
+      {
+        "award_type": "Deutscher Lernspielpreis",
+        "year": 2003
+      },
+      {
+        "award_type": "International Gamers Award",
+        "year": 2003
+      },
+      {
+        "award_type": "Lucca Games Best Original Game",
+        "year": 2003
+      },
+      {
+        "award_type": "Tric Trac awards",
+        "year": 2003
+      },
+      {
+        "award_type": "Australian Games Association Game and Puzzle of the Year",
+        "year": 2004
+      },
+      {
+        "award_type": "Deutscher Lernspielpreis",
+        "year": 2004
+      },
+      {
+        "award_type": "International Gamers Award",
+        "year": 2004
+      },
+      {
+        "award_type": "Lucca Games Best of Show",
+        "year": 2004
+      },
+      {
+        "award_type": "Tric Trac awards",
+        "year": 2004
+      },
+      {
+        "award_type": "Australian Games Association Game and Puzzle of the Year",
+        "year": 2005
+      },
+      {
+        "award_type": "Deutscher Lernspielpreis",
+        "year": 2005
+      },
+      {
+        "award_type": "Diana Jones Award for Excellence in Gaming",
+        "year": 2005
+      },
+      {
+        "award_type": "International Gamers Award",
+        "year": 2005
+      },
+      {
+        "award_type": "Lucca Games Best of Show",
+        "year": 2005
+      },
+      {
+        "award_type": "Tric Trac awards",
+        "year": 2005
+      },
+      {
+        "award_type": "Tric Trac",
+        "year": 2005
+      },
+      {
+        "award_type": "Australian Games Association Game and Puzzle of the Year",
+        "year": 2006
+      },
+      {
+        "award_type": "Deutscher Lernspielpreis",
+        "year": 2006
+      },
+      {
+        "award_type": "Diana Jones Award for Excellence in Gaming",
+        "year": 2006
+      },
+      {
+        "award_type": "International Gamers Award",
+        "year": 2006
+      },
+      {
+        "award_type": "Spiel Portugal Jogo do Ano",
+        "year": 2006
+      },
+      {
+        "award_type": "Lucca Games Best of Show",
+        "year": 2006
+      },
+      {
+        "award_type": "Tric Trac awards",
+        "year": 2006
+      },
+      {
+        "award_type": "Australian Games Association Game and Puzzle of the Year",
+        "year": 2007
+      },
+      {
+        "award_type": "Deutscher Lernspielpreis",
+        "year": 2007
+      },
+      {
+        "award_type": "Diana Jones Award for Excellence in Gaming",
+        "year": 2007
+      },
+      {
+        "award_type": "International Gamers Award",
+        "year": 2007
+      },
+      {
+        "award_type": "Lucca Games Best of Show",
+        "year": 2007
+      },
+      {
+        "award_type": "Origins Awards",
+        "year": 2007
+      },
+      {
+        "award_type": "Tric Trac awards",
+        "year": 2007
+      },
+      {
+        "award_type": "Australian Games Association Game and Puzzle of the Year",
+        "year": 2008
+      },
+      {
+        "award_type": "Boardgames Australia Awards",
+        "year": 2008
+      },
+      {
+        "award_type": "Deutscher Lernspielpreis",
+        "year": 2008
+      },
+      {
+        "award_type": "International Gamers Award",
+        "year": 2008
+      },
+      {
+        "award_type": "Lucca Games Best in Show",
+        "year": 2008
+      },
+      {
+        "award_type": "Tric Trac awards",
+        "year": 2008
+      },
+      {
+        "award_type": "Boardgames Australia Awards",
+        "year": 2009
+      },
+      {
+        "award_type": "Deutscher Lernspielpreis",
+        "year": 2009
+      },
+      {
+        "award_type": "Diana Jones Award for Excellence in Gaming",
+        "year": 2009
+      },
+      {
+        "award_type": "International Gamers Award",
+        "year": 2009
+      },
+      {
+        "award_type": "Jogo do Ano",
+        "year": 2009
+      },
+      {
+        "award_type": "JoTa Awards",
+        "year": 2009
+      },
+      {
+        "award_type": "Tric Trac awards",
+        "year": 2009
+      },
+      {
+        "award_type": "Australian Games Association Game and Puzzle of the Year",
+        "year": 2010
+      },
+      {
+        "award_type": "Boardgames Australia Awards",
+        "year": 2010
+      },
+      {
+        "award_type": "Deutscher Lernspielpreis",
+        "year": 2010
+      },
+      {
+        "award_type": "Diana Jones Award for Excellence in Gaming",
+        "year": 2010
+      },
+      {
+        "award_type": "International Gamers Award",
+        "year": 2010
+      },
+      {
+        "award_type": "Jogo do Ano",
+        "year": 2010
+      },
+      {
+        "award_type": "JoTa Awards",
+        "year": 2010
+      },
+      {
+        "award_type": "Lucca Games Best of Show",
+        "year": 2010
+      },
+      {
+        "award_type": "Tric Trac awards",
+        "year": 2010
+      },
+      {
+        "award_type": "Deutscher Lernspielpreis",
+        "year": 2011
+      },
+      {
+        "award_type": "Diana Jones Award for Excellence in Gaming",
+        "year": 2011
+      },
+      {
+        "award_type": "International Gamers Award",
+        "year": 2011
+      },
+      {
+        "award_type": "JoTa Awards",
+        "year": 2011
+      },
+      {
+        "award_type": "Kennerspiel des Jahres",
+        "year": 2011
+      },
+      {
+        "award_type": "Tric Trac awards",
+        "year": 2011
+      },
+      {
+        "award_type": "2011/2012 Boardgames Australia Awards",
+        "year": 2011
+      },
+      {
+        "award_type": "JoTa Awards",
+        "year": 2012
+      },
+      {
+        "award_type": "Deutscher Lernspielpreis",
+        "year": 2012
+      },
+      {
+        "award_type": "Diana Jones Award for Excellence in Gaming",
+        "year": 2012
+      },
+      {
+        "award_type": "ENnies",
+        "year": 2012
+      },
+      {
+        "award_type": "International Gamers Award",
+        "year": 2012
+      },
+      {
+        "award_type": "Kennerspiel des Jahres",
+        "year": 2012
+      },
+      {
+        "award_type": "Tric Trac awards",
+        "year": 2012
+      },
+      {
+        "award_type": "Boardgames Australia Awards",
+        "year": 2013
+      },
+      {
+        "award_type": "Diana Jones Award for Excellence in Gaming",
+        "year": 2013
+      },
+      {
+        "award_type": "International Gamers Award",
+        "year": 2013
+      },
+      {
+        "award_type": "Nederlandse Spellenprijs",
+        "year": 2013
+      },
+      {
+        "award_type": "Kennerspiel des Jahres",
+        "year": 2013
+      },
+      {
+        "award_type": "Golden Elephant Award",
+        "year": 2013
+      },
+      {
+        "award_type": "Boardgames Australia Awards",
+        "year": 2014
+      },
+      {
+        "award_type": "Diana Jones Award for Excellence in Gaming",
+        "year": 2014
+      },
+      {
+        "award_type": "International Gamers Award",
+        "year": 2014
+      },
+      {
+        "award_type": "Kinderspielexperten",
+        "year": 2014
+      },
+      {
+        "award_type": "Nederlandse Spellenprijs",
+        "year": 2014
+      },
+      {
+        "award_type": "Golden Elephant Award",
+        "year": 2014
+      },
+      {
+        "award_type": "Tric Trac awards",
+        "year": 2014
+      },
+      {
+        "award_type": "Boardgames Australia",
+        "year": 2015
+      },
+      {
+        "award_type": "Diana Jones Award for Excellence in Gaming",
+        "year": 2015
+      },
+      {
+        "award_type": "International Gamers Award",
+        "year": 2015
+      },
+      {
+        "award_type": "Nederlandse Spellenprijs",
+        "year": 2015
+      },
+      {
+        "award_type": "Origins Awards",
+        "year": 2015
+      },
+      {
+        "award_type": "Origins Awards Best Children S Family and Par",
+        "year": 2015
+      },
+      {
+        "award_type": "Golden Elephant Award",
+        "year": 2015
+      },
+      {
+        "award_type": "Dragon Awards",
+        "year": 2016
+      },
+      {
+        "award_type": "Boardgames Australia",
+        "year": 2016
+      },
+      {
+        "award_type": "Diana Jones Award for Excellence in Gaming",
+        "year": 2016
+      },
+      {
+        "award_type": "International Gamers Award",
+        "year": 2016
+      },
+      {
+        "award_type": "Nederlandse Spellenprijs",
+        "year": 2016
+      },
+      {
+        "award_type": "Golden Elephant Award",
+        "year": 2016
+      },
+      {
+        "award_type": "Tric Trac awards",
+        "year": 2016
+      },
+      {
+        "award_type": "Dragon Awards",
+        "year": 2017
+      },
+      {
+        "award_type": "Boardgames Australia",
+        "year": 2017
+      },
+      {
+        "award_type": "Deutscher Spiele Preis",
+        "year": 2017
+      },
+      {
+        "award_type": "Diana Jones Award for Excellence in Gaming",
+        "year": 2017
+      },
+      {
+        "award_type": "International Gamers Award",
+        "year": 2017
+      },
+      {
+        "award_type": "Nederlandse Spellenprijs",
+        "year": 2017
+      },
+      {
+        "award_type": "Golden Elephant Award",
+        "year": 2017
+      },
+      {
+        "award_type": "Tric Trac awards",
+        "year": 2017
+      },
+      {
+        "award_type": "Boardgames Australia",
+        "year": 2018
+      },
+      {
+        "award_type": "Deutscher Spiele Preis",
+        "year": 2018
+      },
+      {
+        "award_type": "Diana Jones Award for Excellence in Gaming",
+        "year": 2018
+      },
+      {
+        "award_type": "International Gamers Award",
+        "year": 2018
+      },
+      {
+        "award_type": "Nederlandse Spellenprijs",
+        "year": 2018
+      },
+      {
+        "award_type": "Golden Elephant Award",
+        "year": 2018
+      },
+      {
+        "award_type": "Tric Trac awards",
+        "year": 2018
+      },
+      {
+        "award_type": "UK Games Expo Awards",
+        "year": 2018
+      },
+      {
+        "award_type": "Board Game Quest Awards",
+        "year": 2019
+      },
+      {
+        "award_type": "Boardgames Australia",
+        "year": 2019
+      },
+      {
+        "award_type": "Charles S. Roberts",
+        "year": 2019
+      },
+      {
+        "award_type": "Deutscher Spiele Preis",
+        "year": 2019
+      },
+      {
+        "award_type": "Diana Jones Award for Excellence in Gaming",
+        "year": 2019
+      },
+      {
+        "award_type": "Dragon Awards",
+        "year": 2019
+      },
+      {
+        "award_type": "International Gamers Award",
+        "year": 2019
+      },
+      {
+        "award_type": "Nederlandse Spellenprijs",
+        "year": 2019
+      },
+      {
+        "award_type": "Origins Awards",
+        "year": 2019
+      },
+      {
+        "award_type": "Palmes des Jeux",
+        "year": 2019
+      },
+      {
+        "award_type": "Golden Elephant Award",
+        "year": 2019
+      },
+      {
+        "award_type": "Tric Trac awards",
+        "year": 2019
+      },
+      {
+        "award_type": "UK Games Expo Awards",
+        "year": 2019
+      },
+      {
+        "award_type": "5 Seasons Best International Strategy",
+        "year": 2020
+      },
+      {
+        "award_type": "Arets Spel Best Adult Game",
+        "year": 2020
+      },
+      {
+        "award_type": "Board Game Quest Awards",
+        "year": 2020
+      },
+      {
+        "award_type": "Board Game Quest Awards Best Game From A Smal",
+        "year": 2020
+      },
+      {
+        "award_type": "Deutscher Spiele Preis",
+        "year": 2020
+      },
+      {
+        "award_type": "Dragon Awards",
+        "year": 2020
+      },
+      {
+        "award_type": "Golden Geek Best Solo Board Game",
+        "year": 2020
+      },
+      {
+        "award_type": "Gra Roku Best Expansion",
+        "year": 2020
+      },
+      {
+        "award_type": "International Gamers Award",
+        "year": 2020
+      },
+      {
+        "award_type": "Nederlandse Spellenprijs",
+        "year": 2020
+      },
+      {
+        "award_type": "Palmes des Jeux",
+        "year": 2020
+      },
+      {
+        "award_type": "UK Games Expo Awards",
+        "year": 2020
+      },
+      {
+        "award_type": "Board Game Quest Awards Best Strategyeuro Gam",
+        "year": 2021
+      },
+      {
+        "award_type": "Bulgarian Board Game Awards",
+        "year": 2021
+      },
+      {
+        "award_type": "Deutscher Spiele Preis",
+        "year": 2021
+      },
+      {
+        "award_type": "Dragon Awards",
+        "year": 2021
+      },
+      {
+        "award_type": "Nederlandse Spellenprijs",
+        "year": 2021
+      },
+      {
+        "award_type": "Palmes des Jeux",
+        "year": 2021
+      },
+      {
+        "award_type": "Tric Trac Awards",
+        "year": 2021
+      },
+      {
+        "award_type": "Uk Games Expo Best New Boardgame Euro Style P",
+        "year": 2021
+      },
+      {
+        "award_type": "Bulgarian Board Game Awards",
+        "year": 2022
+      },
+      {
+        "award_type": "Deutscher Spiele Preis",
+        "year": 2022
+      },
+      {
+        "award_type": "Dragon Awards",
+        "year": 2022
+      },
+      {
+        "award_type": "Geek Media Awards",
+        "year": 2022
+      },
+      {
+        "award_type": "Nederlandse Spellenprijs",
+        "year": 2022
+      },
+      {
+        "award_type": "Nederlandse Spellenprijs Best Family Game Win",
+        "year": 2022
+      },
+      {
+        "award_type": "Premio Alfonso X Categoría 2019/20",
+        "year": 2022
+      },
+      {
+        "award_type": "Premio Alfonso X Categoría 2021",
+        "year": 2022
+      },
+      {
+        "award_type": "Tric Trac Awards",
+        "year": 2022
+      },
+      {
+        "award_type": "Tric Trac d'or",
+        "year": 2022
+      },
+      {
+        "award_type": "UK Games Expo Awards",
+        "year": 2022
+      },
+      {
+        "award_type": "Uk Games Expo Best Boardgame American Style J",
+        "year": 2022
+      },
+      {
+        "award_type": "Uk Games Expo Best Boardgame Strategic Style",
+        "year": 2022
+      },
+      {
+        "award_type": "Bulgarian Board Game Awards",
+        "year": 2023
+      },
+      {
+        "award_type": "Deutscher Spiele Preis",
+        "year": 2023
+      },
+      {
+        "award_type": "Dragon Awards",
+        "year": 2023
+      },
+      {
+        "award_type": "Geek Media Awards",
+        "year": 2023
+      },
+      {
+        "award_type": "Nederlandse Spellenprijs",
+        "year": 2023
+      },
+      {
+        "award_type": "UK Games Expo Awards",
+        "year": 2023
+      },
+      {
+        "award_type": "Bulgarian Board Game Awards",
+        "year": 2024
+      },
+      {
+        "award_type": "Deutscher Spiele Preis",
+        "year": 2024
+      },
+      {
+        "award_type": "Geek Media Awards",
+        "year": 2024
+      },
+      {
+        "award_type": "Nederlandse Spellenprijs",
+        "year": 2024
+      },
+      {
+        "award_type": "Premio Juego Argentino del Año",
+        "year": 2024
+      },
+      {
+        "award_type": "UK Games Expo Awards",
+        "year": 2024
+      },
+      {
+        "award_type": "Zenobia Award",
+        "year": 2024
+      },
+      {
+        "award_type": "BoardGameGeek Hall of Fame",
+        "year": 2025
+      },
+      {
+        "award_type": "Prix des Lys",
+        "year": 2025
+      }
+    ]
+  },
+  "normalization_changes": {
+    "mapped_category": 5995,
+    "cleaned_title": 277,
+    "standardized_subcategory": 4914,
+    "primary_assigned_groups": 890,
+    "multi_equal_primary_groups": 64
+  }
+}

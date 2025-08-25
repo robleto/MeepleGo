@@ -18,18 +18,17 @@ dist/
 .railway/
 .render/
 
-# Development scripts and tools
-scripts/
+# Development scripts (we now version organized scripts, ignore only ad-hoc temp patterns)
+scripts/tmp/
+scripts/**/scratch-*.js
+
+# Legacy migrations moved under database/
 migrations/
+
+# Raw SQL drops or backups (schema lives in database/)
 *.sql
-run-bgg-import.sh
-test-*.js
-import-*.js
-add-*.js
-check-*.js
-debug-*.js
-analyze-*.js
-populate-*.js
+
+# (Previously ignored ad-hoc script name patterns removed to allow versioning inside scripts/)
 
 # Supabase
 supabase/.temp/
@@ -126,3 +125,9 @@ jspm_packages/
 # Temporary folders
 tmp/
 temp/
+
+# Data artifacts (allow small examples)
+data/raw/
+data/derived/
+!data/examples/
+!data/README.md

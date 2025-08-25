@@ -1,0 +1,1617 @@
+[
+  {
+    "id": "79097",
+    "slug": "test-honor",
+    "url": "/boardgamehonor/79097/test-honor",
+    "year": null,
+    "title": "Honor",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 382244,
+        "name": "Test board game with honor"
+      }
+    ],
+    "awardSet": "Test Award Set",
+    "position": "Test Award Category"
+  },
+  {
+    "id": "10866",
+    "slug": "1974-charles-s-roberts-best-amateur-game-nominee",
+    "url": "/boardgamehonor/10866/1974-charles-s-roberts-best-amateur-game-nominee",
+    "year": 1974,
+    "title": "Charles S Roberts Best Amateur Game Nominee",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 18158,
+        "name": "Manassas"
+      },
+      {
+        "bggId": 5568,
+        "name": "Zeppelin"
+      }
+    ],
+    "awardSet": "1974 Charles S. Roberts",
+    "position": "Charles S. Roberts Best Amateur Game"
+  },
+  {
+    "id": "10865",
+    "slug": "1974-charles-s-roberts-best-amateur-game-winner",
+    "url": "/boardgamehonor/10865/1974-charles-s-roberts-best-amateur-game-winner",
+    "year": 1974,
+    "title": "Charles S Roberts Best Amateur Game Winner",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 18158,
+        "name": "Manassas"
+      }
+    ],
+    "awardSet": "1974 Charles S. Roberts",
+    "position": "Charles S. Roberts Best Amateur Game"
+  },
+  {
+    "id": "10862",
+    "slug": "1974-charles-s-roberts-best-professional-game-nomi",
+    "url": "/boardgamehonor/10862/1974-charles-s-roberts-best-professional-game-nomi",
+    "year": 1974,
+    "title": "Charles S Roberts Best Professional Game Nomi",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 7662,
+        "name": "Bar-Lev: The Yom-Kippur War of 1973"
+      },
+      {
+        "bggId": 1563,
+        "name": "Rise and Decline of the Third Reich"
+      },
+      {
+        "bggId": 2524,
+        "name": "StarForce 'Alpha Centauri': Interstellar Conflict in the 25th Century"
+      }
+    ],
+    "awardSet": "1974 Charles S. Roberts",
+    "position": "Charles S. Roberts Best Professional Game"
+  },
+  {
+    "id": "10861",
+    "slug": "1974-charles-s-roberts-best-professional-game-winn",
+    "url": "/boardgamehonor/10861/1974-charles-s-roberts-best-professional-game-winn",
+    "year": 1974,
+    "title": "Charles S Roberts Best Professional Game Winn",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 1563,
+        "name": "Rise and Decline of the Third Reich"
+      }
+    ],
+    "awardSet": "1974 Charles S. Roberts",
+    "position": "Charles S. Roberts Best Professional Game"
+  },
+  {
+    "id": "21580",
+    "slug": "1974-charles-s-roberts-hall-of-fame-inductee",
+    "url": "/boardgamehonor/21580/1974-charles-s-roberts-hall-of-fame-inductee",
+    "year": 1974,
+    "title": "Charles S Roberts Hall of Fame Inductee",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [],
+    "awardSet": "1974 Charles S. Roberts",
+    "position": "Clausewitz Award Hall of Fame"
+  },
+  {
+    "id": "10868",
+    "slug": "1975-charles-s-roberrts-best-amateur-game-nominee",
+    "url": "/boardgamehonor/10868/1975-charles-s-roberrts-best-amateur-game-nominee",
+    "year": 1975,
+    "title": "Charles S Roberrts Best Amateur Game Nominee",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 15274,
+        "name": "La Bataille de la Moscowa"
+      },
+      {
+        "bggId": 15060,
+        "name": "Schutztruppe: East African Guerilla Warfare, 1914-1918"
+      },
+      {
+        "bggId": 1708,
+        "name": "Stellar Conquest"
+      }
+    ],
+    "awardSet": "1975 Charles S. Roberts",
+    "position": "Charles S. Roberts Best Amateur Game"
+  },
+  {
+    "id": "10867",
+    "slug": "1975-charles-s-roberts-best-amateur-game-winner",
+    "url": "/boardgamehonor/10867/1975-charles-s-roberts-best-amateur-game-winner",
+    "year": 1975,
+    "title": "Charles S Roberts Best Amateur Game Winner",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 15274,
+        "name": "La Bataille de la Moscowa"
+      }
+    ],
+    "awardSet": "1975 Charles S. Roberts",
+    "position": "Charles S. Roberts Best Amateur Game"
+  },
+  {
+    "id": "10864",
+    "slug": "1975-charles-s-roberts-best-professional-game-nomi",
+    "url": "/boardgamehonor/10864/1975-charles-s-roberts-best-professional-game-nomi",
+    "year": 1975,
+    "title": "Charles S Roberts Best Professional Game Nomi",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 4564,
+        "name": "Blue & Gray: Four American Civil War Battles"
+      },
+      {
+        "bggId": 7640,
+        "name": "The Fall of Tobruk"
+      },
+      {
+        "bggId": 987,
+        "name": "Kingmaker"
+      },
+      {
+        "bggId": 5455,
+        "name": "Tobruk:  Tank Battles in North Africa 1942"
+      },
+      {
+        "bggId": 9991,
+        "name": "Von Manstein: Battles for the Ukraine 1941-1944"
+      }
+    ],
+    "awardSet": "1975 Charles S. Roberts",
+    "position": "Charles S. Roberts Best Professional Game"
+  },
+  {
+    "id": "10863",
+    "slug": "1975-charles-s-roberts-best-professional-game-winn",
+    "url": "/boardgamehonor/10863/1975-charles-s-roberts-best-professional-game-winn",
+    "year": 1975,
+    "title": "Charles S Roberts Best Professional Game Winn",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 987,
+        "name": "Kingmaker"
+      }
+    ],
+    "awardSet": "1975 Charles S. Roberts",
+    "position": "Charles S. Roberts Best Professional Game"
+  },
+  {
+    "id": "21581",
+    "slug": "1975-charles-s-roberts-hall-of-fame-inductee",
+    "url": "/boardgamehonor/21581/1975-charles-s-roberts-hall-of-fame-inductee",
+    "year": 1975,
+    "title": "Charles S Roberts Hall of Fame Inductee",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [],
+    "awardSet": "1975 Charles S. Roberts",
+    "position": "Clausewitz Award Hall of Fame"
+  },
+  {
+    "id": "21583",
+    "slug": "1976-charles-s-roberts-best-graphics-and-physical",
+    "url": "/boardgamehonor/21583/1976-charles-s-roberts-best-graphics-and-physical",
+    "year": 1976,
+    "title": "Charles S Roberts Best Graphics and Physical",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 10394,
+        "name": "Avalanche: The Salerno Landings"
+      },
+      {
+        "bggId": 3577,
+        "name": "Terrible Swift Sword: Battle of Gettysburg Game"
+      },
+      {
+        "bggId": 2802,
+        "name": "War in Europe"
+      },
+      {
+        "bggId": 4974,
+        "name": "Wellington's Victory: Battle of Waterloo Game – June 18th, 1815"
+      }
+    ],
+    "awardSet": "1976 Charles S. Roberts",
+    "position": "Charles S. Roberts Best Graphics and Physical Systems"
+  },
+  {
+    "id": "21584",
+    "slug": "1976-charles-s-roberts-best-graphics-and-physical",
+    "url": "/boardgamehonor/21584/1976-charles-s-roberts-best-graphics-and-physical",
+    "year": 1976,
+    "title": "Charles S Roberts Best Graphics and Physical",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 10394,
+        "name": "Avalanche: The Salerno Landings"
+      }
+    ],
+    "awardSet": "1976 Charles S. Roberts",
+    "position": "Charles S. Roberts Best Graphics and Physical Systems"
+  },
+  {
+    "id": "10876",
+    "slug": "1976-charles-s-roberts-best-strategic-game-nominee",
+    "url": "/boardgamehonor/10876/1976-charles-s-roberts-best-strategic-game-nominee",
+    "year": 1976,
+    "title": "Charles S Roberts Best Strategic Game Nominee",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 1506,
+        "name": "Conquistador: The Age of Exploration – 1495-1600"
+      },
+      {
+        "bggId": 3041,
+        "name": "Panzergruppe Guderian"
+      },
+      {
+        "bggId": 2808,
+        "name": "The Russian Campaign"
+      },
+      {
+        "bggId": 2802,
+        "name": "War in Europe"
+      }
+    ],
+    "awardSet": "1976 Charles S. Roberts",
+    "position": "Charles S. Roberts Best Strategic Game"
+  },
+  {
+    "id": "10875",
+    "slug": "1976-charles-s-roberts-best-strategic-game-winner",
+    "url": "/boardgamehonor/10875/1976-charles-s-roberts-best-strategic-game-winner",
+    "year": 1976,
+    "title": "Charles S Roberts Best Strategic Game Winner",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 2808,
+        "name": "The Russian Campaign"
+      }
+    ],
+    "awardSet": "1976 Charles S. Roberts",
+    "position": "Charles S. Roberts Best Strategic Game"
+  },
+  {
+    "id": "10871",
+    "slug": "1976-charles-s-roberts-best-tactical-game-winner",
+    "url": "/boardgamehonor/10871/1976-charles-s-roberts-best-tactical-game-winner",
+    "year": 1976,
+    "title": "Charles S Roberts Best Tactical Game Winner",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 3577,
+        "name": "Terrible Swift Sword: Battle of Gettysburg Game"
+      }
+    ],
+    "awardSet": "1976 Charles S. Roberts",
+    "position": "Charles S. Roberts Best Tactical Game"
+  },
+  {
+    "id": "10872",
+    "slug": "1976-charles-s-roberts-best-tactical-nominee",
+    "url": "/boardgamehonor/10872/1976-charles-s-roberts-best-tactical-nominee",
+    "year": 1976,
+    "title": "Charles S Roberts Best Tactical Nominee",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 8833,
+        "name": "Firefight: Modern U.S. and Soviet Small Unit Tactics"
+      },
+      {
+        "bggId": 670,
+        "name": "Starship Troopers"
+      },
+      {
+        "bggId": 3577,
+        "name": "Terrible Swift Sword: Battle of Gettysburg Game"
+      },
+      {
+        "bggId": 4974,
+        "name": "Wellington's Victory: Battle of Waterloo Game – June 18th, 1815"
+      }
+    ],
+    "awardSet": "1976 Charles S. Roberts",
+    "position": "Charles S. Roberts Best Tactical Game"
+  },
+  {
+    "id": "21585",
+    "slug": "1976-charles-s-roberts-hall-of-fame-inductee",
+    "url": "/boardgamehonor/21585/1976-charles-s-roberts-hall-of-fame-inductee",
+    "year": 1976,
+    "title": "Charles S Roberts Hall of Fame Inductee",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [],
+    "awardSet": "1976 Charles S. Roberts",
+    "position": "Clausewitz Award Hall of Fame"
+  },
+  {
+    "id": "10886",
+    "slug": "1977-charles-s-roberts-best-fantasy-board-game-nom",
+    "url": "/boardgamehonor/10886/1977-charles-s-roberts-best-fantasy-board-game-nom",
+    "year": 1977,
+    "title": "Charles S Roberts Best Fantasy Board Game Nom",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 1339,
+        "name": "Dungeon!"
+      },
+      {
+        "bggId": 8233,
+        "name": "Lords & Wizards"
+      },
+      {
+        "bggId": 3585,
+        "name": "Sorcerer: The Game of Magical Conflict"
+      },
+      {
+        "bggId": 2228,
+        "name": "War of the Ring"
+      },
+      {
+        "bggId": 10884,
+        "name": "White Bear & Red Moon"
+      }
+    ],
+    "awardSet": "1977 Charles S. Roberts",
+    "position": "Charles S. Roberts Best Fantasy Board Game"
+  },
+  {
+    "id": "10884",
+    "slug": "1977-charles-s-roberts-best-fantasy-board-game-win",
+    "url": "/boardgamehonor/10884/1977-charles-s-roberts-best-fantasy-board-game-win",
+    "year": 1977,
+    "title": "Charles S Roberts Best Fantasy Board Game Win",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 2228,
+        "name": "War of the Ring"
+      }
+    ],
+    "awardSet": "1977 Charles S. Roberts",
+    "position": "Charles S. Roberts Best Fantasy Board Game"
+  },
+  {
+    "id": "10878",
+    "slug": "1977-charles-s-roberts-best-strategic-game-nominee",
+    "url": "/boardgamehonor/10878/1977-charles-s-roberts-best-strategic-game-nominee",
+    "year": 1977,
+    "title": "Charles S Roberts Best Strategic Game Nominee",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 5023,
+        "name": "The Conquerors"
+      },
+      {
+        "bggId": 4235,
+        "name": "Fulda Gap: The First Battle of the Next War"
+      },
+      {
+        "bggId": 2666,
+        "name": "A Mighty Fortress"
+      },
+      {
+        "bggId": 1442,
+        "name": "Victory in the Pacific"
+      },
+      {
+        "bggId": 4222,
+        "name": "War Between The States 1861-1865"
+      }
+    ],
+    "awardSet": "1977 Charles S. Roberts",
+    "position": "Charles S. Roberts Best Strategic Game"
+  },
+  {
+    "id": "10877",
+    "slug": "1977-charles-s-roberts-best-strategic-game-winner",
+    "url": "/boardgamehonor/10877/1977-charles-s-roberts-best-strategic-game-winner",
+    "year": 1977,
+    "title": "Charles S Roberts Best Strategic Game Winner",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 1442,
+        "name": "Victory in the Pacific"
+      }
+    ],
+    "awardSet": "1977 Charles S. Roberts",
+    "position": "Charles S. Roberts Best Strategic Game"
+  },
+  {
+    "id": "10873",
+    "slug": "1977-charles-s-roberts-best-tactical-game-winner",
+    "url": "/boardgamehonor/10873/1977-charles-s-roberts-best-tactical-game-winner",
+    "year": 1977,
+    "title": "Charles S Roberts Best Tactical Game Winner",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 1035,
+        "name": "Squad Leader"
+      }
+    ],
+    "awardSet": "1977 Charles S. Roberts",
+    "position": "Charles S. Roberts Best Tactical Game"
+  },
+  {
+    "id": "10874",
+    "slug": "1977-charles-s-roberts-best-tactical-nominee",
+    "url": "/boardgamehonor/10874/1977-charles-s-roberts-best-tactical-nominee",
+    "year": 1977,
+    "title": "Charles S Roberts Best Tactical Nominee",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 1629,
+        "name": "Air War: Modern Tactical Air Combat"
+      },
+      {
+        "bggId": 4244,
+        "name": "Highway to the Reich: Operation Market-Garden 17-26 September 1944"
+      },
+      {
+        "bggId": 5965,
+        "name": "October War: Doctrine and Tactics in the Yom Kippur Conflict, 1973"
+      },
+      {
+        "bggId": 1035,
+        "name": "Squad Leader"
+      },
+      {
+        "bggId": 6253,
+        "name": "'Wacht am Rhein': The Battle of the Bulge, 16 Dec 44 – 2 Jan 45"
+      }
+    ],
+    "awardSet": "1977 Charles S. Roberts",
+    "position": "Charles S. Roberts Best Tactical Game"
+  },
+  {
+    "id": "21586",
+    "slug": "1977-charles-s-roberts-hall-of-fame-inductee",
+    "url": "/boardgamehonor/21586/1977-charles-s-roberts-hall-of-fame-inductee",
+    "year": 1977,
+    "title": "Charles S Roberts Hall of Fame Inductee",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [],
+    "awardSet": "1977 Charles S. Roberts",
+    "position": "Clausewitz Award Hall of Fame"
+  },
+  {
+    "id": "10870",
+    "slug": "1978-charles-s-roberts-best-amateur-game-nominee",
+    "url": "/boardgamehonor/10870/1978-charles-s-roberts-best-amateur-game-nominee",
+    "year": 1978,
+    "title": "Charles S Roberts Best Amateur Game Nominee",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 12899,
+        "name": "La Bataille de Preussisch-Eylau"
+      },
+      {
+        "bggId": 1577,
+        "name": "Source of the Nile"
+      },
+      {
+        "bggId": 1681,
+        "name": "Tokyo Express: The Guadalcanal Naval Campaign – 1942"
+      }
+    ],
+    "awardSet": "1978 Charles S. Roberts",
+    "position": "Charles S. Roberts Best Amateur Game"
+  },
+  {
+    "id": "10869",
+    "slug": "1978-charles-s-roberts-best-amateur-game-winner",
+    "url": "/boardgamehonor/10869/1978-charles-s-roberts-best-amateur-game-winner",
+    "year": 1978,
+    "title": "Charles S Roberts Best Amateur Game Winner",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 1577,
+        "name": "Source of the Nile"
+      }
+    ],
+    "awardSet": "1978 Charles S. Roberts",
+    "position": "Charles S. Roberts Best Amateur Game"
+  },
+  {
+    "id": "10887",
+    "slug": "1978-charles-s-roberts-best-fantasy-futuristic-boa",
+    "url": "/boardgamehonor/10887/1978-charles-s-roberts-best-fantasy-futuristic-boa",
+    "year": 1978,
+    "title": "Charles S Roberts Best Fantasy Futuristic Boa",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 3527,
+        "name": "Iliad: The Most Renowned War Legend"
+      },
+      {
+        "bggId": 4317,
+        "name": "Mayday"
+      },
+      {
+        "bggId": 6270,
+        "name": "Objective Moscow: The Death of Soviet Communism"
+      },
+      {
+        "bggId": 2464,
+        "name": "Swords & Sorcery: Quest and Conquest in the Age of Magic"
+      }
+    ],
+    "awardSet": "1978 Charles S. Roberts",
+    "position": "Charles S. Roberts Best Fantasy Board Game"
+  },
+  {
+    "id": "10885",
+    "slug": "1978-charles-s-roberts-best-fantasy-futuristic-boa",
+    "url": "/boardgamehonor/10885/1978-charles-s-roberts-best-fantasy-futuristic-boa",
+    "year": 1978,
+    "title": "Charles S Roberts Best Fantasy Futuristic Boa",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 4317,
+        "name": "Mayday"
+      }
+    ],
+    "awardSet": "1978 Charles S. Roberts",
+    "position": "Charles S. Roberts Best Fantasy Board Game"
+  },
+  {
+    "id": "22043",
+    "slug": "1978-charles-s-roberts-best-graphics-and-physical",
+    "url": "/boardgamehonor/22043/1978-charles-s-roberts-best-graphics-and-physical",
+    "year": 1978,
+    "title": "Charles S Roberts Best Graphics and Physical",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 12899,
+        "name": "La Bataille de Preussisch-Eylau"
+      },
+      {
+        "bggId": 2587,
+        "name": "Cross of Iron: A Squad Leader Gamette"
+      },
+      {
+        "bggId": 8719,
+        "name": "The Next War: Modern Conflict in Europe"
+      },
+      {
+        "bggId": 5058,
+        "name": "Operation Crusader"
+      }
+    ],
+    "awardSet": "1978 Charles S. Roberts",
+    "position": "Charles S. Roberts Best Graphics and Physical Systems"
+  },
+  {
+    "id": "22044",
+    "slug": "1978-charles-s-roberts-best-graphics-and-physical",
+    "url": "/boardgamehonor/22044/1978-charles-s-roberts-best-graphics-and-physical",
+    "year": 1978,
+    "title": "Charles S Roberts Best Graphics and Physical",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 2587,
+        "name": "Cross of Iron: A Squad Leader Gamette"
+      }
+    ],
+    "awardSet": "1978 Charles S. Roberts",
+    "position": "Charles S. Roberts Best Graphics and Physical Systems"
+  },
+  {
+    "id": "10903",
+    "slug": "1978-charles-s-roberts-best-pre-twentieth-century",
+    "url": "/boardgamehonor/10903/1978-charles-s-roberts-best-pre-twentieth-century",
+    "year": 1978,
+    "title": "Charles S Roberts Best Pre Twentieth Century",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 3615,
+        "name": "Agincourt: The Triumph of Archery over Armor, 1415"
+      },
+      {
+        "bggId": 12899,
+        "name": "La Bataille de Preussisch-Eylau"
+      },
+      {
+        "bggId": 4086,
+        "name": "Napoleon at Bay: The Campaign in France, 1814"
+      },
+      {
+        "bggId": 1577,
+        "name": "Source of the Nile"
+      },
+      {
+        "bggId": 5939,
+        "name": "Stonewall: The Battle of Kernstown"
+      }
+    ],
+    "awardSet": "1978 Charles S. Roberts",
+    "position": "Charles S. Roberts Best Pre-Twentieth Century Game"
+  },
+  {
+    "id": "10898",
+    "slug": "1978-charles-s-roberts-best-pre-twentieth-century",
+    "url": "/boardgamehonor/10898/1978-charles-s-roberts-best-pre-twentieth-century",
+    "year": 1978,
+    "title": "Charles S Roberts Best Pre Twentieth Century",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 1577,
+        "name": "Source of the Nile"
+      }
+    ],
+    "awardSet": "1978 Charles S. Roberts",
+    "position": "Charles S. Roberts Best Pre-Twentieth Century Game"
+  },
+  {
+    "id": "10918",
+    "slug": "1978-charles-s-roberts-best-twentieth-century-game",
+    "url": "/boardgamehonor/10918/1978-charles-s-roberts-best-twentieth-century-game",
+    "year": 1978,
+    "title": "Charles S Roberts Best Twentieth Century Game",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 3044,
+        "name": "Air Assault on Crete / Invasion of Malta: 1942"
+      },
+      {
+        "bggId": 2587,
+        "name": "Cross of Iron: A Squad Leader Gamette"
+      },
+      {
+        "bggId": 8719,
+        "name": "The Next War: Modern Conflict in Europe"
+      },
+      {
+        "bggId": 5058,
+        "name": "Operation Crusader"
+      },
+      {
+        "bggId": 7215,
+        "name": "To the Green Fields Beyond: The Battle of Cambrai, 1917"
+      }
+    ],
+    "awardSet": "1978 Charles S. Roberts",
+    "position": "Charles S. Roberts Best Twentieth Century Game"
+  },
+  {
+    "id": "10912",
+    "slug": "1978-charles-s-roberts-best-twentieth-century-game",
+    "url": "/boardgamehonor/10912/1978-charles-s-roberts-best-twentieth-century-game",
+    "year": 1978,
+    "title": "Charles S Roberts Best Twentieth Century Game",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 7215,
+        "name": "To the Green Fields Beyond: The Battle of Cambrai, 1917"
+      }
+    ],
+    "awardSet": "1978 Charles S. Roberts",
+    "position": "Charles S. Roberts Best Twentieth Century Game"
+  },
+  {
+    "id": "22046",
+    "slug": "1978-charles-s-roberts-hall-of-fame-inductee",
+    "url": "/boardgamehonor/22046/1978-charles-s-roberts-hall-of-fame-inductee",
+    "year": 1978,
+    "title": "Charles S Roberts Hall of Fame Inductee",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [],
+    "awardSet": "1978 Charles S. Roberts",
+    "position": "Clausewitz Award Hall of Fame"
+  },
+  {
+    "id": "22992",
+    "slug": "1978-hg-wells-best-miniatures-rules-winner",
+    "url": "/boardgamehonor/22992/1978-hg-wells-best-miniatures-rules-winner",
+    "year": 1978,
+    "title": "Hg Wells Best Miniatures Rules Winner",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 19134,
+        "name": "Fire & Steel"
+      }
+    ],
+    "awardSet": "1978 H.G. Wells Awards",
+    "position": "H.G. Wells Best Miniatures Rules"
+  },
+  {
+    "id": "10883",
+    "slug": "1979-charles-s-roberts-best-fantasy-or-science-fic",
+    "url": "/boardgamehonor/10883/1979-charles-s-roberts-best-fantasy-or-science-fic",
+    "year": 1979,
+    "title": "Charles S Roberts Best Fantasy Or Science Fic",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 1783,
+        "name": "The Creature That Ate Sheboygan"
+      }
+    ],
+    "awardSet": "1979 Charles S. Roberts",
+    "position": "Charles S. Roberts Best Fantasy Board Game"
+  },
+  {
+    "id": "10923",
+    "slug": "1979-charles-s-roberts-best-initial-release-winner",
+    "url": "/boardgamehonor/10923/1979-charles-s-roberts-best-initial-release-winner",
+    "year": 1979,
+    "title": "Charles S Roberts Best Initial Release Winner",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 2800,
+        "name": "The Ironclads: A Tactical Level Game of Naval Combat in the American Civil War 1861-1865"
+      }
+    ],
+    "awardSet": "1979 Charles S. Roberts",
+    "position": "Charles S. Roberts Best Initial Release"
+  },
+  {
+    "id": "10894",
+    "slug": "1979-charles-s-roberts-best-pre-twentieth-century",
+    "url": "/boardgamehonor/10894/1979-charles-s-roberts-best-pre-twentieth-century",
+    "year": 1979,
+    "title": "Charles S Roberts Best Pre Twentieth Century",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 10183,
+        "name": "Napoleon at Leipzig"
+      }
+    ],
+    "awardSet": "1979 Charles S. Roberts",
+    "position": "Charles S. Roberts Best Pre-Twentieth Century Game"
+  },
+  {
+    "id": "10908",
+    "slug": "1979-charles-s-roberts-best-twentieth-century-game",
+    "url": "/boardgamehonor/10908/1979-charles-s-roberts-best-twentieth-century-game",
+    "year": 1979,
+    "title": "Charles S Roberts Best Twentieth Century Game",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 4436,
+        "name": "Cityfight: Modern Combat in the Urban Environment"
+      }
+    ],
+    "awardSet": "1979 Charles S. Roberts",
+    "position": "Charles S. Roberts Best Twentieth Century Game"
+  },
+  {
+    "id": "21456",
+    "slug": "1979-charles-s-roberts-hall-of-fame-inductee",
+    "url": "/boardgamehonor/21456/1979-charles-s-roberts-hall-of-fame-inductee",
+    "year": 1979,
+    "title": "Charles S Roberts Hall of Fame Inductee",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [],
+    "awardSet": "1979 Charles S. Roberts",
+    "position": "Clausewitz Award Hall of Fame"
+  },
+  {
+    "id": "22998",
+    "slug": "1979-hg-wells-all-time-best-20th-century-naval-rul",
+    "url": "/boardgamehonor/22998/1979-hg-wells-all-time-best-20th-century-naval-rul",
+    "year": 1979,
+    "title": "Hg Wells All Time Best 20th Century Naval Rul",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 16435,
+        "name": "General Quarters"
+      }
+    ],
+    "awardSet": "1979 H.G. Wells Awards",
+    "position": "H.G. Wells Best 20th Century Naval Rules"
+  },
+  {
+    "id": "22993",
+    "slug": "1979-hg-wells-best-miniatures-rules-winner",
+    "url": "/boardgamehonor/22993/1979-hg-wells-best-miniatures-rules-winner",
+    "year": 1979,
+    "title": "Hg Wells Best Miniatures Rules Winner",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 16741,
+        "name": "System 7 Napoleonics"
+      }
+    ],
+    "awardSet": "1979 H.G. Wells Awards",
+    "position": "H.G. Wells Best Miniatures Rules"
+  },
+  {
+    "id": "8793",
+    "slug": "1979-spiel-des-jahres-beautiful-game-winner",
+    "url": "/boardgamehonor/8793/1979-spiel-des-jahres-beautiful-game-winner",
+    "year": 1979,
+    "title": "Spiel des Jahres Beautiful Game Winner",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 17785,
+        "name": "Seti"
+      }
+    ],
+    "awardSet": "1979 Spiel des Jahres",
+    "position": "Spiel des Jahres Special Award \"Beautiful Game\""
+  },
+  {
+    "id": "8792",
+    "slug": "1979-spiel-des-jahres-recommended",
+    "url": "/boardgamehonor/8792/1979-spiel-des-jahres-recommended",
+    "year": 1979,
+    "title": "Spiel des Jahres Recommended",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 5,
+        "name": "Acquire"
+      },
+      {
+        "bggId": 1387,
+        "name": "Alaska"
+      },
+      {
+        "bggId": 16052,
+        "name": "Merlin"
+      },
+      {
+        "bggId": 2043,
+        "name": "Shogun"
+      },
+      {
+        "bggId": 5749,
+        "name": "Simon"
+      },
+      {
+        "bggId": 5096,
+        "name": "Sly"
+      },
+      {
+        "bggId": 5709,
+        "name": "Touché"
+      },
+      {
+        "bggId": 949,
+        "name": "Twixt"
+      }
+    ],
+    "awardSet": "1979 Spiel des Jahres",
+    "position": "Spiel des Jahres Game of the Year"
+  },
+  {
+    "id": "8783",
+    "slug": "1979-spiel-des-jahres-winner",
+    "url": "/boardgamehonor/8783/1979-spiel-des-jahres-winner",
+    "year": 1979,
+    "title": "Spiel des Jahres Winner",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 361,
+        "name": "Hare & Tortoise"
+      }
+    ],
+    "awardSet": "1979 Spiel des Jahres",
+    "position": "Spiel des Jahres Game of the Year"
+  },
+  {
+    "id": "10891",
+    "slug": "1980-charles-s-roberts-best-fantasy-or-science-fic",
+    "url": "/boardgamehonor/10891/1980-charles-s-roberts-best-fantasy-or-science-fic",
+    "year": 1980,
+    "title": "Charles S Roberts Best Fantasy Or Science Fic",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 1772,
+        "name": "Asteroid"
+      },
+      {
+        "bggId": 6282,
+        "name": "Azhanti High Lightning"
+      },
+      {
+        "bggId": 2388,
+        "name": "Dark Nebula"
+      },
+      {
+        "bggId": 1780,
+        "name": "Knights of Camelot"
+      },
+      {
+        "bggId": 5503,
+        "name": "TimeTripper"
+      }
+    ],
+    "awardSet": "1980 Charles S. Roberts",
+    "position": "Charles S. Roberts Best Fantasy Board Game"
+  },
+  {
+    "id": "10889",
+    "slug": "1980-charles-s-roberts-best-fantasy-or-science-fic",
+    "url": "/boardgamehonor/10889/1980-charles-s-roberts-best-fantasy-or-science-fic",
+    "year": 1980,
+    "title": "Charles S Roberts Best Fantasy Or Science Fic",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 6282,
+        "name": "Azhanti High Lightning"
+      }
+    ],
+    "awardSet": "1980 Charles S. Roberts",
+    "position": "Charles S. Roberts Best Fantasy Board Game"
+  },
+  {
+    "id": "10926",
+    "slug": "1980-charles-s-roberts-best-initial-release-nomine",
+    "url": "/boardgamehonor/10926/1980-charles-s-roberts-best-initial-release-nomine",
+    "year": 1980,
+    "title": "Charles S Roberts Best Initial Release Nomine",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 6740,
+        "name": "Alaric the Goth: Fall of the Western Roman Empire"
+      },
+      {
+        "bggId": 5437,
+        "name": "Raid on Iran"
+      },
+      {
+        "bggId": 2236,
+        "name": "Streets of Stalingrad"
+      },
+      {
+        "bggId": 103,
+        "name": "Titan"
+      },
+      {
+        "bggId": 9636,
+        "name": "Winter Storm: Decision at Stalingrad"
+      }
+    ],
+    "awardSet": "1980 Charles S. Roberts",
+    "position": "Charles S. Roberts Best Initial Release"
+  },
+  {
+    "id": "10924",
+    "slug": "1980-charles-s-roberts-best-initial-release-winner",
+    "url": "/boardgamehonor/10924/1980-charles-s-roberts-best-initial-release-winner",
+    "year": 1980,
+    "title": "Charles S Roberts Best Initial Release Winner",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 2236,
+        "name": "Streets of Stalingrad"
+      }
+    ],
+    "awardSet": "1980 Charles S. Roberts",
+    "position": "Charles S. Roberts Best Initial Release"
+  },
+  {
+    "id": "10904",
+    "slug": "1980-charles-s-roberts-best-pre-twentieth-century",
+    "url": "/boardgamehonor/10904/1980-charles-s-roberts-best-pre-twentieth-century",
+    "year": 1980,
+    "title": "Charles S Roberts Best Pre Twentieth Century",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 244,
+        "name": "Circus Maximus"
+      },
+      {
+        "bggId": 911,
+        "name": "Empires of the Middle Ages"
+      },
+      {
+        "bggId": 1780,
+        "name": "Knights of Camelot"
+      },
+      {
+        "bggId": 4275,
+        "name": "Pea Ridge: The Gettysburg of the West March 7-8 1862"
+      },
+      {
+        "bggId": 626,
+        "name": "War and Peace"
+      }
+    ],
+    "awardSet": "1980 Charles S. Roberts",
+    "position": "Charles S. Roberts Best Pre-Twentieth Century Game"
+  },
+  {
+    "id": "10899",
+    "slug": "1980-charles-s-roberts-best-pre-twentieth-century",
+    "url": "/boardgamehonor/10899/1980-charles-s-roberts-best-pre-twentieth-century",
+    "year": 1980,
+    "title": "Charles S Roberts Best Pre Twentieth Century",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 911,
+        "name": "Empires of the Middle Ages"
+      }
+    ],
+    "awardSet": "1980 Charles S. Roberts",
+    "position": "Charles S. Roberts Best Pre-Twentieth Century Game"
+  },
+  {
+    "id": "10919",
+    "slug": "1980-charles-s-roberts-best-twentieth-century-game",
+    "url": "/boardgamehonor/10919/1980-charles-s-roberts-best-twentieth-century-game",
+    "year": 1980,
+    "title": "Charles S Roberts Best Twentieth Century Game",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 4839,
+        "name": "Berlin '85: The Enemy at the Gates"
+      },
+      {
+        "bggId": 3609,
+        "name": "Crescendo of Doom: A Squad Leader Gamette"
+      },
+      {
+        "bggId": 7109,
+        "name": "Fifth Corps: The Soviet Breakthrough at Fulda"
+      },
+      {
+        "bggId": 4050,
+        "name": "Fortress Europa"
+      },
+      {
+        "bggId": 5483,
+        "name": "Kursk: History's Greatest Tank Battle, July 1943"
+      }
+    ],
+    "awardSet": "1980 Charles S. Roberts",
+    "position": "Charles S. Roberts Best Twentieth Century Game"
+  },
+  {
+    "id": "10913",
+    "slug": "1980-charles-s-roberts-best-twentieth-century-game",
+    "url": "/boardgamehonor/10913/1980-charles-s-roberts-best-twentieth-century-game",
+    "year": 1980,
+    "title": "Charles S Roberts Best Twentieth Century Game",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 3609,
+        "name": "Crescendo of Doom: A Squad Leader Gamette"
+      }
+    ],
+    "awardSet": "1980 Charles S. Roberts",
+    "position": "Charles S. Roberts Best Twentieth Century Game"
+  },
+  {
+    "id": "22051",
+    "slug": "1980-charles-s-roberts-gamers-choice-award-winner",
+    "url": "/boardgamehonor/22051/1980-charles-s-roberts-gamers-choice-award-winner",
+    "year": 1980,
+    "title": "Charles S Roberts Gamers Choice Award Winner",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 798,
+        "name": "Ace of Aces: Handy Rotary Series"
+      }
+    ],
+    "awardSet": "1980 Charles S. Roberts",
+    "position": "Charles S. Roberts Gamers Choice Award"
+  },
+  {
+    "id": "22052",
+    "slug": "1980-charles-s-roberts-hall-of-fame-inductee",
+    "url": "/boardgamehonor/22052/1980-charles-s-roberts-hall-of-fame-inductee",
+    "year": 1980,
+    "title": "Charles S Roberts Hall of Fame Inductee",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [],
+    "awardSet": "1980 Charles S. Roberts",
+    "position": "Clausewitz Award Hall of Fame"
+  },
+  {
+    "id": "23005",
+    "slug": "1980-hg-wells-all-time-best-air-combat-miniatures",
+    "url": "/boardgamehonor/23005/1980-hg-wells-all-time-best-air-combat-miniatures",
+    "year": 1980,
+    "title": "Hg Wells All Time Best Air Combat Miniatures",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 106126,
+        "name": "Advanced Fighter Combat"
+      },
+      {
+        "bggId": 12752,
+        "name": "Basic Fighter Combat Manual"
+      }
+    ],
+    "awardSet": "1980 H.G. Wells Awards",
+    "position": "H.G. Wells Best Air Combat Miniatures Rules"
+  },
+  {
+    "id": "23001",
+    "slug": "1980-hg-wells-best-miniatures-rules-winner",
+    "url": "/boardgamehonor/23001/1980-hg-wells-best-miniatures-rules-winner",
+    "year": 1980,
+    "title": "Hg Wells Best Miniatures Rules Winner",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 9181,
+        "name": "TacForce"
+      }
+    ],
+    "awardSet": "1980 H.G. Wells Awards",
+    "position": "H.G. Wells Best Miniatures Rules"
+  },
+  {
+    "id": "8794",
+    "slug": "1980-spiel-des-jahres-beautiful-game-winner",
+    "url": "/boardgamehonor/8794/1980-spiel-des-jahres-beautiful-game-winner",
+    "year": 1980,
+    "title": "Spiel des Jahres Beautiful Game Winner",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 2229,
+        "name": "Spiel"
+      }
+    ],
+    "awardSet": "1980 Spiel des Jahres",
+    "position": "Spiel des Jahres Special Award \"Beautiful Game\""
+  },
+  {
+    "id": "8791",
+    "slug": "1980-spiel-des-jahres-recommended",
+    "url": "/boardgamehonor/8791/1980-spiel-des-jahres-recommended",
+    "year": 1980,
+    "title": "Spiel des Jahres Recommended",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 539,
+        "name": "Dampfross"
+      },
+      {
+        "bggId": 7338,
+        "name": "Epaminondas"
+      },
+      {
+        "bggId": 789,
+        "name": "Focus"
+      },
+      {
+        "bggId": 17784,
+        "name": "Galaxis"
+      },
+      {
+        "bggId": 5389,
+        "name": "Niki Lauda's Formel 1"
+      },
+      {
+        "bggId": 1992,
+        "name": "Stop Thief"
+      }
+    ],
+    "awardSet": "1980 Spiel des Jahres",
+    "position": "Spiel des Jahres Game of the Year"
+  },
+  {
+    "id": "8784",
+    "slug": "1980-spiel-des-jahres-winner",
+    "url": "/boardgamehonor/8784/1980-spiel-des-jahres-winner",
+    "year": 1980,
+    "title": "Spiel des Jahres Winner",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 811,
+        "name": "Rummikub"
+      }
+    ],
+    "awardSet": "1980 Spiel des Jahres",
+    "position": "Spiel des Jahres Game of the Year"
+  },
+  {
+    "id": "10892",
+    "slug": "1981-charles-s-roberts-best-fantasy-board-game-nom",
+    "url": "/boardgamehonor/10892/1981-charles-s-roberts-best-fantasy-board-game-nom",
+    "year": 1981,
+    "title": "Charles S Roberts Best Fantasy Board Game Nom",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 1631,
+        "name": "Barbarian Prince"
+      },
+      {
+        "bggId": 7389,
+        "name": "The Castle"
+      },
+      {
+        "bggId": 1720,
+        "name": "Dragon Pass"
+      },
+      {
+        "bggId": 1628,
+        "name": "Elric"
+      },
+      {
+        "bggId": 4060,
+        "name": "Undead"
+      }
+    ],
+    "awardSet": "1981 Charles S. Roberts",
+    "position": "Charles S. Roberts Best Fantasy Board Game"
+  },
+  {
+    "id": "10888",
+    "slug": "1981-charles-s-roberts-best-fantasy-board-game-win",
+    "url": "/boardgamehonor/10888/1981-charles-s-roberts-best-fantasy-board-game-win",
+    "year": 1981,
+    "title": "Charles S Roberts Best Fantasy Board Game Win",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 1631,
+        "name": "Barbarian Prince"
+      }
+    ],
+    "awardSet": "1981 Charles S. Roberts",
+    "position": "Charles S. Roberts Best Fantasy Board Game"
+  },
+  {
+    "id": "10927",
+    "slug": "1981-charles-s-roberts-best-initial-release-nomine",
+    "url": "/boardgamehonor/10927/1981-charles-s-roberts-best-initial-release-nomine",
+    "year": 1981,
+    "title": "Charles S Roberts Best Initial Release Nomine",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 7389,
+        "name": "The Castle"
+      },
+      {
+        "bggId": 4733,
+        "name": "I.C.B.M."
+      },
+      {
+        "bggId": 8538,
+        "name": "Ironbottom Sound"
+      },
+      {
+        "bggId": 12269,
+        "name": "Manassas"
+      },
+      {
+        "bggId": 7385,
+        "name": "Richard I the Lionheart"
+      }
+    ],
+    "awardSet": "1981 Charles S. Roberts",
+    "position": "Charles S. Roberts Best Initial Release"
+  },
+  {
+    "id": "10925",
+    "slug": "1981-charles-s-roberts-best-initial-release-winner",
+    "url": "/boardgamehonor/10925/1981-charles-s-roberts-best-initial-release-winner",
+    "year": 1981,
+    "title": "Charles S Roberts Best Initial Release Winner",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 8538,
+        "name": "Ironbottom Sound"
+      }
+    ],
+    "awardSet": "1981 Charles S. Roberts",
+    "position": "Charles S. Roberts Best Initial Release"
+  },
+  {
+    "id": "10905",
+    "slug": "1981-charles-s-roberts-best-pre-twentieth-century",
+    "url": "/boardgamehonor/10905/1981-charles-s-roberts-best-pre-twentieth-century",
+    "year": 1981,
+    "title": "Charles S Roberts Best Pre Twentieth Century",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 4084,
+        "name": "The Alamo"
+      },
+      {
+        "bggId": 4346,
+        "name": "Cedar Mountain: Prelude to Bull Run, August 9, 1862"
+      },
+      {
+        "bggId": 701,
+        "name": "A House Divided: War Between the States 1861-65"
+      },
+      {
+        "bggId": 7385,
+        "name": "Richard I the Lionheart"
+      },
+      {
+        "bggId": 7387,
+        "name": "Sheridan's Ride"
+      }
+    ],
+    "awardSet": "1981 Charles S. Roberts",
+    "position": "Charles S. Roberts Best Pre-Twentieth Century Game"
+  },
+  {
+    "id": "10900",
+    "slug": "1981-charles-s-roberts-best-pre-twentieth-century",
+    "url": "/boardgamehonor/10900/1981-charles-s-roberts-best-pre-twentieth-century",
+    "year": 1981,
+    "title": "Charles S Roberts Best Pre Twentieth Century",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 701,
+        "name": "A House Divided: War Between the States 1861-65"
+      }
+    ],
+    "awardSet": "1981 Charles S. Roberts",
+    "position": "Charles S. Roberts Best Pre-Twentieth Century Game"
+  },
+  {
+    "id": "10932",
+    "slug": "1981-charles-s-roberts-best-science-fiction-board",
+    "url": "/boardgamehonor/10932/1981-charles-s-roberts-best-science-fiction-board",
+    "year": 1981,
+    "title": "Charles S Roberts Best Science Fiction Board",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 2795,
+        "name": "Car Wars"
+      },
+      {
+        "bggId": 1594,
+        "name": "Federation Space"
+      },
+      {
+        "bggId": 3600,
+        "name": "Fifth Frontier War"
+      },
+      {
+        "bggId": 6919,
+        "name": "Invasion: Earth"
+      },
+      {
+        "bggId": 3531,
+        "name": "The Return of the Stainless Steel Rat"
+      }
+    ],
+    "awardSet": "1981 Charles S. Roberts",
+    "position": "Charles S. Roberts Best Science-Fiction Board Game"
+  },
+  {
+    "id": "10931",
+    "slug": "1981-charles-s-roberts-best-science-fiction-board",
+    "url": "/boardgamehonor/10931/1981-charles-s-roberts-best-science-fiction-board",
+    "year": 1981,
+    "title": "Charles S Roberts Best Science Fiction Board",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 2795,
+        "name": "Car Wars"
+      }
+    ],
+    "awardSet": "1981 Charles S. Roberts",
+    "position": "Charles S. Roberts Best Science-Fiction Board Game"
+  },
+  {
+    "id": "10920",
+    "slug": "1981-charles-s-roberts-best-twentieth-century-game",
+    "url": "/boardgamehonor/10920/1981-charles-s-roberts-best-twentieth-century-game",
+    "year": 1981,
+    "title": "Charles S Roberts Best Twentieth Century Game",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 8325,
+        "name": "The Desert Fox: Rommel's Campaign for North Africa April 1941-December 1942"
+      },
+      {
+        "bggId": 7637,
+        "name": "The Fall of France"
+      },
+      {
+        "bggId": 1633,
+        "name": "Spies!"
+      },
+      {
+        "bggId": 5488,
+        "name": "TaskForce: Naval Tactics and Operations in the 1980's"
+      },
+      {
+        "bggId": 2742,
+        "name": "Wings: World War One Plane to Plane Combat 1916-1918"
+      }
+    ],
+    "awardSet": "1981 Charles S. Roberts",
+    "position": "Charles S. Roberts Best Twentieth Century Game"
+  },
+  {
+    "id": "10914",
+    "slug": "1981-charles-s-roberts-best-twentieth-century-game",
+    "url": "/boardgamehonor/10914/1981-charles-s-roberts-best-twentieth-century-game",
+    "year": 1981,
+    "title": "Charles S Roberts Best Twentieth Century Game",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 2742,
+        "name": "Wings: World War One Plane to Plane Combat 1916-1918"
+      }
+    ],
+    "awardSet": "1981 Charles S. Roberts",
+    "position": "Charles S. Roberts Best Twentieth Century Game"
+  },
+  {
+    "id": "22056",
+    "slug": "1981-charles-s-roberts-hall-of-fame-inductee",
+    "url": "/boardgamehonor/22056/1981-charles-s-roberts-hall-of-fame-inductee",
+    "year": 1981,
+    "title": "Charles S Roberts Hall of Fame Inductee",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [],
+    "awardSet": "1981 Charles S. Roberts",
+    "position": "Clausewitz Award Hall of Fame"
+  },
+  {
+    "id": "23010",
+    "slug": "1981-hg-wells-all-time-best-miniatures-rules-for-2",
+    "url": "/boardgamehonor/23010/1981-hg-wells-all-time-best-miniatures-rules-for-2",
+    "year": 1981,
+    "title": "Hg Wells All Time Best Miniatures Rules for 2",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 9181,
+        "name": "TacForce"
+      }
+    ],
+    "awardSet": "1981 H.G. Wells Awards",
+    "position": "H.G. Wells Best Miniatures Rules for 20th Century Land Battles"
+  },
+  {
+    "id": "23015",
+    "slug": "1981-hg-wells-all-time-best-miniatures-rules-for-p",
+    "url": "/boardgamehonor/23015/1981-hg-wells-all-time-best-miniatures-rules-for-p",
+    "year": 1981,
+    "title": "Hg Wells All Time Best Miniatures Rules for P",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 7782,
+        "name": "Ship o' the Line"
+      }
+    ],
+    "awardSet": "1981 H.G. Wells Awards",
+    "position": "H.G. Wells Best Miniatures Rules for Pre-20th Century Naval Battles"
+  }
+]

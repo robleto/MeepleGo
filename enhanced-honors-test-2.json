@@ -1,0 +1,40 @@
+[
+  {
+    "id": "79097",
+    "slug": "test-honor",
+    "url": "/boardgamehonor/79097/test-honor",
+    "year": null,
+    "title": "Honor",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 382244,
+        "name": "Test board game with honor"
+      }
+    ],
+    "awardSet": "Test Award Set",
+    "position": "Test Award Category"
+  },
+  {
+    "id": "10866",
+    "slug": "1974-charles-s-roberts-best-amateur-game-nominee",
+    "url": "/boardgamehonor/10866/1974-charles-s-roberts-best-amateur-game-nominee",
+    "year": 1974,
+    "title": "Charles S Roberts Best Amateur Game Nominee",
+    "primaryName": "",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 18158,
+        "name": "Manassas"
+      },
+      {
+        "bggId": 5568,
+        "name": "Zeppelin"
+      }
+    ],
+    "awardSet": "1974 Charles S. Roberts",
+    "position": "Charles S. Roberts Best Amateur Game"
+  }
+]

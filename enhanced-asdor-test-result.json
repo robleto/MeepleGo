@@ -1,0 +1,36 @@
+[
+  {
+    "id": "104574",
+    "slug": "2024-as-dor-jeu-de-lannee-winner",
+    "url": "/boardgamehonor/104574/2024-as-dor-jeu-de-lannee-winner",
+    "year": 2024,
+    "title": "As d'or Jeu de l'année Winner",
+    "primaryName": "2024 As d'Or - Jeu de l'Année Winner",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 352515,
+        "name": "Trio"
+      }
+    ],
+    "awardSet": "2024 As d'Or - Jeu de l'Année",
+    "position": "As d'Or - Jeu de l'Année"
+  },
+  {
+    "id": "104575",
+    "slug": "2024-as-dor-jeu-de-lannee-initie-winner",
+    "url": "/boardgamehonor/104575/2024-as-dor-jeu-de-lannee-initie-winner",
+    "year": 2024,
+    "title": "As d'or Jeu de l'année Initié Winner",
+    "primaryName": "2024 As d'Or - Jeu de l'Année Initié Winner",
+    "alternateNames": [],
+    "boardgames": [
+      {
+        "bggId": 385761,
+        "name": "Faraway"
+      }
+    ],
+    "awardSet": "2024 As d'Or - Jeu de l'Année",
+    "position": "As d'Or - Jeu de l'Année Initié"
+  }
+]
