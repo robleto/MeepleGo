@@ -84,10 +84,19 @@ export default function GameRowCard({ game, index, onUpdate, onClick }: GameRowC
           )}
         </div>
         
-        {/* Own It Status - placeholder for future library functionality */}
-        <div className="flex items-center gap-1 text-gray-400">
-          <BookmarkIcon className="h-4 w-4" />
-          <span className="text-sm hidden md:inline">Own It</span>
+        {/* Own It Status */}
+        <div className="flex items-center gap-2">
+          {game.list_membership?.library ? (
+            <div className="flex items-center gap-1 text-green-600">
+              <BookmarkIcon className="h-4 w-4 fill-current" />
+              <span className="text-sm font-medium hidden md:inline">Own It</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-1 text-gray-400">
+              <BookmarkIcon className="h-4 w-4" />
+              <span className="text-sm hidden md:inline">Own It</span>
+            </div>
+          )}
         </div>
         
         {/* Rating */}

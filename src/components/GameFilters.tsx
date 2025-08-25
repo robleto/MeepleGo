@@ -19,8 +19,8 @@ interface GameFiltersProps {
   setSortOrder: (order: SortOrder) => void
   groupBy: GroupKey
   setGroupBy: (group: GroupKey) => void
-  filterType: 'none' | 'year' | 'publisher' | 'players' | 'category' | 'mechanic' | 'game'
-  setFilterType: (type: 'none' | 'year' | 'publisher' | 'players' | 'category' | 'mechanic' | 'game') => void
+  filterType: 'none' | 'year' | 'publisher' | 'players' | 'category' | 'mechanic' | 'game' | 'award'
+  setFilterType: (type: 'none' | 'year' | 'publisher' | 'players' | 'category' | 'mechanic' | 'game' | 'award') => void
   filterValue: string
   setFilterValue: (value: string) => void
   uniqueYears: number[]
@@ -35,7 +35,7 @@ interface GameFiltersProps {
     sortBy?: SortKey
     sortOrder?: SortOrder
     groupBy?: GroupKey
-    filterType?: 'none' | 'year' | 'publisher' | 'players' | 'category' | 'mechanic' | 'game'
+  filterType?: 'none' | 'year' | 'publisher' | 'players' | 'category' | 'mechanic' | 'game' | 'award'
     filterValue?: string
   }
 }
@@ -206,7 +206,7 @@ export default function GameFilters({
               <div className="flex gap-2">
                 <select
                   value={filterType}
-                  onChange={(e) => setFilterType(e.target.value as 'none' | 'year' | 'publisher' | 'players' | 'category' | 'mechanic' | 'game')}
+                  onChange={(e) => setFilterType(e.target.value as any)}
                   className="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white text-gray-900"
                 >
                   <option value="none">None</option>
@@ -215,6 +215,7 @@ export default function GameFilters({
                   <option value="players">Players</option>
                   <option value="category">Category</option>
                   <option value="mechanic">Mechanic</option>
+                  <option value="award">Award-Winning</option>
                 </select>
 
                 {filterType === 'year' && (
@@ -290,6 +291,11 @@ export default function GameFilters({
                       </option>
                     ))}
                   </select>
+                )}
+                {filterType === 'award' && (
+                  <div className="flex-1 flex items-center text-sm text-amber-600 font-medium px-2 py-2 rounded-md bg-amber-50 border border-amber-200">
+                    Showing only award-winning games
+                  </div>
                 )}
               </div>
             </div>

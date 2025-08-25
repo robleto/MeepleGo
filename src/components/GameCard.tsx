@@ -20,7 +20,8 @@ import {
   UserGroupIcon,
   PlusIcon,
   ListBulletIcon,
-  BookmarkIcon
+  BookmarkIcon,
+  TrophyIcon
 } from '@heroicons/react/24/outline'
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid'
 import { supabase } from '@/lib/supabase'
@@ -45,6 +46,12 @@ export default function GameCard({ game, viewMode, onMembershipChange }: GameCar
   const [localRanking, setLocalRanking] = useState(game.ranking || null)
   const [lastAdded, setLastAdded] = useState<'library' | 'wishlist' | null>(null)
   const [membership, setMembership] = useState<{ library: boolean; wishlist: boolean }>({ library: initialLibrary, wishlist: initialWishlist })
+  // Determine if this game has at least one winning honor (category "Winner" or result containing "Winner")
+  const isAwardWinner = Array.isArray((game as any).honors) && (game as any).honors.some((h: any) => {
+    const cat = (h.category || h.result_category || '').toLowerCase()
+    const res = (h.result_raw || h.derived_result || '').toLowerCase()
+    return cat.includes('winner') || res.includes('winner')
+  })
 
   const ratingTone = (r?: number | null) => {
     switch (r) {
@@ -145,9 +152,17 @@ export default function GameCard({ game, viewMode, onMembershipChange }: GameCar
   if (viewMode === 'list') {
     return (
       <div 
-        className="bg-white rounded-lg shadow p-4 hover:shadow-md transition-shadow cursor-pointer"
+        className="bg-white rounded-lg shadow p-4 hover:shadow-md transition-shadow cursor-pointer relative"
         onClick={() => setShowModal(true)}
       >
+        {isAwardWinner && (
+          <div className="absolute -left-2 top-2">
+            <div className="bg-amber-400 text-white rounded-r px-2 py-1 flex items-center shadow text-xs font-semibold" title="Award-Winning Game">
+              <TrophyIcon className="h-4 w-4 mr-1" />
+              Winner
+            </div>
+          </div>
+        )}
         {/* Bookmark overlay for list view */}
         {(membership.library || membership.wishlist) && (
           <div className="absolute top-0 right-0 flex">
@@ -174,7 +189,12 @@ export default function GameCard({ game, viewMode, onMembershipChange }: GameCar
             />
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="text-lg font-medium text-gray-900 truncate">{game.name}</h3>
+            <h3 className="text-lg font-medium text-gray-900 truncate flex items-center gap-1">
+              {game.name}
+              {isAwardWinner && (
+                <TrophyIcon className="h-4 w-4 text-amber-500 flex-shrink-0" aria-label="Award Winning" />
+              )}
+            </h3>
             <div className="flex items-center space-x-4 text-sm text-gray-500">
               <span>{formatYear(game.year_published)}</span>
               <span>{formatPlayerCount(game.min_players, game.max_players)}</span>
@@ -220,6 +240,14 @@ export default function GameCard({ game, viewMode, onMembershipChange }: GameCar
       onClick={() => setShowModal(true)}
       style={{ cursor: 'pointer' }}
     >
+      {isAwardWinner && (
+        <div className="absolute left-0 top-0 z-30">
+          <div className="m-1 inline-flex items-center gap-1 bg-amber-400/90 backdrop-blur text-white px-2 py-1 rounded-md text-[10px] font-semibold shadow" title="Award-Winning Game">
+            <TrophyIcon className="h-3 w-3" />
+            Winner
+          </div>
+        </div>
+      )}
       {/* Bookmark overlay (top-right) */}
       {(membership.library || membership.wishlist) && (
         <div className="absolute top-0 right-0 z-30 flex">
@@ -258,10 +286,22 @@ export default function GameCard({ game, viewMode, onMembershipChange }: GameCar
           sizes="(max-width: 640px) 150px, (max-width: 768px) 150px, (max-width: 1024px) 150px, 150px"
         />
         
-        {/* Rating badge - always visible if rated */}
+        {/* Rating & Played badges (grid view) */}
         {localRanking?.ranking && (
-          // (removed from image area; now shown in info row)
-          <></>
+          <div
+            className={`absolute top-1 right-1 px-2 py-1 rounded text-[11px] font-semibold shadow-sm ${ratingTone(localRanking.ranking)} pointer-events-none`}
+            aria-label={`Your rating: ${localRanking.ranking}`}
+          >
+            {localRanking.ranking}
+          </div>
+        )}
+        {localRanking?.played_it && (
+          <div
+            className="absolute bottom-1 right-1 bg-green-600/90 text-white text-[10px] px-2 py-0.5 rounded shadow pointer-events-none font-medium"
+            aria-label="Marked as played"
+          >
+            Played
+          </div>
         )}
 
         {/* Simple hover overlay with key actions */}

@@ -16,7 +16,7 @@ export const SORT_OPTIONS: { key: SortKey; label: string }[] = [
 export const GROUP_OPTIONS: { key: GroupKey; label: string }[] = [
   { key: 'none', label: 'None' },
   { key: 'year', label: 'Year' },
-  { key: 'ratingBand', label: 'Rating Band' },
+  { key: 'ratingBand', label: 'Rating' },
 ]
 
 interface UpdatePatch { ranking?: number | null; played_it?: boolean }
@@ -52,11 +52,34 @@ export function useGameDataWithGuest() {
       }
       setIsGuest(false)
       setUserId(session.user.id)
+      
+      // Fetch rankings with game data
       const { data, error } = await supabase
         .from('rankings')
         .select('id, game:games(*), ranking, played_it, user_id, game_id')
         .eq('user_id', session.user.id)
       if (error) throw error
+
+      // Fetch library and wishlist memberships
+      const { data: libraryData } = await supabase
+        .from('game_list_items')
+        .select('game_id, list:game_lists(list_type)')
+        .eq('list.user_id', session.user.id)
+        .in('list.list_type', ['library', 'wishlist'])
+
+      // Create membership map
+      const membershipMap: Record<string, { library: boolean; wishlist: boolean }> = {}
+      libraryData?.forEach((item: any) => {
+        if (!membershipMap[item.game_id]) {
+          membershipMap[item.game_id] = { library: false, wishlist: false }
+        }
+        if (item.list?.list_type === 'library') {
+          membershipMap[item.game_id].library = true
+        } else if (item.list?.list_type === 'wishlist') {
+          membershipMap[item.game_id].wishlist = true
+        }
+      })
+
       const mapped: GameWithRanking[] = (data || []).map((r: any) => ({
         ...r.game,
         ranking: r.id ? {
@@ -70,7 +93,7 @@ export function useGameDataWithGuest() {
           imported_from: null,
           updated_at: null,
         } : null,
-        list_membership: { library: false, wishlist: false }
+        list_membership: membershipMap[r.game_id] || { library: false, wishlist: false }
       }))
       setGames(mapped)
     } finally {
@@ -165,15 +188,17 @@ export function groupGames(games: GameWithRanking[], groupBy: GroupKey) {
     return entries.sort((a,b) => b[0]-a[0]).map(([year, grp]) => ({ group: String(year), games: grp }))
   }
   if (groupBy === 'ratingBand') {
-    const band = (r?: number | null) => r ? Math.ceil(r / 2) * 2 : 0
     const map = new Map<number, GameWithRanking[]>()
     for (const g of games) {
-      const key = band(g.ranking?.ranking)
-      if (!map.has(key)) map.set(key, [])
-      map.get(key)!.push(g)
+      const rating = g.ranking?.ranking ?? 0
+      if (!map.has(rating)) map.set(rating, [])
+      map.get(rating)!.push(g)
     }
     const entries: [number, GameWithRanking[] ][] = Array.from(map.entries())
-    return entries.sort((a,b) => b[0]-a[0]).map(([top, grp]) => ({ group: top === 0 ? 'Unrated' : `${top-1}-${top}`, games: grp }))
+    return entries.sort((a,b) => b[0]-a[0]).map(([rating, grp]) => ({ 
+      group: rating === 0 ? 'Unrated' : `${rating}`, 
+      games: grp 
+    }))
   }
   return [{ group: null as string | null, games }]
 }

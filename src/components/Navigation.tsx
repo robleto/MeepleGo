@@ -63,6 +63,8 @@ import {
   XMarkIcon,
   EyeIcon,
   EyeSlashIcon,
+  SunIcon,
+  MoonIcon,
 } from '@heroicons/react/24/outline'
 
 const navigation = [
@@ -86,14 +88,18 @@ function NavigationComponent() {
   const [session, setSession] = useState<import('@supabase/supabase-js').Session | null>(null)
   const [showUserMenu, setShowUserMenu] = useState(false)
 
-  // Scroll state for hiding/showing nav
+  // Scroll state for hiding/showing nav and background
   const [isVisible, setIsVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
+  const [hasScrolled, setHasScrolled] = useState(false)
 
   // Desktop auth modals
   const [showLoginModal, setShowLoginModal] = useState(false)
   const [showSignupModal, setShowSignupModal] = useState(false)
   const [showForgotModal, setShowForgotModal] = useState(false)
+
+  // Dark mode state
+  const [isDarkMode, setIsDarkMode] = useState(false)
 
   // Memoized modal close handlers to prevent modal remount
   const handleCloseLoginModal = useCallback(() => setShowLoginModal(false), [])
@@ -128,6 +134,9 @@ function NavigationComponent() {
 
     const handleScroll = () => {
       const currentScrollY = window.scrollY
+      
+      // Track if we've scrolled for background styling
+      setHasScrolled(currentScrollY > 10)
       
       // Always show nav when at top of page
       if (currentScrollY < 10) {
@@ -175,6 +184,42 @@ function NavigationComponent() {
       }
     } catch {}
   }, [pathname])
+
+  // Dark mode state management
+  useEffect(() => {
+    // Load dark mode preference from localStorage
+    const savedDarkMode = localStorage.getItem('darkMode')
+    if (savedDarkMode !== null) {
+      const isDark = JSON.parse(savedDarkMode)
+      setIsDarkMode(isDark)
+      // Apply dark mode class to document
+      if (isDark) {
+        document.documentElement.classList.add('dark')
+      } else {
+        document.documentElement.classList.remove('dark')
+      }
+    } else {
+      // Check system preference
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+      setIsDarkMode(prefersDark)
+      if (prefersDark) {
+        document.documentElement.classList.add('dark')
+      }
+    }
+  }, [])
+
+  // Toggle dark mode function
+  const toggleDarkMode = useCallback(() => {
+    const newDarkMode = !isDarkMode
+    setIsDarkMode(newDarkMode)
+    localStorage.setItem('darkMode', JSON.stringify(newDarkMode))
+    
+    if (newDarkMode) {
+      document.documentElement.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+    }
+  }, [isDarkMode])
 
   const fetchSuggestions = useCallback(async (value: string) => {
     if (!value) {
@@ -255,7 +300,7 @@ function NavigationComponent() {
   const ModalShell = ({ open, title, onClose, children, id }: { open: boolean; title: string; onClose: () => void; children: React.ReactNode; id: string }) => (
     <div
       aria-hidden={!open}
-      className={`fixed inset-0 z-[100] transition-opacity duration-150 ${open ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'}`}
+      className={`fixed inset-0 z-[200] transition-opacity duration-150 ${open ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'}`}
     >
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
       <div
@@ -468,7 +513,7 @@ function NavigationComponent() {
   }, [navSearch, router])
 
   return (
-    <nav className={`bg-white shadow-lg border-b border-gray-200 fixed top-0 left-0 right-0 z-50 transition-transform duration-300 ease-in-out ${
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out bg-white dark:bg-gray-900 shadow-lg border-b border-gray-200 dark:border-gray-700 ${
       isVisible ? 'translate-y-0' : '-translate-y-full'
     }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -477,7 +522,7 @@ function NavigationComponent() {
           <div className="flex items-center">
             <Link href="/" className="flex items-center space-x-2">
               <CubeIcon className="h-8 w-8 text-primary-600" />
-              <span className="text-xl font-bold text-gray-900">MeepleGo</span>
+              <span className="text-xl font-bold text-gray-900 dark:text-white">MeepleGo</span>
             </Link>
           </div>
 
@@ -490,10 +535,10 @@ function NavigationComponent() {
                   key={item.name}
                   href={item.href}
                   className={cn(
-                    'flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium transition-colors',
+                    'flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300',
                     isActive
-                      ? 'bg-primary-100 text-primary-700'
-                      : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                      ? 'bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-300'
+                      : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-800'
                   )}
                 >
                   <item.icon className="h-4 w-4" />
@@ -508,7 +553,7 @@ function NavigationComponent() {
             <form onSubmit={onSubmit} className="w-full">
               <div className="relative transition-all duration-300">
                 <div className="absolute inset-y-0 left-0 pl-3  text-sm font-medium flex items-center pointer-events-none">
-                  <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
+                  <MagnifyingGlassIcon className="h-5 w-5 text-gray-400 dark:text-gray-500" />
                 </div>
                 <input
                   ref={desktopSearchRef}
@@ -519,7 +564,7 @@ function NavigationComponent() {
                   autoComplete="off"
                   onChange={onNavChange}
                   onBlur={() => { setTimeout(() => setShowNavSuggestions(false), 150) }}
-                  className={`pl-10 pr-3 py-2 border border-gray-300 rounded-md  text-sm font-medium leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 ${
+                  className={`pl-10 pr-3 py-2 border rounded-md text-sm font-medium leading-5 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 dark:text-white focus:placeholder-gray-400 dark:focus:placeholder-gray-300 ${
                     navSearch.length > 0 || showNavSuggestions ? 'w-96' : 'w-56'
                   }`}
                 />
@@ -527,7 +572,7 @@ function NavigationComponent() {
             </form>
 
             {showNavSuggestions && (
-              <ul className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto">
+              <ul className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto">
                 {navSuggestions.map((g, i) => (
                   <li
                     key={g.id}
@@ -561,13 +606,23 @@ function NavigationComponent() {
               <>
                 {/* Mobile: route to pages */}
                 <div className="flex items-center gap-2 md:hidden">
-                  <Link href="/login" className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-800">Log in</Link>
+                  <Link href="/login" className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white">Log in</Link>
                   <Link href="/signup" className="px-3 py-2 text-sm font-medium rounded-md bg-primary-600 text-white hover:bg-primary-700">Sign up</Link>
                 </div>
                 {/* Desktop: open modals */}
                 <div className="hidden md:flex items-center gap-2">
-                  <button onClick={() => { setShowSignupModal(false); setShowLoginModal(true) }} className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-800">Log in</button>
-                  <button onClick={() => { setShowLoginModal(false); setShowSignupModal(true) }} className="px-3 py-2 text-sm font-medium rounded-md bg-primary-600 text-white hover:bg-primary-700">Sign up</button>
+                  <button 
+                    onClick={() => { setShowSignupModal(false); setShowLoginModal(true) }} 
+                    className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white"
+                  >
+                    Log in
+                  </button>
+                  <button 
+                    onClick={() => { setShowLoginModal(false); setShowSignupModal(true) }} 
+                    className="px-3 py-2 text-sm font-medium rounded-md bg-primary-600 text-white hover:bg-primary-700"
+                  >
+                    Sign up
+                  </button>
                 </div>
               </>
             ) : (
@@ -583,15 +638,29 @@ function NavigationComponent() {
                   </div>
                 </button>
                 {showUserMenu && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-50">
-                    <Link href="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">My Profile</Link>
-                    <Link href="/library" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">My Library</Link>
-                    <Link href="/import" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Import CSV</Link>
-                    <Link href="/wishlist" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">My Wishlist</Link>
-                    <Link href="/settings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Settings</Link>
+                  <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-md shadow-lg z-50">
+                    <Link href="/profile" className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">My Profile</Link>
+                    <Link href="/library" className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">My Library</Link>
+                    <Link href="/wishlist" className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">My Wishlist</Link>
+                    <Link href="/settings" className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700">Settings</Link>
+                    <div className="border-t border-gray-200 dark:border-gray-600 my-1"></div>
+                    <button
+                      onClick={toggleDarkMode}
+                      className="w-full flex items-center justify-between px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
+                    >
+                      <span>Dark mode</span>
+                      <div className="flex items-center">
+                        {isDarkMode ? (
+                          <MoonIcon className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                        ) : (
+                          <SunIcon className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                        )}
+                      </div>
+                    </button>
+                    <div className="border-t border-gray-200 dark:border-gray-600 my-1"></div>
                     <button
                       onClick={async () => { await supabase.auth.signOut(); setShowUserMenu(false); router.refresh() }}
-                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                      className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
                     >
                       Sign out
                     </button>
@@ -604,12 +673,12 @@ function NavigationComponent() {
       </div>
 
       {/* Mobile Navigation */}
-      <div className="md:hidden border-t border-gray-200">
+      <div className="md:hidden border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
         <div className="px-4 py-3 relative">
           <form onSubmit={onSubmit} className="w-full">
             <div className="relative transition-all duration-300">
               <div className="absolute inset-y-0 left-0 pl-3 flex  text-sm font-medium items-center pointer-events-none">
-                <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
+                <MagnifyingGlassIcon className="h-5 w-5 text-gray-400 dark:text-gray-500" />
               </div>
               <input
                 ref={mobileSearchRef}
@@ -620,7 +689,7 @@ function NavigationComponent() {
                 autoComplete="off"
                 onChange={onNavChange}
                 onBlur={() => { setTimeout(() => setShowNavSuggestions(false), 150) }}
-                className={`pl-10 pr-3 py-2 border border-gray-300  text-sm font-medium rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 ${
+                className={`pl-10 pr-3 py-2 border text-sm font-medium rounded-md leading-5 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 dark:text-white focus:placeholder-gray-400 dark:focus:placeholder-gray-300 ${
                   navSearch.length > 0 || showNavSuggestions ? 'w-full' : 'w-64'
                 }`}
               />
@@ -664,10 +733,10 @@ function NavigationComponent() {
                 key={item.name}
                 href={item.href}
                 className={cn(
-                  'flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium',
+                  'flex items-center space-x-2 px-3 py-2 rounded-md text-base font-medium transition-colors duration-300',
                   isActive
-                    ? 'bg-primary-100 text-primary-700'
-                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                    ? 'bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-300'
+                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-800'
                 )}
               >
                 <item.icon className="h-5 w-5" />

@@ -161,10 +161,18 @@ export default function GameDetailModal({ game, open, onClose, onMembershipChang
 
   const description = game.description || game.summary
   const isLongDescription = description && description.length > 300
+  const honors: any[] = Array.isArray((game as any).honors) ? (game as any).honors : []
+  const winners = honors.filter(h => {
+    const cat = (h.category || h.result_category || '').toLowerCase()
+    const res = (h.result_raw || h.derived_result || '').toLowerCase()
+    return cat.includes('winner') || res.includes('winner')
+  })
+  const others = honors.filter(h => !winners.includes(h))
+  const sortedHonors = [...winners, ...others]
 
   return (
     <div
-      className="fixed inset-0 z-[100] transition-opacity duration-150 pointer-events-auto opacity-100 flex items-start justify-center pt-8 pb-8"
+      className="fixed inset-0 z-[200] transition-opacity duration-150 pointer-events-auto opacity-100 flex items-start justify-center pt-8 pb-8"
       onMouseDown={(e) => {
         // If user clicks directly on this wrapper (not modal content) close
         if (e.target === e.currentTarget) onClose()
@@ -226,7 +234,7 @@ export default function GameDetailModal({ game, open, onClose, onMembershipChang
                 {game.rating && (
                   <div className="flex items-center space-x-1">
                     <TrophyIcon className="h-4 w-4" />
-                    <span>BGG Rating: {game.rating}</span>
+                    <span>BGG Rating: {Number(game.rating).toFixed(1)}</span>
                   </div>
                 )}
                 {game.rank && (
@@ -249,86 +257,66 @@ export default function GameDetailModal({ game, open, onClose, onMembershipChang
         {/* Content */}
         <div className="flex-1 overflow-y-auto">
           <div className="p-6 space-y-6">
-            {/* User Actions */}
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h3 className="text-sm font-medium text-gray-900 mb-4">Your Status</h3>
-              
-              <div className="flex items-start justify-between gap-6">
-                {/* Left side: Rating & Played Status */}
-                <div className="flex-1 space-y-4">
-                  {/* Current Rating & Played Status */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      {/* Rating */}
-                      <div className="flex items-center space-x-2">
-                        <span className="text-sm text-gray-600">Rating:</span>
-                        <button
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            const rect = e.currentTarget.getBoundingClientRect();
-                            setRatingPopupPosition({ 
-                              x: rect.left + rect.width / 2, 
-                              y: rect.top 
-                            });
-                            setShowRatingPopup(true);
-                          }}
-                          className="flex items-center space-x-1 hover:bg-gray-100 rounded px-3 py-3 transition-colors"
-                        >
-                          {localRanking?.ranking ? (
-                            <div className={`px-3 py-3 rounded text-sm font-semibold ${ratingTone(localRanking.ranking)} ${saving ? 'opacity-70' : ''}`}>
-                              {localRanking.ranking}
-                            </div>
-                          ) : (
-                            <span className="text-sm text-gray-400">Click to rate</span>
-                          )}
-                        </button>
-                      </div>
-                      
-                      {/* Played Status */}
-                      <div className="flex items-center space-x-2">
-                        <button
-                          onClick={handlePlayedToggle}
-                          className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                            localRanking?.played_it
-                              ? 'bg-green-100 text-green-700 hover:bg-green-200'
-                              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                          }`}
-                          title={localRanking?.played_it ? 'Mark as not played' : 'Mark as played'}
-                        >
-                          <div className="flex items-center space-x-2">
-                            <PlayIcon className="h-4 w-4" />
-                            <span>{localRanking?.played_it ? 'Played' : 'Played It'}</span>
-                          </div>
-                        </button>
-                      </div>
+            {/* User Actions - compact */}
+            <div className="rounded-md border border-gray-200 bg-white/70 backdrop-blur-sm px-3 py-2">
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="text-xs font-semibold tracking-wide uppercase text-gray-600">Your Status</span>
+                {/* Rating */}
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    setRatingPopupPosition({ x: rect.left + rect.width / 2, y: rect.top });
+                    setShowRatingPopup(true);
+                  }}
+                  className="flex items-center gap-1 group"
+                  title={localRanking?.ranking ? 'Click to change rating' : 'Click to rate'}
+                  aria-label={localRanking?.ranking ? `Your rating ${localRanking.ranking}` : 'Rate this game'}
+                >
+                  {localRanking?.ranking ? (
+                    <div className={`px-2.5 py-1.5 rounded text-sm font-semibold leading-none ${ratingTone(localRanking.ranking)} ${saving ? 'opacity-70' : ''}`}>
+                      {localRanking.ranking}
                     </div>
-                    
-                    {/* List Membership */}
-                    <div className="flex items-center space-x-2">
-                      <button
-                        onClick={() => handleAddTo('library')}
-                        className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-                          membership.library
-                            ? 'bg-green-100 text-green-700 hover:bg-green-200'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                        }`}
-                      >
-                        {membership.library ? 'In Library ✓' : 'Add to Library'}
-                      </button>
-                      <button
-                        onClick={() => handleAddTo('wishlist')}
-                        className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-                          membership.wishlist
-                            ? 'bg-teal-100 text-teal-700 hover:bg-teal-200'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                        }`}
-                      >
-                        {membership.wishlist ? 'In Wishlist ✓' : 'Add to Wishlist'}
-                      </button>
-                    </div>
-                  </div>
-
+                  ) : (
+                    <div className="px-2.5 py-1.5 rounded text-sm font-medium leading-none bg-gray-100 text-gray-500 group-hover:bg-gray-200">Rate</div>
+                  )}
+                </button>
+                {/* Played Toggle */}
+                <button
+                  onClick={handlePlayedToggle}
+                  className={`flex items-center gap-1 px-3 py-1.5 rounded-md text-sm font-medium leading-none transition-colors border ${
+                    localRanking?.played_it
+                      ? 'bg-green-100 text-green-700 border-green-200 hover:bg-green-200'
+                      : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+                  }`}
+                  title={localRanking?.played_it ? 'Mark as not played' : 'Mark as played'}
+                >
+                  <PlayIcon className="h-4 w-4" />
+                  {localRanking?.played_it ? 'Played' : 'Played It'}
+                </button>
+                {/* Membership Buttons */}
+                <div className="flex items-center gap-2 ml-auto">
+                  <button
+                    onClick={() => handleAddTo('library')}
+                    className={`px-3 py-1.5 rounded-md text-sm font-medium leading-none transition-colors border ${
+                      membership.library
+                        ? 'bg-green-100 text-green-700 border-green-200 hover:bg-green-200'
+                        : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
+                    }`}
+                  >
+                    {membership.library ? 'In Library ✓' : 'Add Library'}
+                  </button>
+                  <button
+                    onClick={() => handleAddTo('wishlist')}
+                    className={`px-3 py-1.5 rounded-md text-sm font-medium leading-none transition-colors border ${
+                      membership.wishlist
+                        ? 'bg-teal-100 text-teal-700 border-teal-200 hover:bg-teal-200'
+                        : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
+                    }`}
+                  >
+                    {membership.wishlist ? 'In Wishlist ✓' : 'Add Wishlist'}
+                  </button>
                 </div>
               </div>
             </div>
@@ -410,7 +398,7 @@ export default function GameDetailModal({ game, open, onClose, onMembershipChang
                 {game.rating && (
                   <div className="flex justify-between">
                     <span className="text-gray-600">BGG Rating:</span>
-                    <span className="font-medium">{game.rating}/10</span>
+                    <span className="font-medium">{Number(game.rating).toFixed(1)}/10</span>
                   </div>
                 )}
                 {game.rank && (
@@ -456,6 +444,45 @@ export default function GameDetailModal({ game, open, onClose, onMembershipChang
                 </div>
               )}
             </div>
+
+            {/* Awards & Honors */}
+            {sortedHonors.length > 0 && (
+              <div>
+                <h3 className="text-lg font-medium text-gray-900 mb-3 flex items-center gap-2">
+                  <TrophyIcon className="h-5 w-5 text-amber-500" />
+                  Awards & Honors
+                </h3>
+                <ul className="space-y-2 text-sm">
+                  {sortedHonors.map((h, idx) => {
+                    const year = h.year || h.award_year || h.date || null
+                    const award = h.award_type || h.name || h.award || 'Award'
+                    const category = h.subcategory || h.sub_category || h.category || h.result_category || null
+                    const result = h.derived_result || h.result_raw || h.result || null
+                    const isWinner = winners.includes(h)
+                    return (
+                      <li key={idx} className={`flex items-start gap-2 p-2 rounded-md border text-gray-700 ${isWinner ? 'bg-amber-50 border-amber-200' : 'bg-white border-gray-200'}`}> 
+                        <div className={`flex-shrink-0 mt-0.5 ${isWinner ? 'text-amber-500' : 'text-gray-400'}`}>
+                          <TrophyIcon className="h-4 w-4" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-gray-900 flex flex-wrap items-center gap-x-2 gap-y-1">
+                            {award}
+                            {year && <span className="text-gray-500 font-normal">{year}</span>}
+                            {isWinner && <span className="inline-block text-[10px] uppercase tracking-wide bg-amber-500 text-white px-1.5 py-0.5 rounded">Winner</span>}
+                          </div>
+                          {(category || result) && (
+                            <div className="text-xs text-gray-600 mt-0.5 flex flex-wrap gap-2">
+                              {category && <span className="inline-block bg-gray-100 px-1.5 py-0.5 rounded">{category}</span>}
+                              {!isWinner && result && <span className="inline-block bg-gray-50 px-1.5 py-0.5 rounded text-gray-500">{result}</span>}
+                            </div>
+                          )}
+                        </div>
+                      </li>
+                    )
+                  })}
+                </ul>
+              </div>
+            )}
           </div>
         </div>
       </div>

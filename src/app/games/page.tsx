@@ -6,7 +6,8 @@ import PageLayout from '@/components/PageLayout'
 import GameCard from '@/components/GameCard'
 import GameFilters from '@/components/GameFilters'
 import { GameWithRanking } from '@/types'
-import { useViewMode, useGameFilters } from '@/utils/gameFilters'
+import { useGameFilters, useViewMode } from '@/utils/gameFilters'
+import { searchGamesFallback } from '@/utils/databaseSearch'
 import { Squares2X2Icon } from '@heroicons/react/24/outline'
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import { getMembershipSets } from '@/lib/lists'
@@ -131,6 +132,10 @@ function GamesPageContent() {
     if (filterType === 'mechanic' && filterValue !== 'all') {
       query = query.contains('mechanics', [filterValue])
     }
+    if (filterType === 'award') {
+      // Filter to games that have at least one honor entry (winner refinement done client-side)
+      query = query.not('honors', 'eq', '[]')
+    }
     return query
   }
 
@@ -144,6 +149,26 @@ function GamesPageContent() {
       const { data: { session } } = await supabase.auth.getSession()
       const userId = session?.user?.id
 
+      // If we have a search term, use enhanced database search
+      if (searchTerm.trim()) {
+        const { games: searchResults, error: searchError } = await searchGamesFallback(
+          searchTerm.trim(),
+          userId,
+          ITEMS_PER_LOAD,
+          games.length
+        )
+
+        if (searchError) {
+          setError(searchError)
+          return
+        }
+
+        setGames(prev => [...prev, ...searchResults])
+        setHasMore(searchResults.length === ITEMS_PER_LOAD)
+        return
+      }
+
+      // Regular load more for non-search cases
       // Build query with search
       let query = supabase
         .from('games')
@@ -155,11 +180,6 @@ function GamesPageContent() {
       // Filter rankings by current user if logged in
       if (userId) {
         query = query.eq('rankings.user_id', userId)
-      }
-
-      // Add search filter if provided
-      if (searchTerm.trim()) {
-        query = query.ilike('name', `%${searchTerm.trim()}%`)
       }
 
       // Apply advanced filters server-side
@@ -215,6 +235,26 @@ function GamesPageContent() {
         const { data: { session } } = await supabase.auth.getSession()
         const userId = session?.user?.id
 
+        // If we have a search term, use enhanced database search
+        if (searchTerm.trim()) {
+          const { games: searchResults, error: searchError } = await searchGamesFallback(
+            searchTerm.trim(),
+            userId,
+            ITEMS_PER_LOAD,
+            0
+          )
+
+          if (searchError) {
+            setError(searchError)
+            return
+          }
+
+          setGames(searchResults)
+          setHasMore(searchResults.length === ITEMS_PER_LOAD)
+          return
+        }
+
+        // Regular query for non-search cases
         // Build query with search
         let query = supabase
           .from('games')
@@ -226,11 +266,6 @@ function GamesPageContent() {
         // Filter rankings by current user if logged in
         if (userId) {
           query = query.eq('rankings.user_id', userId)
-        }
-
-        // Add search filter if provided
-        if (searchTerm.trim()) {
-          query = query.ilike('name', `%${searchTerm.trim()}%`)
         }
 
         // Apply advanced filters server-side
@@ -292,7 +327,8 @@ function GamesPageContent() {
               q = q.eq('rankings.user_id', userId)
             }
             if (searchTerm.trim()) {
-              q = q.ilike('name', `%${searchTerm.trim()}%`)
+              const term = searchTerm.trim()
+              q = q.or(`name.ilike.%${term}%,publisher.ilike.%${term}%,summary.ilike.%${term}%`)
             }
             // Apply the same filters
             q = applyServerFilters(q)

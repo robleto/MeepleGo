@@ -5,6 +5,7 @@ export type SortOption = 'name' | 'year' | 'rating' | 'date_added' | 'playing_ti
 
 export type GameWithRanking = Game & {
   ranking?: Ranking | null
+  list_membership?: { library: boolean; wishlist: boolean }
 }
 
 export type FilterState = {

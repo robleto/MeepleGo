@@ -113,7 +113,42 @@ export function calculateSimilarity(query: string, target: string): number {
   
   if (queryWords.length === 0) return 0
   
-  // Count similar words (allows typos)
+  // Special handling for multi-word queries like "star wars outer rim"
+  if (queryWords.length > 1) {
+    // Check if all query words appear in target (in any order)
+    let matchedWords = 0
+    let totalQueryWords = queryWords.length
+    
+    for (const queryWord of queryWords) {
+      let foundMatch = false
+      
+      for (const targetWord of targetWords) {
+        if (areWordsSimilar(queryWord, targetWord)) {
+          foundMatch = true
+          break
+        }
+      }
+      
+      if (foundMatch) {
+        matchedWords++
+      }
+    }
+    
+    const wordMatchRatio = matchedWords / totalQueryWords
+    
+    // For multi-word queries, require higher match ratio
+    if (wordMatchRatio >= 0.8) { // 80% of words must match
+      return wordMatchRatio * 0.9 // High score for good multi-word matches
+    } else if (wordMatchRatio >= 0.6) { // 60% partial match
+      return wordMatchRatio * 0.7
+    } else if (wordMatchRatio >= 0.4) { // 40% weak match
+      return wordMatchRatio * 0.5
+    }
+    
+    return 0 // Below 40% word match threshold
+  }
+  
+  // Single word matching (original logic)
   let matchedWords = 0
   let totalQueryWords = queryWords.length
   
@@ -164,9 +199,34 @@ export function fuzzySearchGames<T extends { name: string }>(
     }))
     .filter(item => item.score > 0)
     .sort((a, b) => b.score - a.score)
-    .slice(0, limit)
+  
+  // If we don't have enough results and it's a single word query,
+  // try a more lenient subtitle search
+  if (scoredGames.length < 3 && query.trim().split(' ').length === 1) {
+    const singleWord = query.trim().toLowerCase()
+    if (singleWord.length > 2) {
+      const additionalGames = games
+        .filter(game => !scoredGames.some(scored => scored.game === game))
+        .filter(game => {
+          const nameLower = game.name.toLowerCase()
+          // Check if the word appears after a colon (subtitle)
+          return nameLower.includes(`: ${singleWord}`) || 
+                 nameLower.includes(`:${singleWord}`) ||
+                 nameLower.includes(` ${singleWord} `) ||
+                 nameLower.includes(` ${singleWord}:`) ||
+                 nameLower.endsWith(` ${singleWord}`)
+        })
+        .map(game => ({
+          game,
+          score: 0.6 // Medium score for subtitle matches
+        }))
+      
+      scoredGames.push(...additionalGames)
+      scoredGames.sort((a, b) => b.score - a.score)
+    }
+  }
     
-  return scoredGames.map(item => item.game)
+  return scoredGames.slice(0, limit).map(item => item.game)
 }
 
 /**

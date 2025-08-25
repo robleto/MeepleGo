@@ -18,7 +18,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className + ' min-h-screen'}>
+      <body className={inter.className + ' min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-white'}>
         <Navigation />
         <div className="pt-16">
           {children}

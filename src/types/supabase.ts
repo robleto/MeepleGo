@@ -291,6 +291,7 @@ export type Publisher = Database['public']['Tables']['publishers']['Row']
 
 export type GameWithRanking = Game & {
   ranking?: Ranking | null
+  list_membership?: { library: boolean; wishlist: boolean }
 }
 
 export type GameListWithItems = GameList & {

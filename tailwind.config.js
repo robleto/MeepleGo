@@ -5,6 +5,7 @@ module.exports = {
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
+  darkMode: 'class',
   safelist: [
     // Ensure rating colors are never purged - Reawarding color scheme
     'bg-[#e5dbf3]', 'text-[#4c2c65]', // 10 - Purple

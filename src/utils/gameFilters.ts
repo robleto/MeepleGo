@@ -1,5 +1,7 @@
-import { useState, useEffect } from 'react'
-import { GameWithRanking } from '@/types'
+import { useState, useEffect, useMemo } from 'react'
+import type { GameWithRanking } from '@/types'
+import { ultimateSearchGames } from './ultimateSearch'
+import { searchGamesWithExactBoost } from './enhancedSearch'
 import { fuzzySearchGames, isGameMatch } from './fuzzySearch'
 
 export type SortKey = 'name' | 'year_published' | 'rating' | 'ranking' | 'playtime_minutes' | 'min_players' | 'max_players'
@@ -75,7 +77,7 @@ export function useGameFilters(games: GameWithRanking[], options?: { disableClie
     return 'year_published'
   })
 
-  const [filterType, setFilterType] = useState<'none' | 'year' | 'publisher' | 'players' | 'category' | 'mechanic' | 'game'>('none')
+  const [filterType, setFilterType] = useState<'none' | 'year' | 'publisher' | 'players' | 'category' | 'mechanic' | 'game' | 'award'>('none')
   const [filterValue, setFilterValue] = useState<string>('all')
 
   useEffect(() => {
@@ -95,17 +97,31 @@ export function useGameFilters(games: GameWithRanking[], options?: { disableClie
   const filteredGames = (() => {
     let filtered = games
     
-    // Apply search term first using fuzzy search
+    // Apply search term first using the ultimate search algorithm
     if (searchTerm.trim()) {
-      const searchResults = fuzzySearchGames(games, searchTerm.trim())
-      // If fuzzy search finds results, use those; otherwise fall back to basic filtering
-      if (searchResults.length > 0) {
-        filtered = searchResults
+      // Use the ultimate search that combines multiple algorithms
+      const ultimateResults = ultimateSearchGames(games, searchTerm.trim(), 1000)
+      
+      // If ultimate search finds results, use those; otherwise fall back to enhanced search
+      if (ultimateResults.length > 0) {
+        filtered = ultimateResults
       } else {
-        // Fallback: basic name matching
-        filtered = games.filter(game => 
-          isGameMatch(searchTerm.trim(), game.name, 0.3) // Lower threshold for fallback
-        )
+        // Fallback: enhanced search with exact match boosting
+        const enhancedResults = searchGamesWithExactBoost(games, searchTerm.trim(), 1000)
+        if (enhancedResults.length > 0) {
+          filtered = enhancedResults
+        } else {
+          // Final fallback: original fuzzy search
+          const fuzzyResults = fuzzySearchGames(games, searchTerm.trim())
+          if (fuzzyResults.length > 0) {
+            filtered = fuzzyResults
+          } else {
+            // Last resort: basic name matching
+            filtered = games.filter(game => 
+              isGameMatch(searchTerm.trim(), game.name, 0.3)
+            )
+          }
+        }
       }
     }
     
@@ -135,6 +151,14 @@ export function useGameFilters(games: GameWithRanking[], options?: { disableClie
       }
       if (filterType === 'game') {
         return String(game.id) === filterValue
+      }
+      if (filterType === 'award') {
+        const honors: any[] = Array.isArray((game as any).honors) ? (game as any).honors : []
+        return honors.some(h => {
+          const cat = (h.category || h.result_category || '').toLowerCase()
+          const res = (h.result_raw || h.derived_result || '').toLowerCase()
+          return cat.includes('winner') || res.includes('winner')
+        })
       }
       return true
     })
