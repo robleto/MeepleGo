@@ -44,10 +44,11 @@ export function Heading({
   let base = 'font-display tracking-minus-half'
   if (poster) base = 'font-poster tracking-tight'
   else if (soft) base = 'font-[var(--font-display-soft)] tracking-tight'
+  // Adjusted to cap at 600 (no extrabold) per design directive
   const weight = soft
     ? (weightScale ? 'font-medium md:font-semibold lg:font-semibold' : 'font-medium')
     : weightScale
-      ? 'font-semibold md:font-bold lg:font-extrabold'
+      ? 'font-semibold md:font-semibold lg:font-semibold'
       : 'font-semibold'
   const color = gradient
     ? 'bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-400 dark:from-amber-300 dark:via-amber-400 dark:to-yellow-200 bg-clip-text text-transparent'

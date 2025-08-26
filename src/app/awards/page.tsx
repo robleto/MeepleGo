@@ -331,6 +331,15 @@ export default async function AwardsPage({
           </div>
         </div>
 
+        {/* Personal Awards CTA */}
+        <div className="mb-10 flex flex-col items-center gap-3">
+          <Heading as="h2" size="sm" subtle className="">Your Personalized Awards</Heading>
+          <p className="text-sm text-gray-500 max-w-xl text-center">Generate and edit your own yearly awards based on the games you've rated. Adjust nominees, pick winners, and rebuild after ranking changes.</p>
+          {(() => { const y = new Date().getFullYear(); return (
+            <a href={`/awards/my/${y}`} className="px-4 py-2 rounded-md bg-primary-600 text-white text-sm hover:bg-primary-500">View My {y} Awards</a>
+          )})()}
+        </div>
+
         {/* Award Categories */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {AWARD_CATEGORIES.map((category, index) => (

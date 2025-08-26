@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+import AuthLayout from '@/components/AuthLayout'
 
 export default function SignUpPage() {
   const router = useRouter()
@@ -30,13 +31,14 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="max-w-md mx-auto px-4 py-12">
-      <h1 className="text-2xl font-semibold text-gray-900 mb-6">
-        Create your account
-      </h1>
-      <form onSubmit={onSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+    <AuthLayout
+      title="Create your account"
+      subtitle="Start tracking and ranking your collection"
+      footer={<span>By creating an account you agree to basic usage terms.</span>}
+    >
+      <form onSubmit={onSubmit} className="space-y-5">
+        <div className="space-y-1">
+          <label className="block text-xs font-medium uppercase tracking-wide text-gray-600 dark:text-gray-400">
             Email
           </label>
           <input
@@ -44,11 +46,12 @@ export default function SignUpPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+            autoComplete="email"
+            className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
           />
         </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+        <div className="space-y-1">
+          <label className="block text-xs font-medium uppercase tracking-wide text-gray-600 dark:text-gray-400">
             Password
           </label>
           <input
@@ -56,7 +59,8 @@ export default function SignUpPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+            autoComplete="new-password"
+            className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
           />
         </div>
         {error && <p className="text-sm text-red-600">{error}</p>}
@@ -64,16 +68,14 @@ export default function SignUpPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full inline-flex justify-center items-center px-4 py-2 rounded-md bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50"
+          className="w-full inline-flex justify-center items-center px-4 py-2 rounded-md bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors"
         >
-          {loading ? 'Creating account…' : 'Sign up'}
+          {loading ? 'Creating…' : 'Sign up'}
         </button>
+        <div className="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400 pt-1">
+          <a href="/login" className="font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300">Have an account? Log in</a>
+        </div>
       </form>
-      <div className="flex justify-between text-sm text-gray-600 mt-4">
-        <a href="/login" className="text-primary-600 hover:text-primary-700">
-          Already have an account? Log in
-        </a>
-      </div>
-    </div>
+    </AuthLayout>
   )
 }

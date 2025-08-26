@@ -42,7 +42,7 @@ export default function RatingPopup({
         .eq('user_id', session.user.id)
         .eq('game_id', gameId)
         .maybeSingle()
-      const { error } = await supabase.from('rankings').upsert(
+  const { error } = await supabase.from('rankings').upsert(
         {
           user_id: session.user.id,
           game_id: gameId,
@@ -55,6 +55,7 @@ export default function RatingPopup({
         console.error('Failed to save rating:', error)
         // Could optionally rollback but leaving optimistic value
       }
+  // Attempt to mark awards stale (game year unknown here; optional improvement: pass year prop)
     } catch (error) {
       console.error('Failed to save rating:', error)
     } finally {
@@ -78,7 +79,7 @@ export default function RatingPopup({
         .eq('user_id', session.user.id)
         .eq('game_id', gameId)
         .maybeSingle()
-      const { error } = await supabase.from('rankings').upsert(
+  const { error } = await supabase.from('rankings').upsert(
         {
           user_id: session.user.id,
           game_id: gameId,
@@ -88,6 +89,7 @@ export default function RatingPopup({
         { onConflict: 'user_id,game_id' }
       )
       if (error) console.error('Failed to clear rating:', error)
+  // stale marking skipped (no year)
     } catch (error) {
       console.error('Failed to clear rating:', error)
     } finally {

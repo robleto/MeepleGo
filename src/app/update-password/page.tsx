@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+import AuthLayout from '@/components/AuthLayout'
 
 export default function UpdatePasswordPage() {
   const router = useRouter()
@@ -31,21 +32,17 @@ export default function UpdatePasswordPage() {
   }
 
   return (
-    <div className="max-w-md mx-auto px-4 py-12">
-      <h1 className="text-2xl font-semibold text-gray-900 mb-6">
-        Choose a new password
-      </h1>
-      <form onSubmit={onSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            New password
-          </label>
+    <AuthLayout title="Choose a new password" subtitle="Set a strong password you haven't used before" footer={<a href="/login" className="underline hover:text-gray-700 dark:hover:text-gray-300">Return to login</a>}>
+      <form onSubmit={onSubmit} className="space-y-5">
+        <div className="space-y-1">
+          <label className="block text-xs font-medium uppercase tracking-wide text-gray-600 dark:text-gray-400">New password</label>
           <input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+            autoComplete="new-password"
+            className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
           />
         </div>
         {error && <p className="text-sm text-red-600">{error}</p>}
@@ -53,11 +50,11 @@ export default function UpdatePasswordPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full inline-flex justify-center items-center px-4 py-2 rounded-md bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50"
+          className="w-full inline-flex justify-center items-center px-4 py-2 rounded-md bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors"
         >
           {loading ? 'Updating…' : 'Update password'}
         </button>
       </form>
-    </div>
+    </AuthLayout>
   )
 }

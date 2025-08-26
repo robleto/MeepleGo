@@ -95,6 +95,8 @@ function Navigation() {
   const [activeIndex, setActiveIndex] = useState(-1)
   const inputRef = useRef<HTMLInputElement | null>(null)
   const dropdownRef = useRef<HTMLDivElement | null>(null)
+  const cacheRef = useRef<Record<string, SuggestionGame[]>>({})
+  const abortRef = useRef<AbortController | null>(null)
 
   // Session/profile
   useEffect(() => {
@@ -147,30 +149,59 @@ function Navigation() {
     document.documentElement.classList.toggle('dark', next)
   }
 
-  // Fetch suggestions (debounced)
+  // Fetch suggestions (debounced, cached, abortable)
   useEffect(() => {
-    if (!query.trim()) { setGrouped({ exactMatches: [], popular: [], other: [] }); setFlat([]); setShow(false); setActiveIndex(-1); return }
+    const raw = query.trim()
+    if (!raw) { setGrouped({ exactMatches: [], popular: [], other: [] }); setFlat([]); setShow(false); setActiveIndex(-1); return }
+    if (raw.length < 2) { // avoid noisy 1-char searches
+      setGrouped({ exactMatches: [], popular: [], other: [] }); setFlat([]); setShow(false); setActiveIndex(-1); return
+    }
+    const norm = raw.toLowerCase()
+
+    // Serve from cache instantly if available
+    if (cacheRef.current[norm]) {
+      const data = cacheRef.current[norm]
+      const exact = data.filter(g => g.name.toLowerCase() === norm)
+      const popular = data.filter(g => g.name.toLowerCase() !== norm && (g.rating||0) >= 7.5).slice(0,8)
+      const other = data.filter(g => g.name.toLowerCase() !== norm && (g.rating||0) < 7.5).slice(0,12)
+      const flatArr = [...exact, ...popular, ...other]
+      setGrouped({ exactMatches: exact, popular, other })
+      setFlat(flatArr); setActiveIndex(flatArr.length ? 0 : -1); setShow(true)
+      // Continue to refresh in background (stale-while-revalidate)
+    }
+
     const handle = setTimeout(async () => {
+      // Abort previous
+      if (abortRef.current) abortRef.current.abort()
+      const controller = new AbortController()
+      abortRef.current = controller
       setLoading(true)
       try {
         const { data, error } = await supabase
           .from('games')
           .select('id,name,year_published,thumbnail_url,rating')
-          .ilike('name', `%${query.trim()}%`)
+          .ilike('name', `%${raw}%`)
           .order('rating', { ascending: false })
-          .limit(40)
+          .limit(30)
+          .abortSignal(controller.signal as any)
         if (!error && data) {
-          const exact = data.filter(g => g.name.toLowerCase() === query.trim().toLowerCase())
-          const popular = data.filter(g => g.name.toLowerCase() !== query.trim().toLowerCase() && (g.rating||0) >= 7.5).slice(0,8)
-          const other = data.filter(g => g.name.toLowerCase() !== query.trim().toLowerCase() && (g.rating||0) < 7.5).slice(0,12)
-          setGrouped({ exactMatches: exact, popular, other })
+          cacheRef.current[norm] = data
+          const exact = data.filter(g => g.name.toLowerCase() === norm)
+            .slice(0,3)
+          const popular = data.filter(g => g.name.toLowerCase() !== norm && (g.rating||0) >= 7.5).slice(0,6)
+          const other = data.filter(g => g.name.toLowerCase() !== norm && (g.rating||0) < 7.5).slice(0,10)
           const flatArr = [...exact, ...popular, ...other]
+          setGrouped({ exactMatches: exact, popular, other })
           setFlat(flatArr)
-          setActiveIndex(flatArr.length ? 0 : -1)
+          setActiveIndex(prev => prev === -1 ? (flatArr.length ? 0 : -1) : Math.min(prev, flatArr.length - 1))
           setShow(true)
-        } else { setGrouped({ exactMatches: [], popular: [], other: [] }); setFlat([]); setShow(false) }
+        }
+      } catch (e) {
+        if ((e as any)?.name !== 'AbortError') {
+          setGrouped({ exactMatches: [], popular: [], other: [] }); setFlat([])
+        }
       } finally { setLoading(false) }
-    }, 220)
+    }, 120)
     return () => clearTimeout(handle)
   }, [query])
 
@@ -209,14 +240,14 @@ function Navigation() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center gap-4">
           <Link href="/" aria-label="Home" className="flex items-center gap-2 flex-shrink-0">
-            <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-primary-500 to-primary-600 text-white font-bold shadow-sm ring-1 ring-white/30 dark:ring-white/10">MG</span>
-            <span className="font-semibold text-sm tracking-tight text-gray-800 dark:text-gray-200">MeepleGo</span>
+            <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 text-white font-bold shadow-sm ring-1 ring-white/30 dark:ring-white/10">MG</span>
+            <span className="font-medium text-[15px] tracking-tight text-gray-800 dark:text-gray-200">MeepleGo</span>
           </Link>
           <div className="hidden md:flex items-center gap-1">
             {NAV_ITEMS.map(item => {
               const active = pathname === item.href
               return (
-                <Link key={item.href} href={item.href} className={cn('group relative flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors', active ? 'text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white')}> 
+                <Link key={item.href} href={item.href} className={cn('group relative flex items-center gap-2 rounded-full px-4 py-2 text-[13px] font-normal transition-colors', active ? 'text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white')}> 
                   <span className={cn('absolute inset-0 rounded-full -z-10 transition-all', active ? 'bg-primary-500/15 dark:bg-primary-400/20 ring-1 ring-primary-500/30 dark:ring-primary-400/30' : 'group-hover:bg-gray-200/60 dark:group-hover:bg-gray-700/50')} />
                   <item.icon className="h-5 w-5" />
                   <span>{item.name}</span>
@@ -225,26 +256,35 @@ function Navigation() {
             })}
           </div>
           <div className="flex-1 hidden md:block" />
-          {/* Search */}
-          <div className="hidden md:block relative w-full max-w-sm">
-            <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <input
-              ref={inputRef}
-              type="text"
-              value={query}
-              onChange={(e)=>{ setQuery(e.target.value); if (e.target.value) setShow(true) }}
-              onKeyDown={onKey}
-              onFocus={()=>{ if (flat.length) setShow(true) }}
-              placeholder="Search games…"
-              className="w-full pl-9 pr-3 py-2 rounded-lg bg-white/70 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm backdrop-blur-sm"
-              role="combobox"
-              aria-autocomplete="list"
-              aria-expanded={show}
-              aria-controls="nav-suggestions"
-              aria-activedescendant={activeIndex>=0 && show?`nav-sugg-${activeIndex}`:undefined}
-            />
+          {/* Search (Airbnb-style pill, compact) */}
+          <div className="hidden md:flex relative w-full max-w-lg">
+            <div className="flex w-full items-center gap-2 rounded-full border border-gray-200 dark:border-gray-700 bg-white/85 dark:bg-gray-900/70 px-4 py-1.5 shadow-sm hover:shadow-md backdrop-blur-sm transition focus-within:ring-2 focus-within:ring-primary-500">
+              <input
+                ref={inputRef}
+                type="text"
+                value={query}
+                onChange={(e)=>{ setQuery(e.target.value); if (e.target.value) setShow(true) }}
+                onKeyDown={onKey}
+                onFocus={()=>{ if (flat.length) setShow(true) }}
+                placeholder="Start your search"
+                className="flex-1 bg-transparent placeholder-gray-400 dark:placeholder-gray-500 text-sm leading-tight focus:outline-none"
+                role="combobox"
+                aria-autocomplete="list"
+                aria-expanded={show}
+                aria-controls="nav-suggestions"
+                aria-activedescendant={activeIndex>=0 && show?`nav-sugg-${activeIndex}`:undefined}
+              />
+              <button
+                type="button"
+                onClick={()=>{ if(query && flat.length && activeIndex>=0) { selectGame(flat[activeIndex]) } else { inputRef.current?.focus(); setShow(true) } }}
+                aria-label="Search"
+                className="shrink-0 h-9 w-9 rounded-full bg-primary-600 hover:bg-primary-600/90 active:bg-primary-700 text-white flex items-center justify-center shadow-sm transition"
+              >
+                <MagnifyingGlassIcon className="h-5 w-5" />
+              </button>
+            </div>
             {show && (
-              <div ref={dropdownRef} id="nav-suggestions" role="listbox" className="absolute left-0 right-0 mt-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg overflow-hidden max-h-[420px] overflow-y-auto z-50 text-sm">
+              <div ref={dropdownRef} id="nav-suggestions" role="listbox" className="absolute left-0 right-0 top-full mt-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-xl overflow-hidden max-h-[400px] overflow-y-auto z-50 text-sm">
                 {loading && <div className="px-6 py-4 text-gray-500 dark:text-gray-400">Searching…</div>}
                 {!loading && !flat.length && (
                   <div className="px-6 py-6 text-center">
@@ -308,6 +348,8 @@ function Navigation() {
                         <div className="text-gray-500 dark:text-gray-400 truncate text-xs">{session?.user.email}</div>
                       </div>
                       <Link href="/profile" className="flex items-center gap-3 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"><UserCircleIcon className="h-4 w-4 text-gray-400" /> My Profile</Link>
+                      <Link href="/library" className="flex items-center gap-3 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">My Library</Link>
+                      <Link href="/watchlist" className="flex items-center gap-3 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">My Watchlist</Link>
                       <Link href="/settings" className="flex items-center gap-3 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">Settings</Link>
                       <hr className="my-1 border-gray-100 dark:border-gray-800" />
                       <button onClick={signOut} className="w-full flex items-center gap-3 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-red-600 dark:text-red-400"><ArrowRightOnRectangleIcon className="h-4 w-4" /> Sign out</button>

@@ -123,7 +123,7 @@ export default function GameCard({
     setLocalRanking(optimistic)
     setSaving(true)
     try {
-      const { error } = await supabase
+  const { error } = await supabase
         .from('rankings')
         .upsert(optimistic, { onConflict: 'user_id,game_id' })
       if (error) {
@@ -138,6 +138,11 @@ export default function GameCard({
         .eq('game_id', game.id)
         .maybeSingle()
       if (!refErr && refreshed) setLocalRanking(refreshed as any)
+      // Mark awards for this year stale (fire & forget)
+      const year = game.year_published
+      if (year) {
+        fetch(`/api/awards/${year}/mark-stale`, { method: 'POST' }).catch(()=>{})
+      }
     } finally {
       setSaving(false)
     }
