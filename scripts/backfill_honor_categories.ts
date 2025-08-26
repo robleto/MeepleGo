@@ -20,13 +20,19 @@ import { createClient } from '@supabase/supabase-js'
 import { inferHonorCategory } from '../src/utils/honors'
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+const serviceKey =
+  process.env.SUPABASE_SERVICE_ROLE_KEY ||
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 if (!url || !serviceKey) {
-  console.error('Missing Supabase credentials. Set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.')
+  console.error(
+    'Missing Supabase credentials. Set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.'
+  )
   process.exit(1)
 }
 
-const supabase = createClient(url, serviceKey, { auth: { persistSession: false } })
+const supabase = createClient(url, serviceKey, {
+  auth: { persistSession: false },
+})
 
 interface Honor {
   category: 'Winner' | 'Nominee' | 'Special'
@@ -40,7 +46,10 @@ interface Honor {
   derived_result?: string | null
   [key: string]: any
 }
-interface Game { bgg_id: number; honors: Honor[] }
+interface Game {
+  bgg_id: number
+  honors: Honor[]
+}
 
 async function ensureLogTable() {
   // Attempt to create log table (idempotent via RPC or raw SQL not available here; using insert test)
@@ -50,7 +59,9 @@ async function ensureLogTable() {
 
 async function backfill() {
   const dryRun = process.env.DRY_RUN === '1' || process.env.DRY_RUN === 'true'
-  console.log(`🔁 Starting honor category backfill${dryRun ? ' (dry-run)' : ''}...`)
+  console.log(
+    `🔁 Starting honor category backfill${dryRun ? ' (dry-run)' : ''}...`
+  )
   const pageSize = 1000
   let from = 0
   let totalUpdated = 0
@@ -74,7 +85,7 @@ async function backfill() {
       if (!Array.isArray(game.honors) || game.honors.length === 0) continue
 
       let mutated = false
-      const updatedHonors = game.honors.map(h => {
+      const updatedHonors = game.honors.map((h) => {
         const inferred = inferHonorCategory(h)
         if (h.category !== inferred) {
           mutated = true
@@ -84,7 +95,10 @@ async function backfill() {
       })
 
       if (mutated) {
-        changeSamples.push({ bgg_id: game.bgg_id, changes: updatedHonors.filter((h,i)=>h!==game.honors[i]).length })
+        changeSamples.push({
+          bgg_id: game.bgg_id,
+          changes: updatedHonors.filter((h, i) => h !== game.honors[i]).length,
+        })
         if (!dryRun) {
           const { error: upErr } = await supabase
             .from('games')
@@ -98,8 +112,10 @@ async function backfill() {
             // Attempt to insert a log entry (requires a table honor_category_migrations with RLS allowing service key)
             await supabase.from('honor_category_migrations').insert({
               game_id: game.bgg_id,
-              changed_count: updatedHonors.filter((h,i)=>h!==game.honors[i]).length,
-              ran_at: new Date().toISOString()
+              changed_count: updatedHonors.filter(
+                (h, i) => h !== game.honors[i]
+              ).length,
+              ran_at: new Date().toISOString(),
             })
           }
         }
@@ -112,14 +128,16 @@ async function backfill() {
 
   if (dryRun) {
     const affected = changeSamples.length
-    console.log(`🔎 Dry-run summary: scanned=${totalScanned} affected=${affected}`)
-    console.log('Sample (first 10):', changeSamples.slice(0,10))
+    console.log(
+      `🔎 Dry-run summary: scanned=${totalScanned} affected=${affected}`
+    )
+    console.log('Sample (first 10):', changeSamples.slice(0, 10))
   } else {
     console.log(`🎯 Backfill complete. Games updated: ${totalUpdated}`)
   }
 }
 
-backfill().catch(e => {
+backfill().catch((e) => {
   console.error(e)
   process.exit(1)
 })

@@ -8,16 +8,26 @@ module.exports = {
   darkMode: 'class',
   safelist: [
     // Ensure rating colors are never purged - Reawarding color scheme
-    'bg-[#e5dbf3]', 'text-[#4c2c65]', // 10 - Purple
-    'bg-[#d5e7f2]', 'text-[#1a3448]', // 9 - Blue
-    'bg-[#dcebe3]', 'text-[#1f3c30]', // 8 - Green
-    'bg-[#f8e7ba]', 'text-[#5b3d00]', // 7 - Yellow
-    'bg-[#f4d8c7]', 'text-[#7b3f00]', // 6 - Orange
-    'bg-[#f5d9e8]', 'text-[#6a1f45]', // 5 - Pink
-    'bg-[#f6d4d4]', 'text-[#7b1818]', // 4 - Red
-    'bg-[#eee0d6]', 'text-[#7b5c42]', // 3 - Beige
-    'bg-[#e2e2e2]', 'text-[#474747]', // 2 - Gray
-    'bg-[#f5f5f5]', 'text-[#474747]', // 1 - Light Gray
+    'bg-[#e5dbf3]',
+    'text-[#4c2c65]', // 10 - Purple
+    'bg-[#d5e7f2]',
+    'text-[#1a3448]', // 9 - Blue
+    'bg-[#dcebe3]',
+    'text-[#1f3c30]', // 8 - Green
+    'bg-[#f8e7ba]',
+    'text-[#5b3d00]', // 7 - Yellow
+    'bg-[#f4d8c7]',
+    'text-[#7b3f00]', // 6 - Orange
+    'bg-[#f5d9e8]',
+    'text-[#6a1f45]', // 5 - Pink
+    'bg-[#f6d4d4]',
+    'text-[#7b1818]', // 4 - Red
+    'bg-[#eee0d6]',
+    'text-[#7b5c42]', // 3 - Beige
+    'bg-[#e2e2e2]',
+    'text-[#474747]', // 2 - Gray
+    'bg-[#f5f5f5]',
+    'text-[#474747]', // 1 - Light Gray
   ],
   theme: {
     extend: {
@@ -49,12 +59,18 @@ module.exports = {
         },
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-inter)', 'Inter', 'system-ui', 'sans-serif'],
+        display: ['var(--font-display)', 'Outfit', 'Inter', 'system-ui', 'sans-serif'],
+  // Optional prestige set (mapped via globals.css by toggling html.typography-b)
+  prestige: ['var(--font-award-b)', 'Fraunces', 'var(--font-display)', 'serif'],
+  prestigeAlt: ['var(--font-award-b-alt)', 'Playfair Display', 'Fraunces', 'serif'],
+  poster: ['var(--font-award-poster)', 'Archivo Black', 'var(--font-display)', 'sans-serif'],
+  softdisplay: ['var(--font-display-soft)', 'Epilogue', 'var(--font-display)', 'Outfit', 'system-ui', 'sans-serif'],
+      },
+      letterSpacing: {
+        'minus-half': '-0.5px',
       },
     },
   },
-  plugins: [
-    require('@tailwindcss/typography'),
-  ],
+  plugins: [require('@tailwindcss/typography')],
 }
-

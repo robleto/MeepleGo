@@ -17,8 +17,9 @@ This is a Next.js 15 board game collection management app called MeepleGo, inspi
 ## Rating System
 
 The app uses a 1-10 rating system with specific colors:
+
 - 1: red-600 (Awful)
-- 2: orange-600 (Bad) 
+- 2: orange-600 (Bad)
 - 3: amber-600 (Poor)
 - 4: yellow-600 (Below Average)
 - 5: lime-600 (Average)
@@ -47,7 +48,7 @@ The app uses a 1-10 rating system with specific colors:
 ## Database Schema
 
 - `games` - Master game list
-- `profiles` - User profiles  
+- `profiles` - User profiles
 - `rankings` - User ratings and played status
 - `lists` - User-created lists
 - `list_items` - Games in lists with ordering

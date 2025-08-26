@@ -1,163 +1,186 @@
 #!/usr/bin/env node
 // Import Kennerspiel des Jahres honors from BGG
-const { createClient } = require('@supabase/supabase-js');
-require('dotenv').config({ path: '.env.local' });
-const { ensureGame } = require('./fetchers');
-const https = require('https');
+const { createClient } = require('@supabase/supabase-js')
+require('dotenv').config({ path: '.env.local' })
+const { ensureGame } = require('./fetchers')
+const https = require('https')
 
-const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+)
 
-const AWARD_TYPE = 'Kennerspiel des Jahres';
+const AWARD_TYPE = 'Kennerspiel des Jahres'
 
 const args = {
-  since: parseInt(process.argv.find(arg => arg.startsWith('--since='))?.split('=')[1] || '2011'),
-  until: parseInt(process.argv.find(arg => arg.startsWith('--until='))?.split('=')[1] || new Date().getFullYear()),
+  since: parseInt(
+    process.argv.find((arg) => arg.startsWith('--since='))?.split('=')[1] ||
+      '2011'
+  ),
+  until: parseInt(
+    process.argv.find((arg) => arg.startsWith('--until='))?.split('=')[1] ||
+      new Date().getFullYear()
+  ),
   dryRun: process.argv.includes('--dry-run'),
-  maxPages: parseInt(process.argv.find(arg => arg.startsWith('--max-pages='))?.split('=')[1] || '5')
-};
+  maxPages: parseInt(
+    process.argv.find((arg) => arg.startsWith('--max-pages='))?.split('=')[1] ||
+      '5'
+  ),
+}
 
 function yearFromSlug(slug) {
-  const match = slug.match(/^(\d{4})-/);
-  return match ? parseInt(match[1]) : null;
+  const match = slug.match(/^(\d{4})-/)
+  return match ? parseInt(match[1]) : null
 }
 
 async function fetchHonorPage(honorId, slug) {
   return new Promise((resolve, reject) => {
-    const url = `https://boardgamegeek.com/boardgamehonor/${honorId}/${slug}`;
-    https.get(url, (res) => {
-      let data = '';
-      res.on('data', chunk => data += chunk);
-      res.on('end', () => resolve(data));
-    }).on('error', reject);
-  });
+    const url = `https://boardgamegeek.com/boardgamehonor/${honorId}/${slug}`
+    https
+      .get(url, (res) => {
+        let data = ''
+        res.on('data', (chunk) => (data += chunk))
+        res.on('end', () => resolve(data))
+      })
+      .on('error', reject)
+  })
 }
 
 function parseGamesFromHonorPage(html) {
-  const games = [];
-  const lines = html.split('\n');
-  
+  const games = []
+  const lines = html.split('\n')
+
   for (const line of lines) {
-    const match = line.match(/href="\/boardgame\/(\d+)\/[^"]*"[^>]*>([^<]+)</);
+    const match = line.match(/href="\/boardgame\/(\d+)\/[^"]*"[^>]*>([^<]+)</)
     if (match) {
-      const [, bggId, name] = match;
-      games.push({ bggId: parseInt(bggId), name: name.trim() });
+      const [, bggId, name] = match
+      games.push({ bggId: parseInt(bggId), name: name.trim() })
     }
   }
-  
-  return games;
+
+  return games
 }
 
 function categorizePage(slug) {
-  if (slug.includes('winner')) return 'Winner';
-  if (slug.includes('nominee')) return 'Nominee';
-  if (slug.includes('recommended')) return 'Special'; // Display as "Recommended" but store as "Special"
-  return 'Special';
+  if (slug.includes('winner')) return 'Winner'
+  if (slug.includes('nominee')) return 'Nominee'
+  if (slug.includes('recommended')) return 'Special' // Display as "Recommended" but store as "Special"
+  return 'Special'
 }
 
 async function processHonorPages(pages) {
-  const perYear = {};
-  
+  const perYear = {}
+
   for (const page of pages) {
-    const year = yearFromSlug(page.slug);
-    if (!year) continue;
-    
+    const year = yearFromSlug(page.slug)
+    if (!year) continue
+
     try {
-      console.log(`Fetching honor page: ${page.slug}`);
-      const html = await fetchHonorPage(page.id, page.slug);
-      const games = parseGamesFromHonorPage(html);
-      const category = categorizePage(page.slug);
-      
-      if (!perYear[year]) perYear[year] = {};
-      if (!perYear[year][category]) perYear[year][category] = new Set();
-      
-      games.forEach(game => perYear[year][category].add(game.bggId));
-      
+      console.log(`Fetching honor page: ${page.slug}`)
+      const html = await fetchHonorPage(page.id, page.slug)
+      const games = parseGamesFromHonorPage(html)
+      const category = categorizePage(page.slug)
+
+      if (!perYear[year]) perYear[year] = {}
+      if (!perYear[year][category]) perYear[year][category] = new Set()
+
+      games.forEach((game) => perYear[year][category].add(game.bggId))
+
       // Rate limiting
-      await new Promise(resolve => setTimeout(resolve, 300));
+      await new Promise((resolve) => setTimeout(resolve, 300))
     } catch (error) {
-      console.error(`Error processing ${page.slug}:`, error.message);
+      console.error(`Error processing ${page.slug}:`, error.message)
     }
   }
-  
-  return perYear;
+
+  return perYear
 }
 
 async function applyHonorsToDatabase(perYear) {
-  const summary = {};
-  
+  const summary = {}
+
   for (const [year, categories] of Object.entries(perYear)) {
-    summary[year] = { validation: {} };
-    
+    summary[year] = { validation: {} }
+
     for (const [category, gameIds] of Object.entries(categories)) {
-      const idsArray = Array.from(gameIds);
-      
+      const idsArray = Array.from(gameIds)
+
       for (const bggId of idsArray) {
         try {
-          await ensureGame(bggId);
-          
+          await ensureGame(bggId)
+
           const { data: game, error: fetchError } = await supabase
             .from('games')
             .select('honors')
             .eq('bgg_id', bggId)
-            .single();
-          
+            .single()
+
           if (fetchError) {
-            console.error(`Error fetching game ${bggId}:`, fetchError.message);
-            continue;
+            console.error(`Error fetching game ${bggId}:`, fetchError.message)
+            continue
           }
-          
-          const honors = Array.isArray(game.honors) ? [...game.honors] : [];
-          const displayCategory = category === 'Special' ? 'Recommended' : category;
-          
-          const honorExists = honors.some(h => 
-            h.award_type === AWARD_TYPE && 
-            h.year === parseInt(year) && 
-            h.category === category
-          );
-          
+
+          const honors = Array.isArray(game.honors) ? [...game.honors] : []
+          const displayCategory =
+            category === 'Special' ? 'Recommended' : category
+
+          const honorExists = honors.some(
+            (h) =>
+              h.award_type === AWARD_TYPE &&
+              h.year === parseInt(year) &&
+              h.category === category
+          )
+
           if (!honorExists) {
             const honor = {
               name: `${year} ${AWARD_TYPE} ${displayCategory}`,
               year: parseInt(year),
               category: category,
               award_type: AWARD_TYPE,
-              description: `${displayCategory} for the ${year} ${AWARD_TYPE}`
-            };
-            
-            honors.push(honor);
-            
+              description: `${displayCategory} for the ${year} ${AWARD_TYPE}`,
+            }
+
+            honors.push(honor)
+
             const { error: updateError } = await supabase
               .from('games')
               .update({ honors })
-              .eq('bgg_id', bggId);
-            
+              .eq('bgg_id', bggId)
+
             if (updateError) {
-              console.error(`Error updating game ${bggId}:`, updateError.message);
+              console.error(
+                `Error updating game ${bggId}:`,
+                updateError.message
+              )
             } else {
               const { data: gameData } = await supabase
                 .from('games')
                 .select('name')
                 .eq('bgg_id', bggId)
-                .single();
-              
-              console.log(`Applied ${year} ${AWARD_TYPE} ${displayCategory} to ${gameData?.name || bggId}`);
+                .single()
+
+              console.log(
+                `Applied ${year} ${AWARD_TYPE} ${displayCategory} to ${gameData?.name || bggId}`
+              )
             }
           }
         } catch (error) {
-          console.error(`Error processing game ${bggId}:`, error.message);
+          console.error(`Error processing game ${bggId}:`, error.message)
         }
       }
     }
-    
-    summary[year] = 'OK';
+
+    summary[year] = 'OK'
   }
-  
-  return summary;
+
+  return summary
 }
 
 async function run() {
-  console.log(`=== IMPORT AWARD: ${AWARD_TYPE} Years ${args.since}-${args.until} ===`);
-  
+  console.log(
+    `=== IMPORT AWARD: ${AWARD_TYPE} Years ${args.since}-${args.until} ===`
+  )
+
   // Manual honor page entries for historical data
   const manualPages = [
     // Historical kennerspiel entries (15 years: 2011-2025)
@@ -219,41 +242,46 @@ async function run() {
     // 2025
     { id: 111383, slug: '2025-kennerspiel-des-jahres-nominee' },
     { id: 111386, slug: '2025-kennerspiel-des-jahres-recommended' },
-    { id: 112339, slug: '2025-kennerspiel-des-jahres-winner' }
-  ];
-  
-  const filtered = manualPages.filter(p => {
-    const y = yearFromSlug(p.slug);
-    return y && y >= args.since && y <= args.until;
-  });
-  
-  console.log(`Discovered ${filtered.length} honor page slugs in range.`);
-  
+    { id: 112339, slug: '2025-kennerspiel-des-jahres-winner' },
+  ]
+
+  const filtered = manualPages.filter((p) => {
+    const y = yearFromSlug(p.slug)
+    return y && y >= args.since && y <= args.until
+  })
+
+  console.log(`Discovered ${filtered.length} honor page slugs in range.`)
+
   if (args.dryRun) {
-    const perYear = await processHonorPages(filtered);
-    const report = { award: 'kennerspiel_des_jahres', years: {}, strictFailed: false };
-    
+    const perYear = await processHonorPages(filtered)
+    const report = {
+      award: 'kennerspiel_des_jahres',
+      years: {},
+      strictFailed: false,
+    }
+
     Object.entries(perYear).forEach(([year, categories]) => {
-      report.years[year] = { categories: {}, validation: {} };
+      report.years[year] = { categories: {}, validation: {} }
       Object.entries(categories).forEach(([category, gameIds]) => {
-        const displayCategory = category === 'Special' ? 'Recommended' : category;
+        const displayCategory =
+          category === 'Special' ? 'Recommended' : category
         report.years[year].categories[displayCategory] = {
           count: gameIds.size,
-          ids: Array.from(gameIds)
-        };
-      });
-    });
-    
-    console.log('Dry run report:', JSON.stringify(report, null, 2));
+          ids: Array.from(gameIds),
+        }
+      })
+    })
+
+    console.log('Dry run report:', JSON.stringify(report, null, 2))
   } else {
-    const perYear = await processHonorPages(filtered);
-    const summary = await applyHonorsToDatabase(perYear);
-    
-    console.log('Import finished. Validation summary:');
+    const perYear = await processHonorPages(filtered)
+    const summary = await applyHonorsToDatabase(perYear)
+
+    console.log('Import finished. Validation summary:')
     Object.entries(summary).forEach(([year, status]) => {
-      console.log(`${year}: ${status}`);
-    });
+      console.log(`${year}: ${status}`)
+    })
   }
 }
 
-run().catch(console.error);
+run().catch(console.error)

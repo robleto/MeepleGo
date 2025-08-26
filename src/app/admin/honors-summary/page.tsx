@@ -14,7 +14,10 @@ interface Honor {
   award_type?: string
 }
 
-interface Game { bgg_id: number; honors: Honor[] }
+interface Game {
+  bgg_id: number
+  honors: Honor[]
+}
 
 async function getSummary() {
   let all: Game[] = []
@@ -31,21 +34,34 @@ async function getSummary() {
     if (data.length < pageSize) break
     page++
   }
-  const counts: Record<string, { Winner: number; Nominee: number; Special: number; total: number }> = {}
+  const counts: Record<
+    string,
+    { Winner: number; Nominee: number; Special: number; total: number }
+  > = {}
   let totalHonors = 0
   for (const g of all) {
     for (const h of g.honors || []) {
       const cat = inferHonorCategory(h)
       const type = h.award_type || 'Unknown'
-      counts[type] = counts[type] || { Winner: 0, Nominee: 0, Special: 0, total: 0 }
+      counts[type] = counts[type] || {
+        Winner: 0,
+        Nominee: 0,
+        Special: 0,
+        total: 0,
+      }
       counts[type][cat]++
       counts[type].total++
       totalHonors++
     }
   }
   const awardRows = Object.entries(counts)
-    .sort((a,b)=>a[0].localeCompare(b[0]))
-    .map(([award, c]) => ({ award, ...c, winnerPct: c.total? (c.Winner/c.total*100):0, nomineePct: c.total? (c.Nominee/c.total*100):0 }))
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([award, c]) => ({
+      award,
+      ...c,
+      winnerPct: c.total ? (c.Winner / c.total) * 100 : 0,
+      nomineePct: c.total ? (c.Nominee / c.total) * 100 : 0,
+    }))
   return { totalAwards: awardRows.length, totalHonors, awardRows }
 }
 
@@ -54,7 +70,9 @@ export default async function HonorsSummaryPage() {
   return (
     <div className="max-w-5xl mx-auto py-10 px-6">
       <h1 className="text-3xl font-bold mb-6">Honor Category Summary</h1>
-      <p className="text-sm text-gray-600 mb-8">{totalHonors} honors across {totalAwards} award types (live inference)</p>
+      <p className="text-sm text-gray-600 mb-8">
+        {totalHonors} honors across {totalAwards} award types (live inference)
+      </p>
       <div className="overflow-x-auto rounded border">
         <table className="min-w-full text-sm">
           <thead className="bg-gray-100">
@@ -69,21 +87,33 @@ export default async function HonorsSummaryPage() {
             </tr>
           </thead>
           <tbody>
-            {awardRows.map(r => (
+            {awardRows.map((r) => (
               <tr key={r.award} className="border-t hover:bg-gray-50">
                 <td className="px-3 py-2 font-medium">{r.award}</td>
                 <td className="px-3 py-2 text-right tabular-nums">{r.total}</td>
-                <td className="px-3 py-2 text-right text-green-700 tabular-nums">{r.Winner}</td>
-                <td className="px-3 py-2 text-right text-amber-700 tabular-nums">{r.Nominee}</td>
-                <td className="px-3 py-2 text-right text-gray-600 tabular-nums">{r.Special}</td>
-                <td className="px-3 py-2 text-right tabular-nums">{r.winnerPct.toFixed(1)}%</td>
-                <td className="px-3 py-2 text-right tabular-nums">{r.nomineePct.toFixed(1)}%</td>
+                <td className="px-3 py-2 text-right text-green-700 tabular-nums">
+                  {r.Winner}
+                </td>
+                <td className="px-3 py-2 text-right text-amber-700 tabular-nums">
+                  {r.Nominee}
+                </td>
+                <td className="px-3 py-2 text-right text-gray-600 tabular-nums">
+                  {r.Special}
+                </td>
+                <td className="px-3 py-2 text-right tabular-nums">
+                  {r.winnerPct.toFixed(1)}%
+                </td>
+                <td className="px-3 py-2 text-right tabular-nums">
+                  {r.nomineePct.toFixed(1)}%
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      <p className="text-xs text-gray-500 mt-4">Categories computed with shared inference (handles truncated slugs).</p>
+      <p className="text-xs text-gray-500 mt-4">
+        Categories computed with shared inference (handles truncated slugs).
+      </p>
     </div>
   )
 }

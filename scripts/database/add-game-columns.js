@@ -11,7 +11,7 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
 async function addGameColumns() {
   console.log('🔧 Adding new columns to games table...')
-  
+
   try {
     // Add designers column
     const { error: designersError } = await supabase.rpc('sql', {
@@ -22,11 +22,14 @@ async function addGameColumns() {
             ALTER TABLE public.games ADD COLUMN designers text[] NULL;
           END IF;
         END $$;
-      `
+      `,
     })
-    
+
     if (designersError) {
-      console.log('⚠️ Designers column may already exist:', designersError.message)
+      console.log(
+        '⚠️ Designers column may already exist:',
+        designersError.message
+      )
     } else {
       console.log('✅ Designers column added')
     }
@@ -40,9 +43,9 @@ async function addGameColumns() {
             ALTER TABLE public.games ADD COLUMN artists text[] NULL;
           END IF;
         END $$;
-      `
+      `,
     })
-    
+
     if (artistsError) {
       console.log('⚠️ Artists column may already exist:', artistsError.message)
     } else {
@@ -58,9 +61,9 @@ async function addGameColumns() {
             ALTER TABLE public.games ADD COLUMN age integer NULL;
           END IF;
         END $$;
-      `
+      `,
     })
-    
+
     if (ageError) {
       console.log('⚠️ Age column may already exist:', ageError.message)
     } else {
@@ -76,9 +79,9 @@ async function addGameColumns() {
             ALTER TABLE public.games ADD COLUMN weight numeric(3,2) NULL;
           END IF;
         END $$;
-      `
+      `,
     })
-    
+
     if (weightError) {
       console.log('⚠️ Weight column may already exist:', weightError.message)
     } else {
@@ -86,7 +89,6 @@ async function addGameColumns() {
     }
 
     console.log('🎉 All columns processed successfully!')
-    
   } catch (error) {
     console.error('❌ Error adding columns:', error)
   }

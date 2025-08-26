@@ -1,7 +1,12 @@
 import { Game, Ranking } from './supabase'
 
 export type ViewMode = 'grid' | 'list'
-export type SortOption = 'name' | 'year' | 'rating' | 'date_added' | 'playing_time'
+export type SortOption =
+  | 'name'
+  | 'year'
+  | 'rating'
+  | 'date_added'
+  | 'playing_time'
 
 export type GameWithRanking = Game & {
   ranking?: Ranking | null
@@ -40,7 +45,7 @@ export type Navigation = {
   current: boolean
 }
 
-export type AwardCategory = 
+export type AwardCategory =
   | 'Best Game'
   | 'Best Strategy Game'
   | 'Best Party Game'

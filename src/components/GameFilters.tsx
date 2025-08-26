@@ -1,13 +1,13 @@
 import React, { useState } from 'react'
 import { SORT_OPTIONS, GROUP_OPTIONS } from '@/utils/gameFilters'
 import type { SortKey, GroupKey, SortOrder } from '@/utils/gameFilters'
-import { 
+import {
   MagnifyingGlassIcon,
   FunnelIcon,
   ChevronUpDownIcon,
   Squares2X2Icon,
   ListBulletIcon,
-  XMarkIcon
+  XMarkIcon,
 } from '@heroicons/react/24/outline'
 
 interface GameFiltersProps {
@@ -19,8 +19,26 @@ interface GameFiltersProps {
   setSortOrder: (order: SortOrder) => void
   groupBy: GroupKey
   setGroupBy: (group: GroupKey) => void
-  filterType: 'none' | 'year' | 'publisher' | 'players' | 'category' | 'mechanic' | 'game' | 'award'
-  setFilterType: (type: 'none' | 'year' | 'publisher' | 'players' | 'category' | 'mechanic' | 'game' | 'award') => void
+  filterType:
+    | 'none'
+    | 'year'
+    | 'publisher'
+    | 'players'
+    | 'category'
+    | 'mechanic'
+    | 'game'
+    | 'award'
+  setFilterType: (
+    type:
+      | 'none'
+      | 'year'
+      | 'publisher'
+      | 'players'
+      | 'category'
+      | 'mechanic'
+      | 'game'
+      | 'award'
+  ) => void
   filterValue: string
   setFilterValue: (value: string) => void
   uniqueYears: number[]
@@ -35,7 +53,15 @@ interface GameFiltersProps {
     sortBy?: SortKey
     sortOrder?: SortOrder
     groupBy?: GroupKey
-  filterType?: 'none' | 'year' | 'publisher' | 'players' | 'category' | 'mechanic' | 'game' | 'award'
+    filterType?:
+      | 'none'
+      | 'year'
+      | 'publisher'
+      | 'players'
+      | 'category'
+      | 'mechanic'
+      | 'game'
+      | 'award'
     filterValue?: string
   }
 }
@@ -66,8 +92,8 @@ export default function GameFilters({
     sortOrder: 'asc',
     groupBy: 'year_published',
     filterType: 'none',
-    filterValue: 'all'
-  }
+    filterValue: 'all',
+  },
 }: GameFiltersProps) {
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
 
@@ -123,7 +149,10 @@ export default function GameFilters({
           <button
             onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
             className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition-colors ${
-              showAdvancedFilters || filterType !== 'none' || groupBy !== 'year_published' || sortBy !== 'name'
+              showAdvancedFilters ||
+              filterType !== 'none' ||
+              groupBy !== 'year_published' ||
+              sortBy !== 'name'
                 ? 'bg-primary-100 text-primary-600 border-primary-300'
                 : 'text-gray-400 border-gray-300 hover:bg-gray-50 bg-white'
             }`}
@@ -136,10 +165,12 @@ export default function GameFilters({
           <button
             onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
             className="flex items-center gap-2 px-3 py-2 rounded-lg border text-gray-400 border-gray-300 hover:bg-gray-50 bg-white transition-colors"
-            title={`Currently sorting ${SORT_OPTIONS.find(opt => opt.value === sortBy)?.label} ${sortOrder === 'asc' ? 'ascending' : 'descending'}`}
+            title={`Currently sorting ${SORT_OPTIONS.find((opt) => opt.value === sortBy)?.label} ${sortOrder === 'asc' ? 'ascending' : 'descending'}`}
           >
             <ChevronUpDownIcon className="w-4 h-4" />
-            <span className="text-sm hidden sm:inline">{SORT_OPTIONS.find(opt => opt.value === sortBy)?.label}</span>
+            <span className="text-sm hidden sm:inline">
+              {SORT_OPTIONS.find((opt) => opt.value === sortBy)?.label}
+            </span>
           </button>
 
           {/* View Mode Toggle */}
@@ -170,7 +201,9 @@ export default function GameFilters({
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Sort By */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Sort by</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Sort by
+              </label>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as SortKey)}
@@ -186,7 +219,9 @@ export default function GameFilters({
 
             {/* Group By */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Group by</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Group by
+              </label>
               <select
                 value={groupBy}
                 onChange={(e) => setGroupBy(e.target.value as GroupKey)}
@@ -202,7 +237,9 @@ export default function GameFilters({
 
             {/* Filter By */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Filter by</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Filter by
+              </label>
               <div className="flex gap-2">
                 <select
                   value={filterType}

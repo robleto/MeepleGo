@@ -1,4 +1,4 @@
-"use client"
+'use client'
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -26,16 +26,19 @@ export default function SignUpPage() {
     })
     setLoading(false)
     if (error) return setError(error.message)
-    if (data.user)
-      setMessage('Check your email to confirm your account.')
+    if (data.user) setMessage('Check your email to confirm your account.')
   }
 
   return (
     <div className="max-w-md mx-auto px-4 py-12">
-      <h1 className="text-2xl font-semibold text-gray-900 mb-6">Create your account</h1>
+      <h1 className="text-2xl font-semibold text-gray-900 mb-6">
+        Create your account
+      </h1>
       <form onSubmit={onSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Email
+          </label>
           <input
             type="email"
             value={email}
@@ -45,7 +48,9 @@ export default function SignUpPage() {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Password
+          </label>
           <input
             type="password"
             value={password}
@@ -65,7 +70,9 @@ export default function SignUpPage() {
         </button>
       </form>
       <div className="flex justify-between text-sm text-gray-600 mt-4">
-        <a href="/login" className="text-primary-600 hover:text-primary-700">Already have an account? Log in</a>
+        <a href="/login" className="text-primary-600 hover:text-primary-700">
+          Already have an account? Log in
+        </a>
       </div>
     </div>
   )

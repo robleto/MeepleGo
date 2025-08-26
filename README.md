@@ -13,7 +13,7 @@ A comprehensive board game collection manager built with Next.js, TypeScript, Ta
   - `examples/` small sampled JSON files committed for reference/tests
 - **`/scripts/`** – Organized automation & utilities
   - `maintenance/` recurring hygiene & enrichment tasks
-  - `audit/` validation / diagnostic scripts (was test-* helpers)
+  - `audit/` validation / diagnostic scripts (was test-\* helpers)
   - `legacy/` historical one‑off scripts retained for reference
 - **`/supabase/`** – Supabase generated types / edge functions
 - **`/public/`** – Static assets
@@ -23,35 +23,41 @@ Legacy ad-hoc root scripts and large JSON artifacts have been relocated into the
 ## Features
 
 ### 🏠 **Home Dashboard**
+
 - Quick overview of your collection statistics
 - Easy access to all main features
 - Getting started guide for new users
 
 ### 🏆 **Awards System**
+
 - Create yearly awards with custom categories
 - Drag-and-drop nomination and winner selection
 - Track your "Best Of" games by year
 - Default categories: Best Game, Best Strategy, Best Party Game, etc.
 
 ### 📊 **Rankings & Ratings**
+
 - Rate games from 1-10 with color-coded system
 - Track "Played It" status for your collection
 - Personal ranking leaderboard
 - Detailed rating statistics and insights
 
 ### 🎲 **Games Collection**
+
 - Grid and list view modes
 - Advanced filtering and search
 - Hover actions for quick rating and status updates
 - Detailed game information with BGG integration
 
 ### 📝 **Custom Lists**
+
 - Create unlimited custom lists (e.g., "Top 10 Party Games")
 - Reorder games with drag-and-drop
 - Add personal notes and custom organization
 - Share lists with friends
 
 ### 👤 **Profile Management**
+
 - Personal gaming statistics
 - Customizable preferences
 - Privacy controls
@@ -72,7 +78,7 @@ Legacy ad-hoc root scripts and large JSON artifacts have been relocated into the
 
 ### Prerequisites
 
-- Node.js 18+ 
+- Node.js 18+
 - npm or yarn
 - Supabase account
 
@@ -168,7 +174,7 @@ docs/                 # Additional project & pipeline docs
 ### Tables
 
 - **games**: Master list of all board games
-- **profiles**: User profiles and preferences  
+- **profiles**: User profiles and preferences
 - **rankings**: User ratings and played status for games
 - **lists**: User-created custom lists
 - **list_items**: Games within lists with notes and ordering

@@ -11,14 +11,21 @@ interface CreateListModalProps {
   onSuccess?: () => void
 }
 
-export default function CreateListModal({ isOpen, onClose, onSuccess }: CreateListModalProps) {
+export default function CreateListModal({
+  isOpen,
+  onClose,
+  onSuccess,
+}: CreateListModalProps) {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    isPublic: false
+    isPublic: false,
   })
   const [isLoading, setIsLoading] = useState(false)
-  const [showToast, setShowToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
+  const [showToast, setShowToast] = useState<{
+    message: string
+    type: 'success' | 'error'
+  } | null>(null)
   const router = useRouter()
 
   // Simple toast implementation
@@ -37,7 +44,7 @@ export default function CreateListModal({ isOpen, onClose, onSuccess }: CreateLi
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!formData.name.trim()) {
       showMessage('List name is required', 'error')
       return
@@ -46,8 +53,10 @@ export default function CreateListModal({ isOpen, onClose, onSuccess }: CreateLi
     setIsLoading(true)
 
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+
       if (!user) {
         showMessage('You must be logged in to create a list', 'error')
         return
@@ -60,7 +69,7 @@ export default function CreateListModal({ isOpen, onClose, onSuccess }: CreateLi
           description: formData.description.trim() || null,
           user_id: user.id,
           is_public: formData.isPublic,
-          list_type: 'custom'
+          list_type: 'custom',
         })
         .select()
         .single()
@@ -72,17 +81,17 @@ export default function CreateListModal({ isOpen, onClose, onSuccess }: CreateLi
       }
 
       showMessage('List created successfully!', 'success')
-      
+
       // Reset form
       setFormData({
         name: '',
         description: '',
-        isPublic: false
+        isPublic: false,
       })
-      
+
       onClose()
       onSuccess?.()
-      
+
       // Navigate to the new list
       router.push(`/lists/${data.id}`)
     } catch (error) {
@@ -98,7 +107,7 @@ export default function CreateListModal({ isOpen, onClose, onSuccess }: CreateLi
       setFormData({
         name: '',
         description: '',
-        isPublic: false
+        isPublic: false,
       })
       onClose()
     }
@@ -111,11 +120,13 @@ export default function CreateListModal({ isOpen, onClose, onSuccess }: CreateLi
       {/* Toast */}
       {showToast && (
         <div className="fixed top-4 right-4 z-[60] animate-in fade-in slide-in-from-top-2 duration-300">
-          <div className={`px-4 py-2 rounded-lg shadow-lg ${
-            showToast.type === 'success' 
-              ? 'bg-green-500 text-white' 
-              : 'bg-red-500 text-white'
-          }`}>
+          <div
+            className={`px-4 py-2 rounded-lg shadow-lg ${
+              showToast.type === 'success'
+                ? 'bg-green-500 text-white'
+                : 'bg-red-500 text-white'
+            }`}
+          >
             {showToast.message}
           </div>
         </div>
@@ -124,11 +135,11 @@ export default function CreateListModal({ isOpen, onClose, onSuccess }: CreateLi
       {/* Modal Backdrop */}
       <div className="fixed inset-0 z-50 flex items-center justify-center">
         {/* Backdrop */}
-        <div 
+        <div
           className="absolute inset-0 bg-black bg-opacity-50 dark:bg-opacity-70"
           onClick={handleClose}
         />
-        
+
         {/* Modal Content */}
         <div className="relative w-full max-w-md mx-4 bg-white dark:bg-gray-800 rounded-2xl shadow-xl transform transition-all">
           <div className="p-6">
@@ -151,14 +162,19 @@ export default function CreateListModal({ isOpen, onClose, onSuccess }: CreateLi
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* List Name */}
               <div>
-                <label htmlFor="listName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label
+                  htmlFor="listName"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                >
                   List Name *
                 </label>
                 <input
                   type="text"
                   id="listName"
                   value={formData.name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, name: e.target.value }))
+                  }
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700 dark:text-white transition-colors"
                   placeholder="Enter list name"
                   maxLength={100}
@@ -169,13 +185,21 @@ export default function CreateListModal({ isOpen, onClose, onSuccess }: CreateLi
 
               {/* Description */}
               <div>
-                <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label
+                  htmlFor="description"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                >
                   Description
                 </label>
                 <textarea
                   id="description"
                   value={formData.description}
-                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      description: e.target.value,
+                    }))
+                  }
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700 dark:text-white resize-none transition-colors"
                   placeholder="Optional description for your list"
                   rows={3}
@@ -191,13 +215,21 @@ export default function CreateListModal({ isOpen, onClose, onSuccess }: CreateLi
                     id="isPublic"
                     type="checkbox"
                     checked={formData.isPublic}
-                    onChange={(e) => setFormData(prev => ({ ...prev, isPublic: e.target.checked }))}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        isPublic: e.target.checked,
+                      }))
+                    }
                     className="focus:ring-purple-500 h-4 w-4 text-purple-600 border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700"
                     disabled={isLoading}
                   />
                 </div>
                 <div className="ml-3 text-sm">
-                  <label htmlFor="isPublic" className="font-medium text-gray-700 dark:text-gray-300">
+                  <label
+                    htmlFor="isPublic"
+                    className="font-medium text-gray-700 dark:text-gray-300"
+                  >
                     Make this list public
                   </label>
                   <p className="text-gray-500 dark:text-gray-400">

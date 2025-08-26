@@ -2,12 +2,39 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
 
 :root {
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
   --background-end-rgb: 255, 255, 255;
+  /* Design tokens (Light) */
+  --color-bg: #f8fafc; /* subtle neutral */
+  --color-surface: #ffffff;
+  --color-surface-alt: #f1f5f9; /* slate-100-ish */
+  --color-surface-emphasis: #ffffff;
+  --color-border: #e2e8f0; /* slate-200 */
+  --color-border-strong: #cbd5e1; /* slate-300 */
+  --color-ring: #93c5fd; /* blue-300 */
+  --color-text: #0f172a; /* slate-900 */
+  --color-text-muted: #64748b; /* slate-500 */
+  --color-text-subtle: #94a3b8; /* slate-400 */
+  --color-accent: #2563eb; /* primary-600 */
+  --color-accent-hover: #1d4ed8;
+  --color-accent-soft: #eff6ff;
+  --color-positive: #059669;
+  --color-positive-bg: #ecfdf5;
+  --color-warning: #d97706;
+  --color-warning-bg: #fef3c7;
+  --color-danger: #dc2626;
+  --color-danger-bg: #fef2f2;
+  --radius-xs: 3px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --shadow-xs: 0 1px 2px rgba(15,23,42,0.04), 0 0 0 1px rgba(15,23,42,0.03);
+  --shadow-sm: 0 2px 4px rgba(15,23,42,0.06), 0 1px 2px rgba(15,23,42,0.04);
+  --shadow-md: 0 4px 12px -2px rgba(15,23,42,0.08), 0 2px 4px rgba(15,23,42,0.06);
+  --shadow-lg: 0 8px 24px -4px rgba(15,23,42,0.12), 0 4px 10px rgba(15,23,42,0.08);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -15,11 +42,130 @@
     --foreground-rgb: 255, 255, 255;
     --background-start-rgb: 0, 0, 0;
     --background-end-rgb: 0, 0, 0;
+  /* Dark mode token overrides */
+  --color-bg: #0f172a; /* slate-900 */
+  --color-surface: #1e293b; /* slate-800 */
+  --color-surface-alt: #24324b; /* custom subtle lift */
+  --color-surface-emphasis: #334155; /* slate-700 */
+  --color-border: #334155;
+  --color-border-strong: #475569;
+  --color-ring: #1d4ed8;
+  --color-text: #f1f5f9;
+  --color-text-muted: #94a3b8;
+  --color-text-subtle: #64748b;
+  --color-accent: #3b82f6;
+  --color-accent-hover: #60a5fa;
+  --color-accent-soft: #1e3a8a;
+  --color-positive: #10b981;
+  --color-positive-bg: #064e3b;
+  --color-warning: #f59e0b;
+  --color-warning-bg: #78350f;
+  --color-danger: #ef4444;
+  --color-danger-bg: #7f1d1d;
+  --shadow-xs: 0 1px 2px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.03);
+  --shadow-sm: 0 2px 4px rgba(0,0,0,0.55), 0 1px 2px rgba(0,0,0,0.4);
+  --shadow-md: 0 4px 12px -2px rgba(0,0,0,0.6), 0 2px 4px rgba(0,0,0,0.5);
+  --shadow-lg: 0 8px 24px -4px rgba(0,0,0,0.65), 0 4px 10px rgba(0,0,0,0.55);
   }
 }
 
 body {
   color: rgb(var(--foreground-rgb));
+  background: var(--color-bg);
+}
+
+/* Structural utilities */
+.app-container { max-width: 1200px; margin: 0 auto; padding: 2rem 1.25rem; }
+.surface { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); box-shadow: var(--shadow-xs); }
+.surface-elevated { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); box-shadow: var(--shadow-md); }
+.divider { height:1px; background: var(--color-border); }
+.text-muted { color: var(--color-text-muted); }
+.card-grid { display:grid; gap:1.25rem; grid-template-columns: repeat(auto-fill,minmax(180px,1fr)); }
+
+/* Focus outline unify */
+:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; border-radius: 4px; }
+
+/* Scroll momentum enable for iOS panels */
+.scroll-smooth-touch { -webkit-overflow-scrolling: touch; }
+
+/* UI primitives base classes (can be composed with @apply if desired) */
+.ui-btn { position:relative; display:inline-flex; align-items:center; justify-content:center; gap:0.5rem; font-weight:500; border-radius: var(--radius-sm); padding:0.55rem 0.9rem; font-size:0.875rem; line-height:1.1; transition: background .18s, color .18s, box-shadow .18s; }
+.ui-btn-primary { background: var(--color-accent); color:#fff; box-shadow: var(--shadow-sm); }
+.ui-btn-primary:hover { background: var(--color-accent-hover); }
+.ui-btn-secondary { background: var(--color-surface-alt); color: var(--color-text); border:1px solid var(--color-border); }
+.ui-btn-secondary:hover { background: var(--color-surface); }
+.ui-btn-ghost { background: transparent; color: var(--color-text-muted); }
+.ui-btn-ghost:hover { color: var(--color-text); background: var(--color-surface-alt); }
+.ui-btn-danger { background: var(--color-danger); color:#fff; }
+.ui-btn-danger:hover { background:#b91c1c; }
+.ui-btn-outline { background: #fff; border:1px solid var(--color-border); color: var(--color-text); }
+.dark .ui-btn-outline { background: var(--color-surface); }
+.ui-btn-outline:hover { background: var(--color-surface-alt); }
+.ui-btn-sm { padding:0.35rem 0.65rem; font-size:0.75rem; }
+.ui-btn-lg { padding:0.9rem 1.25rem; font-size:0.95rem; }
+.ui-btn:disabled { opacity:.55; cursor:not-allowed; }
+.ui-btn-primary:focus-visible { box-shadow: 0 0 0 4px rgba(59,130,246,0.35); }
+
+/* Toast styles (base) */
+.toast-stack { position: fixed; top: 1rem; right: 1rem; display:flex; flex-direction:column; gap:0.6rem; z-index:300; }
+.toast { background: var(--color-surface-emphasis); border:1px solid var(--color-border); border-radius: var(--radius-md); box-shadow: var(--shadow-md); padding:0.75rem 0.95rem; display:flex; gap:0.75rem; align-items:flex-start; width: 320px; max-width: calc(100vw - 2rem); }
+.toast-success { border-color: var(--color-positive); }
+.toast-enter { animation: toastIn .35s ease; }
+.toast-exit { animation: toastOut .35s ease forwards; }
+@keyframes toastIn { from { opacity:0; transform: translateY(-6px) scale(.98); } to { opacity:1; transform: translateY(0) scale(1); } }
+@keyframes toastOut { to { opacity:0; transform: translateY(-6px) scale(.96); } }
+
+
+/* ---------------------------------------------
+   Typography Set B (Prestige / Serif Contrast)
+   Toggle by adding class `typography-b` to <html>.
+   This remaps the generic CSS vars used in Tailwind font stacks
+   so components automatically pick up alternative fonts without code changes.
+   Set A (default): Inter (body) + Outfit (display)
+   Set B: Geist (body) + Fraunces (primary display/award) + Playfair (alt award)
+---------------------------------------------- */
+
+html.typography-b {
+  /* Override semantic vars to point at B-set */
+  --font-inter: var(--font-sans-b); /* body -> Geist */
+  --font-display: var(--font-award-b); /* display -> Fraunces */
+}
+
+/* Optional helper class to swap Fraunces for Playfair on specific elements */
+.award-serif-alt { font-family: var(--font-award-b-alt), var(--font-award-b), var(--font-display), serif; }
+
+/* Utility for award / prestige headings when B-set active (falls back gracefully) */
+.award-heading-prestige { font-family: var(--font-award-b), var(--font-display), serif; font-weight: 600; letter-spacing: -0.5px; }
+.award-heading-prestige-alt { font-family: var(--font-award-b-alt), var(--font-award-b), var(--font-display), serif; font-weight: 600; letter-spacing: -0.5px; }
+
+/* Poster experiment (Archivo Black) */
+.award-heading-poster { font-family: var(--font-award-poster), var(--font-display), 'Archivo Black', sans-serif; font-weight: 400; letter-spacing: -0.75px; }
+.award-heading-poster-tight { font-family: var(--font-award-poster), var(--font-display), 'Archivo Black', sans-serif; font-weight: 400; letter-spacing: -1px; }
+
+/* Soft heading token (Epilogue) */
+.heading-soft { font-family: var(--font-display-soft), var(--font-display), 'Epilogue', sans-serif; font-weight: 500; letter-spacing: -0.25px; }
+
+/* Optical size / line-height helpers */
+.heading-tight { line-height:1.05; }
+.heading-normal { line-height:1.15; }
+.heading-relaxed { line-height:1.25; }
+
+/* Display font utilities */
+.font-display {
+  font-family: 'Outfit', 'Inter', system-ui, sans-serif;
+  font-feature-settings: 'ss01' 1, 'liga' 1;
+}
+
+.award-heading {
+  font-family: var(--font-display), Inter, system-ui, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.5px;
+}
+
+.award-subheading {
+  font-family: var(--font-display), Inter, system-ui, sans-serif;
+  font-weight: 500;
+  color: #1f2937; /* gray-800 */
 }
 
 /* Animated blob background inspired by ChatGPT */
@@ -106,7 +252,8 @@ body {
 }
 
 @keyframes floatBlob1 {
-  0%, 100% {
+  0%,
+  100% {
     transform: translate(0, 0) scale(1);
   }
   33% {
@@ -118,7 +265,8 @@ body {
 }
 
 @keyframes floatBlob2 {
-  0%, 100% {
+  0%,
+  100% {
     transform: translate(0, 0) scale(1);
   }
   33% {
@@ -130,7 +278,8 @@ body {
 }
 
 @keyframes floatBlob3 {
-  0%, 100% {
+  0%,
+  100% {
     transform: translate(0, 0) scale(1);
   }
   50% {
@@ -139,7 +288,8 @@ body {
 }
 
 @keyframes floatBlob4 {
-  0%, 100% {
+  0%,
+  100% {
     transform: translate(0, 0) scale(1);
   }
   50% {
@@ -148,7 +298,8 @@ body {
 }
 
 @keyframes floatBlob5 {
-  0%, 100% {
+  0%,
+  100% {
     transform: translate(0, 0) scale(1);
   }
   25% {
@@ -193,13 +344,13 @@ body {
 }
 
 /* Rating colors */
-.rating-1 { @apply bg-red-600 text-white; }
-.rating-2 { @apply bg-orange-600 text-white; }
-.rating-3 { @apply bg-amber-600 text-white; }
-.rating-4 { @apply bg-yellow-600 text-white; }
-.rating-5 { @apply bg-lime-600 text-white; }
-.rating-6 { @apply bg-green-600 text-white; }
-.rating-7 { @apply bg-emerald-600 text-white; }
-.rating-8 { @apply bg-teal-600 text-white; }
-.rating-9 { @apply bg-cyan-600 text-white; }
-.rating-10 { @apply bg-sky-600 text-white; }
+.rating-1 { background-color:#dc2626; color:#fff; }
+.rating-2 { background-color:#ea580c; color:#fff; }
+.rating-3 { background-color:#d97706; color:#fff; }
+.rating-4 { background-color:#ca8a04; color:#fff; }
+.rating-5 { background-color:#65a30d; color:#fff; }
+.rating-6 { background-color:#16a34a; color:#fff; }
+.rating-7 { background-color:#059669; color:#fff; }
+.rating-8 { background-color:#0d9488; color:#fff; }
+.rating-9 { background-color:#0891b2; color:#fff; }
+.rating-10 { background-color:#0284c7; color:#fff; }

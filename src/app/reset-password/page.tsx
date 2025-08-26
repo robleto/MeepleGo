@@ -1,4 +1,4 @@
-"use client"
+'use client'
 
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
@@ -24,10 +24,14 @@ export default function ResetPasswordPage() {
 
   return (
     <div className="max-w-md mx-auto px-4 py-12">
-      <h1 className="text-2xl font-semibold text-gray-900 mb-6">Reset your password</h1>
+      <h1 className="text-2xl font-semibold text-gray-900 mb-6">
+        Reset your password
+      </h1>
       <form onSubmit={onSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Email
+          </label>
           <input
             type="email"
             value={email}

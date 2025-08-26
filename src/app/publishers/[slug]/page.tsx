@@ -5,7 +5,9 @@ import { GameWithRanking } from '@/types'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
-interface Props { params: Promise<{ slug: string }> }
+interface Props {
+  params: Promise<{ slug: string }>
+}
 export const revalidate = 60
 
 export default async function PublisherDetailPage({ params }: Props) {
@@ -30,12 +32,14 @@ export default async function PublisherDetailPage({ params }: Props) {
   if (jErr) {
     return (
       <PageLayout>
-        <div className="py-12"><p className="text-red-600">Failed to load games.</p></div>
+        <div className="py-12">
+          <p className="text-red-600">Failed to load games.</p>
+        </div>
       </PageLayout>
     )
   }
 
-  const gameIds = (junctionRows || []).map(r => r.game_id)
+  const gameIds = (junctionRows || []).map((r) => r.game_id)
   let games: GameWithRanking[] = []
   if (gameIds.length > 0) {
     const { data: gameRows, error: gErr } = await supabase
@@ -55,13 +59,20 @@ export default async function PublisherDetailPage({ params }: Props) {
             <h1 className="text-3xl font-bold text-gray-900">{pub.name}</h1>
             <p className="text-gray-600">Games from this publisher</p>
           </div>
-          <Link href="/publishers" className="text-sm text-primary-600 hover:underline">All Publishers →</Link>
+          <Link
+            href="/publishers"
+            className="text-sm text-primary-600 hover:underline"
+          >
+            All Publishers →
+          </Link>
         </div>
         {games.length === 0 && (
-          <div className="rounded-lg border border-gray-200 bg-white p-6 text-center text-sm text-gray-500">No games found for this publisher.</div>
+          <div className="rounded-lg border border-gray-200 bg-white p-6 text-center text-sm text-gray-500">
+            No games found for this publisher.
+          </div>
         )}
         <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-          {games.map(g => (
+          {games.map((g) => (
             <GameCard key={g.id} game={g} viewMode="grid" />
           ))}
         </div>

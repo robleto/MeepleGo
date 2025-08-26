@@ -31,7 +31,10 @@ export async function POST(req: NextRequest) {
     }
     const xml = await resp.text()
 
-    const parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: '@_' })
+    const parser = new XMLParser({
+      ignoreAttributes: false,
+      attributeNamePrefix: '@_',
+    })
     const parsed = parser.parse(xml)
     const item = parsed?.items?.item
     if (!item) {
@@ -46,20 +49,33 @@ export async function POST(req: NextRequest) {
     } else if (item.name) {
       name = item.name['@_value'] || item.name
     }
-    if (!name) return NextResponse.json({ error: 'Name missing' }, { status: 422 })
-    
+    if (!name)
+      return NextResponse.json({ error: 'Name missing' }, { status: 422 })
+
     // Decode HTML entities in the name
     name = decodeHtmlEntities(name)
 
-  const year_published = item.yearpublished ? Number(item.yearpublished['@_value'] || item.yearpublished) : null
-  const min_players = item.minplayers ? Number(item.minplayers['@_value'] || item.minplayers) : null
-  const max_players = item.maxplayers ? Number(item.maxplayers['@_value'] || item.maxplayers) : null
-  const playtime_minutes = item.playingtime ? Number(item.playingtime['@_value'] || item.playingtime) : null
-  const image_url = item.image || null
-  const thumbnail_url = item.thumbnail || null
+    const year_published = item.yearpublished
+      ? Number(item.yearpublished['@_value'] || item.yearpublished)
+      : null
+    const min_players = item.minplayers
+      ? Number(item.minplayers['@_value'] || item.minplayers)
+      : null
+    const max_players = item.maxplayers
+      ? Number(item.maxplayers['@_value'] || item.maxplayers)
+      : null
+    const playtime_minutes = item.playingtime
+      ? Number(item.playingtime['@_value'] || item.playingtime)
+      : null
+    const image_url = item.image || null
+    const thumbnail_url = item.thumbnail || null
 
     // Categories & mechanics from link elements (decode HTML entities)
-    const links = Array.isArray(item.link) ? item.link : (item.link ? [item.link] : [])
+    const links = Array.isArray(item.link)
+      ? item.link
+      : item.link
+        ? [item.link]
+        : []
     const categories: string[] = links
       .filter((l: any) => l['@_type'] === 'boardgamecategory')
       .map((l: any) => decodeHtmlEntities(l['@_value']))
@@ -68,10 +84,14 @@ export async function POST(req: NextRequest) {
       .filter((l: any) => l['@_type'] === 'boardgamemechanic')
       .map((l: any) => decodeHtmlEntities(l['@_value']))
       .filter(Boolean)
-    const rawPublisher = links.find((l: any) => l['@_type'] === 'boardgamepublisher')?.['@_value']
+    const rawPublisher = links.find(
+      (l: any) => l['@_type'] === 'boardgamepublisher'
+    )?.['@_value']
     const publisher = rawPublisher ? decodeHtmlEntities(rawPublisher) : null
 
-    const rawDescription = item.description ? (item.description['@_value'] || item.description) : null
+    const rawDescription = item.description
+      ? item.description['@_value'] || item.description
+      : null
     let description = rawDescription ? decodeHtmlEntities(rawDescription) : null
     if (description) {
       // Normalize whitespace & line breaks similar to hygiene script
@@ -99,7 +119,10 @@ export async function POST(req: NextRequest) {
     let summary: string | null = null
     if (description) {
       const sentenceEnd = description.indexOf('. ')
-      summary = sentenceEnd > -1 ? description.slice(0, sentenceEnd + 1) : description.slice(0, 240)
+      summary =
+        sentenceEnd > -1
+          ? description.slice(0, sentenceEnd + 1)
+          : description.slice(0, 240)
       if (summary.length > 260) summary = summary.slice(0, 260) + '…'
     }
 
@@ -144,32 +167,54 @@ export async function POST(req: NextRequest) {
     } else {
       // Optionally update missing fields
       const patch: any = {}
-      if (!existing.year_published && year_published) patch.year_published = year_published
+      if (!existing.year_published && year_published)
+        patch.year_published = year_published
       if (!existing.min_players && min_players) patch.min_players = min_players
       if (!existing.max_players && max_players) patch.max_players = max_players
-      if (!existing.playtime_minutes && playtime_minutes) patch.playtime_minutes = playtime_minutes
+      if (!existing.playtime_minutes && playtime_minutes)
+        patch.playtime_minutes = playtime_minutes
       if (!existing.image_url && image_url) patch.image_url = image_url
-      if (!existing.thumbnail_url && thumbnail_url) patch.thumbnail_url = thumbnail_url
-      if ((!existing.categories || !existing.categories.length) && categories.length) patch.categories = categories
-      if ((!existing.mechanics || !existing.mechanics.length) && mechanics.length) patch.mechanics = mechanics
+      if (!existing.thumbnail_url && thumbnail_url)
+        patch.thumbnail_url = thumbnail_url
+      if (
+        (!existing.categories || !existing.categories.length) &&
+        categories.length
+      )
+        patch.categories = categories
+      if (
+        (!existing.mechanics || !existing.mechanics.length) &&
+        mechanics.length
+      )
+        patch.mechanics = mechanics
       if (publisher && !existing.publisher) patch.publisher = publisher
       if (!existing.description && description) patch.description = description
       if (!existing.summary && summary) patch.summary = summary
-      if ((!existing.designer || !existing.designer.length) && designers.length) patch.designer = designers
+      if ((!existing.designer || !existing.designer.length) && designers.length)
+        patch.designer = designers
       if (!existing.weight && weight) patch.weight = weight
       if (Object.keys(patch).length) {
-        const { error: updErr } = await client.from('games').update(patch).eq('id', gameId)
+        const { error: updErr } = await client
+          .from('games')
+          .update(patch)
+          .eq('id', gameId)
         if (updErr) throw updErr
       }
     }
 
     // Return the (possibly updated) game row
-    const { data: finalGame, error: finalErr } = await client.from('games').select('*').eq('id', gameId).single()
+    const { data: finalGame, error: finalErr } = await client
+      .from('games')
+      .select('*')
+      .eq('id', gameId)
+      .single()
     if (finalErr) throw finalErr
 
     return NextResponse.json({ game: finalGame }, { status: 200 })
   } catch (e: any) {
     console.error(e)
-    return NextResponse.json({ error: e.message || 'Unexpected error' }, { status: 500 })
+    return NextResponse.json(
+      { error: e.message || 'Unexpected error' },
+      { status: 500 }
+    )
   }
 }

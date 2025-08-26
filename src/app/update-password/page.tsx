@@ -1,4 +1,4 @@
-"use client"
+'use client'
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -32,10 +32,14 @@ export default function UpdatePasswordPage() {
 
   return (
     <div className="max-w-md mx-auto px-4 py-12">
-      <h1 className="text-2xl font-semibold text-gray-900 mb-6">Choose a new password</h1>
+      <h1 className="text-2xl font-semibold text-gray-900 mb-6">
+        Choose a new password
+      </h1>
       <form onSubmit={onSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">New password</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            New password
+          </label>
           <input
             type="password"
             value={password}

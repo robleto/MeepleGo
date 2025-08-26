@@ -1,14 +1,20 @@
 'use client'
 
 import React, { useState, useCallback } from 'react'
-import { SORT_OPTIONS, GROUP_OPTIONS, SortKey, SortOrder, GroupKey } from '@/utils/sharedGameUtils'
-import { 
+import {
+  SORT_OPTIONS,
+  GROUP_OPTIONS,
+  SortKey,
+  SortOrder,
+  GroupKey,
+} from '@/utils/sharedGameUtils'
+import {
   MagnifyingGlassIcon,
   FunnelIcon,
   ChevronUpDownIcon,
   Squares2X2Icon,
   ListBulletIcon,
-  XMarkIcon
+  XMarkIcon,
 } from '@heroicons/react/24/outline'
 
 interface RankingsFiltersProps {
@@ -36,21 +42,28 @@ export default function RankingsFilters({
   setGroupBy,
   searchTerm,
   setSearchTerm,
-  total
+  total,
 }: RankingsFiltersProps) {
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
 
   // Stabilize the search input handler
-  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value)
-  }, [setSearchTerm])
+  const handleSearchChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setSearchTerm(e.target.value)
+    },
+    [setSearchTerm]
+  )
 
   const handleSearchClear = useCallback(() => {
     setSearchTerm('')
   }, [setSearchTerm])
 
   // Clear All handler
-  const isDefault = groupBy === 'none' && sortBy === 'ranking' && sortOrder === 'desc' && viewMode === 'list'
+  const isDefault =
+    groupBy === 'none' &&
+    sortBy === 'ranking' &&
+    sortOrder === 'desc' &&
+    viewMode === 'list'
 
   const handleClearAll = () => {
     setGroupBy('none')
@@ -106,10 +119,12 @@ export default function RankingsFilters({
           <button
             onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
             className="flex items-center gap-2 px-3 py-2 rounded-lg border text-gray-400 border-gray-300 hover:bg-gray-50 bg-white transition-colors"
-            title={`Currently sorting ${SORT_OPTIONS.find(opt => opt.key === sortBy)?.label} ${sortOrder === 'asc' ? 'ascending' : 'descending'}`}
+            title={`Currently sorting ${SORT_OPTIONS.find((opt) => opt.key === sortBy)?.label} ${sortOrder === 'asc' ? 'ascending' : 'descending'}`}
           >
             <ChevronUpDownIcon className="w-4 h-4" />
-            <span className="text-sm hidden sm:inline">{SORT_OPTIONS.find(opt => opt.key === sortBy)?.label}</span>
+            <span className="text-sm hidden sm:inline">
+              {SORT_OPTIONS.find((opt) => opt.key === sortBy)?.label}
+            </span>
           </button>
 
           {/* View Mode Toggle */}
@@ -135,7 +150,9 @@ export default function RankingsFilters({
       </div>
 
       {/* Results count */}
-      <div className="text-sm text-gray-600 mb-2">{total} ranked game{total !== 1 ? 's' : ''}</div>
+      <div className="text-sm text-gray-600 mb-2">
+        {total} ranked game{total !== 1 ? 's' : ''}
+      </div>
 
       {/* Advanced Filters - Collapsible */}
       {showAdvancedFilters && (
@@ -143,7 +160,9 @@ export default function RankingsFilters({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Sort By */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Sort by</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Sort by
+              </label>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as SortKey)}
@@ -159,7 +178,9 @@ export default function RankingsFilters({
 
             {/* Group By */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Group by</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Group by
+              </label>
               <select
                 value={groupBy}
                 onChange={(e) => setGroupBy(e.target.value as GroupKey)}

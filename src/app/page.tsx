@@ -10,28 +10,32 @@ import {
 const features = [
   {
     name: 'Awards',
-    description: 'Create and manage your yearly awards. Nominate and pick winners for categories like Best Game, Best Strategy Game, and more.',
+    description:
+      'Create and manage your yearly awards. Nominate and pick winners for categories like Best Game, Best Strategy Game, and more.',
     href: '/awards',
     icon: TrophyIcon,
     color: 'bg-yellow-500',
   },
   {
     name: 'Rankings',
-    description: 'Rate your games from 1-10 and track which ones you\'ve played. Build your personal ranking system.',
+    description:
+      "Rate your games from 1-10 and track which ones you've played. Build your personal ranking system.",
     href: '/rankings',
     icon: ChartBarIcon,
     color: 'bg-blue-500',
   },
   {
     name: 'Games',
-    description: 'Browse your game collection with detailed information, ratings, and quick actions.',
+    description:
+      'Browse your game collection with detailed information, ratings, and quick actions.',
     href: '/games',
     icon: CubeIcon,
     color: 'bg-green-500',
   },
   {
     name: 'Lists',
-    description: 'Create custom lists like "Top 10 Party Games" or "Games to Play With Family" and organize your collection.',
+    description:
+      'Create custom lists like "Top 10 Party Games" or "Games to Play With Family" and organize your collection.',
     href: '/lists',
     icon: ListBulletIcon,
     color: 'bg-purple-500',
@@ -55,17 +59,25 @@ export default function HomePage() {
             Welcome to MeepleGo
           </h1>
           <p className="mt-4 text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-            Your personal board game collection manager. Track, rate, and organize 
-            your games with powerful tools for awards, rankings, and custom lists.
+            Your personal board game collection manager. Track, rate, and
+            organize your games with powerful tools for awards, rankings, and
+            custom lists.
           </p>
         </div>
 
         {/* Stats */}
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
           {stats.map((stat) => (
-            <div key={stat.label} className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 text-center">
-              <div className="text-2xl font-bold text-gray-900 dark:text-white">{stat.value}</div>
-              <div className="text-sm text-gray-600 dark:text-gray-300">{stat.label}</div>
+            <div
+              key={stat.label}
+              className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 text-center"
+            >
+              <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                {stat.value}
+              </div>
+              <div className="text-sm text-gray-600 dark:text-gray-300">
+                {stat.label}
+              </div>
             </div>
           ))}
         </div>
@@ -79,7 +91,9 @@ export default function HomePage() {
               className="group relative bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow p-6"
             >
               <div className="flex items-center space-x-4">
-                <div className={`flex-shrink-0 p-3 rounded-lg ${feature.color}`}>
+                <div
+                  className={`flex-shrink-0 p-3 rounded-lg ${feature.color}`}
+                >
                   <feature.icon className="h-6 w-6 text-white" />
                 </div>
                 <div className="flex-1">
@@ -97,7 +111,9 @@ export default function HomePage() {
 
         {/* Quick Actions */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-          <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Quick Actions</h2>
+          <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+            Quick Actions
+          </h2>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <Link
               href="/add"
@@ -122,9 +138,12 @@ export default function HomePage() {
 
         {/* Getting Started */}
         <div className="bg-primary-50 dark:bg-primary-900/20 rounded-lg p-6">
-          <h2 className="text-lg font-medium text-primary-900 dark:text-primary-100 mb-2">Getting Started</h2>
+          <h2 className="text-lg font-medium text-primary-900 dark:text-primary-100 mb-2">
+            Getting Started
+          </h2>
           <p className="text-primary-700 dark:text-primary-200 mb-4">
-            Welcome to MeepleGo! To get started, add some games to your collection and begin rating them.
+            Welcome to MeepleGo! To get started, add some games to your
+            collection and begin rating them.
           </p>
           <div className="space-y-2 text-sm text-primary-600 dark:text-primary-300">
             <div>1. Add games using the + button or from the Add page</div>

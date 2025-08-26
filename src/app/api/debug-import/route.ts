@@ -4,8 +4,11 @@ import type { NextRequest } from 'next/server'
 export async function GET(request: NextRequest) {
   try {
     // Get current user
-    const { data: { user }, error: userError } = await supabase.auth.getUser()
-    
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser()
+
     if (userError || !user) {
       return Response.json({ error: 'Not authenticated' }, { status: 401 })
     }
@@ -28,14 +31,16 @@ export async function GET(request: NextRequest) {
     // Check library items
     let libraryItems = []
     if (lists && lists.length > 0) {
-      const libraryList = lists.find(l => l.name === 'Library')
+      const libraryList = lists.find((l) => l.name === 'Library')
       if (libraryList) {
         const { data: items, error: itemsError } = await supabase
           .from('game_list_items')
-          .select(`
+          .select(
+            `
             *,
             games (id, name, year_published)
-          `)
+          `
+          )
           .eq('list_id', libraryList.id)
 
         if (itemsError) {
@@ -49,10 +54,12 @@ export async function GET(request: NextRequest) {
     // Check rankings
     const { data: rankings, error: rankingsError } = await supabase
       .from('rankings')
-      .select(`
+      .select(
+        `
         *,
         games (id, name, year_published)
-      `)
+      `
+      )
       .eq('user_id', user.id)
 
     if (rankingsError) {
@@ -66,14 +73,20 @@ export async function GET(request: NextRequest) {
       library_count: libraryItems.length,
       rankings: rankings || [],
       rankings_count: (rankings || []).length,
-      rankings_with_actual_ratings: (rankings || []).filter(r => typeof r.ranking === 'number').length,
-      rankings_played_only: (rankings || []).filter(r => r.ranking === null && r.played_it === true).length
+      rankings_with_actual_ratings: (rankings || []).filter(
+        (r) => typeof r.ranking === 'number'
+      ).length,
+      rankings_played_only: (rankings || []).filter(
+        (r) => r.ranking === null && r.played_it === true
+      ).length,
     })
-
   } catch (error) {
     console.error('Debug failed:', error)
-    return Response.json({ 
-      error: error instanceof Error ? error.message : 'Unknown error' 
-    }, { status: 500 })
+    return Response.json(
+      {
+        error: error instanceof Error ? error.message : 'Unknown error',
+      },
+      { status: 500 }
+    )
   }
 }

@@ -232,20 +232,83 @@ export interface Database {
           nominee_ids?: string[] | null
         }
       }
+      play_logs: {
+        Row: {
+          id: string
+          user_id: string
+          game_id: string
+          played_at: string
+          rating: number | null
+          player_count: number | null
+          duration_minutes: number | null
+          location: string | null
+          notes: string | null
+          tags: string[] | null
+          is_public: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          game_id: string
+          played_at?: string
+            // rating snapshot at time of play
+          rating?: number | null
+          player_count?: number | null
+          duration_minutes?: number | null
+          location?: string | null
+          notes?: string | null
+          tags?: string[] | null
+          is_public?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          game_id?: string
+          played_at?: string
+          rating?: number | null
+          player_count?: number | null
+          duration_minutes?: number | null
+          location?: string | null
+          notes?: string | null
+          tags?: string[] | null
+          is_public?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
       categories: {
         Row: { id: string; name: string; slug: string; created_at: string }
         Insert: { id?: string; name: string; slug: string; created_at?: string }
-        Update: { id?: string; name?: string; slug?: string; created_at?: string }
+        Update: {
+          id?: string
+          name?: string
+          slug?: string
+          created_at?: string
+        }
       }
       mechanics: {
         Row: { id: string; name: string; slug: string; created_at: string }
         Insert: { id?: string; name: string; slug: string; created_at?: string }
-        Update: { id?: string; name?: string; slug?: string; created_at?: string }
+        Update: {
+          id?: string
+          name?: string
+          slug?: string
+          created_at?: string
+        }
       }
       publishers: {
         Row: { id: string; name: string; slug: string; created_at: string }
         Insert: { id?: string; name: string; slug: string; created_at?: string }
-        Update: { id?: string; name?: string; slug?: string; created_at?: string }
+        Update: {
+          id?: string
+          name?: string
+          slug?: string
+          created_at?: string
+        }
       }
       game_categories: {
         Row: { game_id: string; category_id: string }
@@ -283,8 +346,10 @@ export type Game = Database['public']['Tables']['games']['Row']
 export type Profile = Database['public']['Tables']['profiles']['Row']
 export type Ranking = Database['public']['Tables']['rankings']['Row']
 export type GameList = Database['public']['Tables']['game_lists']['Row']
-export type GameListItem = Database['public']['Tables']['game_list_items']['Row']
+export type GameListItem =
+  Database['public']['Tables']['game_list_items']['Row']
 export type Award = Database['public']['Tables']['awards']['Row']
+export type PlayLog = Database['public']['Tables']['play_logs']['Row']
 export type Category = Database['public']['Tables']['categories']['Row']
 export type Mechanic = Database['public']['Tables']['mechanics']['Row']
 export type Publisher = Database['public']['Tables']['publishers']['Row']

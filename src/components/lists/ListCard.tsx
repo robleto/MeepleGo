@@ -3,12 +3,12 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { GameListWithItems } from '@/types/supabase'
-import { 
-  EyeIcon, 
-  LockClosedIcon, 
-  BookOpenIcon, 
+import {
+  EyeIcon,
+  LockClosedIcon,
+  BookOpenIcon,
   HeartIcon,
-  ListBulletIcon 
+  ListBulletIcon,
 } from '@heroicons/react/24/outline'
 interface ListCardProps {
   list: GameListWithItems
@@ -16,11 +16,15 @@ interface ListCardProps {
   onUpdate?: () => void
 }
 
-export default function ListCard({ list, isPublic = false, onUpdate }: ListCardProps) {
+export default function ListCard({
+  list,
+  isPublic = false,
+  onUpdate,
+}: ListCardProps) {
   const [imageErrors, setImageErrors] = useState<Set<string>>(new Set())
 
   const handleImageError = (gameId: string) => {
-    setImageErrors(prev => {
+    setImageErrors((prev) => {
       const newSet = new Set(prev)
       newSet.add(gameId)
       return newSet
@@ -29,11 +33,13 @@ export default function ListCard({ list, isPublic = false, onUpdate }: ListCardP
 
   const formatTimeAgo = (dateString: string | null) => {
     if (!dateString) return 'Unknown'
-    
+
     const date = new Date(dateString)
     const now = new Date()
-    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60))
-    
+    const diffInMinutes = Math.floor(
+      (now.getTime() - date.getTime()) / (1000 * 60)
+    )
+
     if (diffInMinutes < 60) return `${diffInMinutes}m ago`
     if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h ago`
     if (diffInMinutes < 10080) return `${Math.floor(diffInMinutes / 1440)}d ago`
@@ -79,7 +85,7 @@ export default function ListCard({ list, isPublic = false, onUpdate }: ListCardP
   }
 
   return (
-    <Link 
+    <Link
       href={getListHref()}
       className="block bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-lg transition-shadow duration-200 overflow-hidden group"
     >
@@ -93,14 +99,14 @@ export default function ListCard({ list, isPublic = false, onUpdate }: ListCardP
               const zIndex = topGames.length - index
               const rotation = (index - 2) * 8 // Center around index 2
               const xOffset = (index - 2) * 12
-              
+
               return (
                 <div
                   key={game.id}
                   className="absolute w-16 h-20 rounded-md shadow-lg transition-transform group-hover:scale-105"
                   style={{
                     transform: `rotate(${rotation}deg) translateX(${xOffset}px)`,
-                    zIndex
+                    zIndex,
                   }}
                 >
                   {game.thumbnail_url && !hasError ? (
@@ -123,10 +129,10 @@ export default function ListCard({ list, isPublic = false, onUpdate }: ListCardP
           </div>
         ) : (
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className={`w-16 h-16 rounded-lg ${getListColor()} bg-opacity-20 dark:bg-opacity-30 flex items-center justify-center`}>
-              <div className={getListColor()}>
-                {getListIcon()}
-              </div>
+            <div
+              className={`w-16 h-16 rounded-lg ${getListColor()} bg-opacity-20 dark:bg-opacity-30 flex items-center justify-center`}
+            >
+              <div className={getListColor()}>{getListIcon()}</div>
             </div>
           </div>
         )}
@@ -137,25 +143,27 @@ export default function ListCard({ list, isPublic = false, onUpdate }: ListCardP
         {/* List Title and Type */}
         <div className="flex items-start justify-between mb-2">
           <div className="flex items-center gap-2 min-w-0 flex-1">
-            <div className={getListColor()}>
-              {getListIcon()}
-            </div>
+            <div className={getListColor()}>{getListIcon()}</div>
             <h3 className="font-semibold text-gray-900 dark:text-white truncate">
               {list.name}
             </h3>
           </div>
-          
+
           {/* Privacy Indicator */}
           <div className="flex items-center gap-1 flex-shrink-0 ml-2">
             {list.is_public ? (
               <>
                 <EyeIcon className="w-3 h-3 text-green-500" />
-                <span className="text-xs text-green-600 dark:text-green-400">Public</span>
+                <span className="text-xs text-green-600 dark:text-green-400">
+                  Public
+                </span>
               </>
             ) : (
               <>
                 <LockClosedIcon className="w-3 h-3 text-gray-400" />
-                <span className="text-xs text-gray-500 dark:text-gray-400">Private</span>
+                <span className="text-xs text-gray-500 dark:text-gray-400">
+                  Private
+                </span>
               </>
             )}
           </div>

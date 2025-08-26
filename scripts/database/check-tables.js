@@ -13,18 +13,22 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
 async function checkTables() {
   console.log('🔍 Checking existing tables...')
-  
+
   try {
     // Try to check what tables exist by attempting to query each one
-    const tables = ['games', 'profiles', 'rankings', 'game_lists', 'game_list_items', 'awards']
-    
+    const tables = [
+      'games',
+      'profiles',
+      'rankings',
+      'game_lists',
+      'game_list_items',
+      'awards',
+    ]
+
     for (const table of tables) {
       try {
-        const { data, error } = await supabase
-          .from(table)
-          .select('*')
-          .limit(1)
-        
+        const { data, error } = await supabase.from(table).select('*').limit(1)
+
         if (error) {
           console.log(`❌ Table '${table}' - Error: ${error.message}`)
         } else {

@@ -41,41 +41,52 @@ export default function WishlistPage() {
     setSearchTerm,
   } = useGameFilters(games)
 
-  const [membershipSets, setMembershipSets] = useState<{ library: Set<string>; wishlist: Set<string> } | null>(null)
-  const [membershipMap, setMembershipMap] = useState<Record<string, { library: boolean; wishlist: boolean }>>({})
+  const [membershipSets, setMembershipSets] = useState<{
+    library: Set<string>
+    wishlist: Set<string>
+  } | null>(null)
+  const [membershipMap, setMembershipMap] = useState<
+    Record<string, { library: boolean; wishlist: boolean }>
+  >({})
 
   const fetchWishlist = async () => {
     setRefreshing(true)
     setError(null)
     try {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) { 
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+      if (!session) {
         setGames([])
-        return 
+        return
       }
 
       const lists = await getOrCreateDefaultLists()
       const wishlistId = lists?.wishlist
-      if (!wishlistId) { 
+      if (!wishlistId) {
         setGames([])
-        return 
+        return
       }
 
       // Fetch list items + game data
       const { data: itemRows, error: itemsErr } = await supabase
         .from('game_list_items')
-        .select(`
+        .select(
+          `
           game:games(
             *
           ),
           played_it
-        `)
+        `
+        )
         .eq('list_id', wishlistId)
 
       if (itemsErr) throw itemsErr
 
-      const gameIds = (itemRows || []).map((r: any) => r.game?.id).filter(Boolean)
-      
+      const gameIds = (itemRows || [])
+        .map((r: any) => r.game?.id)
+        .filter(Boolean)
+
       // Separate rankings fetch
       let rankingsMap: Record<string, any> = {}
       if (gameIds.length) {
@@ -84,18 +95,20 @@ export default function WishlistPage() {
           .select('game_id, ranking, played_it')
           .eq('user_id', session.user.id)
           .in('game_id', gameIds)
-        
+
         if (!rankingErr && rankingRows) {
-          rankingRows.forEach(r => { 
-            rankingsMap[r.game_id] = r 
+          rankingRows.forEach((r) => {
+            rankingsMap[r.game_id] = r
           })
         }
       }
 
       const mapped: GameWithRanking[] = (itemRows || []).map((row: any) => ({
         ...row.game,
-        ranking: rankingsMap[row.game?.id] ? { ...rankingsMap[row.game.id] } : null,
-        list_membership: { library: false, wishlist: true }
+        ranking: rankingsMap[row.game?.id]
+          ? { ...rankingsMap[row.game.id] }
+          : null,
+        list_membership: { library: false, wishlist: true },
       }))
 
       setGames(mapped)
@@ -105,10 +118,10 @@ export default function WishlistPage() {
       if (sets) {
         setMembershipSets(sets)
         const map: Record<string, { library: boolean; wishlist: boolean }> = {}
-        mapped.forEach(g => {
+        mapped.forEach((g) => {
           map[g.id] = {
             library: sets.library.has(g.id),
-            wishlist: sets.wishlist.has(g.id)
+            wishlist: sets.wishlist.has(g.id),
           }
         })
         setMembershipMap(map)
@@ -122,22 +135,31 @@ export default function WishlistPage() {
     }
   }
 
-  useEffect(() => { 
-    fetchWishlist() 
+  useEffect(() => {
+    fetchWishlist()
   }, [])
 
-  const handleMembershipChange = (gameId: string, change: { library?: boolean; wishlist?: boolean }) => {
-    setMembershipMap(prev => ({
+  const handleMembershipChange = (
+    gameId: string,
+    change: { library?: boolean; wishlist?: boolean }
+  ) => {
+    setMembershipMap((prev) => ({
       ...prev,
       [gameId]: {
-        library: change.library !== undefined ? change.library : prev[gameId]?.library || false,
-        wishlist: change.wishlist !== undefined ? change.wishlist : prev[gameId]?.wishlist || false,
-      }
+        library:
+          change.library !== undefined
+            ? change.library
+            : prev[gameId]?.library || false,
+        wishlist:
+          change.wishlist !== undefined
+            ? change.wishlist
+            : prev[gameId]?.wishlist || false,
+      },
     }))
 
     // If removing from wishlist, also remove from local games list
     if (change.wishlist === false) {
-      setGames(prev => prev.filter(g => g.id !== gameId))
+      setGames((prev) => prev.filter((g) => g.id !== gameId))
     }
   }
 
@@ -165,7 +187,9 @@ export default function WishlistPage() {
             disabled={refreshing}
             className="inline-flex items-center gap-2 text-sm px-3 py-2 rounded-md border border-gray-300 bg-white hover:bg-gray-50 disabled:opacity-50"
           >
-            <ArrowPathIcon className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+            <ArrowPathIcon
+              className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`}
+            />
             Refresh
           </button>
         </div>
@@ -197,7 +221,7 @@ export default function WishlistPage() {
             sortOrder: 'asc',
             groupBy: 'none',
             filterType: 'none',
-            filterValue: 'all'
+            filterValue: 'all',
           }}
         />
 
@@ -221,12 +245,15 @@ export default function WishlistPage() {
           <div className="text-sm text-gray-600">
             {searchTerm ? (
               <>
-                Search results for "<span className="font-medium">{searchTerm}</span>": {' '}
-                showing {filteredGames.length} game{filteredGames.length !== 1 ? 's' : ''}
+                Search results for "
+                <span className="font-medium">{searchTerm}</span>": showing{' '}
+                {filteredGames.length} game
+                {filteredGames.length !== 1 ? 's' : ''}
               </>
             ) : (
               <>
-                Showing {filteredGames.length} game{filteredGames.length !== 1 ? 's' : ''} in your wishlist
+                Showing {filteredGames.length} game
+                {filteredGames.length !== 1 ? 's' : ''} in your wishlist
               </>
             )}
             {filteredGames.length !== games.length && (
@@ -247,22 +274,28 @@ export default function WishlistPage() {
                     <h2 className="text-2xl font-bold text-gray-900">{key}</h2>
                   </div>
                 )}
-                
-                <div className={
-                  viewMode === 'grid' 
-                    ? 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4'
-                    : 'space-y-4'
-                }>
+
+                <div
+                  className={
+                    viewMode === 'grid'
+                      ? 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4'
+                      : 'space-y-4'
+                  }
+                >
                   {groupGames.map((game) => (
-                    <GameCard 
-                      key={game.id} 
+                    <GameCard
+                      key={game.id}
                       game={{
-                        ...game, 
+                        ...game,
                         list_membership: membershipMap[game.id] || {
-                          library: membershipSets ? membershipSets.library.has(game.id) : false,
-                          wishlist: membershipSets ? membershipSets.wishlist.has(game.id) : true,
-                        }
-                      }} 
+                          library: membershipSets
+                            ? membershipSets.library.has(game.id)
+                            : false,
+                          wishlist: membershipSets
+                            ? membershipSets.wishlist.has(game.id)
+                            : true,
+                        },
+                      }}
                       viewMode={viewMode}
                       onMembershipChange={handleMembershipChange}
                     />
@@ -274,30 +307,41 @@ export default function WishlistPage() {
         )}
 
         {/* Empty State */}
-        {!loading && !error && filteredGames.length === 0 && games.length === 0 && (
-          <div className="text-center py-12">
-            <div className="text-gray-400 mb-4">
-              <HeartIcon className="h-12 w-12 mx-auto" />
+        {!loading &&
+          !error &&
+          filteredGames.length === 0 &&
+          games.length === 0 && (
+            <div className="text-center py-12">
+              <div className="text-gray-400 mb-4">
+                <HeartIcon className="h-12 w-12 mx-auto" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                Your wishlist is empty
+              </h3>
+              <p className="text-gray-600 mb-4">
+                Add games to your wishlist by clicking the heart icon on any
+                game card.
+              </p>
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Your wishlist is empty</h3>
-            <p className="text-gray-600 mb-4">
-              Add games to your wishlist by clicking the heart icon on any game card.
-            </p>
-          </div>
-        )}
+          )}
 
         {/* No Results for Filter */}
-        {!loading && !error && filteredGames.length === 0 && games.length > 0 && (
-          <div className="text-center py-12">
-            <div className="text-gray-400 mb-4">
-              <HeartIcon className="h-12 w-12 mx-auto" />
+        {!loading &&
+          !error &&
+          filteredGames.length === 0 &&
+          games.length > 0 && (
+            <div className="text-center py-12">
+              <div className="text-gray-400 mb-4">
+                <HeartIcon className="h-12 w-12 mx-auto" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                No games match your filters
+              </h3>
+              <p className="text-gray-600 mb-4">
+                Try adjusting your search criteria or clearing some filters.
+              </p>
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No games match your filters</h3>
-            <p className="text-gray-600 mb-4">
-              Try adjusting your search criteria or clearing some filters.
-            </p>
-          </div>
-        )}
+          )}
       </div>
     </PageLayout>
   )

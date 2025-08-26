@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import PageLayout from '@/components/PageLayout'
+import Heading from '@/components/Heading'
 import { supabase } from '@/lib/supabase'
 import { GameList, GameListWithItems } from '@/types/supabase'
 import ListCard from '@/components/lists/ListCard'
@@ -23,8 +24,10 @@ export default function ListsPage() {
   const fetchLists = async () => {
     setLoading(true)
     try {
-      const { data: { session } } = await supabase.auth.getSession()
-      
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+
       if (!session) {
         setIsGuest(true)
         setUserId(null)
@@ -35,13 +38,9 @@ export default function ListsPage() {
 
       setIsGuest(false)
       setUserId(session.user.id)
-      
+
       // Fetch user's own lists (including default library/wishlist)
-      await Promise.all([
-        fetchUserLists(session.user.id),
-        fetchPublicLists()
-      ])
-      
+      await Promise.all([fetchUserLists(session.user.id), fetchPublicLists()])
     } finally {
       setLoading(false)
     }
@@ -50,13 +49,15 @@ export default function ListsPage() {
   const fetchUserLists = async (userId: string) => {
     const { data, error } = await supabase
       .from('game_lists')
-      .select(`
+      .select(
+        `
         *,
         game_list_items(
           *,
           game:games(*)
         )
-      `)
+      `
+      )
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
 
@@ -71,13 +72,15 @@ export default function ListsPage() {
   const fetchPublicLists = async () => {
     const { data, error } = await supabase
       .from('game_lists')
-      .select(`
+      .select(
+        `
         *,
         game_list_items(
           *,
           game:games(*)
         )
-      `)
+      `
+      )
       .eq('is_public', true)
       .order('updated_at', { ascending: false })
       .limit(20)
@@ -91,14 +94,20 @@ export default function ListsPage() {
   }
 
   const defaultLists = useMemo(() => {
-    return userLists.filter(list => ['library', 'wishlist'].includes(list.list_type))
+    return userLists.filter((list) =>
+      ['library', 'wishlist'].includes(list.list_type)
+    )
   }, [userLists])
 
   const customLists = useMemo(() => {
-    return userLists.filter(list => list.list_type === 'custom')
+    return userLists.filter((list) => list.list_type === 'custom')
   }, [userLists])
 
-  const handleCreateList = async (listData: { name: string; description?: string; is_public: boolean }) => {
+  const handleCreateList = async (listData: {
+    name: string
+    description?: string
+    is_public: boolean
+  }) => {
     if (!userId) return
 
     const { data, error } = await supabase
@@ -108,7 +117,7 @@ export default function ListsPage() {
         name: listData.name,
         description: listData.description,
         is_public: listData.is_public,
-        list_type: 'custom'
+        list_type: 'custom',
       })
       .select()
       .single()
@@ -138,17 +147,18 @@ export default function ListsPage() {
       <div className="space-y-8">
         {/* My Lists Section */}
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">
+          <Heading as="h1" size="xl" weightScale className="mb-6">
             {isGuest ? 'Discover Lists' : 'My Lists'}
-          </h1>
-          
+          </Heading>
+
           {isGuest ? (
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-8 text-center">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+              <Heading as="h2" size="md" className="mb-2">
                 Create Your Own Lists
-              </h2>
+              </Heading>
               <p className="text-gray-600 dark:text-gray-300 mb-4">
-                Sign up to create custom game lists, organize your collection, and share with friends.
+                Sign up to create custom game lists, organize your collection,
+                and share with friends.
               </p>
               <button className="bg-primary-600 text-white px-6 py-2 rounded-md hover:bg-primary-700 transition-colors">
                 Sign Up to Get Started
@@ -158,24 +168,24 @@ export default function ListsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {/* Default Lists (Library & Wishlist) */}
               {defaultLists.map((list) => (
-                <ListCard 
-                  key={list.id} 
-                  list={list} 
+                <ListCard
+                  key={list.id}
+                  list={list}
                   onUpdate={() => fetchUserLists(userId!)}
                 />
               ))}
-              
+
               {/* Custom Lists */}
               {customLists.map((list) => (
-                <ListCard 
-                  key={list.id} 
-                  list={list} 
+                <ListCard
+                  key={list.id}
+                  list={list}
                   onUpdate={() => fetchUserLists(userId!)}
                 />
               ))}
-              
+
               {/* Create New List Card */}
-              <div 
+              <div
                 onClick={() => setShowCreateModal(true)}
                 className="bg-gray-50 dark:bg-gray-800 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 hover:border-gray-400 dark:hover:border-gray-500 transition-colors cursor-pointer group"
               >
@@ -183,9 +193,9 @@ export default function ListsPage() {
                   <div className="w-16 h-16 bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-300 dark:group-hover:bg-gray-600 transition-colors">
                     <PlusIcon className="w-8 h-8 text-gray-400 dark:text-gray-500" />
                   </div>
-                  <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                  <Heading as="h3" size="sm" className="mb-2">
                     Create New List
-                  </h3>
+                  </Heading>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
                     Organize your games into custom collections
                   </p>
@@ -198,14 +208,14 @@ export default function ListsPage() {
         {/* Public Lists Section */}
         {publicLists.length > 0 && (
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+            <Heading as="h2" size="lg" weightScale className="mb-6">
               Public Lists
-            </h2>
+            </Heading>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {publicLists.map((list) => (
-                <ListCard 
-                  key={list.id} 
-                  list={list} 
+                <ListCard
+                  key={list.id}
+                  list={list}
                   isPublic={true}
                   onUpdate={fetchPublicLists}
                 />

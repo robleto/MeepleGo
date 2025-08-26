@@ -17,6 +17,7 @@ This guide will help you set up the MeepleGo database schema and import game dat
 5. Click **Run** to execute the schema
 
 This will create:
+
 - ✅ `profiles` table for user data
 - ✅ `games` table for BoardGameGeek game data
 - ✅ `rankings` table for user ratings and played status
@@ -30,16 +31,19 @@ This will create:
 ## Step 2: Deploy Edge Function
 
 1. Install Supabase CLI:
+
    ```bash
    npm install -g supabase
    ```
 
 2. Login to Supabase:
+
    ```bash
    supabase login
    ```
 
 3. Link your project:
+
    ```bash
    supabase link --project-ref YOUR_PROJECT_REF
    ```
@@ -58,6 +62,7 @@ node test-setup.js
 ```
 
 This will:
+
 - ✅ Test Supabase connection
 - ✅ Verify database schema
 - ✅ Test BGG edge function connectivity
@@ -99,12 +104,14 @@ curl -X GET "https://dsqceuerzoeotrcatxvb.supabase.co/functions/v1/populate-game
 ## Step 5: Monitor Import Progress
 
 The edge function includes:
+
 - ⏱️ **Rate limiting**: 2-second delays between batches
 - 🔄 **Error recovery**: Retries on temporary failures
 - 📊 **Progress logging**: Detailed console output
 - 🛡️ **Duplicate handling**: Uses `upsert` to avoid duplicates
 
 You can check the Supabase Functions logs to monitor progress:
+
 1. Go to **Functions** in your Supabase dashboard
 2. Click on `populate-games`
 3. View the **Logs** tab
@@ -121,21 +128,25 @@ SELECT name, year_published, rating FROM games ORDER BY rating DESC LIMIT 10;
 ## Troubleshooting
 
 ### Schema Issues
+
 - Make sure all foreign key constraints are satisfied
 - Check that RLS policies are correctly applied
 - Verify triggers are created successfully
 
 ### Edge Function Issues
+
 - Ensure function is deployed: `supabase functions list`
 - Check logs for errors: Supabase Dashboard > Functions > Logs
 - Verify environment variables are set
 
 ### BGG API Issues
+
 - The function includes rate limiting to respect BGG's API
 - Some games might not have complete data
 - Invalid BGG IDs will be skipped
 
 ### Import Performance
+
 - The function processes games in batches of 100
 - Expect ~2-5 minutes per 1,000 games
 - Monitor Supabase database usage quotas
@@ -143,6 +154,7 @@ SELECT name, year_published, rating FROM games ORDER BY rating DESC LIMIT 10;
 ## Next Steps
 
 After successful import:
+
 1. ✅ Test the development server: `npm run dev`
 2. ✅ Create a user account to test authentication
 3. ✅ Rate some games to test the ranking system
@@ -153,6 +165,7 @@ After successful import:
 ### Update Game Data
 
 Re-run the import function to update existing games:
+
 ```bash
 curl -X GET "https://dsqceuerzoeotrcatxvb.supabase.co/functions/v1/populate-games?max_games=1000" \
   -H "Authorization: Bearer YOUR_SUPABASE_ANON_KEY"
@@ -161,6 +174,7 @@ curl -X GET "https://dsqceuerzoeotrcatxvb.supabase.co/functions/v1/populate-game
 ### Cleanup
 
 To reset the games table:
+
 ```sql
 TRUNCATE games CASCADE;
 ```

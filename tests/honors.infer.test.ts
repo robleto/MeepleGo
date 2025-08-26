@@ -16,17 +16,26 @@ describe('inferHonorCategory truncated & golden geek heuristics', () => {
   })
 
   it('detects truncated slug -winn as Winner', () => {
-    expect(inferHonorCategory(h({ slug: 'golden-geek-best-artwork-and-prese-winn' }))).toBe('Winner')
+    expect(
+      inferHonorCategory(h({ slug: 'golden-geek-best-artwork-and-prese-winn' }))
+    ).toBe('Winner')
   })
 
   it('detects truncated slug -nomin as Nominee', () => {
-    expect(inferHonorCategory(h({ slug: 'golden-geek-best-artwork-and-prese-nomin' }))).toBe('Nominee')
+    expect(
+      inferHonorCategory(
+        h({ slug: 'golden-geek-best-artwork-and-prese-nomin' })
+      )
+    ).toBe('Nominee')
   })
 
   it('infers Golden Geek Winner when truncated category & single game', () => {
     expect(
       inferHonorCategory(
-        h({ title: 'Golden Geek Best Print and Play Board Game Wi', award_type: 'Golden Geek' }),
+        h({
+          title: 'Golden Geek Best Print and Play Board Game Wi',
+          award_type: 'Golden Geek',
+        }),
         { gameCount: 1 }
       )
     ).toBe('Winner')
@@ -35,14 +44,24 @@ describe('inferHonorCategory truncated & golden geek heuristics', () => {
   it('infers Golden Geek Nominee when truncated category & multiple games', () => {
     expect(
       inferHonorCategory(
-        h({ title: 'Golden Geek Best Print and Play Board Game No', award_type: 'Golden Geek' }),
+        h({
+          title: 'Golden Geek Best Print and Play Board Game No',
+          award_type: 'Golden Geek',
+        }),
         { gameCount: 5 }
       )
     ).toBe('Nominee')
   })
 
   it('does not misclassify recommended as Special', () => {
-    expect(inferHonorCategory(h({ title: 'Golden Geek Recommended Something', award_type: 'Golden Geek' }))).toBe('Special')
+    expect(
+      inferHonorCategory(
+        h({
+          title: 'Golden Geek Recommended Something',
+          award_type: 'Golden Geek',
+        })
+      )
+    ).toBe('Special')
   })
 
   it('falls back to provided category if no signals', () => {

@@ -1,4 +1,4 @@
-"use client"
+'use client'
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -15,7 +15,10 @@ export default function LoginPage() {
     e.preventDefault()
     setError(null)
     setLoading(true)
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    })
     setLoading(false)
     if (error) return setError(error.message)
     router.push('/')
@@ -26,7 +29,9 @@ export default function LoginPage() {
       <h1 className="text-2xl font-semibold text-gray-900 mb-6">Log in</h1>
       <form onSubmit={onSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Email
+          </label>
           <input
             type="email"
             value={email}
@@ -36,7 +41,9 @@ export default function LoginPage() {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Password
+          </label>
           <input
             type="password"
             value={password}
@@ -55,8 +62,12 @@ export default function LoginPage() {
         </button>
       </form>
       <div className="flex justify-between text-sm text-gray-600 mt-4">
-        <a href="/signup" className="text-primary-600 hover:text-primary-700">Create an account</a>
-        <a href="/reset-password" className="hover:text-gray-800">Forgot password?</a>
+        <a href="/signup" className="text-primary-600 hover:text-primary-700">
+          Create an account
+        </a>
+        <a href="/reset-password" className="hover:text-gray-800">
+          Forgot password?
+        </a>
       </div>
     </div>
   )

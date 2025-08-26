@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from 'react'
 import { supabase } from '@/lib/supabase'
 import PageLayout from '@/components/PageLayout'
+import Heading from '@/components/Heading'
 import GameCard from '@/components/GameCard'
 import GameFilters from '@/components/GameFilters'
 import { GameWithRanking } from '@/types'
@@ -21,7 +22,7 @@ function GamesPageContent() {
   const [searchTerm, setSearchTerm] = useState('')
 
   const [viewMode, setViewMode] = useViewMode('grid')
-  
+
   const ITEMS_PER_LOAD = 500
 
   // Read search query from URL (e.g., top-nav search submits ?search=foo)
@@ -54,15 +55,23 @@ function GamesPageContent() {
     uniquePlayerCounts,
     uniqueCategories,
     uniqueMechanics,
-  } = useGameFilters(games, { 
-    disableClientSorting: true // Server handles sorting
+  } = useGameFilters(games, {
+    disableClientSorting: true, // Server handles sorting
   })
 
   // Reset games when search, sort, or URL-selected game changes
   useEffect(() => {
     setGames([])
     setHasMore(true)
-  }, [searchTerm, sortBy, sortOrder, groupBy, filterType, filterValue, searchParams?.get('gameId') || null])
+  }, [
+    searchTerm,
+    sortBy,
+    sortOrder,
+    groupBy,
+    filterType,
+    filterValue,
+    searchParams?.get('gameId') || null,
+  ])
 
   // Helper function to build Supabase ordering
   const buildOrderClause = (sortField: string, order: string) => {
@@ -90,10 +99,18 @@ function GamesPageContent() {
   }
 
   // When grouping by year, force server ordering to year desc, then name asc to keep 2025 at top
-  const buildServerOrders = (sortField: string, order: string, groupField: string) => {
+  const buildServerOrders = (
+    sortField: string,
+    order: string,
+    groupField: string
+  ) => {
     if (groupField === 'year_published') {
       return [
-        { column: 'year_published', ascending: false as const, nullsFirst: false as const },
+        {
+          column: 'year_published',
+          ascending: false as const,
+          nullsFirst: false as const,
+        },
         { column: 'name', ascending: true as const },
       ]
     }
@@ -102,7 +119,9 @@ function GamesPageContent() {
   }
 
   // Helper to apply server-side filters based on current filterType/value and URL params
-  const applyServerFilters = (q: ReturnType<typeof supabase.from> extends any ? any : never) => {
+  const applyServerFilters = (
+    q: ReturnType<typeof supabase.from> extends any ? any : never
+  ) => {
     let query = q
 
     // If a specific gameId is provided via top-nav dropdown selection, scope to that game
@@ -146,33 +165,34 @@ function GamesPageContent() {
       setError(null)
 
       // Get current user for rankings
-      const { data: { session } } = await supabase.auth.getSession()
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
       const userId = session?.user?.id
 
       // If we have a search term, use enhanced database search
       if (searchTerm.trim()) {
-        const { games: searchResults, error: searchError } = await searchGamesFallback(
-          searchTerm.trim(),
-          userId,
-          ITEMS_PER_LOAD,
-          games.length
-        )
+        const { games: searchResults, error: searchError } =
+          await searchGamesFallback(
+            searchTerm.trim(),
+            userId,
+            ITEMS_PER_LOAD,
+            games.length
+          )
 
         if (searchError) {
           setError(searchError)
           return
         }
 
-        setGames(prev => [...prev, ...searchResults])
+        setGames((prev) => [...prev, ...searchResults])
         setHasMore(searchResults.length === ITEMS_PER_LOAD)
         return
       }
 
       // Regular load more for non-search cases
       // Build query with search
-      let query = supabase
-        .from('games')
-        .select(`
+      let query = supabase.from('games').select(`
           *,
           rankings(*)
         `)
@@ -187,10 +207,18 @@ function GamesPageContent() {
 
       // Add ordering based on current sort criteria (with grouping awareness)
       const orders = buildServerOrders(sortBy, sortOrder, groupBy)
-      console.log('🔍 Sort Debug (load more):', { sortBy, sortOrder, groupBy, orders })
-      orders.forEach(o => {
+      console.log('🔍 Sort Debug (load more):', {
+        sortBy,
+        sortOrder,
+        groupBy,
+        orders,
+      })
+      orders.forEach((o) => {
         if (o.column === 'year_published' && o.ascending === false) {
-          query = query.order(o.column as any, { ascending: o.ascending, nullsFirst: false })
+          query = query.order(o.column as any, {
+            ascending: o.ascending,
+            nullsFirst: false,
+          })
         } else {
           query = query.order(o.column as any, { ascending: o.ascending })
         }
@@ -208,13 +236,14 @@ function GamesPageContent() {
       }
 
       // Transform the data to match our GameWithRanking type
-      const gamesWithRankings: GameWithRanking[] = gamesData?.map(game => ({
-        ...game,
-        ranking: game.rankings?.[0] || null
-      })) || []
+      const gamesWithRankings: GameWithRanking[] =
+        gamesData?.map((game) => ({
+          ...game,
+          ranking: game.rankings?.[0] || null,
+        })) || []
 
       // Append new games to existing ones
-      setGames(prev => [...prev, ...gamesWithRankings])
+      setGames((prev) => [...prev, ...gamesWithRankings])
       setHasMore(gamesData?.length === ITEMS_PER_LOAD)
     } catch (err) {
       console.error('Error loading more games:', err)
@@ -232,17 +261,20 @@ function GamesPageContent() {
         setError(null)
 
         // Get current user for rankings
-        const { data: { session } } = await supabase.auth.getSession()
+        const {
+          data: { session },
+        } = await supabase.auth.getSession()
         const userId = session?.user?.id
 
         // If we have a search term, use enhanced database search
         if (searchTerm.trim()) {
-          const { games: searchResults, error: searchError } = await searchGamesFallback(
-            searchTerm.trim(),
-            userId,
-            ITEMS_PER_LOAD,
-            0
-          )
+          const { games: searchResults, error: searchError } =
+            await searchGamesFallback(
+              searchTerm.trim(),
+              userId,
+              ITEMS_PER_LOAD,
+              0
+            )
 
           if (searchError) {
             setError(searchError)
@@ -256,9 +288,7 @@ function GamesPageContent() {
 
         // Regular query for non-search cases
         // Build query with search
-        let query = supabase
-          .from('games')
-          .select(`
+        let query = supabase.from('games').select(`
             *,
             rankings(*)
           `)
@@ -273,10 +303,18 @@ function GamesPageContent() {
 
         // Add ordering based on current sort criteria (with grouping awareness)
         const orders = buildServerOrders(sortBy, sortOrder, groupBy)
-        console.log('🔍 Initial Sort Debug:', { sortBy, sortOrder, groupBy, orders })
-        orders.forEach(o => {
+        console.log('🔍 Initial Sort Debug:', {
+          sortBy,
+          sortOrder,
+          groupBy,
+          orders,
+        })
+        orders.forEach((o) => {
           if (o.column === 'year_published' && o.ascending === false) {
-            query = query.order(o.column as any, { ascending: o.ascending, nullsFirst: false })
+            query = query.order(o.column as any, {
+              ascending: o.ascending,
+              nullsFirst: false,
+            })
           } else {
             query = query.order(o.column as any, { ascending: o.ascending })
           }
@@ -292,19 +330,34 @@ function GamesPageContent() {
         }
 
         // Transform the data to match our GameWithRanking type
-        const gamesWithRankings: GameWithRanking[] = gamesData?.map(game => ({
-          ...game,
-          ranking: game.rankings?.[0] || null
-        })) || []
+        const gamesWithRankings: GameWithRanking[] =
+          gamesData?.map((game) => ({
+            ...game,
+            ranking: game.rankings?.[0] || null,
+          })) || []
 
         console.log('🎮 Initial games loaded:', gamesWithRankings.length)
-        console.log('📅 First 10 games by year:', gamesWithRankings.slice(0, 10).map(g => ({ name: g.name, year: g.year_published })))
-        console.log('🔍 2025 games found:', gamesWithRankings.filter(g => g.year_published === 2025).length)
-        console.log('📊 Year distribution:', gamesWithRankings.reduce((acc, game) => {
-          const year = game.year_published || 'Unknown'
-          acc[year] = (acc[year] || 0) + 1
-          return acc
-        }, {} as Record<string | number, number>))
+        console.log(
+          '📅 First 10 games by year:',
+          gamesWithRankings
+            .slice(0, 10)
+            .map((g) => ({ name: g.name, year: g.year_published }))
+        )
+        console.log(
+          '🔍 2025 games found:',
+          gamesWithRankings.filter((g) => g.year_published === 2025).length
+        )
+        console.log(
+          '📊 Year distribution:',
+          gamesWithRankings.reduce(
+            (acc, game) => {
+              const year = game.year_published || 'Unknown'
+              acc[year] = (acc[year] || 0) + 1
+              return acc
+            },
+            {} as Record<string | number, number>
+          )
+        )
 
         // If grouping by year, ensure we include all games from the top year (e.g., 2025) before truncating
         let combined = gamesWithRankings
@@ -316,9 +369,7 @@ function GamesPageContent() {
 
           // Helper to fetch additional pages with the exact same query ordering
           const fetchNextBatch = async (start: number, end: number) => {
-            let q = supabase
-              .from('games')
-              .select(`
+            let q = supabase.from('games').select(`
                 *,
                 rankings(*)
               `)
@@ -328,14 +379,19 @@ function GamesPageContent() {
             }
             if (searchTerm.trim()) {
               const term = searchTerm.trim()
-              q = q.or(`name.ilike.%${term}%,publisher.ilike.%${term}%,summary.ilike.%${term}%`)
+              q = q.or(
+                `name.ilike.%${term}%,publisher.ilike.%${term}%,summary.ilike.%${term}%`
+              )
             }
             // Apply the same filters
             q = applyServerFilters(q)
             const extraOrders = buildServerOrders(sortBy, sortOrder, groupBy)
-            extraOrders.forEach(o => {
+            extraOrders.forEach((o) => {
               if (o.column === 'year_published' && o.ascending === false) {
-                q = q.order(o.column as any, { ascending: o.ascending, nullsFirst: false })
+                q = q.order(o.column as any, {
+                  ascending: o.ascending,
+                  nullsFirst: false,
+                })
               } else {
                 q = q.order(o.column as any, { ascending: o.ascending })
               }
@@ -346,15 +402,19 @@ function GamesPageContent() {
 
           // Keep fetching while we are still within the same top year window
           while (moreAvailable && lastYear === topYear) {
-            const { data: nextData, error: nextErr } = await fetchNextBatch(nextStart, nextStart + ITEMS_PER_LOAD - 1)
+            const { data: nextData, error: nextErr } = await fetchNextBatch(
+              nextStart,
+              nextStart + ITEMS_PER_LOAD - 1
+            )
             if (nextErr) {
               console.error('Error fetching continuation page:', nextErr)
               break
             }
-            const nextMapped: GameWithRanking[] = nextData?.map(game => ({
-              ...game,
-              ranking: game.rankings?.[0] || null
-            })) || []
+            const nextMapped: GameWithRanking[] =
+              nextData?.map((game) => ({
+                ...game,
+                ranking: game.rankings?.[0] || null,
+              })) || []
 
             combined = [...combined, ...nextMapped]
             moreAvailable = nextData?.length === ITEMS_PER_LOAD
@@ -362,7 +422,8 @@ function GamesPageContent() {
             nextStart += ITEMS_PER_LOAD
 
             // Safety: don't fetch excessively in one go
-            if (nextStart > ITEMS_PER_LOAD * 6) { // cap ~3000 items in one initial load
+            if (nextStart > ITEMS_PER_LOAD * 6) {
+              // cap ~3000 items in one initial load
               break
             }
           }
@@ -381,23 +442,30 @@ function GamesPageContent() {
     initialLoad()
   }, [searchTerm, sortBy, sortOrder, groupBy, filterType, filterValue])
 
-  const [membershipSets, setMembershipSets] = useState<{ library: Set<string>; wishlist: Set<string> } | null>(null)
-  const [membershipMap, setMembershipMap] = useState<Record<string, { library: boolean; wishlist: boolean }>>({})
+  const [membershipSets, setMembershipSets] = useState<{
+    library: Set<string>
+    wishlist: Set<string>
+  } | null>(null)
+  const [membershipMap, setMembershipMap] = useState<
+    Record<string, { library: boolean; wishlist: boolean }>
+  >({})
 
   // Fetch membership once after initial games load (and when games list changes substantially)
   useEffect(() => {
-    (async () => {
-      const { data: { session } } = await supabase.auth.getSession()
+    ;(async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
       if (!session) return
       const sets = await getMembershipSets()
       if (sets) {
         setMembershipSets(sets)
         // initialize membershipMap from sets
         const map: Record<string, { library: boolean; wishlist: boolean }> = {}
-        games.forEach(g => {
+        games.forEach((g) => {
           map[g.id] = {
             library: sets.library.has(g.id),
-            wishlist: sets.wishlist.has(g.id)
+            wishlist: sets.wishlist.has(g.id),
           }
         })
         setMembershipMap(map)
@@ -405,18 +473,32 @@ function GamesPageContent() {
     })()
   }, [games.length])
 
-  const handleMembershipChange = (gameId: string, change: { library?: boolean; wishlist?: boolean }) => {
-    setMembershipMap(prev => ({
+  const handleMembershipChange = (
+    gameId: string,
+    change: { library?: boolean; wishlist?: boolean }
+  ) => {
+    setMembershipMap((prev) => ({
       ...prev,
       [gameId]: {
-        library: change.library !== undefined ? change.library : prev[gameId]?.library || false,
-        wishlist: change.wishlist !== undefined ? change.wishlist : prev[gameId]?.wishlist || false,
-      }
+        library:
+          change.library !== undefined
+            ? change.library
+            : prev[gameId]?.library || false,
+        wishlist:
+          change.wishlist !== undefined
+            ? change.wishlist
+            : prev[gameId]?.wishlist || false,
+      },
     }))
   }
 
   // Local slugify mirroring server mg_slugify (must stay in sync)
-  const slugify = (input: string) => input.toLowerCase().trim().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')
+  const slugify = (input: string) =>
+    input
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
 
   const taxonomyLinkForGroup = (groupKey: string) => {
     if (groupBy === 'categories') {
@@ -450,8 +532,12 @@ function GamesPageContent() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Games</h1>
-            <p className="text-gray-600">Browse and manage your game collection</p>
+            <Heading as="h1" size="xl" weightScale>
+              Games
+            </Heading>
+            <p className="text-gray-600">
+              Browse and manage your game collection
+            </p>
           </div>
         </div>
 
@@ -482,7 +568,7 @@ function GamesPageContent() {
             sortOrder: 'desc',
             groupBy: 'year_published',
             filterType: 'none',
-            filterValue: 'all'
+            filterValue: 'all',
           }}
         />
 
@@ -506,8 +592,9 @@ function GamesPageContent() {
           <div className="text-sm text-gray-600">
             {searchTerm ? (
               <>
-                Search results for "<span className="font-medium">{searchTerm}</span>": {' '}
-                showing {games.length} game{games.length !== 1 ? 's' : ''}
+                Search results for "
+                <span className="font-medium">{searchTerm}</span>": showing{' '}
+                {games.length} game{games.length !== 1 ? 's' : ''}
                 {hasMore && ' (more available)'}
               </>
             ) : (
@@ -532,29 +619,41 @@ function GamesPageContent() {
                 {groupBy !== 'none' && (
                   <div className="mb-6 flex items-center justify-between">
                     <h2 className="text-2xl font-bold text-gray-900">{key}</h2>
-                    {['categories','mechanics','publisher'].includes(groupBy) && taxonomyLinkForGroup(key) && (
-                      <a
-                        href={taxonomyLinkForGroup(key)!}
-                        className="text-sm font-medium text-primary-600 hover:underline focus:outline-none focus:ring-2 focus:ring-primary-500 rounded"
-                      >
-                        See all →
-                      </a>
-                    )}
+                    {['categories', 'mechanics', 'publisher'].includes(
+                      groupBy
+                    ) &&
+                      taxonomyLinkForGroup(key) && (
+                        <a
+                          href={taxonomyLinkForGroup(key)!}
+                          className="text-sm font-medium text-primary-600 hover:underline focus:outline-none focus:ring-2 focus:ring-primary-500 rounded"
+                        >
+                          See all →
+                        </a>
+                      )}
                   </div>
                 )}
-                
-                <div className={
-                  viewMode === 'grid' 
-                    ? 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4'
-                    : 'space-y-4'
-                }>
+
+                <div
+                  className={
+                    viewMode === 'grid'
+                      ? 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4'
+                      : 'space-y-4'
+                  }
+                >
                   {groupGames.map((game) => (
-                    <GameCard 
-                      key={game.id} 
-                      game={{...game, list_membership: membershipMap[game.id] || {
-                        library: membershipSets ? membershipSets.library.has(game.id) : false,
-                        wishlist: membershipSets ? membershipSets.wishlist.has(game.id) : false,
-                      }}} 
+                    <GameCard
+                      key={game.id}
+                      game={{
+                        ...game,
+                        list_membership: membershipMap[game.id] || {
+                          library: membershipSets
+                            ? membershipSets.library.has(game.id)
+                            : false,
+                          wishlist: membershipSets
+                            ? membershipSets.wishlist.has(game.id)
+                            : false,
+                        },
+                      }}
                       viewMode={viewMode}
                       onMembershipChange={handleMembershipChange}
                     />
@@ -586,35 +685,47 @@ function GamesPageContent() {
         )}
 
         {/* Empty State */}
-        {!loading && !error && filteredGames.length === 0 && games.length === 0 && (
-          <div className="text-center py-12">
-            <div className="text-gray-400 mb-4">
-              <Squares2X2Icon className="h-12 w-12 mx-auto" />
+        {!loading &&
+          !error &&
+          filteredGames.length === 0 &&
+          games.length === 0 && (
+            <div className="text-center py-12">
+              <div className="text-gray-400 mb-4">
+                <Squares2X2Icon className="h-12 w-12 mx-auto" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                No games found
+              </h3>
+              <p className="text-gray-600 mb-4">
+                {searchTerm
+                  ? 'No games match your search criteria.'
+                  : 'Get started by adding your first game to the collection.'}
+              </p>
+              {!searchTerm && (
+                <button className="bg-primary-600 text-white px-4 py-2 rounded-md hover:bg-primary-700">
+                  Add Game
+                </button>
+              )}
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No games found</h3>
-            <p className="text-gray-600 mb-4">
-              {searchTerm ? 'No games match your search criteria.' : 'Get started by adding your first game to the collection.'}
-            </p>
-            {!searchTerm && (
-              <button className="bg-primary-600 text-white px-4 py-2 rounded-md hover:bg-primary-700">
-                Add Game
-              </button>
-            )}
-          </div>
-        )}
+          )}
 
         {/* No Results for Filter */}
-        {!loading && !error && filteredGames.length === 0 && games.length > 0 && (
-          <div className="text-center py-12">
-            <div className="text-gray-400 mb-4">
-              <Squares2X2Icon className="h-12 w-12 mx-auto" />
+        {!loading &&
+          !error &&
+          filteredGames.length === 0 &&
+          games.length > 0 && (
+            <div className="text-center py-12">
+              <div className="text-gray-400 mb-4">
+                <Squares2X2Icon className="h-12 w-12 mx-auto" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                No games match your filters
+              </h3>
+              <p className="text-gray-600 mb-4">
+                Try adjusting your search criteria or clearing some filters.
+              </p>
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No games match your filters</h3>
-            <p className="text-gray-600 mb-4">
-              Try adjusting your search criteria or clearing some filters.
-            </p>
-          </div>
-        )}
+          )}
       </div>
     </PageLayout>
   )
@@ -622,14 +733,16 @@ function GamesPageContent() {
 
 export default function GamesPage() {
   return (
-    <Suspense fallback={
-      <PageLayout>
-        <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-          <span className="ml-2 text-gray-600">Loading...</span>
-        </div>
-      </PageLayout>
-    }>
+    <Suspense
+      fallback={
+        <PageLayout>
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+            <span className="ml-2 text-gray-600">Loading...</span>
+          </div>
+        </PageLayout>
+      }
+    >
       <GamesPageContent />
     </Suspense>
   )

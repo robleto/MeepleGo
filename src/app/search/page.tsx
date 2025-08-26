@@ -12,7 +12,7 @@ export default function SearchPage() {
             Search your collection and discover new games
           </p>
         </div>
-        
+
         <div className="max-w-2xl mx-auto">
           <div className="relative">
             <input
@@ -25,7 +25,9 @@ export default function SearchPage() {
         </div>
 
         <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">Search Features</h2>
+          <h2 className="text-lg font-medium text-gray-900 mb-4">
+            Search Features
+          </h2>
           <ul className="space-y-2 text-gray-600">
             <li>• Global search across your collection</li>
             <li>• Advanced filtering options</li>
