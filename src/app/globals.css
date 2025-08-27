@@ -3,6 +3,17 @@
 @tailwind utilities;
 
 
+/* Base link styling (raw CSS to avoid @apply processing issues) */
+a { color: #2563eb; transition: color .15s ease; text-decoration: none; }
+a:hover { color: #3b82f6; }
+.dark a { color: #60a5fa; text-decoration: none; }
+.dark a:hover { color: #93c5fd; }
+a:focus-visible { outline: 2px solid #2563eb; outline-offset: 2px; border-radius:4px; }
+.dark a:focus-visible { outline-color: #60a5fa; }
+/* Opt-out helper */
+a.unstyled, .dark a.unstyled { color: inherit; text-decoration: none; }
+a.unstyled:hover, .dark a.unstyled:hover { color: inherit; }
+
 :root {
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
@@ -35,7 +46,24 @@
   --shadow-sm: 0 2px 4px rgba(15,23,42,0.06), 0 1px 2px rgba(15,23,42,0.04);
   --shadow-md: 0 4px 12px -2px rgba(15,23,42,0.08), 0 2px 4px rgba(15,23,42,0.06);
   --shadow-lg: 0 8px 24px -4px rgba(15,23,42,0.12), 0 4px 10px rgba(15,23,42,0.08);
+
+  /* Typography overrides: use Proxima Nova for body & Rift Soft for headings */
+  --font-inter: 'Proxima Nova';
+  /* Using explicit font-family declarations; removing Tailwind variable indirection */
+  --font-display: 'Rift Soft';
 }
+
+/* Global base font size increase (affects all rem-based typography & spacing) */
+html { font-size: 18px; }
+
+/* --------------------------------------------------
+   Custom Font Faces (ensure you have proper licenses)
+   Place font files in /public/fonts/ ... file names below are suggestions.
+   Proxima Nova and Rift Soft are commercially licensed; replace with valid
+   self-hosted files or load via an authorized service.
+-------------------------------------------------- */
+/* Self-host @font-face blocks removed in favor of Adobe Fonts kit.
+  If you later self-host, restore these with correct file paths. */
 
 @media (prefers-color-scheme: dark) {
   :root {
@@ -72,7 +100,38 @@
 body {
   color: rgb(var(--foreground-rgb));
   background: var(--color-bg);
+  /* Adobe kit supplies Proxima Nova; add alias names to cover kit naming variations */
+  font-family: 'Proxima Nova', proxima-nova, system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+  font-weight: 400;
 }
+
+/* Reusable panel wrapper (award sections, hero blocks, general cards) */
+.panel { 
+  --panel-pad: 2rem; /* default ~32px (Tailwind p-8 at base 16px) */
+  margin-bottom:1.5rem; 
+  background:#ffffff; 
+  border:1px solid #f3f4f6; 
+  border-radius:0.5rem; 
+  padding:var(--panel-pad);
+  box-shadow:0 1px 2px rgba(0,0,0,0.05); 
+  flex:1; 
+}
+/* Attribute-based overrides: <div class="panel" data-pad="sm"> */
+.panel[data-pad="xs"] { --panel-pad:0.75rem; }
+.panel[data-pad="sm"] { --panel-pad:1.25rem; }
+.panel[data-pad="md"] { --panel-pad:1.75rem; }
+.panel[data-pad="lg"] { --panel-pad:2.5rem; }
+.panel[data-pad="xl"] { --panel-pad:3rem; }
+
+/* Utility to allow direct override without attribute: add class panel--tight or panel--loose */
+.panel.panel--tight { --panel-pad:1rem; }
+.panel.panel--loose { --panel-pad:3rem; }
+.dark .panel { background: rgba(17,24,39,0.6); border-color: #1f2937; }
+
+/* Remove global Rift Soft from all headings; default to body font.
+  Provide opt-in utilities for selective display usage. */
+h1, h2, h3, h4, h5, h6 { font-family: inherit; font-weight:600; letter-spacing:-0.5px; }
+.heading-display { font-family: 'Rift Soft', rift-soft, 'Proxima Nova', proxima-nova, system-ui, sans-serif; }
 
 /* Structural utilities */
 .app-container { max-width: 1200px; margin: 0 auto; padding: 2rem 1.25rem; }
@@ -116,57 +175,6 @@ body {
 @keyframes toastOut { to { opacity:0; transform: translateY(-6px) scale(.96); } }
 
 
-/* ---------------------------------------------
-   Typography Set B (Prestige / Serif Contrast)
-   Toggle by adding class `typography-b` to <html>.
-   This remaps the generic CSS vars used in Tailwind font stacks
-   so components automatically pick up alternative fonts without code changes.
-   Set A (default): Inter (body) + Outfit (display)
-   Set B: Geist (body) + Fraunces (primary display/award) + Playfair (alt award)
----------------------------------------------- */
-
-html.typography-b {
-  /* Override semantic vars to point at B-set */
-  --font-inter: var(--font-sans-b); /* body -> Geist */
-  --font-display: var(--font-award-b); /* display -> Fraunces */
-}
-
-/* Optional helper class to swap Fraunces for Playfair on specific elements */
-.award-serif-alt { font-family: var(--font-award-b-alt), var(--font-award-b), var(--font-display), serif; }
-
-/* Utility for award / prestige headings when B-set active (falls back gracefully) */
-.award-heading-prestige { font-family: var(--font-award-b), var(--font-display), serif; font-weight: 600; letter-spacing: -0.5px; }
-.award-heading-prestige-alt { font-family: var(--font-award-b-alt), var(--font-award-b), var(--font-display), serif; font-weight: 600; letter-spacing: -0.5px; }
-
-/* Poster experiment (Archivo Black) */
-.award-heading-poster { font-family: var(--font-award-poster), var(--font-display), 'Archivo Black', sans-serif; font-weight: 400; letter-spacing: -0.75px; }
-.award-heading-poster-tight { font-family: var(--font-award-poster), var(--font-display), 'Archivo Black', sans-serif; font-weight: 400; letter-spacing: -1px; }
-
-/* Soft heading token (Epilogue) */
-.heading-soft { font-family: var(--font-display-soft), var(--font-display), 'Epilogue', sans-serif; font-weight: 500; letter-spacing: -0.25px; }
-
-/* Optical size / line-height helpers */
-.heading-tight { line-height:1.05; }
-.heading-normal { line-height:1.15; }
-.heading-relaxed { line-height:1.25; }
-
-/* Display font utilities */
-.font-display {
-  font-family: 'Outfit', 'Inter', system-ui, sans-serif;
-  font-feature-settings: 'ss01' 1, 'liga' 1;
-}
-
-.award-heading {
-  font-family: var(--font-display), Inter, system-ui, sans-serif;
-  font-weight: 600;
-  letter-spacing: -0.5px;
-}
-
-.award-subheading {
-  font-family: var(--font-display), Inter, system-ui, sans-serif;
-  font-weight: 500;
-  color: #1f2937; /* gray-800 */
-}
 
 /* Animated blob background inspired by ChatGPT */
 .gradient-background {

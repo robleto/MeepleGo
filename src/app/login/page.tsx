@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import AuthLayout from '@/components/AuthLayout'
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -13,6 +13,8 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null)
   const [info, setInfo] = useState<string | null>(null)
   const [showPassword, setShowPassword] = useState(false)
+  const [magicSending, setMagicSending] = useState(false)
+  const [magicSent, setMagicSent] = useState(false)
 
   // If already authenticated, skip login form
   const searchParams = useSearchParams()
@@ -58,6 +60,22 @@ export default function LoginPage() {
       return
     }
   router.push(nextPath)
+  }
+
+  const sendMagicLink = async () => {
+    setError(null)
+    setInfo(null)
+    setMagicSending(true)
+  const redirectBase = process.env.NEXT_PUBLIC_AUTH_REDIRECT_BASE || window.location.origin
+  const { error } = await supabase.auth.signInWithOtp({ email: email.trim(), options: { shouldCreateUser: false, emailRedirectTo: `${redirectBase}/auth/callback` } })
+    setMagicSending(false)
+    if (error) {
+      setError(error.message)
+      setInfo('Magic link failed. If this email is not registered in this Supabase project you will always see invalid credentials.')
+    } else {
+      setMagicSent(true)
+      setInfo('Magic link sent (if the email exists). Check inbox/spam. If no email arrives, the user likely does not exist in this project or SMTP settings are off.')
+    }
   }
 
   return (
@@ -112,6 +130,12 @@ export default function LoginPage() {
         >
           {loading ? 'Logging in…' : 'Log in'}
         </button>
+        <div className="flex items-center justify-between text-xs pt-1">
+          <button type="button" onClick={sendMagicLink} disabled={!email || magicSending || magicSent} className="underline disabled:opacity-40">
+            {magicSent ? 'Magic link sent' : magicSending ? 'Sending…' : 'Send magic link'}
+          </button>
+          <span className="text-[10px] text-gray-500">Diagnostic: tests email existence</span>
+        </div>
         <div className="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400 pt-1">
           <a href="/signup" className="font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300">Create account</a>
           <a href="/reset-password" className="hover:text-gray-800 dark:hover:text-gray-200">Forgot password?</a>
@@ -123,5 +147,13 @@ export default function LoginPage() {
         )}
       </form>
     </AuthLayout>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LoginForm />
+    </Suspense>
   )
 }

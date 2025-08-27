@@ -23,18 +23,20 @@ export default function AuthProvidersTestPage() {
     provider: 'google' | 'facebook' | 'github'
   ) => {
     setStatus(`Redirecting to ${provider}…`)
+    const redirectBase = process.env.NEXT_PUBLIC_AUTH_REDIRECT_BASE || window.location.origin
     await supabase.auth.signInWithOAuth({
       provider,
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+      options: { redirectTo: `${redirectBase}/auth/callback` },
     })
   }
 
   const testSignup = async () => {
     setStatus('Signing up and sending confirmation email…')
+    const redirectBase = process.env.NEXT_PUBLIC_AUTH_REDIRECT_BASE || window.location.origin
     const { error } = await supabase.auth.signUp({
       email,
       password,
-      options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+      options: { emailRedirectTo: `${redirectBase}/auth/callback` },
     })
     setStatus(
       error
@@ -58,8 +60,9 @@ export default function AuthProvidersTestPage() {
 
   const testReset = async () => {
     setStatus('Sending password reset email…')
+    const redirectBase = process.env.NEXT_PUBLIC_AUTH_REDIRECT_BASE || window.location.origin
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/update-password`,
+      redirectTo: `${redirectBase}/update-password`,
     })
     setStatus(
       error

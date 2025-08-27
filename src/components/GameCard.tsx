@@ -6,13 +6,7 @@ import GameImageFallback from './GameImageFallback'
 import { GameWithRanking } from '@/types'
 import { Game, Ranking } from '@/types/supabase'
 import { addGameToDefaultList, removeGameFromDefaultList } from '@/lib/lists'
-import {
-  formatYear,
-  formatPlayingTime,
-  formatPlayerCount,
-  getRatingColor,
-  truncate,
-} from '@/utils/helpers'
+import { formatYear, formatPlayingTime, formatPlayerCount, truncate } from '@/utils/helpers'
 import {
   StarIcon,
   PlayIcon,
@@ -28,6 +22,7 @@ import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid'
 import { supabase } from '@/lib/supabase'
 import GameDetailModal from './GameDetailModal'
 import RatingPopup from './RatingPopup'
+import RatingChip from './RatingChip'
 
 interface GameCardProps {
   game: GameWithRanking & {
@@ -41,6 +36,9 @@ interface GameCardProps {
   className?: string
   hideWinnerBadge?: boolean
   variant?: 'default' | 'compact'
+  showSummary?: boolean
+  emphasizeMeta?: boolean
+  showMeta?: boolean
 }
 
 export default function GameCard({
@@ -50,6 +48,9 @@ export default function GameCard({
   className,
   hideWinnerBadge = false,
   variant = 'default',
+  showSummary = false,
+  emphasizeMeta = false,
+  showMeta = true,
 }: GameCardProps) {
   const initialLibrary = game.list_membership?.library ?? false
   const initialWishlist = game.list_membership?.wishlist ?? false
@@ -62,7 +63,12 @@ export default function GameCard({
   const [showAddMenu, setShowAddMenu] = useState(false)
   const [showModal, setShowModal] = useState(false)
   const [saving, setSaving] = useState(false)
-  const [localRanking, setLocalRanking] = useState(game.ranking || null)
+  // localRanking can be a Ranking object or just a number (from lightweight award derivations)
+  const [localRanking, setLocalRanking] = useState<any>(
+    typeof game.ranking === 'number'
+      ? { ranking: game.ranking, played_it: (game as any).played_it ?? false }
+      : game.ranking || null
+  )
   const [lastAdded, setLastAdded] = useState<'library' | 'wishlist' | null>(
     null
   )
@@ -79,32 +85,7 @@ export default function GameCard({
       return cat.includes('winner') || res.includes('winner')
     })
 
-  const ratingTone = (r?: number | null) => {
-    switch (r) {
-      case 10:
-        return 'bg-sky-100 text-sky-800'
-      case 9:
-        return 'bg-cyan-100 text-cyan-800'
-      case 8:
-        return 'bg-teal-100 text-teal-800'
-      case 7:
-        return 'bg-emerald-100 text-emerald-800'
-      case 6:
-        return 'bg-green-100 text-green-800'
-      case 5:
-        return 'bg-lime-100 text-lime-800'
-      case 4:
-        return 'bg-yellow-100 text-yellow-800'
-      case 3:
-        return 'bg-amber-100 text-amber-800'
-      case 2:
-        return 'bg-orange-100 text-orange-800'
-      case 1:
-        return 'bg-red-100 text-red-800'
-      default:
-        return 'bg-gray-200 text-gray-700'
-    }
-  }
+  // ratingTone removed in favor of HexRatingBadge
 
   const upsertRanking = async (
     patch: Partial<{ played_it: boolean; ranking: number }>
@@ -191,8 +172,19 @@ export default function GameCard({
   }
 
   useEffect(() => {
-    // membership now passed from parent or managed locally; remove old fetch logic
-  }, [game.list_membership])
+    // Normalize ranking again if parent supplies primitive number later
+    setLocalRanking(
+      typeof game.ranking === 'number'
+        ? { ranking: game.ranking, played_it: (game as any).played_it ?? false }
+        : game.ranking || null
+    )
+  }, [game.ranking, (game as any).played_it])
+
+  // Convenience numeric rating value
+  const ratingValue: number | null =
+    typeof localRanking === 'number'
+      ? localRanking
+      : localRanking?.ranking ?? null
 
   // Removed overflow-hidden so popovers are not clipped
   const cardClass =
@@ -264,12 +256,8 @@ export default function GameCard({
             </div>
           </div>
           <div className="flex items-center space-x-2">
-            {localRanking?.ranking && (
-              <div
-                className={`px-2 py-1 rounded text-xs font-semibold ${ratingTone(localRanking.ranking)} ${saving ? 'opacity-70' : ''}`}
-              >
-                {localRanking.ranking}
-              </div>
+            {ratingValue && (
+              <RatingChip value={ratingValue} size="sm" className={`${saving ? 'opacity-70' : ''}`} />
             )}
             <button
               onClick={(e) => {
@@ -359,15 +347,7 @@ export default function GameCard({
           <GameImageFallback name={game.name} />
         )}
 
-        {/* Rating & Played badges (grid view) */}
-  {variant === 'default' && localRanking?.ranking && (
-          <div
-            className={`absolute top-1 right-1 px-2 py-1 rounded text-[11px] font-semibold shadow-sm ${ratingTone(localRanking.ranking)} pointer-events-none`}
-            aria-label={`Your rating: ${localRanking.ranking}`}
-          >
-            {localRanking.ranking}
-          </div>
-        )}
+  {/* (Removed) old image overlay rating chip – now shown inline with title */}
   {variant === 'default' && localRanking?.played_it && (
           <div
             className="absolute bottom-1 right-1 bg-green-600/90 text-white text-[10px] px-2 py-0.5 rounded shadow pointer-events-none font-medium"
@@ -463,34 +443,34 @@ export default function GameCard({
 
       {/* Game Info */}
       <div className={`p-3 ${variant === 'compact' ? 'pb-2' : ''}`}>
-        <h3 className={`font-medium text-gray-900 ${variant === 'compact' ? 'text-xs leading-snug line-clamp-2 min-h-[2.1rem]' : 'mb-1 text-sm line-clamp-2 leading-tight'}`}>
-          {game.name}
+        <h3 className={`font-medium text-gray-900 flex items-start gap-1 ${variant === 'compact' ? 'text-xs leading-snug line-clamp-2 min-h-[2.1rem]' : 'mb-1 text-sm line-clamp-2 leading-tight'}`}>
+          <span className="flex-1 inline-block">{game.name}</span>
+          {ratingValue && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                const rect = e.currentTarget.getBoundingClientRect()
+                setRatingPosition({
+                  x: rect.left + rect.width / 2,
+                  y: rect.top,
+                })
+                setIsRating(true)
+              }}
+              title={`Current rating: ${ratingValue} (click to change)`}
+              className="shrink-0 translate-y-[1px] focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-gray-800"
+            >
+              <RatingChip value={ratingValue} size={variant === 'compact' ? '2xs' as any : 'xs'} interactive subtle={false} />
+            </button>
+          )}
         </h3>
-        {variant === 'default' && (
-          <div className="space-y-1 text-xs text-gray-500">
+  {variant === 'default' && showMeta && (
+          <div className={`space-y-1 text-xs ${emphasizeMeta ? 'text-gray-700' : 'text-gray-500'}`}>
             <div className="flex items-center justify-between">
               <span>{formatYear(game.year_published)}</span>
               <div className="flex items-center space-x-2">
                 {localRanking?.played_it && (
                   <span className="text-green-600 font-medium">Played</span>
-                )}
-                {localRanking?.ranking && (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      const rect = e.currentTarget.getBoundingClientRect()
-                      setRatingPosition({
-                        x: rect.left + rect.width / 2,
-                        y: rect.top,
-                      })
-                      setIsRating(true)
-                    }}
-                    title={`Current rating: ${localRanking.ranking} (click to change)`}
-                    className={`px-2 py-1 rounded text-xs font-semibold shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-gray-800 transition ${ratingTone(localRanking.ranking)}`}
-                  >
-                    {localRanking.ranking}
-                  </button>
                 )}
               </div>
             </div>
@@ -506,6 +486,11 @@ export default function GameCard({
                 <span>{formatPlayingTime(game.playtime_minutes)}</span>
               </div>
             </div>
+            {showSummary && game.summary && (
+              <p className="pt-1 text-[11px] leading-snug text-gray-600 line-clamp-4">
+                {game.summary}
+              </p>
+            )}
           </div>
         )}
       </div>
@@ -518,14 +503,11 @@ export default function GameCard({
         isOpen={isRating}
         onClose={() => setIsRating(false)}
         onRatingChange={(rating) => {
-          setLocalRanking(
-            (prev) =>
-              ({
-                ...(prev || {}),
-                ranking: rating ?? null,
-                played_it: prev?.played_it ?? false,
-              }) as any
-          )
+          setLocalRanking((prev: any) => ({
+            ...(prev || {}),
+            ranking: rating ?? null,
+            played_it: prev?.played_it ?? false,
+          }))
         }}
         position={ratingPosition || undefined}
       />

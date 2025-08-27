@@ -50,6 +50,110 @@ const AWARD_CATEGORIES = {
     color: 'blue',
     website: 'https://www.spiel-des-jahres.de/',
   },
+  'deutscher-spiele-preis': {
+    id: 'deutscher-spiele-preis',
+    name: 'Deutscher Spiele Preis',
+    description: "Prominent German gamers' award emphasizing gamer opinion and depth.",
+    icon: TrophyIcon,
+    color: 'rose',
+    website: 'https://www.dspielt.de/',
+  },
+  'origins-awards': {
+    id: 'origins-awards',
+    name: 'Origins Awards',
+    description: 'Historical industry awards from the Game Manufacturers Association (GAMA).',
+    icon: TrophyIcon,
+    color: 'violet',
+    website: 'https://www.originsgamefair.com/',
+  },
+  'dice-tower-awards': {
+    id: 'dice-tower-awards',
+    name: 'The Dice Tower Gaming Awards',
+    description: 'Annual Dice Tower network selections across multiple categories.',
+    icon: TrophyIcon,
+    color: 'fuchsia',
+    website: 'https://www.dicetower.com/awards',
+  },
+  'as-dor': {
+    id: 'as-dor',
+    name: "As d'Or",
+    description: "French Game of the Year awards (Jeu de l'Année).",
+    icon: TrophyIcon,
+    color: 'orange',
+    website: 'https://www.fij.fr/',
+  },
+  'international-gamers-award': {
+    id: 'international-gamers-award',
+    name: 'International Gamers Award',
+    description: 'Global strategy game recognition spanning multiplayer and two-player titles.',
+    icon: TrophyIcon,
+    color: 'cyan',
+    website: 'https://www.internationalgamersaward.net/',
+  },
+  'ion-award': {
+    id: 'ion-award',
+    name: 'Ion Award',
+    description: 'Game design competition highlighting prototypes and emerging designers.',
+    icon: TrophyIcon,
+    color: 'emerald',
+    website: 'https://saltcon.com/ion-award/',
+  },
+  'zenobia-award': {
+    id: 'zenobia-award',
+    name: 'Zenobia Award',
+    description: 'Award encouraging diverse voices in historical game design.',
+    icon: TrophyIcon,
+    color: 'teal',
+    website: 'https://zenobiaaward.org/',
+  },
+  'charles-s-roberts': {
+    id: 'charles-s-roberts',
+    name: 'Charles S. Roberts Award',
+    description: 'Historic recognition for excellence in wargame design & publication.',
+    icon: TrophyIcon,
+    color: 'slate',
+    website: 'https://charlieawards.com/',
+  },
+  'sxsw': {
+    id: 'sxsw',
+    name: 'SXSW',
+    description: 'South by Southwest tabletop game of the year & related honors.',
+    icon: TrophyIcon,
+    color: 'pink',
+    website: 'https://www.sxsw.com/',
+  },
+  'board-game-quest': {
+    id: 'board-game-quest',
+    name: 'Board Game Quest',
+    description: 'Board Game Quest Awards across production, strategy & more.',
+    icon: TrophyIcon,
+    color: 'indigo',
+    website: 'https://www.boardgamequest.com/',
+  },
+  'juego-del-ano': {
+    id: 'juego-del-ano',
+    name: 'Juego del Año',
+    description: 'Spanish-language (Mexico / Tico) Game of the Year recognitions.',
+    icon: TrophyIcon,
+    color: 'amber',
+    website: 'https://juegodelano.mx/',
+  },
+  'parents-choice': {
+    id: 'parents-choice',
+    name: "Parents' Choice Approved",
+    description: 'Parents Choice award winners & approved recommendations.',
+    icon: TrophyIcon,
+    color: 'lime',
+    website: 'https://www.parentschoice.org/',
+  },
+  'guldbrikken': {
+    id: 'guldbrikken',
+    name: 'Guldbrikken',
+    description: 'Danish awards (children, family, adult & special jury).',
+    icon: TrophyIcon,
+    color: 'yellow',
+    website: 'https://www.guldbrikken.dk/',
+  },
 }
 
 interface Honor {
@@ -101,7 +205,8 @@ async function getAwardData(awardType: string): Promise<AwardYearGroup[]> {
   while (true) {
     const { data: games, error } = await supabase
       .from('games')
-      .select('bgg_id, name, year_published, image_url, thumbnail_url, honors')
+  // Select current schema columns (playtime_minutes in canonical schema)
+	.select('bgg_id, name, year_published, image_url, thumbnail_url, honors, min_players, max_players, playtime_minutes')
       .not('honors', 'eq', '[]')
       .range(page * pageSize, (page + 1) * pageSize - 1)
 
@@ -111,7 +216,8 @@ async function getAwardData(awardType: string): Promise<AwardYearGroup[]> {
     }
 
     if (!games || games.length === 0) break
-    allGames = allGames.concat(games as Game[])
+  const normalized = (games as any[]).map(g => g)
+  allGames = allGames.concat(normalized as Game[])
     if (games.length < pageSize) break // Last page
     page++
   }
@@ -333,25 +439,95 @@ function toGameWithRanking(g: Game) {
 function YearSection({
   yearData,
   awardType,
+  isLast,
 }: {
   yearData: AwardYearGroup
   awardType: string
+  isLast: boolean
 }) {
   // multi-equal flag retained for potential future labeling
   const multiEqual = /(Mensa Select|Meeples Choice Award)/i.test(awardType)
 
   // Check if this is a categorized award structure
   const hasCategories = yearData.categories && yearData.categories.length > 0
+  // Build a normalized categories array so we can always use the categorized renderer.
+  let normalizedCategories = yearData.categories
+  if (!hasCategories) {
+    normalizedCategories = []
+    // Primary winner category
+    if (yearData.primary) {
+      normalizedCategories.push({
+        name: 'Winner',
+        winner: yearData.primary.game,
+        nominees: [],
+        special: [],
+      })
+    }
+    // Category winners -> each its own category
+    yearData.categoryWinners.forEach((cw) => {
+      normalizedCategories!.push({
+        name: cw.subcategory || 'Category Winner',
+        winner: cw.game,
+        nominees: [],
+        special: [],
+      })
+    })
+    // Unified nominees + special as a single "Nominees" category (winner null)
+    const unifiedNominees = Array.from(
+      new Map(
+        [...yearData.nominees, ...yearData.special].map((g) => [g.bgg_id, g])
+      ).values()
+    ).sort((a, b) => a.name.localeCompare(b.name))
+    if (unifiedNominees.length > 0) {
+      normalizedCategories!.push({
+        name: 'Nominees',
+        winner: null,
+        nominees: unifiedNominees,
+        special: [],
+      })
+    }
+  }
 
   return (
-    <div className="border-b border-gray-200 pb-8 mb-8 last:border-b-0">
-      {/* Year header */}
-      <div className="flex items-center gap-3 mb-6">
-        <div className="flex items-center gap-2">
-          <CalendarIcon className="w-5 h-5 text-gray-500" />
-          <h2 className="text-2xl font-bold text-gray-900 font-display tracking-tight">{yearData.year}</h2>
+    <div className="relative flex">
+      {/* Timeline rail (hidden on small screens) */}
+      <div className="relative flex flex-col items-center w-12 md:w-24 shrink-0">
+        {/* Vertical line */}
+        <div
+          className={`hidden md:block absolute top-0 ${!isLast ? 'bottom-0' : 'h-1/2'} left-1/2 -translate-x-1/2 w-0.5 bg-gradient-to-b from-gray-200 via-gray-200 to-transparent pointer-events-none`}
+          aria-hidden="true"
+        />
+        {/* Year marker */}
+        <div className="sticky top-24 flex flex-col items-center">
+          <div className="relative w-10 h-16 md:h-20 flex items-center justify-center">
+            {/* Dot */}
+            <div className="absolute top-0 md:top-0 left-1/2 -translate-x-1/2 w-5 h-5 rounded-full bg-white ring-2 ring-gray-300 shadow flex items-center justify-center">
+              <div className="w-2 h-2 rounded-full bg-gray-300" />
+            </div>
+            {/* Rotated year positioned southwest of dot */}
+            <span
+              aria-hidden="true"
+              className="hidden md:block absolute top-2 md:top-2 left-1/2 -translate-x-1/2 translate-y-1/2 -rotate-90 origin-center text-4xl font-extrabold text-gray-300 dark:text-gray-600 tracking-tight select-none pointer-events-none pr-6"
+              style={{ transform: 'translate(-67%, 100%) rotate(-90deg)' }}
+            >
+              {yearData.year}
+            </span>
+            <span className="sr-only">{yearData.year}</span>
+          </div>
         </div>
-        <div className="text-sm text-gray-500">
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 pb-16">
+        {/* Mobile year heading */}
+        <div className="md:hidden flex items-center gap-2 mb-4">
+          <CalendarIcon className="w-5 h-5 text-gray-500" />
+          <h2 className="text-xl font-bold text-gray-900 font-display tracking-tight">
+            {yearData.year}
+          </h2>
+        </div>
+        {/* Meta summary */}
+        <div className="text-xs text-gray-500 mb-6 font-medium">
           {hasCategories ? (
             <>
               {yearData.categories!.length} categor
@@ -386,14 +562,10 @@ function YearSection({
             </>
           )}
         </div>
-      </div>
 
-      {hasCategories ? (
-        /* Categorized Awards (like Golden Geek) */
-        yearData.categories!.map((category, idx) => {
+        {normalizedCategories && normalizedCategories.map((category, idx) => {
           const hasRightContent =
             category.nominees.length > 0 || category.special.length > 0
-          // Merge nominees + special into one unified nominee list (deduped)
           const combinedNominees = Array.from(
             new Map(
               [...category.nominees, ...category.special].map((g) => [
@@ -402,167 +574,87 @@ function YearSection({
               ])
             ).values()
           ).sort((a, b) => a.name.localeCompare(b.name))
+          const nomineeOnly = !category.winner && combinedNominees.length > 0 && category.name === 'Nominees'
+          
+          
+           {/* Awards Winner/Nom Card */}
           return (
-            <div key={category.name} className="mb-12">
-              {idx > 0 && (
-                <div className="h-px bg-gray-200 mb-10" aria-hidden="true" />
-              )}
-              <Heading as="h3" size="lg" className="mb-6 flex items-center gap-2">
+            <div key={category.name} className="panel">
+              <Heading as="h3" size="lg" className="mb-6 flex items-center font-semibold gap-2">
                 <TrophyIcon className="w-5 h-5 text-yellow-500" />
                 <span>{category.name}</span>
               </Heading>
-              <div className="md:grid md:grid-cols-12 md:gap-8 items-start">
-                {/* Left: Featured Winner */}
-                <div className="md:col-span-4 mb-6 md:mb-0">
-                  {category.winner ? (
-                    <div className="relative group">
-                      {/* Winner badge repositioned for clarity (no longer hidden behind card) */}
-                      <div className="absolute top-2 left-2 z-20 bg-amber-500/95 backdrop-blur text-white text-[11px] font-semibold px-2 py-1 rounded-md shadow flex items-center gap-1 pointer-events-none">
-                        <TrophyIcon className="w-4 h-4" />
-                        <span>Winner</span>
+              <div className={`md:grid md:grid-cols-12 md:gap-8 items-start ${nomineeOnly ? 'md:block' : ''}`}>
+                {!nomineeOnly && (
+                  <div className="md:col-span-4 mb-6 md:mb-0">
+                    {category.winner ? (
+                      <div className="relative group">
+                        <div className="absolute top-2 left-2 z-20 bg-amber-500/95 backdrop-blur text-white text-[11px] font-semibold px-2 py-1 rounded-md shadow flex items-center gap-1 pointer-events-none">
+                          <TrophyIcon className="w-4 h-4" />
+                          <span>Winner</span>
+                        </div>
+                        <GameCard
+                          game={toGameWithRanking(category.winner)}
+                          viewMode="grid"
+                          className="ring-2 ring-amber-300 shadow-lg hover:shadow-xl"
+                          hideWinnerBadge
+                          showSummary
+                          emphasizeMeta
+                          showMeta={false}
+                        />
                       </div>
-                      <GameCard
-                        game={toGameWithRanking(category.winner)}
-                        viewMode="grid"
-                        className="ring-2 ring-amber-300 shadow-lg hover:shadow-xl"
-                        hideWinnerBadge
-                      />
-                    </div>
-                  ) : (
-                    <div className="text-sm text-gray-500 italic">
-                      No winner recorded
-                    </div>
-                  )}
-                </div>
-                {/* Right: Nominees unified */}
+                    ) : (
+                      <div className="text-sm text-gray-500 italic">No winner recorded</div>
+                    )}
+                  </div>
+                )}
                 {hasRightContent && combinedNominees.length > 0 && (
-                  <div className="md:col-span-8">
+                  <div className={`${nomineeOnly ? '' : 'md:col-span-8'}`}>
                     <div className="flex items-center gap-2 mb-3 font-display">
                       <UserGroupIcon className="w-4 h-4 text-gray-500" />
                       <h4 className="text-sm font-semibold text-gray-700">
-                        Nominees
+                        {category.name === 'Nominees' ? 'Nominees' : 'Other Nominees'}
                       </h4>
                       <span className="text-xs text-gray-400">
                         ({combinedNominees.length})
                       </span>
                     </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                      {combinedNominees.map((game) => (
-                        <GameCard
-                          key={`${game.bgg_id}-nominee-unified`}
-                          game={toGameWithRanking(game)}
-                          viewMode="grid"
-                          className="bg-white/70"
-                          hideWinnerBadge
-                          variant="compact"
-                        />
-                      ))}
-                    </div>
+                    {(!nomineeOnly) ? (
+                      <ul className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm leading-tight">
+                        {combinedNominees.map(game => (
+                          <li key={`${game.bgg_id}-nominee-name`} className="flex items-start gap-2">
+                            <span className="mt-1 w-1.5 h-1.5 rounded-full bg-gray-300" aria-hidden="true" />
+                            <span className="text-gray-700 hover:text-gray-900 transition-colors truncate" title={game.name}>{game.name}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                        {combinedNominees.map((game) => (
+                          <GameCard
+                            key={`${game.bgg_id}-nominee-unified`}
+                            game={toGameWithRanking(game)}
+                            viewMode="grid"
+                            className="bg-white/70"
+                            hideWinnerBadge
+                            variant="compact"
+                          />
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
             </div>
           )
-        })
-      ) : (
-        /* Simple Awards (like Spiel des Jahres) */
-        <>
-          {(() => {
-            // Build ordered sections and insert dividers automatically
-            const sections: Array<{ key: string; title: string; icon: React.ReactNode; content: React.ReactNode }> = []
-            if (yearData.primary) {
-              sections.push({
-                key: 'primary',
-                title: 'Primary Winner',
-                icon: <TrophyIcon className="w-5 h-5 text-yellow-500" />,
-                content: (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                    <GameCard
-                      game={toGameWithRanking(yearData.primary.game)}
-                      viewMode="grid"
-                    />
-                  </div>
-                ),
-              })
-            }
-            if (yearData.categoryWinners.length > 0) {
-              sections.push({
-                key: 'cat-winners',
-                title: 'Category Winners',
-                icon: <TrophyIcon className="w-4 h-4 text-yellow-400" />,
-                content: (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                    {yearData.categoryWinners.map((entry) => (
-                      <div
-                        key={`${entry.game.bgg_id}-${entry.subcategory}`}
-                        className="relative"
-                      >
-                        {entry.subcategory && (
-                          <div className="absolute top-2 left-2 z-10">
-                            <div className="bg-gray-900/70 text-xs text-white px-2 py-0.5 rounded-full">
-                              {entry.subcategory}
-                            </div>
-                          </div>
-                        )}
-                        <GameCard
-                          game={toGameWithRanking(entry.game)}
-                          viewMode="grid"
-                        />
-                      </div>
-                    ))}
-                  </div>
-                ),
-              })
-            }
-            // Unified nominees list (nominees + special)
-            const unifiedNominees = Array.from(
-              new Map(
-                [...yearData.nominees, ...yearData.special].map((g) => [
-                  g.bgg_id,
-                  g,
-                ])
-              ).values()
-            ).sort((a, b) => a.name.localeCompare(b.name))
-            if (unifiedNominees.length > 0) {
-              sections.push({
-                key: 'nominees',
-                title: 'Nominees',
-                icon: <UserGroupIcon className="w-5 h-5 text-gray-500" />,
-                content: (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                    {unifiedNominees.map((game) => (
-                      <GameCard
-                        key={`${game.bgg_id}-nominee-unified`}
-                        game={toGameWithRanking(game)}
-                        viewMode="grid"
-                      />
-                    ))}
-                  </div>
-                ),
-              })
-            }
-            return sections.map((section, i) => (
-              <div key={section.key} className={i < sections.length - 1 ? 'mb-8' : ''}>
-                {i > 0 && (
-                  <div className="h-px bg-gray-200 mb-8" aria-hidden="true" />
-                )}
-                <Heading as="h3" size="md" className="mb-4 flex items-center gap-2">
-                  {section.icon}
-                  <span>{section.title}</span>
-                </Heading>
-                {section.content}
-              </div>
-            ))
-          })()}
-        </>
-      )}
+        })}
+      </div>
     </div>
   )
 }
 
-// Using loose typing due to Next 15 type inference issues in this dynamic route.
-export default async function AwardPage(props: any) {
-  const award: string = props?.params?.award
+export default async function AwardPage({ params }: { params: Promise<{ award: string }> }) {
+  const { award } = await params
   const awardConfig = AWARD_CATEGORIES[award as keyof typeof AWARD_CATEGORIES]
 
   if (!awardConfig) {
@@ -584,6 +676,19 @@ export default async function AwardPage(props: any) {
     'spiel-des-jahres': 'Spiel des Jahres',
     'kinderspiel-des-jahres': 'Kinderspiel des Jahres',
     'kennerspiel-des-jahres': 'Kennerspiel des Jahres',
+  'deutscher-spiele-preis': 'Deutscher Spiele Preis',
+  'origins-awards': 'Origins Awards',
+  'dice-tower-awards': 'The Dice Tower Gaming Awards',
+  'as-dor': "As d'Or - Jeu de l'Année",
+  'international-gamers-award': 'International Gamers Award',
+  'ion-award': 'Ion Award',
+  'zenobia-award': 'Zenobia Award',
+  'charles-s-roberts': 'Charles S. Roberts',
+  'sxsw': 'SXSW',
+  'board-game-quest': 'Board Game Quest Awards',
+  'juego-del-ano': 'Juego del Año',
+  'parents-choice': 'Parents Choice',
+  'guldbrikken': 'Guldbrikken',
   }
 
   const awardType = awardTypeMap[award]
@@ -623,7 +728,7 @@ export default async function AwardPage(props: any) {
               />
             </div>
           </div>
-          <Heading as="h1" size="display" gradient weightScale align="center" className="mb-4">
+          <Heading as="h1" size="display" gradient weightScale align="center" displayFont className="mb-4">
             {awardConfig.name}
           </Heading>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-6">
@@ -665,11 +770,12 @@ export default async function AwardPage(props: any) {
               </p>
             </div>
           ) : (
-            awardData.map((yearData) => (
+      awardData.map((yearData, idx) => (
               <YearSection
                 key={yearData.year}
                 yearData={yearData}
                 awardType={awardType}
+        isLast={idx === awardData.length - 1}
               />
             ))
           )}

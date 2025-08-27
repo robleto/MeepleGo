@@ -4,34 +4,140 @@ import PageLayout from '@/components/PageLayout'
 import Heading from '@/components/Heading'
 import { getSupabaseServerClient } from '@/lib/supabaseServer'
 import { CATEGORY_CONFIGS } from '@/lib/awards/deriveUserAwards'
+import { deriveAwards } from '@/lib/awards/deriveUserAwards'
+import AwardCategoryEditor from '@/components/awards/AwardCategoryEditor'
 import AwardYearSelect from '@/components/AwardYearSelect'
+import AwardsRebuildButtons from '@/components/AwardsRebuildButtons'
+import AwardsDebugInfo from '@/components/awards/AwardsDebugInfo'
 import Link from 'next/link'
-import { redirect } from 'next/navigation'
+import SessionFallback from './SessionFallback'
 
-interface AwardRow { id:number; year:number; category:string; nominees:number[]; winner_id:number|null; updated_at:string; created_at:string; threshold_used?: number|null; manual_override?: boolean; stale?: boolean }
+interface AwardRow { id:string; year:number; category:string; nominees:string[]; winner_id:string|null; updated_at:string; created_at:string; threshold_used?: number|null; manual_override?: boolean; stale?: boolean }
 
-interface GameLite { id:number; name:string; thumbnail_url:string|null }
+interface GameLite { id:string; name:string; thumbnail_url:string|null }
 
 async function fetchAwards(year: number) {
   const supabase = await getSupabaseServerClient()
   const { data: { session } } = await supabase.auth.getSession()
-  if (!session) return { session:null, awards: [] as AwardRow[] }
-  const { data } = await supabase
+  if (!session) return { session:null, awards: [] as AwardRow[], gameMap: {} as Record<string, GameLite>, debugInfo: { totalRankings: 0, qualifyingRankings: 0 } }
+  let { data } = await supabase
     .from('awards')
     .select('id,year,category,nominees,winner_id,updated_at,created_at,threshold_used,manual_override,stale')
-    .eq('profile_id', session.user.id)
+  .eq('user_id', session.user.id)
     .eq('year', year)
     .order('category')
+
+  // Auto-generate any missing categories (value prop: always populated from rankings)
+  const haveCategories = new Set((data||[]).map(a=>a.category))
+  const missingConfigs = CATEGORY_CONFIGS.filter(c=>!haveCategories.has(c.id))
+  
+  console.log('Awards fetch debug:', { 
+    year, 
+    existingAwards: data?.length || 0, 
+    haveCategories: Array.from(haveCategories), 
+    missingConfigs: missingConfigs.map(c => c.id) 
+  })
+  
+  let debugInfo = { totalRankings: 0, qualifyingRankings: 0 }
+  
+  if (missingConfigs.length > 0) {
+    console.log('Generating missing categories:', missingConfigs.map(c => c.id))
+    // Pull rankings once
+    const { data: rows } = await supabase
+      .from('rankings')
+      .select('game_id, ranking, played_it, updated_at, games:game_id ( id, name, year_published, categories, mechanics, min_players, max_players )')
+      .eq('user_id', session.user.id)
+    
+    debugInfo.totalRankings = rows?.length || 0
+    
+    const rankings = (rows||[]).map(r=>{
+      const g = (r as any).games
+      if (!g) return null
+      return {
+        game_id: r.game_id as string,
+        rating: (r as any).ranking as number | null,
+        updated_at: r.updated_at as string | null,
+        played_it: (r as any).played_it as boolean | null,
+        game: {
+          id: g.id as string,
+          name: g.name as string,
+          year_published: g.year_published as number | null,
+          categories: g.categories as string[] | null,
+          mechanics: g.mechanics as string[] | null,
+          min_players: g.min_players as number | null,
+          max_players: g.max_players as number | null,
+        }
+      }
+    }).filter(Boolean) as any
+    
+    // Count qualifying rankings for debug (now all-time, not year-specific)
+    debugInfo.qualifyingRankings = rankings.filter((r: any) => 
+      r.played_it && (r.rating || 0) >= 7
+    ).length
+    const derived = deriveAwards({ profileId: session.user.id, year, rankings })
+    console.log('Derived awards result:', { 
+      derivedCount: derived.length, 
+      categories: derived.map(d => d.category),
+      derivedSample: derived.slice(0, 2).map(d => ({ 
+        category: d.category, 
+        nominees: d.nominees?.length, 
+        winner_id: d.winner_id 
+      }))
+    })
+    
+    // Upsert only missing categories (respect manual overrides if any exist later)
+    for (const d of derived) {
+      if (haveCategories.size && haveCategories.has(d.category)) continue
+      console.log(`Upserting category ${d.category}:`, { 
+        nominees: d.nominees?.length, 
+        winner_id: d.winner_id 
+      })
+      const { error } = await supabase.from('awards').upsert({
+        user_id: session.user.id,
+        year,
+        category: d.category,
+        nominees: d.nominees,
+        winner_id: d.winner_id,
+        threshold_used: d.threshold_used,
+        refreshed_at: new Date().toISOString(),
+        stale: false,
+        manual_override: false,
+      }, { onConflict: 'user_id,year,category' })
+      // Log errors but don't fail page load
+      if (error) {
+        console.error(`Failed to auto-create award ${d.category} for year ${year}:`, error)
+      } else {
+        console.log(`Successfully upserted award ${d.category}`)
+      }
+    }
+    // Re-fetch after inserts
+    console.log('Re-fetching awards after auto-generation...')
+    const refetch = await supabase
+      .from('awards')
+      .select('id,year,category,nominees,winner_id,updated_at,created_at,threshold_used,manual_override,stale')
+      .eq('user_id', session.user.id)
+      .eq('year', year)
+      .order('category')
+    if (!refetch.error && refetch.data) {
+      data = refetch.data
+      console.log('Refetch successful:', { 
+        count: refetch.data.length, 
+        categories: refetch.data.map(a => a.category) 
+      })
+    } else {
+      console.error('Refetch failed:', refetch.error)
+    }
+  }
   // Collect all game IDs
-  const ids = new Set<number>()
-  ;(data||[]).forEach(a=>{ a.nominees?.forEach((n:number)=>ids.add(n)); if (a.winner_id) ids.add(a.winner_id) })
+  const ids = new Set<string>()
+  ;(data||[]).forEach(a=>{ a.nominees?.forEach((n:string)=>ids.add(n)); if (a.winner_id) ids.add(a.winner_id) })
   let games: GameLite[] = []
   if (ids.size) {
     const { data: gdata } = await supabase.from('games').select('id,name,thumbnail_url').in('id', Array.from(ids))
     games = (gdata || []) as any
   }
-  const gameMap = Object.fromEntries(games.map(g=>[g.id,g]))
-  return { session, awards: (data||[]) as AwardRow[], gameMap: gameMap as Record<number, GameLite> }
+  const gameMap: Record<string, GameLite> = Object.fromEntries(games.map(g=>[g.id,g]))
+  return { session, awards: (data||[]) as AwardRow[], gameMap, debugInfo }
 }
 
 async function fetchYears() {
@@ -44,116 +150,65 @@ async function fetchYears() {
   return Array.from(years).sort((a,b)=>b-a)
 }
 
-export default async function MyAwardsYearPage({ params }: { params: { year: string } }) {
-  const yearNum = Number(params.year)
-  const years = await fetchYears()
-  const { session, awards, gameMap } = await fetchAwards(yearNum)
-  const categoriesById = Object.fromEntries(CATEGORY_CONFIGS.map(c=>[c.id,c]))
-  const anyStale = awards.some(a=>a.stale)
+export default async function MyAwardsYearPage({
+  params: paramsPromise
+}: {
+  params: Promise<{ year: string }>
+}) {
+  console.log('=== MyAwardsYearPage START ===')
+  const params = await paramsPromise
+  const { year } = params
+  console.log('Year param:', year)
+  
+  // Get data including auto-generation logic 
+  const { session, awards, gameMap, debugInfo } = await fetchAwards(Number(year))
+  
   if (!session) {
-    redirect(`/login?next=/awards/my/${yearNum}`)
+    console.log('No session, returning fallback')
+    return <SessionFallback year={Number(year)} />
   }
-
+  
+  console.log('Session user ID:', session.user.id)
+  console.log('Awards count:', awards.length)
+  
   return (
     <PageLayout>
-      <div className="max-w-5xl mx-auto px-4 py-8">
-        {anyStale && (
-          <div className="mb-6 p-4 rounded-md border border-amber-300 bg-amber-50 text-amber-800 text-sm flex flex-wrap items-center gap-3">
-            <span className="font-medium">Some awards are stale after ranking changes.</span>
-            <form action={`/api/awards/${yearNum}/rebuild?staleOnly=1`} method="post">
-              <button className="px-2.5 py-1 rounded bg-amber-600 text-white text-xs hover:bg-amber-500">Refresh Stale Only</button>
-            </form>
-            <form action={`/api/awards/${yearNum}/rebuild`} method="post">
-              <button className="px-2.5 py-1 rounded bg-gray-800 text-white text-xs hover:bg-gray-700">Rebuild All</button>
-            </form>
-          </div>
-        )}
-        <div className="flex items-center justify-between mb-6">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+        <div className="flex items-center justify-between">
           <div>
-            <Heading as="h1" size="lg" soft className="mb-1">My {yearNum} Awards</Heading>
-            <p className="text-sm text-gray-500">Auto-derived from your {yearNum} ratings. Rebuild after you change rankings.</p>
+            <h1 className="text-xl font-semibold">My Awards {year}</h1>
+            <p className="text-xs text-gray-500">Derived automatically from your rankings (played + rating ≥ 7)</p>
           </div>
-          <div className="flex gap-2 items-center">
-            <AwardYearSelect years={years} currentYear={yearNum} />
-            <form action={`/api/awards/${yearNum}/rebuild`} method="post">
-              <button className="px-3 py-1.5 rounded-md bg-primary-600 text-white text-sm hover:bg-primary-600/90">Rebuild All</button>
-            </form>
-          </div>
+          <AwardsRebuildButtons year={Number(year)} />
         </div>
-        {/* Auth is required; unauthenticated users are redirected above. */}
+
         <div className="grid gap-6 md:grid-cols-2">
           {CATEGORY_CONFIGS.map(cfg => {
-            const row = awards.find(a=>a.category===cfg.id)
+            const row = awards.find(a=>a.category===cfg.id) || { id: `temp-${cfg.id}` , category: cfg.id, nominees: [], winner_id: null }
             return (
-              <div key={cfg.id} className="border rounded-lg p-4 bg-white shadow-sm dark:bg-gray-900 dark:border-gray-700">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100 flex items-center gap-2">
-                    {cfg.label}
-                    {row?.stale && <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">STALE</span>}
-                    {row?.manual_override && <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">MANUAL</span>}
-                  </h3>
-                  {row?.threshold_used && <span className="text-[10px] text-gray-500" title={`Threshold used: >= ${row.threshold_used}`}>≥ {row.threshold_used}</span>}
+              <div key={cfg.id} className="border rounded p-4 bg-white dark:bg-gray-900">
+                <div className="mb-2 flex items-center justify-between">
+                  <h2 className="text-sm font-medium">{cfg.id}</h2>
+                  {'manual_override' in row && (row as any).manual_override && <span className="text-[10px] text-amber-600">manual</span>}
                 </div>
-                {!row && (
-                  <div className="text-xs text-gray-500">Not generated yet. Click Rebuild All.</div>
-                )}
-                {row && (
-                  <div className="space-y-3">
-                    <div>
-                      <div className="text-[11px] font-medium text-gray-500 mb-1">Winner</div>
-                      {row.winner_id ? (
-                        <div className="flex items-center gap-2">
-                          {gameMap && gameMap[row.winner_id]?.thumbnail_url && (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img src={gameMap[row.winner_id].thumbnail_url!} alt="" className="w-8 h-8 object-cover rounded" />
-                          )}
-                          <span className="inline-flex items-center text-xs px-2 py-1 rounded bg-primary-600/10 text-primary-700 dark:bg-primary-500/20 dark:text-primary-300">{gameMap && gameMap[row.winner_id]?.name || `Game #${row.winner_id}`}</span>
-                          <form action={`/api/awards/${yearNum}/${cfg.id}`} method="post">
-                            <input type="hidden" name="winner_id" value="" />
-                            <button formMethod="patch" className="text-[10px] text-gray-400 hover:text-red-600" title="Clear winner">✕</button>
-                          </form>
-                        </div>
-                      ) : <span className="text-xs text-gray-400 italic">None</span>}
-                    </div>
-                    <div>
-                      <div className="text-[11px] font-medium text-gray-500 mb-1">Nominees ({row.nominees.length})</div>
-                      {row.nominees.length ? (
-                        <ul className="flex flex-wrap gap-1">
-                          {row.nominees.map(id => (
-                            <li key={id} className={`group relative text-[11px] px-2 py-1 rounded border bg-gray-50 dark:bg-gray-800 dark:border-gray-700 ${id===row.winner_id?'ring-1 ring-primary-500':''}`}
-                              title={(gameMap && gameMap[id]?.name) || `Game #${id}`}
-                            >
-                              {(gameMap && gameMap[id]?.name?.slice(0,24)) || `#${id}`}
-                              <div className="opacity-0 group-hover:opacity-100 transition flex gap-1 absolute -top-2 -right-2">
-                                <form action={`/api/awards/${yearNum}/${cfg.id}`} method="post">
-                                  <input type="hidden" name="winner_id" value={id} />
-                                  <button formMethod="patch" className="bg-primary-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px]" title="Set winner">★</button>
-                                </form>
-                                <form action={`/api/awards/${yearNum}/${cfg.id}`} method="post">
-                                  <input type="hidden" name="remove_nominee" value={id} />
-                                  <button formMethod="patch" className="bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px]" title="Remove">–</button>
-                                </form>
-                              </div>
-                            </li>
-                          ))}
-                        </ul>
-                      ) : <span className="text-xs text-gray-400 italic">None</span>}
-                      <div className="mt-2">
-                        <form action={`/api/awards/${yearNum}/${cfg.id}`} method="post" className="flex gap-2 items-center" autoComplete="off">
-                          <input type="number" name="add_nominee" placeholder="Game ID" className="w-28 text-[11px] px-2 py-1 rounded border bg-white dark:bg-gray-800" />
-                          <button formMethod="patch" className="text-[11px] px-2 py-1 rounded bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600">Add</button>
-                        </form>
-                      </div>
-                    </div>
-                    <form action={`/api/awards/${yearNum}/${cfg.id}`} method="post" className="flex gap-2">
-                      <input type="hidden" name="unlock" value="true" />
-                      {row.manual_override && <button className="text-[11px] px-2 py-1 rounded bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700" formMethod="patch">Unlock Auto</button>}
-                    </form>
-                  </div>
-                )}
+                <AwardCategoryEditor 
+                  year={Number(year)} 
+                  row={row as any} 
+                  categoryLabel={cfg.id} 
+                  gameMap={gameMap} 
+                />
               </div>
             )
           })}
+        </div>
+
+        <div>
+          <AwardsDebugInfo 
+            year={Number(year)} 
+            awards={awards} 
+            totalRankings={debugInfo.totalRankings} 
+            qualifyingRankings={debugInfo.qualifyingRankings}
+          />
         </div>
       </div>
     </PageLayout>

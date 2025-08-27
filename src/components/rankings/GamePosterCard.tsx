@@ -4,6 +4,7 @@ import Image from 'next/image'
 import { GameWithRanking } from '@/types'
 import { formatYear } from '@/utils/helpers'
 import { PlayIcon, StarIcon } from '@heroicons/react/24/outline'
+import RatingChip from '@/components/RatingChip'
 import { useState } from 'react'
 
 interface GamePosterCardProps {
@@ -26,32 +27,7 @@ export default function GamePosterCard({
   const setRanking = (value: number | null) =>
     onUpdate(game.id, { ranking: value })
 
-  const ratingTone = (val?: number | null) => {
-    switch (val) {
-      case 10:
-        return 'bg-sky-100 text-sky-800'
-      case 9:
-        return 'bg-cyan-100 text-cyan-800'
-      case 8:
-        return 'bg-teal-100 text-teal-800'
-      case 7:
-        return 'bg-emerald-100 text-emerald-800'
-      case 6:
-        return 'bg-green-100 text-green-800'
-      case 5:
-        return 'bg-lime-100 text-lime-800'
-      case 4:
-        return 'bg-yellow-100 text-yellow-800'
-      case 3:
-        return 'bg-amber-100 text-amber-800'
-      case 2:
-        return 'bg-orange-100 text-orange-800'
-      case 1:
-        return 'bg-red-100 text-red-800'
-      default:
-        return 'bg-gray-200 text-gray-700'
-    }
-  }
+  // ratingTone replaced by HexRatingBadge
 
   return (
     <div
@@ -73,10 +49,14 @@ export default function GamePosterCard({
             e.stopPropagation()
             setIsRating(true)
           }}
-          className={`absolute top-2 right-2 px-2 py-1 rounded text-white text-xs font-semibold shadow ${r?.ranking ? ratingTone(r.ranking) : 'bg-gray-300 text-gray-700'} hover:brightness-95`}
+          className="absolute top-2 right-2 hover:brightness-95"
           aria-label={r?.ranking ? `Rating ${r.ranking}` : 'Rate game'}
         >
-          {r?.ranking || <StarIcon className="h-4 w-4" />}
+          {r?.ranking ? <RatingChip value={r.ranking} size="xs" /> : (
+            <span className="inline-flex items-center justify-center w-7 h-7 rounded bg-gray-300 text-gray-700">
+              <StarIcon className="h-4 w-4" />
+            </span>
+          )}
         </button>
       </div>
       <div className="p-2">

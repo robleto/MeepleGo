@@ -43,6 +43,16 @@ export default function RootLayout({
   epilogue.variable,
       ].join(' ')}
     >
+      <head>
+        <link rel="preconnect" href="https://use.typekit.net" />
+  <link rel="preconnect" href="https://p.typekit.net" />
+        {process.env.NEXT_PUBLIC_ADOBE_FONTS_KIT_ID && (
+          <link
+            rel="stylesheet"
+            href={`https://use.typekit.net/${process.env.NEXT_PUBLIC_ADOBE_FONTS_KIT_ID}.css`}
+          />
+        )}
+      </head>
       <body
         className={
       'font-sans min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-white'

@@ -1,67 +1,23 @@
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
 import PageLayout from '@/components/PageLayout'
 import Heading from '@/components/Heading'
-import Link from 'next/link'
-import {
-  TrophyIcon,
-  CalendarIcon,
-  UserGroupIcon,
-  StarIcon,
-  ChevronDownIcon,
-} from '@heroicons/react/24/outline'
-import { supabase } from '@/lib/supabase'
+import { TrophyIcon, ChevronDownIcon } from '@heroicons/react/24/outline'
+import awardsData from '@/data/awards.json'
+import { getSupabaseServerClient } from '@/lib/supabaseServer'
+import PersonalAwardCategorySection from '@/components/awards/PersonalAwardCategorySection'
+import PersonalAwardsAuto from '@/components/awards/PersonalAwardsAuto'
+import IndustryAwards from '@/components/awards/IndustryAwards'
+import AwardsLoggedOutHero from '@/components/awards/AwardsLoggedOutHero'
+import HeroAuthGate from '@/components/awards/HeroAuthGate'
 
-// Award categories with their metadata
-const AWARD_CATEGORIES = [
-  {
-    id: 'golden-geek',
-    name: 'Golden Geek Awards',
-    description:
-      'Annual awards voted by the BoardGameGeek community, recognizing excellence across multiple categories including Game of the Year, Best Strategy Game, and more.',
-    icon: TrophyIcon,
-    color: 'amber',
-    backgroundColor: 'bg-amber-50',
-    borderColor: 'border-amber-200',
-    iconColor: 'text-amber-600',
-    website:
-      'https://boardgamegeek.com/boardgamehonor/32396/golden-geek-awards',
-  },
-  {
-    id: 'spiel-des-jahres',
-    name: 'Spiel des Jahres',
-    description:
-      'The prestigious German "Game of the Year" award, considered the Oscar of board gaming. Awarded annually since 1979.',
-    icon: TrophyIcon,
-    color: 'yellow',
-    backgroundColor: 'bg-yellow-50',
-    borderColor: 'border-yellow-200',
-    iconColor: 'text-yellow-600',
-    website: 'https://www.spiel-des-jahres.de/',
-  },
-  {
-    id: 'kinderspiel-des-jahres',
-    name: 'Kinderspiel des Jahres',
-    description:
-      'The German "Children\'s Game of the Year" award, recognizing the best family-friendly games. Part of the Spiel des Jahres family since 2001.',
-    icon: TrophyIcon,
-    color: 'green',
-    backgroundColor: 'bg-green-50',
-    borderColor: 'border-green-200',
-    iconColor: 'text-green-600',
-    website: 'https://www.spiel-des-jahres.de/',
-  },
-  {
-    id: 'kennerspiel-des-jahres',
-    name: 'Kennerspiel des Jahres',
-    description:
-      'The German "Connoisseur Game of the Year" award for more complex games. Established in 2011 for experienced gamers.',
-    icon: TrophyIcon,
-    color: 'blue',
-    backgroundColor: 'bg-blue-50',
-    borderColor: 'border-blue-200',
-    iconColor: 'text-blue-600',
-    website: 'https://www.spiel-des-jahres.de/',
-  },
-]
+// Award categories loaded from JSON (icon string mapped to actual component below)
+const AWARD_CATEGORIES = (awardsData as any).categories.map((c: any) => ({
+  ...c,
+  icon: TrophyIcon, // currently only TrophyIcon, future: dynamic mapping
+})) as Array<{
+  id: string; name: string; description: string; icon: typeof TrophyIcon; color: string; backgroundColor: string; borderColor: string; iconColor: string; website: string
+}>
 
 // Debug helper: build per-year breakdown for an award type
 async function getAwardYearBreakdown(awardType: string) {
@@ -71,7 +27,8 @@ async function getAwardYearBreakdown(awardType: string) {
   const pageSize = 1000
 
   while (true) {
-    const { data: games, error } = await supabase
+  const supabase = await getSupabaseServerClient()
+  const { data: games, error } = await supabase
       .from('games')
       .select('name, honors')
       .not('honors', 'eq', '[]')
@@ -128,7 +85,8 @@ async function getAwardStats(awardType: string): Promise<AwardStats> {
   const pageSize = 1000
 
   while (true) {
-    const { data: games, error } = await supabase
+  const supabase = await getSupabaseServerClient()
+  const { data: games, error } = await supabase
       .from('games')
       .select('honors')
       .not('honors', 'eq', '[]')
@@ -175,82 +133,6 @@ async function getAwardStats(awardType: string): Promise<AwardStats> {
   }
 }
 
-function AwardCategoryCard({
-  category,
-  stats,
-}: {
-  category: (typeof AWARD_CATEGORIES)[0]
-  stats: AwardStats
-}) {
-  const IconComponent = category.icon
-
-  return (
-    <Link
-      href={`/awards/${category.id}`}
-      className={`
-        block p-6 rounded-xl border-2 transition-all duration-200
-        hover:shadow-lg hover:scale-105 group
-        ${category.backgroundColor} ${category.borderColor}
-      `}
-    >
-      {/* Header */}
-      <div className="flex items-start gap-4 mb-4">
-        <div
-          className={`p-3 rounded-lg ${category.backgroundColor} border ${category.borderColor}`}
-        >
-          <IconComponent className={`w-6 h-6 ${category.iconColor}`} />
-        </div>
-        <div className="flex-1">
-          <h3 className="text-xl font-bold text-gray-900 group-hover:text-gray-700 mb-1">
-            {category.name}
-          </h3>
-          {stats.yearSpan && (
-            <p className="text-sm text-gray-500 flex items-center gap-1">
-              <CalendarIcon className="w-4 h-4" />
-              {stats.yearSpan}
-            </p>
-          )}
-        </div>
-      </div>
-
-      {/* Description */}
-      <p className="text-gray-600 mb-4 leading-relaxed">
-        {category.description}
-      </p>
-
-      {/* Stats */}
-      <div className="grid grid-cols-3 gap-4 pt-4 border-t border-gray-200">
-        <div className="text-center">
-          <div className="text-lg font-bold text-gray-900">
-            {stats.totalWinners}
-          </div>
-          <div className="text-xs text-gray-500">Winners</div>
-        </div>
-        <div className="text-center">
-          <div className="text-lg font-bold text-gray-900">
-            {stats.totalNominees}
-          </div>
-          <div className="text-xs text-gray-500">Nominees</div>
-        </div>
-        <div className="text-center">
-          <div className="text-lg font-bold text-gray-900">
-            {stats.totalGames}
-          </div>
-          <div className="text-xs text-gray-500">Total Games</div>
-        </div>
-      </div>
-
-      {/* View arrow */}
-      <div className="mt-4 text-right">
-        <span
-          className={`text-sm font-medium ${category.iconColor} group-hover:underline`}
-        >
-          View Awards →
-        </span>
-      </div>
-    </Link>
-  )
-}
 
 export default async function AwardsPage({
   searchParams,
@@ -258,13 +140,92 @@ export default async function AwardsPage({
   searchParams?: Promise<Record<string, string | string[] | undefined>>
 }) {
   const params = await searchParams
-  // Map award IDs to database award_type values
-  const awardTypeMap: Record<string, string> = {
-    'golden-geek': 'Golden Geek Awards',
-    'spiel-des-jahres': 'Spiel des Jahres',
-    'kinderspiel-des-jahres': 'Kinderspiel des Jahres',
-    'kennerspiel-des-jahres': 'Kennerspiel des Jahres',
+  const supabase = await getSupabaseServerClient()
+  const { data: { session } } = await supabase.auth.getSession()
+
+  // Personal (logged-in) auto-awards (simple: top 10 by rating per category)
+  let personalCategoryBlocks: Array<{ id:string; label:string; games: any[]; description?: string }> = []
+  let validRankedCount = 0
+  if (session?.user) {
+    const { data: rankingRows } = await supabase
+      .from('rankings')
+  .select('game_id, ranking, played_it, games:game_id ( id, name, year_published, image_url, thumbnail_url, categories, mechanics, min_players, max_players, honors, playtime_minutes )')
+      .eq('user_id', session.user.id)
+
+  const rankings = (rankingRows||[]).map(r=>{
+      const g = (r as any).games
+      if (!g) return null
+  const playtime = (g as any).playtime_minutes ?? null
+      return {
+        ranking: (r as any).ranking as number | null,
+        played_it: (r as any).played_it as boolean | null,
+        game: {
+          id: g.id as string,
+          name: g.name as string,
+      year_published: g.year_published as number | null,
+      image_url: g.image_url as string | null,
+      thumbnail_url: g.thumbnail_url as string | null,
+          categories: g.categories as string[] | null,
+          mechanics: (g as any).mechanics as string[] | null,
+          min_players: g.min_players as number | null,
+          max_players: g.max_players as number | null,
+          playtime_minutes: playtime as number | null,
+          honors: g.honors,
+        }
+      }
+    }).filter(Boolean) as any[]
+
+  // Treat any positive ranking as valid; don't require played_it so users without that flag still qualify
+  const validRanked = rankings.filter(r=> (r.ranking ?? 0) > 0)
+  validRankedCount = validRanked.length
+
+  // Sort once by ranking desc (treat null as 0)
+  const sorted = validRanked.sort((a,b)=>(b.ranking??0)-(a.ranking??0))
+
+      const defs: Array<{ id:string; label:string; description?: string; filter:(r:any)=>boolean }> = [
+      { id:'best', label:'Best Overall', description:'Your all‑time highest rated played games.', filter: ()=>true },
+      { id:'strategy', label:'Best Strategy', description:'Depth, planning, crunchy decisions.', filter: r => (r.game.categories||[]).some((c:string)=>/strategy|wargame|economic|abstract|thematic|euro/i.test(c)) },
+      { id:'family', label:'Best Family', description:'Accessible & fun for mixed groups.', filter: r => (r.game.categories||[]).some((c:string)=>/family|gateway|kids/i.test(c)) },
+      { id:'duo', label:'Best Duo', description:'Top two‑player experiences.', filter: r => (r.game.min_players===2 && r.game.max_players===2) || (r.game.categories||[]).some((c:string)=>/2.*player|two.?player|duel/i.test(c)) },
+      { id:'kids', label:'Best Kids', description:'Great for younger players.', filter: r => (r.game.categories||[]).some((c:string)=>/child|kid|junior|preschool/i.test(c)) },
+      { id:'card', label:'Best Card Game', description:'Card‑driven experiences.', filter: r => (r.game.categories||[]).some((c:string)=>/card|living card/i.test(c)) },
+      { id:'wargame', label:'Best Wargame', description:'Conflict & historical simulation.', filter: r => (r.game.categories||[]).some((c:string)=>/war.?game|wargame|conflict|historical/i.test(c)) },
+      { id:'party', label:'Best Party', description:'Social & high energy.', filter: r => (r.game.categories||[]).some((c:string)=>/party|social|humor/i.test(c)) },
+      { id:'trivia', label:'Best Trivia', description:'Quiz & fact showdowns.', filter: r => (r.game.categories||[]).some((c:string)=>/trivia|quiz|knowledge/i.test(c)) },
+      { id:'bluffing', label:'Best Bluffing', description:'Deduction & deception.', filter: r => (r.game.categories||[]).some((c:string)=>/bluff|deception|hidden role|social deduction/i.test(c)) },
+      { id:'pnp', label:'Best Print & Play', description:'DIY / print & play titles.', filter: r => (r.game.categories||[]).some((c:string)=>/print.?(&|and)?.?play|print.?n.?play|pnp|roll.?and.?write/i.test(c)) },
+      { id:'coop', label:'Best Cooperative', description:'Work together vs the game.', filter: r => (r.game.mechanics||[]).some((m:string)=>/coop|campaign|legacy/i.test(m)) || (r.game.categories||[]).some((c:string)=>/co.?op|cooperative/i.test(c)) },
+      { id:'deckbuild', label:'Best Deck Building', description:'Progress via evolving decks.', filter: r => (r.game.mechanics||[]).some((m:string)=>/deck.?build|bag.?build/i.test(m)) },
+      { id:'solo', label:'Best Solo / Solitaire', description:'Great single‑player experience.', filter: r => (r.game.mechanics||[]).some((m:string)=>/solo|solitaire|autom|campaign/i.test(m)) || (r.game.min_players === 1) },
+      { id:'abstract', label:'Best Abstract', description:'Pure mechanisms & elegance.', filter: r => (r.game.categories||[]).some((c:string)=>/abstract/i.test(c)) },
+      { id:'thematic', label:'Best Thematic', description:'Story & immersion focused.', filter: r => (r.game.categories||[]).some((c:string)=>/thematic|adventure|narrative|story/i.test(c)) },
+      { id:'light', label:'Best Light / Filler', description:'Quick to learn & play (<45m).', filter: r => (r.game.playtime_minutes ?? 999) <= 45 },
+      { id:'medium', label:'Best Medium Weight', description:'Mid-weight strategy (~46-90m).', filter: r => (r.game.playtime_minutes ?? 0) > 45 && (r.game.playtime_minutes ?? 0) <= 100 },
+      { id:'long', label:'Best Long / Epic', description:'Long form or epic sessions.', filter: r => (r.game.playtime_minutes ?? 0) > 100 },
+      ]
+
+    personalCategoryBlocks = defs.map(def => ({
+      id: def.id,
+      label: def.label,
+      description: def.description,
+      games: sorted.filter(def.filter).slice(0,10).map(r=>({
+        id: r.game.id,
+        name: r.game.name,
+        year_published: r.game.year_published,
+        image_url: r.game.image_url,
+        thumbnail_url: r.game.thumbnail_url,
+        honors: r.game.honors,
+        categories: r.game.categories,
+        min_players: r.game.min_players,
+        max_players: r.game.max_players,
+        playtime_minutes: r.game.playtime_minutes,
+        ranking: r.ranking,
+        played_it: r.played_it,
+      }))
+    })).filter(block => block.games.length > 0)
   }
+  // Map award IDs to database award_type values
+  const awardTypeMap: Record<string, string> = (awardsData as any).awardTypeMap
 
   // Get stats for each award category
   const statsPromises = AWARD_CATEGORIES.map((category) =>
@@ -297,163 +258,143 @@ export default async function AwardsPage({
     }))
   }
 
+  // Server-known auth state (may be stale) for initial paint; client gate will correct.
+  const serverLoggedIn = !!session?.user
+
   return (
     <PageLayout>
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="p-4 rounded-full bg-yellow-100">
-              <TrophyIcon className="w-10 h-10 text-yellow-600" />
-            </div>
+<div className="max-w-6xl mx-auto px-4 py-8">
+
+  {/* Intro hero (client-gated; hides immediately if authenticated) */}
+  <HeroAuthGate serverLoggedIn={serverLoggedIn} />
+
+
+  {/* Industry Awards */}
+  <IndustryAwards
+    preview
+    categories={AWARD_CATEGORIES.map(({ icon, ...rest }) => rest)}
+    stats={allStats}
+    limit={3}
+  />
+
+
+  {/* Personal Awards (server-rendered if session known; else client fallback) */}
+  {serverLoggedIn ? (
+    <div className="mt-16">
+      <div className="mb-5">
+        <h2 className="text-md font-semibold tracking-wide text-gray-400 uppercase">Personal Awards</h2>
+      </div>
+      <div className="space-y-12">
+        {personalCategoryBlocks.length === 0 && (
+          <p className="text-xs text-gray-500 text-center">Rate and rank games you have played to start generating your personal awards.</p>
+        )}
+        {personalCategoryBlocks.map(block => (
+          <PersonalAwardCategorySection key={block.id} id={block.id} label={block.label} description={block.description} games={block.games as any} />
+        ))}
+        {personalCategoryBlocks.length > 0 && (
+          <div className="pt-2 text-center text-[11px] text-gray-400">
+            Auto Awards are generated from your played & rated games using relaxed category and mechanic matches; rate more games to unlock additional categories.
           </div>
-          <Heading as="h1" size="xl" soft className="mb-4">Board Game Awards</Heading>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-6">
-            Explore prestigious board game awards from around the world.
-            Discover winners and nominees across multiple categories and years.
-          </p>
+        )}
+      </div>
+    </div>
+  ) : (
+    <div className="mt-16">
+      <PersonalAwardsAuto />
+    </div>
+  )}
 
-          {/* Overall stats */}
-          <div className="flex items-center justify-center gap-8 text-sm text-gray-500">
-            <div className="flex items-center gap-2">
-              <TrophyIcon className="w-4 h-4" />
-              {AWARD_CATEGORIES.length} Award Categories
-            </div>
-            <div className="flex items-center gap-2">
-              <StarIcon className="w-4 h-4" />
-              {allStats.reduce((sum, stats) => sum + stats.totalGames, 0)} Total
-              Games
-            </div>
-            <div className="flex items-center gap-2">
-              <UserGroupIcon className="w-4 h-4" />
-              Multiple Award Bodies
-            </div>
-          </div>
-        </div>
 
-        {/* Personal Awards CTA */}
-        <div className="mb-10 flex flex-col items-center gap-3">
-          <Heading as="h2" size="sm" subtle className="">Your Personalized Awards</Heading>
-          <p className="text-sm text-gray-500 max-w-xl text-center">Generate and edit your own yearly awards based on the games you've rated. Adjust nominees, pick winners, and rebuild after ranking changes.</p>
-          {(() => { const y = new Date().getFullYear(); return (
-            <a href={`/awards/my/${y}`} className="px-4 py-2 rounded-md bg-primary-600 text-white text-sm hover:bg-primary-500">View My {y} Awards</a>
-          )})()}
-        </div>
-
-        {/* Award Categories */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {AWARD_CATEGORIES.map((category, index) => (
-            <AwardCategoryCard
-              key={category.id}
-              category={category}
-              stats={allStats[index]}
-            />
-          ))}
-        </div>
-
-        {/* Footer info */}
-        <div className="mt-12 text-center">
-          <div className="max-w-3xl mx-auto p-6 bg-gray-50 rounded-lg">
-            <Heading as="h3" size="sm" subtle className="mb-2">About These Awards</Heading>
-            <p className="text-gray-600 leading-relaxed">
-              These awards represent some of the most prestigious recognitions
-              in board gaming. From the industry-standard Spiel des Jahres to
-              community-driven Golden Geek Awards, each category highlights
-              excellence in game design, innovation, and player experience.
-            </p>
-          </div>
-        </div>
-
-        {debugEnabled && (
-          <div className="mt-16">
-            <Heading as="h2" size="lg" className="mb-4 flex items-center gap-2">
-              <ChevronDownIcon className="w-6 h-6 text-gray-500" /> Debug: Raw Award Data
+  {debugEnabled && (
+    <div className="mt-16">
+      <Heading as="h2" size="lg" className="mb-4 flex items-center gap-2">
+        <ChevronDownIcon className="w-6 h-6 text-gray-500" /> Debug: Raw Award Data
+      </Heading>
+      <p className="text-sm text-gray-500 mb-6">
+        Showing per-year breakdown sourced directly from games.honors.
+        Duplicate game appearances in multiple categories are shown unless
+        de-duplicated in import logic.
+      </p>
+      <div className="space-y-10 text-left">
+        {debugData.map((block) => (
+          <div
+            key={block.id}
+            className="border border-gray-200 rounded-lg p-4 bg-white shadow-sm"
+          >
+            <Heading as="h3" size="sm" subtle className="mb-2">
+              {block.name} <span className="text-xs text-gray-400">({block.awardType})</span>
             </Heading>
-            <p className="text-sm text-gray-500 mb-6">
-              Showing per-year breakdown sourced directly from games.honors.
-              Duplicate game appearances in multiple categories are shown unless
-              de-duplicated in import logic.
-            </p>
-            <div className="space-y-10 text-left">
-              {debugData.map((block) => (
+            {block.years.length === 0 && (
+              <p className="text-sm text-red-500">No honors found.</p>
+            )}
+            <div className="max-h-96 overflow-auto pr-2 space-y-4 text-sm">
+              {block.years.map((y) => (
                 <div
-                  key={block.id}
-                  className="border border-gray-200 rounded-lg p-4 bg-white shadow-sm"
+                  key={y.year}
+                  className="border-b last:border-b-0 pb-3"
                 >
-                  <Heading as="h3" size="sm" subtle className="mb-2">
-                    {block.name} <span className="text-xs text-gray-400">({block.awardType})</span>
-                  </Heading>
-                  {block.years.length === 0 && (
-                    <p className="text-sm text-red-500">No honors found.</p>
-                  )}
-                  <div className="max-h-96 overflow-auto pr-2 space-y-4 text-sm">
-                    {block.years.map((y) => (
-                      <div
-                        key={y.year}
-                        className="border-b last:border-b-0 pb-3"
-                      >
-                        <div className="font-medium text-gray-700 mb-1">
-                          {y.year}
-                        </div>
-                        <div className="grid gap-2 md:grid-cols-3">
-                          <div>
-                            <div className="text-yellow-700 font-semibold">
-                              Winners ({y.winners.length})
-                            </div>
-                            <ul className="list-disc ml-4 text-gray-600 space-y-0.5">
-                              {y.winners.slice(0, 8).map((n) => (
-                                <li key={n}>{n}</li>
-                              ))}
-                              {y.winners.length > 8 && (
-                                <li className="italic text-gray-400">
-                                  +{y.winners.length - 8} more
-                                </li>
-                              )}
-                            </ul>
-                          </div>
-                          <div>
-                            <div className="text-gray-700 font-semibold">
-                              Nominees ({y.nominees.length})
-                            </div>
-                            <ul className="list-disc ml-4 text-gray-600 space-y-0.5">
-                              {y.nominees.slice(0, 8).map((n) => (
-                                <li key={n}>{n}</li>
-                              ))}
-                              {y.nominees.length > 8 && (
-                                <li className="italic text-gray-400">
-                                  +{y.nominees.length - 8} more
-                                </li>
-                              )}
-                            </ul>
-                          </div>
-                          <div>
-                            <div className="text-blue-700 font-semibold">
-                              Special / Recommended ({y.special.length})
-                            </div>
-                            <ul className="list-disc ml-4 text-gray-600 space-y-0.5">
-                              {y.special.slice(0, 8).map((n) => (
-                                <li key={n}>{n}</li>
-                              ))}
-                              {y.special.length > 8 && (
-                                <li className="italic text-gray-400">
-                                  +{y.special.length - 8} more
-                                </li>
-                              )}
-                            </ul>
-                          </div>
-                        </div>
+                  <div className="font-medium text-gray-700 mb-1">
+                    {y.year}
+                  </div>
+                  <div className="grid gap-2 md:grid-cols-3">
+                    <div>
+                      <div className="text-yellow-700 font-semibold">
+                        Winners ({y.winners.length})
                       </div>
-                    ))}
+                      <ul className="list-disc ml-4 text-gray-600 space-y-0.5">
+                        {y.winners.slice(0, 8).map((n) => (
+                          <li key={n}>{n}</li>
+                        ))}
+                        {y.winners.length > 8 && (
+                          <li className="italic text-gray-400">
+                            +{y.winners.length - 8} more
+                          </li>
+                        )}
+                      </ul>
+                    </div>
+                    <div>
+                      <div className="text-gray-700 font-semibold">
+                        Nominees ({y.nominees.length})
+                      </div>
+                      <ul className="list-disc ml-4 text-gray-600 space-y-0.5">
+                        {y.nominees.slice(0, 8).map((n) => (
+                          <li key={n}>{n}</li>
+                        ))}
+                        {y.nominees.length > 8 && (
+                          <li className="italic text-gray-400">
+                            +{y.nominees.length - 8} more
+                          </li>
+                        )}
+                      </ul>
+                    </div>
+                    <div>
+                      <div className="text-blue-700 font-semibold">
+                        Special / Recommended ({y.special.length})
+                      </div>
+                      <ul className="list-disc ml-4 text-gray-600 space-y-0.5">
+                        {y.special.slice(0, 8).map((n) => (
+                          <li key={n}>{n}</li>
+                        ))}
+                        {y.special.length > 8 && (
+                          <li className="italic text-gray-400">
+                            +{y.special.length - 8} more
+                          </li>
+                        )}
+                      </ul>
+                    </div>
                   </div>
                 </div>
               ))}
             </div>
-            <div className="mt-6 text-xs text-gray-400">
-              Debug mode active via ?debug=1
-            </div>
           </div>
-        )}
+        ))}
       </div>
-    </PageLayout>
+      <div className="mt-6 text-xs text-gray-400">
+        Debug mode active via ?debug=1
+      </div>
+    </div>
+  )}
+</div>
+</PageLayout>
   )
 }

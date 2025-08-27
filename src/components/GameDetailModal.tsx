@@ -31,6 +31,7 @@ import {
 } from '@heroicons/react/24/outline'
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid'
 import RatingPopup from './RatingPopup'
+import RatingChip from './RatingChip'
 
 interface GameDetailModalProps {
   game: GameWithRanking & {
@@ -50,7 +51,11 @@ export default function GameDetailModal({
   onClose,
   onMembershipChange,
 }: GameDetailModalProps) {
-  const [localRanking, setLocalRanking] = useState(game.ranking || null)
+  const [localRanking, setLocalRanking] = useState<any>(
+    typeof game.ranking === 'number'
+      ? { ranking: game.ranking, played_it: (game as any).played_it ?? false }
+      : game.ranking || null
+  )
   const [saving, setSaving] = useState(false)
   const [membership, setMembership] = useState<{
     library: boolean
@@ -77,7 +82,15 @@ export default function GameDetailModal({
 
   // Reset state when game changes
   useEffect(() => {
-    setLocalRanking(game.ranking || null)
+    setLocalRanking(
+      typeof game.ranking === 'number'
+        ? { ranking: game.ranking, played_it: (game as any).played_it ?? false }
+        : game.ranking || null
+    )
+  const ratingValue: number | null =
+    typeof localRanking === 'number'
+      ? localRanking
+      : localRanking?.ranking ?? null
     setMembership({
       library: game.list_membership?.library ?? false,
       wishlist: game.list_membership?.wishlist ?? false,
@@ -99,32 +112,7 @@ export default function GameDetailModal({
     }
   }, [open, onClose])
 
-  const ratingTone = (r?: number | null) => {
-    switch (r) {
-      case 10:
-        return 'bg-[#e5dbf3] text-[#4c2c65]' // Purple
-      case 9:
-        return 'bg-[#d5e7f2] text-[#1a3448]' // Blue
-      case 8:
-        return 'bg-[#dcebe3] text-[#1f3c30]' // Green
-      case 7:
-        return 'bg-[#f8e7ba] text-[#5b3d00]' // Yellow
-      case 6:
-        return 'bg-[#f4d8c7] text-[#7b3f00]' // Orange
-      case 5:
-        return 'bg-[#f5d9e8] text-[#6a1f45]' // Pink
-      case 4:
-        return 'bg-[#f6d4d4] text-[#7b1818]' // Red
-      case 3:
-        return 'bg-[#eee0d6] text-[#7b5c42]' // Beige
-      case 2:
-        return 'bg-[#e2e2e2] text-[#474747]' // Gray
-      case 1:
-        return 'bg-[#f5f5f5] text-[#474747]' // Light Gray
-      default:
-        return 'bg-gray-200 text-gray-700'
-    }
-  }
+  // ratingTone replaced by HexRatingBadge
 
   const upsertRanking = async (
     patch: Partial<{ played_it: boolean; ranking: number }>
@@ -204,6 +192,12 @@ export default function GameDetailModal({
 
   const description = game.description || game.summary
   const isLongDescription = description && description.length > 300
+  const ratingValue: number | null =
+    typeof localRanking === 'number'
+      ? localRanking
+      : (localRanking && typeof localRanking === 'object'
+          ? (localRanking as any).ranking ?? null
+          : null)
   const honors: any[] = Array.isArray((game as any).honors)
     ? (game as any).honors
     : []
@@ -347,12 +341,8 @@ export default function GameDetailModal({
                       : 'Rate this game'
                   }
                 >
-                  {localRanking?.ranking ? (
-                    <div
-                      className={`px-2.5 py-1.5 rounded text-sm font-semibold leading-none ${ratingTone(localRanking.ranking)} ${saving ? 'opacity-70' : ''}`}
-                    >
-                      {localRanking.ranking}
-                    </div>
+                  {ratingValue ? (
+                    <RatingChip value={ratingValue} size="sm" className={`${saving ? 'opacity-70' : ''}`} subtle={false} />
                   ) : (
                     <div className="px-2.5 py-1.5 rounded text-sm font-medium leading-none bg-gray-100 text-gray-500 group-hover:bg-gray-200">
                       Rate
@@ -410,17 +400,14 @@ export default function GameDetailModal({
               isOpen={showRatingPopup}
               onClose={() => setShowRatingPopup(false)}
               onRatingChange={(rating) => {
-                setLocalRanking(
-                  (prev) =>
-                    ({
-                      ...(prev || {
-                        played_it: false,
-                        user_id: 'local',
-                        game_id: game.id,
-                      }),
-                      ranking: rating ?? null,
-                    }) as any
-                )
+                setLocalRanking((prev: any) => ({
+                  ...(prev || {
+                    played_it: false,
+                    user_id: 'local',
+                    game_id: game.id,
+                  }),
+                  ranking: rating ?? null,
+                }))
               }}
               position={ratingPopupPosition || undefined}
             />

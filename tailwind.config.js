@@ -28,6 +28,8 @@ module.exports = {
     'text-[#474747]', // 2 - Gray
     'bg-[#f5f5f5]',
     'text-[#474747]', // 1 - Light Gray
+  // Award category dynamic color utilities (from awards.json) safelisted so JIT doesn't purge
+  { pattern: /(bg|border|text)-(amber|yellow|green|blue|rose|violet|fuchsia|orange|cyan|emerald|teal|slate|pink|indigo|lime)-(50|200|600)/ },
   ],
   theme: {
     extend: {
@@ -59,8 +61,8 @@ module.exports = {
         },
       },
       fontFamily: {
-        sans: ['var(--font-inter)', 'Inter', 'system-ui', 'sans-serif'],
-        display: ['var(--font-display)', 'Outfit', 'Inter', 'system-ui', 'sans-serif'],
+  sans: ['var(--font-inter)', 'Proxima Nova', 'Inter', 'system-ui', 'sans-serif'],
+  display: ['Rift Soft', 'var(--font-display)', 'Outfit', 'Inter', 'system-ui', 'sans-serif'],
   // Optional prestige set (mapped via globals.css by toggling html.typography-b)
   prestige: ['var(--font-award-b)', 'Fraunces', 'var(--font-display)', 'serif'],
   prestigeAlt: ['var(--font-award-b-alt)', 'Playfair Display', 'Fraunces', 'serif'],

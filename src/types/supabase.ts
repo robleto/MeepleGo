@@ -206,30 +206,42 @@ export interface Database {
           user_id: string | null
           year: number
           category: string
+          nominees: string[] | null
           winner_id: string | null
+          threshold_used: number | null
+          manual_override: boolean | null
+          refreshed_at: string | null
+          stale: boolean | null
           created_at: string | null
           updated_at: string | null
-          nominee_ids: string[] | null
         }
         Insert: {
           id?: string
           user_id?: string | null
           year: number
           category?: string
+          nominees?: string[] | null
           winner_id?: string | null
+          threshold_used?: number | null
+          manual_override?: boolean | null
+          refreshed_at?: string | null
+          stale?: boolean | null
           created_at?: string | null
           updated_at?: string | null
-          nominee_ids?: string[] | null
         }
         Update: {
           id?: string
           user_id?: string | null
           year?: number
           category?: string
+          nominees?: string[] | null
           winner_id?: string | null
+          threshold_used?: number | null
+          manual_override?: boolean | null
+          refreshed_at?: string | null
+          stale?: boolean | null
           created_at?: string | null
           updated_at?: string | null
-          nominee_ids?: string[] | null
         }
       }
       play_logs: {

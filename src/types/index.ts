@@ -6,7 +6,7 @@ export type SortOption =
   | 'year'
   | 'rating'
   | 'date_added'
-  | 'playing_time'
+  | 'playtime_minutes'
 
 export type GameWithRanking = Game & {
   ranking?: Ranking | null

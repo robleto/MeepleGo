@@ -5,16 +5,17 @@
   "main": "index.js",
   "scripts": {
     "dev": "next dev",
-  "build": "NEXT_DISABLE_ESLINT=1 next build",
+    "build": "NEXT_DISABLE_ESLINT=1 next build",
     "start": "next start",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
     "format": "prettier --write .",
     "type-check": "tsc --noEmit",
     "backfill:honors": "ts-node --compiler-options '{\"module\":\"commonjs\"}' scripts/backfill_honor_categories.ts",
-  "cache:images": "ts-node --compiler-options '{\"module\":\"commonjs\"}' scripts/cache_game_images.ts",
-  "admin:reset": "node scripts/admin_reset_password.cjs",
-    "test": "vitest run"
+    "cache:images": "ts-node --compiler-options '{\"module\":\"commonjs\"}' scripts/cache_game_images.ts",
+    "admin:reset": "node scripts/admin_reset_password.cjs",
+    "test": "vitest run",
+    "supabase:types": "supabase gen types typescript --project-id $SUPABASE_PROJECT_ID > src/types/supabase.generated.ts"
   },
   "keywords": [
     "board games",

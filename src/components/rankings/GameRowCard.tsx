@@ -8,6 +8,7 @@ import {
   formatPlayerCount,
 } from '@/utils/helpers'
 import { PlayIcon, StarIcon, BookmarkIcon } from '@heroicons/react/24/outline'
+import RatingChip from '@/components/RatingChip'
 import { EyeIcon } from '@heroicons/react/24/solid'
 import { useState } from 'react'
 import GameImageFallback from '@/components/GameImageFallback'
@@ -34,32 +35,7 @@ export default function GameRowCard({
   const setRanking = (value: number | null) =>
     onUpdate(game.id, { ranking: value })
 
-  const ratingTone = (val?: number | null) => {
-    switch (val) {
-      case 10:
-        return 'bg-sky-100 text-sky-800'
-      case 9:
-        return 'bg-cyan-100 text-cyan-800'
-      case 8:
-        return 'bg-teal-100 text-teal-800'
-      case 7:
-        return 'bg-emerald-100 text-emerald-800'
-      case 6:
-        return 'bg-green-100 text-green-800'
-      case 5:
-        return 'bg-lime-100 text-lime-800'
-      case 4:
-        return 'bg-yellow-100 text-yellow-800'
-      case 3:
-        return 'bg-amber-100 text-amber-800'
-      case 2:
-        return 'bg-orange-100 text-orange-800'
-      case 1:
-        return 'bg-red-100 text-red-800'
-      default:
-        return 'bg-gray-200 text-gray-700'
-    }
-  }
+  // ratingTone replaced by HexRatingBadge
 
   return (
     <div
@@ -144,10 +120,12 @@ export default function GameRowCard({
             e.stopPropagation()
             setIsRating(true)
           }}
-          className={`px-3 py-1.5 rounded-lg text-sm font-bold flex items-center gap-1 ${ratingTone(r?.ranking)} hover:brightness-95 transition min-w-[3rem] justify-center`}
+          className="px-1 py-1 rounded-md hover:brightness-110 transition"
           aria-label={r?.ranking ? `Rating ${r.ranking}` : 'Rate game'}
         >
-          {r?.ranking ? r.ranking : <StarIcon className="h-4 w-4" />}
+          {r?.ranking ? <RatingChip value={r.ranking} size="sm" /> : (
+            <span className="inline-flex items-center justify-center w-8 h-8 rounded bg-gray-200 text-gray-600"><StarIcon className="h-4 w-4" /></span>
+          )}
         </button>
       </div>
 

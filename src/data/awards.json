@@ -1,0 +1,210 @@
+{
+  "categories": [
+    {
+      "id": "golden-geek",
+      "name": "Golden Geek Awards",
+    "description": "Annual BoardGameGeek community awards honoring top games in a series of categories.",
+      "icon": "TrophyIcon",
+      "color": "amber",
+      "backgroundColor": "bg-amber-50",
+      "borderColor": "border-amber-200",
+      "iconColor": "text-amber-600",
+      "website": "https://boardgamegeek.com/boardgamehonor/32396/golden-geek-awards"
+    },
+    {
+      "id": "spiel-des-jahres",
+      "name": "Spiel des Jahres",
+      "description": "The prestigious German \"Game of the Year\" award, considered the Oscar of board gaming.",
+      "icon": "TrophyIcon",
+      "color": "yellow",
+      "backgroundColor": "bg-yellow-50",
+      "borderColor": "border-yellow-200",
+      "iconColor": "text-yellow-600",
+      "website": "https://www.spiel-des-jahres.de/"
+    },
+    {
+      "id": "kinderspiel-des-jahres",
+      "name": "Kinderspiel des Jahres",
+      "description": "The German \"Children's Game of the Year\" award, recognizing the best family-friendly games. Part of the Spiel des Jahres family.",
+      "icon": "TrophyIcon",
+      "color": "green",
+      "backgroundColor": "bg-green-50",
+      "borderColor": "border-green-200",
+      "iconColor": "text-green-600",
+      "website": "https://www.spiel-des-jahres.de/"
+    },
+    {
+      "id": "kennerspiel-des-jahres",
+      "name": "Kennerspiel des Jahres",
+      "description": "The German \"Connoisseur Game of the Year\" award for more complex games. Part of the Spiel des Jahres family.",
+      "icon": "TrophyIcon",
+      "color": "blue",
+      "backgroundColor": "bg-blue-50",
+      "borderColor": "border-blue-200",
+      "iconColor": "text-blue-600",
+      "website": "https://www.spiel-des-jahres.de/"
+    },
+    {
+      "id": "deutscher-spiele-preis",
+      "name": "Deutscher Spiele Preis",
+      "description": "Prominent German gamers' award emphasizing gamer opinion and depth.",
+      "icon": "TrophyIcon",
+      "color": "rose",
+      "backgroundColor": "bg-rose-50",
+      "borderColor": "border-rose-200",
+      "iconColor": "text-rose-600",
+      "website": "https://www.dspielt.de/"
+    },
+    {
+      "id": "origins-awards",
+      "name": "Origins Awards",
+      "description": "Historical industry awards from the Game Manufacturers Association (GAMA).",
+      "icon": "TrophyIcon",
+      "color": "violet",
+      "backgroundColor": "bg-violet-50",
+      "borderColor": "border-violet-200",
+      "iconColor": "text-violet-600",
+      "website": "https://www.originsgamefair.com/"
+    },
+    {
+      "id": "dice-tower-awards",
+      "name": "The Dice Tower Gaming Awards",
+      "description": "Annual Dice Tower network selections across multiple categories.",
+      "icon": "TrophyIcon",
+      "color": "fuchsia",
+      "backgroundColor": "bg-fuchsia-50",
+      "borderColor": "border-fuchsia-200",
+      "iconColor": "text-fuchsia-600",
+      "website": "https://www.dicetower.com/awards"
+    },
+    {
+      "id": "as-dor",
+      "name": "As d'Or",
+      "description": "French Game of the Year awards (Jeu de l'Année).",
+      "icon": "TrophyIcon",
+      "color": "orange",
+      "backgroundColor": "bg-orange-50",
+      "borderColor": "border-orange-200",
+      "iconColor": "text-orange-600",
+      "website": "https://www.fij.fr/"
+    },
+    {
+      "id": "international-gamers-award",
+      "name": "International Gamers Award",
+      "description": "Global strategy game recognition spanning multiplayer and two-player titles.",
+      "icon": "TrophyIcon",
+      "color": "cyan",
+      "backgroundColor": "bg-cyan-50",
+      "borderColor": "border-cyan-200",
+      "iconColor": "text-cyan-600",
+      "website": "https://www.internationalgamersaward.net/"
+    },
+    {
+      "id": "ion-award",
+      "name": "Ion Award",
+      "description": "Provo-based game design competition highlighting prototypes and design talent.",
+      "icon": "TrophyIcon",
+      "color": "emerald",
+      "backgroundColor": "bg-emerald-50",
+      "borderColor": "border-emerald-200",
+      "iconColor": "text-emerald-600",
+      "website": "https://saltcon.com/ion-award/"
+    },
+    {
+      "id": "zenobia-award",
+      "name": "Zenobia Award",
+      "description": "Award encouraging diverse voices in historical game design.",
+      "icon": "TrophyIcon",
+      "color": "teal",
+      "backgroundColor": "bg-teal-50",
+      "borderColor": "border-teal-200",
+      "iconColor": "text-teal-600",
+      "website": "https://zenobiaaward.org/"
+    },
+    {
+      "id": "charles-s-roberts",
+      "name": "Charles S. Roberts Award",
+      "description": "Historic recognition for excellence in wargame design & publication.",
+      "icon": "TrophyIcon",
+      "color": "slate",
+      "backgroundColor": "bg-slate-50",
+      "borderColor": "border-slate-200",
+      "iconColor": "text-slate-600",
+      "website": "https://charlieawards.com/"
+    },
+    {
+      "id": "sxsw",
+      "name": "SXSW",
+      "description": "South by Southwest tabletop game of the year & related honors.",
+      "icon": "TrophyIcon",
+      "color": "pink",
+      "backgroundColor": "bg-pink-50",
+      "borderColor": "border-pink-200",
+      "iconColor": "text-pink-600",
+      "website": "https://www.sxsw.com/"
+    },
+    {
+      "id": "board-game-quest",
+      "name": "Board Game Quest",
+      "description": "Board Game Quest Awards across production, strategy & more.",
+      "icon": "TrophyIcon",
+      "color": "indigo",
+      "backgroundColor": "bg-indigo-50",
+      "borderColor": "border-indigo-200",
+      "iconColor": "text-indigo-600",
+      "website": "https://www.boardgamequest.com/"
+    },
+    {
+      "id": "juego-del-ano",
+      "name": "Juego del Año",
+      "description": "Spanish-language (Mexico / Tico) Game of the Year recognitions.",
+      "icon": "TrophyIcon",
+      "color": "amber",
+      "backgroundColor": "bg-amber-50",
+      "borderColor": "border-amber-200",
+      "iconColor": "text-amber-600",
+      "website": "https://juegodelano.mx/"
+    },
+    {
+      "id": "parents-choice",
+      "name": "Parents' Choice Approved",
+      "description": "Parents Choice award winners & approved recommendations.",
+      "icon": "TrophyIcon",
+      "color": "lime",
+      "backgroundColor": "bg-lime-50",
+      "borderColor": "border-lime-200",
+      "iconColor": "text-lime-600",
+      "website": "https://www.parentschoice.org/"
+    },
+    {
+      "id": "guldbrikken",
+      "name": "Guldbrikken",
+      "description": "Danish awards (children, family, adult & special jury).",
+      "icon": "TrophyIcon",
+      "color": "yellow",
+      "backgroundColor": "bg-yellow-50",
+      "borderColor": "border-yellow-200",
+      "iconColor": "text-yellow-600",
+      "website": "https://www.guldbrikken.dk/"
+    }
+  ],
+  "awardTypeMap": {
+    "golden-geek": "Golden Geek Awards",
+    "spiel-des-jahres": "Spiel des Jahres",
+    "kinderspiel-des-jahres": "Kinderspiel des Jahres",
+    "kennerspiel-des-jahres": "Kennerspiel des Jahres",
+    "deutscher-spiele-preis": "Deutscher Spiele Preis",
+    "origins-awards": "Origins Awards",
+    "dice-tower-awards": "The Dice Tower Gaming Awards",
+    "as-dor": "As d'Or - Jeu de l'Année",
+    "international-gamers-award": "International Gamers Award",
+    "ion-award": "Ion Award",
+    "zenobia-award": "Zenobia Award",
+    "charles-s-roberts": "Charles S. Roberts",
+    "sxsw": "SXSW",
+    "board-game-quest": "Board Game Quest Awards",
+    "juego-del-ano": "Juego del Año",
+    "parents-choice": "Parents Choice",
+    "guldbrikken": "Guldbrikken"
+  }
+}
