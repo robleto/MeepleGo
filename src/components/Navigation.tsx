@@ -256,7 +256,7 @@ function Navigation() {
             })}
           </div>
           <div className="flex-1 hidden md:block" />
-          {/* Search (Airbnb-style pill, compact) */}
+          {/* Search (Airbnb-style pill, compact) - TEMPORARILY COMMENTED OUT 
           <div className="hidden md:flex relative w-full max-w-lg">
             <div className="flex w-full items-center gap-2 rounded-full border border-gray-200 dark:border-gray-700 bg-white/85 dark:bg-gray-900/70 px-4 py-1.5 shadow-sm hover:shadow-md backdrop-blur-sm transition focus-within:ring-2 focus-within:ring-primary-500">
               <input
@@ -266,7 +266,7 @@ function Navigation() {
                 onChange={(e)=>{ setQuery(e.target.value); if (e.target.value) setShow(true) }}
                 onKeyDown={onKey}
                 onFocus={()=>{ if (flat.length) setShow(true) }}
-                placeholder="Start your search"
+                placeholder="Start for games"
                 className="flex-1 bg-transparent placeholder-gray-400 dark:placeholder-gray-500 text-sm leading-tight focus:outline-none"
                 role="combobox"
                 aria-autocomplete="list"
@@ -324,6 +324,8 @@ function Navigation() {
               </div>
             )}
           </div>
+          */}
+          
           {/* Actions */}
           <div className="flex items-center gap-2">
             <button onClick={toggleDark} aria-label="Toggle dark mode" className="ui-btn-ghost ui-btn-sm rounded-full h-9 w-9 flex items-center justify-center">

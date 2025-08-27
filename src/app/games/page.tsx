@@ -81,7 +81,7 @@ function GamesPageContent() {
       case 'year_published':
         return { column: 'year_published', ascending: order === 'asc' }
       case 'rating':
-        return { column: 'rating', ascending: order === 'asc' }
+        return { column: 'rank', ascending: order === 'asc' }
       case 'ranking':
         // For user rankings, we'll need a different approach since it's in a different table
         return { column: 'name', ascending: order === 'asc' } // Fallback to name for now
@@ -115,6 +115,16 @@ function GamesPageContent() {
       ]
     }
     const single = buildOrderClause(sortField, order)
+    
+    // For BGG rank sorting, we need to handle nulls properly
+    if (sortField === 'rating') {
+      return [{
+        column: single.column,
+        ascending: single.ascending as boolean,
+        nullsFirst: false as const, // Push NULL rankings to the end
+      }]
+    }
+    
     return [{ column: single.column, ascending: single.ascending as boolean }]
   }
 
@@ -214,10 +224,10 @@ function GamesPageContent() {
         orders,
       })
       orders.forEach((o) => {
-        if (o.column === 'year_published' && o.ascending === false) {
+        if ('nullsFirst' in o && typeof o.nullsFirst === 'boolean') {
           query = query.order(o.column as any, {
             ascending: o.ascending,
-            nullsFirst: false,
+            nullsFirst: o.nullsFirst,
           })
         } else {
           query = query.order(o.column as any, { ascending: o.ascending })
@@ -310,10 +320,10 @@ function GamesPageContent() {
           orders,
         })
         orders.forEach((o) => {
-          if (o.column === 'year_published' && o.ascending === false) {
+          if ('nullsFirst' in o && typeof o.nullsFirst === 'boolean') {
             query = query.order(o.column as any, {
               ascending: o.ascending,
-              nullsFirst: false,
+              nullsFirst: o.nullsFirst,
             })
           } else {
             query = query.order(o.column as any, { ascending: o.ascending })
@@ -387,10 +397,10 @@ function GamesPageContent() {
             q = applyServerFilters(q)
             const extraOrders = buildServerOrders(sortBy, sortOrder, groupBy)
             extraOrders.forEach((o) => {
-              if (o.column === 'year_published' && o.ascending === false) {
+              if ('nullsFirst' in o && typeof o.nullsFirst === 'boolean') {
                 q = q.order(o.column as any, {
                   ascending: o.ascending,
-                  nullsFirst: false,
+                  nullsFirst: o.nullsFirst,
                 })
               } else {
                 q = q.order(o.column as any, { ascending: o.ascending })
@@ -529,17 +539,6 @@ function GamesPageContent() {
   return (
     <PageLayout>
       <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <Heading as="h1" size="xl" weightScale>
-              Games
-            </Heading>
-            <p className="text-gray-600">
-              Browse and manage your game collection
-            </p>
-          </div>
-        </div>
 
         {/* Filters */}
         <GameFilters
@@ -562,11 +561,16 @@ function GamesPageContent() {
           uniqueMechanics={uniqueMechanics}
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
+          gamesCount={games.length}
+          filteredGamesCount={filteredGames.length}
+          hasMore={hasMore}
+          loading={loading}
+          error={error}
           defaults={{
             viewMode: 'grid',
-            sortBy: 'year_published',
-            sortOrder: 'desc',
-            groupBy: 'year_published',
+            sortBy: 'rating',
+            sortOrder: 'asc',
+            groupBy: 'none',
             filterType: 'none',
             filterValue: 'all',
           }}
@@ -584,30 +588,6 @@ function GamesPageContent() {
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-md p-4">
             <div className="text-red-800">{error}</div>
-          </div>
-        )}
-
-        {/* Results Count */}
-        {!loading && !error && games.length > 0 && (
-          <div className="text-sm text-gray-600">
-            {searchTerm ? (
-              <>
-                Search results for "
-                <span className="font-medium">{searchTerm}</span>": showing{' '}
-                {games.length} game{games.length !== 1 ? 's' : ''}
-                {hasMore && ' (more available)'}
-              </>
-            ) : (
-              <>
-                Showing {games.length} game{games.length !== 1 ? 's' : ''}
-                {hasMore && ' (more available)'}
-              </>
-            )}
-            {filteredGames.length !== games.length && (
-              <span className="ml-2 text-blue-600">
-                ({filteredGames.length} after filtering)
-              </span>
-            )}
           </div>
         )}
 
