@@ -178,8 +178,8 @@ export function PlayLogEditor({ gameId, gameName, onCreated, autoFocus }: PlayLo
   }
 
   return (
-    <div className="space-y-4">
-      <form onSubmit={handleSubmit} className="space-y-3" aria-describedby={errorMsg ? 'playlog-error' : undefined}>
+    <div className="space-y-5">
+      <form onSubmit={handleSubmit} className="space-y-5" aria-describedby={errorMsg ? 'playlog-error' : undefined}>
         <div className="flex items-center justify-between">
           <h3
             ref={headingRef}
@@ -200,14 +200,14 @@ export function PlayLogEditor({ gameId, gameName, onCreated, autoFocus }: PlayLo
             </button>
           )}
         </div>
-        <div className="grid grid-cols-2 gap-3 text-sm">
+        <div className="grid grid-cols-2 gap-4 text-sm">
           <label className="flex flex-col gap-1">
             <span className="text-xs uppercase tracking-wide text-gray-500">Date / Time</span>
             <input
               type="datetime-local"
               value={playedAt}
               onChange={(e) => setPlayedAt(e.target.value)}
-              className="border rounded px-2 py-1 text-sm"
+              className="border border-gray-300 rounded-md px-2.5 py-2 text-sm focus:ring-emerald-500 focus:border-emerald-500 bg-white/80"
               required
             />
           </label>
@@ -219,7 +219,7 @@ export function PlayLogEditor({ gameId, gameName, onCreated, autoFocus }: PlayLo
               max={10}
               value={rating}
               onChange={(e) => setRating(e.target.value === '' ? '' : Number(e.target.value))}
-              className="border rounded px-2 py-1 text-sm"
+              className="border border-gray-300 rounded-md px-2.5 py-2 text-sm focus:ring-emerald-500 focus:border-emerald-500 bg-white/80"
               placeholder="1-10"
             />
           </label>
@@ -230,7 +230,7 @@ export function PlayLogEditor({ gameId, gameName, onCreated, autoFocus }: PlayLo
               min={1}
               value={playerCount}
               onChange={(e) => setPlayerCount(e.target.value === '' ? '' : Number(e.target.value))}
-              className="border rounded px-2 py-1 text-sm"
+              className="border border-gray-300 rounded-md px-2.5 py-2 text-sm focus:ring-emerald-500 focus:border-emerald-500 bg-white/80"
               placeholder="#"
             />
           </label>
@@ -241,7 +241,7 @@ export function PlayLogEditor({ gameId, gameName, onCreated, autoFocus }: PlayLo
               min={0}
               value={duration}
               onChange={(e) => setDuration(e.target.value === '' ? '' : Number(e.target.value))}
-              className="border rounded px-2 py-1 text-sm"
+              className="border border-gray-300 rounded-md px-2.5 py-2 text-sm focus:ring-emerald-500 focus:border-emerald-500 bg-white/80"
               placeholder="e.g. 90"
             />
           </label>
@@ -253,7 +253,7 @@ export function PlayLogEditor({ gameId, gameName, onCreated, autoFocus }: PlayLo
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={4}
-            className="border rounded px-2 py-1 text-sm resize-y"
+            className="border border-gray-300 rounded-md px-2.5 py-2 text-sm resize-y focus:ring-emerald-500 focus:border-emerald-500 bg-white/80"
             placeholder="What stood out this play?"
             aria-label="Notes about this play session"
           />
@@ -292,7 +292,7 @@ export function PlayLogEditor({ gameId, gameName, onCreated, autoFocus }: PlayLo
                 }
               }}
               placeholder="Add tag"
-              className="border rounded px-2 py-1 text-xs w-32"
+              className="border border-gray-300 rounded-md px-2 py-1.5 text-xs w-32 focus:ring-emerald-500 focus:border-emerald-500 bg-white/80"
             />
           </div>
           {/* Suggestions */}
@@ -356,7 +356,7 @@ export function PlayLogEditor({ gameId, gameName, onCreated, autoFocus }: PlayLo
             type="submit"
             disabled={saving}
             ref={submitRef}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white text-sm px-3 py-1 rounded disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-emerald-500"
+            className="bg-emerald-600 hover:bg-emerald-700 text-white text-sm px-4 py-2 rounded-md disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-emerald-500 shadow-sm"
             aria-label={editing ? 'Update play log' : 'Save play log'}
           >
             {saving ? (editing ? 'Updating…' : 'Saving…') : editing ? 'Update Log' : 'Save Log'}
@@ -366,7 +366,7 @@ export function PlayLogEditor({ gameId, gameName, onCreated, autoFocus }: PlayLo
               type="button"
               onClick={() => clearForm()}
               disabled={saving}
-              className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm px-3 py-1 rounded disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-gray-400"
+              className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm px-4 py-2 rounded-md disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-gray-400"
               aria-label="Reset form fields"
             >
               Reset
@@ -386,7 +386,7 @@ export function PlayLogEditor({ gameId, gameName, onCreated, autoFocus }: PlayLo
       return (
               <li
                 key={log.id}
-                className={`border rounded p-2 bg-white shadow-sm relative ${isEditing ? 'ring-2 ring-emerald-400' : ''}`}
+                className={`border border-gray-200 rounded-md p-3 bg-white shadow-sm relative ${isEditing ? 'ring-2 ring-emerald-400' : ''}`}
         aria-current={isEditing ? 'true' : undefined}
               >
                 <div className="flex items-center justify-between text-xs text-gray-500 gap-2">
