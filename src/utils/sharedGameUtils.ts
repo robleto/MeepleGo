@@ -61,7 +61,7 @@ export function useGameDataWithGuest() {
       // Fetch rankings with game data
       const { data, error } = await supabase
         .from('rankings')
-        .select('id, game:games(*), ranking, played_it, user_id, game_id')
+        .select('id, game:games(*), ranking, played_it, user_id, game_id, public_note')
         .eq('user_id', session.user.id)
       if (error) throw error
 
@@ -98,6 +98,7 @@ export function useGameDataWithGuest() {
               ranking: r.ranking,
               played_it: r.played_it,
               notes: null,
+              public_note: r.public_note ?? null,
               created_at: null,
               imported_from: null,
               updated_at: null,

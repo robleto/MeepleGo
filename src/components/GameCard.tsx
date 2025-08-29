@@ -23,6 +23,7 @@ import { supabase } from '@/lib/supabase'
 import GameDetailModal from './GameDetailModal'
 import RatingPopup from './RatingPopup'
 import RatingChip from './RatingChip'
+import AddToModal from './AddToModal'
 
 interface GameCardProps {
   game: GameWithRanking & {
@@ -39,6 +40,7 @@ interface GameCardProps {
   showSummary?: boolean
   emphasizeMeta?: boolean
   showMeta?: boolean
+  titleClassName?: string
 }
 
 export default function GameCard({
@@ -51,6 +53,7 @@ export default function GameCard({
   showSummary = false,
   emphasizeMeta = false,
   showMeta = true,
+  titleClassName,
 }: GameCardProps) {
   const initialLibrary = game.list_membership?.library ?? false
   const initialWishlist = game.list_membership?.wishlist ?? false
@@ -61,6 +64,7 @@ export default function GameCard({
     y: number
   } | null>(null)
   const [showAddMenu, setShowAddMenu] = useState(false)
+  const [showAddModal, setShowAddModal] = useState(false)
   const [showModal, setShowModal] = useState(false)
   const [saving, setSaving] = useState(false)
   // localRanking can be a Ranking object or just a number (from lightweight award derivations)
@@ -289,7 +293,7 @@ export default function GameCard({
 
   return (
     <div
-      className={cardClass}
+      className={`${cardClass} flex flex-col`}
       onMouseEnter={() => setShowOverlay(true)}
       onMouseLeave={() => {
         setShowOverlay(false)
@@ -347,10 +351,12 @@ export default function GameCard({
           <GameImageFallback name={game.name} />
         )}
 
-  {/* (Removed) old image overlay rating chip – now shown inline with title */}
-  {variant === 'default' && localRanking?.played_it && (
+  {/* Rank badge removed per design request */}
+
+        {/* Played It badge - bottom right */}
+        {variant === 'default' && localRanking?.played_it && (
           <div
-            className="absolute bottom-1 right-1 bg-green-600/90 text-white text-[10px] px-2 py-0.5 rounded shadow pointer-events-none font-medium"
+            className="absolute bottom-2 right-2 bg-green-600/95 text-white text-[10px] px-2 py-0.5 rounded-full shadow pointer-events-none font-medium z-20"
             aria-label="Marked as played"
           >
             Played
@@ -396,55 +402,26 @@ export default function GameCard({
             <button
               onClick={(e) => {
                 e.stopPropagation()
-                setShowAddMenu(true)
+                setShowAddModal(true)
               }}
               className="p-2 rounded-full bg-white text-gray-700 shadow"
-              title="Add to list"
+              title="Add to..."
             >
               <PlusIcon className="h-4 w-4" />
             </button>
           </div>
         )}
 
-        {/* Add to list menu */}
-        {showAddMenu && (
-          <div className="absolute top-2 left-2 bg-white rounded-md shadow-lg border border-gray-200 w-44 py-1 text-sm z-50">
-            <button
-              onClick={(e) => {
-                e.stopPropagation()
-                handleToggle('library')
-                setShowAddMenu(false)
-              }}
-              className={`w-full text-left px-3 py-2 hover:bg-gray-50 flex items-center justify-between ${membership.library ? 'text-green-600' : ''}`}
-            >
-              <span>
-                {membership.library ? 'Remove from Library' : 'Add to Library'}
-              </span>
-              {membership.library && <span className="ml-2">✓</span>}
-            </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation()
-                handleToggle('wishlist')
-                setShowAddMenu(false)
-              }}
-              className={`w-full text-left px-3 py-2 hover:bg-gray-50 flex items-center justify-between ${membership.wishlist ? 'text-teal-600' : ''}`}
-            >
-              <span>
-                {membership.wishlist
-                  ? 'Remove from Wishlist'
-                  : 'Add to Wishlist'}
-              </span>
-              {membership.wishlist && <span className="ml-2">✓</span>}
-            </button>
-          </div>
-        )}
+        {/* AddTo modal separate; inline menu removed */}
       </div>
 
       {/* Game Info */}
-      <div className={`p-3 ${variant === 'compact' ? 'pb-2' : ''}`}>
-        <h3 className={`font-medium text-gray-900 flex items-start gap-1 ${variant === 'compact' ? 'text-xs leading-snug line-clamp-2 min-h-[2.1rem]' : 'mb-1 text-sm line-clamp-2 leading-tight'}`}>
-          <span className="flex-1 inline-block">{game.name}</span>
+      <div className={`p-3 ${variant === 'compact' ? 'pb-2' : ''} flex flex-col justify-between min-h-[120px]`}>
+        {/* Title Section with Rating Chip */}
+  <h3 className={`font-medium text-gray-900 flex items-start gap-1 ${variant === 'compact' ? 'text-xs leading-snug line-clamp-2 min-h-[2.1rem]' : 'text-sm leading-tight line-clamp-2'} ${titleClassName || ''}`}>
+          <span className="flex-1 inline-block">
+            {game.name.length > 48 ? `${game.name.substring(0, 48)}...` : game.name}
+          </span>
           {ratingValue && (
             <button
               type="button"
@@ -464,10 +441,15 @@ export default function GameCard({
             </button>
           )}
         </h3>
-  {variant === 'default' && showMeta && (
-          <div className={`space-y-1 text-xs ${emphasizeMeta ? 'text-gray-700' : 'text-gray-500'}`}>
+
+        {/* Year just below title to tighten vertical space */}
+        {variant === 'default' && (
+          <div className="mt-1 text-[11px] text-gray-500 tabular-nums">{formatYear(game.year_published)}</div>
+        )}
+        {/* Bottom-aligned metadata section (players/time/played + optional summary) */}
+        {variant === 'default' && showMeta && (
+          <div className={`mt-2 space-y-1 text-xs ${emphasizeMeta ? 'text-gray-700' : 'text-gray-500'}`}>
             <div className="flex items-center justify-between">
-              <span>{formatYear(game.year_published)}</span>
               <div className="flex items-center space-x-2">
                 {localRanking?.played_it && (
                   <span className="text-green-600 font-medium">Played</span>
@@ -477,9 +459,7 @@ export default function GameCard({
             <div className="flex items-center justify-between text-xs">
               <div className="flex items-center space-x-1">
                 <UserGroupIcon className="h-4 w-4" />
-                <span>
-                  {formatPlayerCount(game.min_players, game.max_players)}
-                </span>
+                <span>{formatPlayerCount(game.min_players, game.max_players)}</span>
               </div>
               <div className="flex items-center space-x-1">
                 <ClockIcon className="h-4 w-4" />
@@ -502,12 +482,8 @@ export default function GameCard({
         currentRating={localRanking?.ranking}
         isOpen={isRating}
         onClose={() => setIsRating(false)}
-        onRatingChange={(rating) => {
-          setLocalRanking((prev: any) => ({
-            ...(prev || {}),
-            ranking: rating ?? null,
-            played_it: prev?.played_it ?? false,
-          }))
+        onRatingChange={async (rating) => {
+          await upsertRanking({ ranking: rating ?? undefined })
         }}
         position={ratingPosition || undefined}
       />
@@ -517,6 +493,12 @@ export default function GameCard({
         game={{ ...game, list_membership: membership }}
         open={showModal}
         onClose={() => setShowModal(false)}
+        onMembershipChange={onMembershipChange}
+      />
+      <AddToModal
+        game={{ ...game, list_membership: membership } as any}
+        open={showAddModal}
+        onClose={() => setShowAddModal(false)}
         onMembershipChange={onMembershipChange}
       />
     </div>

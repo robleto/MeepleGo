@@ -108,7 +108,9 @@ export interface Database {
           game_id: string | null
           played_it: boolean | null
           ranking: number | null
-          notes: string | null
+          notes: string | null // legacy
+          public_note: string | null
+          private_note: string | null
           created_at: string | null
           imported_from: string | null
           updated_at: string | null
@@ -120,6 +122,8 @@ export interface Database {
           played_it?: boolean | null
           ranking?: number | null
           notes?: string | null
+          public_note?: string | null
+          private_note?: string | null
           created_at?: string | null
           imported_from?: string | null
           updated_at?: string | null
@@ -131,6 +135,8 @@ export interface Database {
           played_it?: boolean | null
           ranking?: number | null
           notes?: string | null
+          public_note?: string | null
+          private_note?: string | null
           created_at?: string | null
           imported_from?: string | null
           updated_at?: string | null

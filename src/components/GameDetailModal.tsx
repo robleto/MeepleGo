@@ -71,6 +71,8 @@ export default function GameDetailModal({
     x: number
     y: number
   } | null>(null)
+  const [note, setNote] = useState('')
+  const [noteDirty, setNoteDirty] = useState(false)
 
   // Lazy-load the PlayLogEditor to avoid bundling when not opened
   const PlayLogEditor = dynamic(() => import('./PlayLogEditor'), {
@@ -96,6 +98,9 @@ export default function GameDetailModal({
       wishlist: game.list_membership?.wishlist ?? false,
     })
     setExpandedDescription(false)
+  const existingNote = (game as any)?.ranking?.public_note || (game as any)?.ranking?.notes || ''
+  setNote(existingNote)
+  setNoteDirty(false)
   }, [game.id, game.ranking, game.list_membership])
 
   // Handle escape key
@@ -115,7 +120,7 @@ export default function GameDetailModal({
   // ratingTone replaced by HexRatingBadge
 
   const upsertRanking = async (
-    patch: Partial<{ played_it: boolean; ranking: number }>
+    patch: Partial<{ played_it: boolean; ranking: number; public_note: string | null }>
   ) => {
     const {
       data: { session },
@@ -127,6 +132,7 @@ export default function GameDetailModal({
       game_id: game.id,
       played_it: patch.played_it ?? prev?.played_it ?? false,
       ranking: patch.ranking ?? prev?.ranking ?? null,
+      public_note: patch.public_note === undefined ? (prev as any)?.public_note ?? null : patch.public_note,
     } as any
     setLocalRanking(optimistic)
     setSaving(true)
@@ -157,6 +163,11 @@ export default function GameDetailModal({
 
   const handlePlayedToggle = async () => {
     await upsertRanking({ played_it: !localRanking?.played_it })
+  }
+
+  const handleNoteSave = async () => {
+    await upsertRanking({ public_note: note.trim() ? note.trim() : null })
+    setNoteDirty(false)
   }
 
   const handleAddTo = async (type: 'library' | 'wishlist') => {
@@ -390,6 +401,37 @@ export default function GameDetailModal({
                   </button>
                 </div>
               </div>
+            </div>
+
+            {/* Your Note */}
+            <div className="rounded-md border border-gray-200 bg-white/70 px-3 py-3">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-semibold tracking-wide uppercase text-gray-600">Your Note</span>
+                <div className="flex items-center gap-2">
+                  {noteDirty && (
+                    <button
+                      onClick={handleNoteSave}
+                      disabled={saving}
+                      className="px-2 py-1 text-[11px] font-medium rounded bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50"
+                    >
+                      {saving ? 'Saving…' : 'Save'}
+                    </button>
+                  )}
+                </div>
+              </div>
+              <textarea
+                value={note}
+                onChange={(e) => {
+                  setNote(e.target.value)
+                  setNoteDirty(true)
+                }}
+                rows={3}
+                placeholder="Add a short public note about this game"
+                className="w-full text-sm rounded-md border border-gray-300 focus:ring-primary-500 focus:border-primary-500 p-2 resize-y"
+              />
+              {note && (
+                <div className="mt-1 text-[10px] text-gray-400">Visible wherever your public note is shown (future).</div>
+              )}
             </div>
 
             {/* Rating Popup */}

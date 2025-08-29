@@ -7,7 +7,7 @@ import { fuzzySearchGames, isGameMatch } from './fuzzySearch'
 export type SortKey =
   | 'name'
   | 'year_published'
-  | 'rating'
+  | 'rank'
   | 'ranking'
   | 'playtime_minutes'
   | 'min_players'
@@ -24,7 +24,7 @@ export type GroupKey =
 export const SORT_OPTIONS = [
   { value: 'name' as SortKey, label: 'Name' },
   { value: 'year_published' as SortKey, label: 'Year' },
-  { value: 'rating' as SortKey, label: 'BGG Rank' },
+  { value: 'rank' as SortKey, label: 'BGG Rank' },
   { value: 'ranking' as SortKey, label: 'My Rating' },
   { value: 'playtime_minutes' as SortKey, label: 'Play Time' },
   { value: 'min_players' as SortKey, label: 'Min Players' },
@@ -72,15 +72,21 @@ export function useGameFilters(
   const [sortBy, setSortBy] = useState<SortKey>(() => {
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem('gamesSortBy') as SortKey
-      return stored || 'rating' // Updated default to BGG rating
+      // Migration: convert old 'rating' to new 'rank'
+      if (stored === 'rating' as any) {
+        localStorage.setItem('gamesSortBy', 'rank')
+        return 'rank'
+      }
+      const result = stored || 'rank'
+      return result // Updated default to BGG rank
     }
-    return 'rating'
+    return 'rank'
   })
 
   const [sortOrder, setSortOrder] = useState<SortOrder>(() => {
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem('gamesSortOrder') as SortOrder
-      return stored || 'asc' // Updated default to ascending (1 -> higher for BGG ranking)
+      return stored || 'asc' // Updated default to ascending (1 -> higher for BGG rank)
     }
     return 'asc'
   })
@@ -229,7 +235,7 @@ export function useGameFilters(
           const bYear = b.year_published || 0
           return sortOrder === 'asc' ? aYear - bYear : bYear - aYear
         }
-        if (sortBy === 'rating') {
+        if (sortBy === 'rank') {
           const aRating = (a as any).rank || Infinity
           const bRating = (b as any).rank || Infinity
           return sortOrder === 'asc' ? aRating - bRating : bRating - aRating
@@ -276,7 +282,7 @@ export function useGameFilters(
                     ? a.name.localeCompare(b.name)
                     : b.name.localeCompare(a.name)
                 }
-                if (sortBy === 'rating') {
+                if (sortBy === 'rank') {
                   const aRating = (a as any).rank || Infinity
                   const bRating = (b as any).rank || Infinity
                   return sortOrder === 'asc'

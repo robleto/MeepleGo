@@ -38,7 +38,7 @@ export default function RatingPopup({
       if (!session) return
       const { data: existing } = await supabase
         .from('rankings')
-        .select('played_it')
+        .select('played_it, public_note')
         .eq('user_id', session.user.id)
         .eq('game_id', gameId)
         .maybeSingle()
@@ -48,6 +48,7 @@ export default function RatingPopup({
           game_id: gameId,
           ranking: rating,
           played_it: existing?.played_it ?? false,
+          public_note: existing?.public_note ?? null,
         },
         { onConflict: 'user_id,game_id' }
       )
@@ -75,7 +76,7 @@ export default function RatingPopup({
       if (!session) return
       const { data: existing } = await supabase
         .from('rankings')
-        .select('played_it')
+        .select('played_it, public_note')
         .eq('user_id', session.user.id)
         .eq('game_id', gameId)
         .maybeSingle()
@@ -85,6 +86,7 @@ export default function RatingPopup({
           game_id: gameId,
           ranking: null,
           played_it: existing?.played_it ?? false,
+          public_note: existing?.public_note ?? null,
         },
         { onConflict: 'user_id,game_id' }
       )

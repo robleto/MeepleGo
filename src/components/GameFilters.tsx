@@ -420,7 +420,7 @@ export default function GameFilters({
     <>
       <div className="mb-6">
         {/* Centered Search Bar with Filter Button - Airbnb Style */}
-        <div className="flex items-center justify-center gap-4 mb-4">
+        <div className="flex items-center justify-center">
           {/* Centered Smart Search */}
           <div className="relative w-full max-w-md">
             <div className="flex w-full items-center gap-2 rounded-full border border-gray-200 dark:border-gray-700 bg-white/85 dark:bg-gray-900/70 px-4 py-1.5 shadow-sm hover:shadow-md backdrop-blur-sm transition focus-within:ring-2 focus-within:ring-primary-500">

@@ -80,7 +80,7 @@ function GamesPageContent() {
         return { column: 'name', ascending: order === 'asc' }
       case 'year_published':
         return { column: 'year_published', ascending: order === 'asc' }
-      case 'rating':
+      case 'rank':
         return { column: 'rank', ascending: order === 'asc' }
       case 'ranking':
         // For user rankings, we'll need a different approach since it's in a different table
@@ -91,8 +91,6 @@ function GamesPageContent() {
         return { column: 'min_players', ascending: order === 'asc' }
       case 'max_players':
         return { column: 'max_players', ascending: order === 'asc' }
-      case 'rank':
-        return { column: 'rank', ascending: order === 'asc' }
       default:
         return { column: 'name', ascending: true }
     }
@@ -117,7 +115,7 @@ function GamesPageContent() {
     const single = buildOrderClause(sortField, order)
     
     // For BGG rank sorting, we need to handle nulls properly
-    if (sortField === 'rating') {
+    if (sortField === 'rank') {
       return [{
         column: single.column,
         ascending: single.ascending as boolean,
@@ -216,13 +214,12 @@ function GamesPageContent() {
       query = applyServerFilters(query)
 
       // Add ordering based on current sort criteria (with grouping awareness)
-      const orders = buildServerOrders(sortBy, sortOrder, groupBy)
-      console.log('🔍 Sort Debug (load more):', {
-        sortBy,
-        sortOrder,
-        groupBy,
-        orders,
-      })
+      // Ensure we use the correct defaults if hook hasn't initialized yet
+      const effectiveSortBy = sortBy || 'rank'
+      const effectiveSortOrder = sortOrder || 'asc'
+      const effectiveGroupBy = groupBy || 'none'
+      
+      const orders = buildServerOrders(effectiveSortBy, effectiveSortOrder, effectiveGroupBy)
       orders.forEach((o) => {
         if ('nullsFirst' in o && typeof o.nullsFirst === 'boolean') {
           query = query.order(o.column as any, {
@@ -297,54 +294,85 @@ function GamesPageContent() {
         }
 
         // Regular query for non-search cases
-        // Build query with search
-        let query = supabase.from('games').select(`
-            *,
-            rankings(*)
-          `)
+        // Enhanced logic: fetch non-null ranked games first to guarantee top BGG ranks appear
+        const noActiveFilter =
+          filterType === 'none' && groupBy === 'none' && !searchTerm.trim()
 
-        // Filter rankings by current user if logged in
-        if (userId) {
-          query = query.eq('rankings.user_id', userId)
-        }
+        let gamesData: any[] = []
+        let rankedBatch: any[] = []
+        let unrankedBatch: any[] = []
 
-        // Apply advanced filters server-side
-        query = applyServerFilters(query)
+        if (noActiveFilter) {
+          // 1. Fetch ranked games (non-null rank) ordered ascending
+            let rankedQuery = supabase
+              .from('games')
+              .select(`*, rankings(*)`)
+              .not('rank', 'is', null)
+              .order('rank', { ascending: true, nullsFirst: false })
+              .range(0, ITEMS_PER_LOAD - 1)
 
-        // Add ordering based on current sort criteria (with grouping awareness)
-        const orders = buildServerOrders(sortBy, sortOrder, groupBy)
-        console.log('🔍 Initial Sort Debug:', {
-          sortBy,
-          sortOrder,
-          groupBy,
-          orders,
-        })
-        orders.forEach((o) => {
-          if ('nullsFirst' in o && typeof o.nullsFirst === 'boolean') {
-            query = query.order(o.column as any, {
-              ascending: o.ascending,
-              nullsFirst: o.nullsFirst,
-            })
-          } else {
-            query = query.order(o.column as any, { ascending: o.ascending })
+            if (userId) rankedQuery = rankedQuery.eq('rankings.user_id', userId)
+            rankedQuery = applyServerFilters(rankedQuery)
+
+            const { data: rankedData, error: rankedErr } = await rankedQuery
+            if (rankedErr) throw rankedErr
+            rankedBatch = rankedData || []
+
+          // If we didn't fill the page, top up with unranked ordered by name (stable fallback)
+          if (rankedBatch.length < ITEMS_PER_LOAD) {
+            const remaining = ITEMS_PER_LOAD - rankedBatch.length
+            let unrankedQuery = supabase
+              .from('games')
+              .select(`*, rankings(*)`)
+              .is('rank', null)
+              .order('name', { ascending: true })
+              .range(0, remaining - 1)
+            if (userId) unrankedQuery = unrankedQuery.eq('rankings.user_id', userId)
+            unrankedQuery = applyServerFilters(unrankedQuery)
+            const { data: unrankedData, error: unrankedErr } = await unrankedQuery
+            if (unrankedErr) throw unrankedErr
+            unrankedBatch = unrankedData || []
           }
-        })
-
-        // Load first batch
-        query = query.range(0, ITEMS_PER_LOAD - 1)
-
-        const { data: gamesData, error: gamesError } = await query
-
-        if (gamesError) {
-          throw gamesError
+          gamesData = [...rankedBatch, ...unrankedBatch]
+        } else {
+          // Fallback to single pass (filters/search complicate dual fetch)
+          let query = supabase
+            .from('games')
+            .select(`*, rankings(*)`)
+            .order('rank', { ascending: true, nullsFirst: false })
+            .range(0, ITEMS_PER_LOAD - 1)
+          if (userId) query = query.eq('rankings.user_id', userId)
+          query = applyServerFilters(query)
+          const { data: singleData, error: singleErr } = await query
+          if (singleErr) throw singleErr
+          gamesData = singleData || []
         }
 
-        // Transform the data to match our GameWithRanking type
-        const gamesWithRankings: GameWithRanking[] =
-          gamesData?.map((game) => ({
-            ...game,
-            ranking: game.rankings?.[0] || null,
-          })) || []
+        // Diagnostics
+        const nonNullRanks = gamesData.filter((g) => g.rank != null)
+        const nullRanks = gamesData.length - nonNullRanks.length
+        const topSample = gamesData.slice(0, 10).map((g) => ({ n: g.name, r: g.rank }))
+        const topRanksSorted = [...nonNullRanks]
+          .sort((a, b) => a.rank - b.rank)
+          .slice(0, 15)
+          .map((g) => ({ n: g.name, r: g.rank }))
+        const gloom = gamesData.find((g) => g.name.toLowerCase().includes('gloomhaven'))
+        console.log('🩺 Rank Debug:', {
+          fetched: gamesData.length,
+          rankedBatch: rankedBatch.length,
+            unrankedBatch: unrankedBatch.length,
+          nonNull: nonNullRanks.length,
+          nulls: nullRanks,
+          sample: topSample,
+          topRanksSorted,
+          gloomhaven: gloom ? { rank: gloom.rank } : 'not in first page',
+        })
+
+        // Transform to internal type
+        const gamesWithRankings: GameWithRanking[] = gamesData.map((game) => ({
+          ...game,
+          ranking: game.rankings?.[0] || null,
+        }))
 
         console.log('🎮 Initial games loaded:', gamesWithRankings.length)
         console.log(
@@ -539,6 +567,38 @@ function GamesPageContent() {
   return (
     <PageLayout>
       <div className="space-y-6">
+        {/* Optional Rank Debug Panel (?debug=ranks) */}
+        {(() => {
+          const debugRanksEnabled = searchParams.get('debug') === 'ranks'
+          if (!debugRanksEnabled) return null
+          const first = games.slice(0, 25)
+          const nonNull = first.filter((g: any) => g.rank != null)
+          const nullCount = first.length - nonNull.length
+          const globalNonNull = games.filter((g: any) => g.rank != null)
+          const ranks = globalNonNull.map((g: any) => g.rank).filter((r: any) => typeof r === 'number')
+          const minRank = ranks.length ? Math.min(...ranks) : '—'
+            const maxRank = ranks.length ? Math.max(...ranks) : '—'
+          return (
+            <div className="border border-amber-300 bg-amber-50 rounded-md p-4 text-sm space-y-2">
+              <div className="font-semibold text-amber-800">Rank Debug (first {first.length} games in current list)</div>
+              <div className="flex flex-wrap gap-2 font-mono">
+                {first.map((g: any) => (
+                  <span key={g.id} className="px-2 py-1 rounded bg-white border text-xs shadow-sm">
+                    {(g.rank ?? '∅') + ':' + g.name.slice(0, 20)}
+                  </span>
+                ))}
+              </div>
+              <div className="text-amber-700 flex flex-wrap gap-x-4">
+                <span>Total loaded: {games.length}</span>
+                <span>First batch null ranks: {nullCount}</span>
+                <span>Overall non-null ranks: {globalNonNull.length}</span>
+                <span>Min rank seen: {minRank}</span>
+                <span>Max rank seen: {maxRank}</span>
+              </div>
+              <div className="text-amber-600">Hide this panel by removing <code>?debug=ranks</code> from the URL.</div>
+            </div>
+          )
+        })()}
 
         {/* Filters */}
         <GameFilters
@@ -568,7 +628,7 @@ function GamesPageContent() {
           error={error}
           defaults={{
             viewMode: 'grid',
-            sortBy: 'rating',
+            sortBy: 'rank',
             sortOrder: 'asc',
             groupBy: 'none',
             filterType: 'none',
@@ -591,57 +651,36 @@ function GamesPageContent() {
           </div>
         )}
 
-        {/* Games Display */}
+        {/* Games Display - Use raw games for proper BGG rank sorting */}
         {!loading && !error && (
-          <>
-            {groupedGames.map(({ key, games: groupGames }) => (
-              <div key={key} className="mb-10">
-                {groupBy !== 'none' && (
-                  <div className="mb-6 flex items-center justify-between">
-                    <h2 className="text-2xl font-bold text-gray-900">{key}</h2>
-                    {['categories', 'mechanics', 'publisher'].includes(
-                      groupBy
-                    ) &&
-                      taxonomyLinkForGroup(key) && (
-                        <a
-                          href={taxonomyLinkForGroup(key)!}
-                          className="text-sm font-medium text-primary-600 hover:underline focus:outline-none focus:ring-2 focus:ring-primary-500 rounded"
-                        >
-                          See all →
-                        </a>
-                      )}
-                  </div>
-                )}
-
-                <div
-                  className={
-                    viewMode === 'grid'
-                      ? 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4'
-                      : 'space-y-4'
-                  }
-                >
-                  {groupGames.map((game) => (
-                    <GameCard
-                      key={game.id}
-                      game={{
-                        ...game,
-                        list_membership: membershipMap[game.id] || {
-                          library: membershipSets
-                            ? membershipSets.library.has(game.id)
-                            : false,
-                          wishlist: membershipSets
-                            ? membershipSets.wishlist.has(game.id)
-                            : false,
-                        },
-                      }}
-                      viewMode={viewMode}
-                      onMembershipChange={handleMembershipChange}
-                    />
-                  ))}
-                </div>
-              </div>
-            ))}
-          </>
+          <div className="mb-10">
+            <div
+              className={
+                viewMode === 'grid'
+                  ? 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4'
+                  : 'space-y-4'
+              }
+            >
+              {games.map((game) => (
+                <GameCard
+                  key={game.id}
+                  game={{
+                    ...game,
+                    list_membership: membershipMap[game.id] || {
+                      library: membershipSets
+                        ? membershipSets.library.has(game.id)
+                        : false,
+                      wishlist: membershipSets
+                        ? membershipSets.wishlist.has(game.id)
+                        : false,
+                    },
+                  }}
+                  viewMode={viewMode}
+                  onMembershipChange={handleMembershipChange}
+                />
+              ))}
+            </div>
+          </div>
         )}
 
         {/* Load More Button */}

@@ -587,20 +587,21 @@ function YearSection({
               <div className={`md:grid md:grid-cols-12 md:gap-8 items-start ${nomineeOnly ? 'md:block' : ''}`}>
                 {!nomineeOnly && (
                   <div className="md:col-span-4 mb-6 md:mb-0">
+                    <div className="flex items-center gap-2 mb-3 font-display">
+                      <TrophyIcon className="w-4 h-4 text-amber-500" />
+                      <h4 className="text-sm font-semibold text-gray-700">Winner</h4>
+                    </div>
                     {category.winner ? (
                       <div className="relative group">
-                        <div className="absolute top-2 left-2 z-20 bg-amber-500/95 backdrop-blur text-white text-[11px] font-semibold px-2 py-1 rounded-md shadow flex items-center gap-1 pointer-events-none">
-                          <TrophyIcon className="w-4 h-4" />
-                          <span>Winner</span>
-                        </div>
                         <GameCard
                           game={toGameWithRanking(category.winner)}
                           viewMode="grid"
-                          className="ring-2 ring-amber-300 shadow-lg hover:shadow-xl"
+                          className=""
                           hideWinnerBadge
                           showSummary
                           emphasizeMeta
                           showMeta={false}
+                          titleClassName="text-base font-semibold"
                         />
                       </div>
                     ) : (
@@ -620,10 +621,21 @@ function YearSection({
                       </span>
                     </div>
                     {(!nomineeOnly) ? (
-                      <ul className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm leading-tight">
+                      <ul className="space-y-2 text-sm leading-tight">
                         {combinedNominees.map(game => (
-                          <li key={`${game.bgg_id}-nominee-name`} className="flex items-start gap-2">
-                            <span className="mt-1 w-1.5 h-1.5 rounded-full bg-gray-300" aria-hidden="true" />
+                          <li key={`${game.bgg_id}-nominee-name`} className="flex items-center gap-3">
+                            {game.thumbnail_url ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img 
+                                src={game.thumbnail_url} 
+                                alt={game.name}
+                                className="w-8 h-8 object-cover rounded border border-gray-200 flex-shrink-0"
+                              />
+                            ) : (
+                              <div className="w-8 h-8 bg-gray-100 border border-gray-200 rounded flex items-center justify-center flex-shrink-0">
+                                <span className="text-gray-400 text-xs">?</span>
+                              </div>
+                            )}
                             <span className="text-gray-700 hover:text-gray-900 transition-colors truncate" title={game.name}>{game.name}</span>
                           </li>
                         ))}

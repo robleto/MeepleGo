@@ -15,6 +15,7 @@ import RankingsEmptyStateGames from '@/components/rankings/RankingsEmptyStateGam
 import GameRowCard from '@/components/rankings/GameRowCard'
 import GamePosterCard from '@/components/rankings/GamePosterCard'
 import RankingsFilters from '@/components/rankings/RankingsFilters'
+import Heading from '@/components/Heading'
 
 export default function RankingsPage() {
   const { games, loading, isGuest, updateGameRanking } = useGameDataWithGuest()
@@ -69,7 +70,6 @@ export default function RankingsPage() {
   return (
     <PageLayout>
       <div className="max-w-screen-xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">My Rankings</h1>
         <RankingsFilters
           viewMode={viewMode}
           setViewMode={setViewMode}
@@ -83,6 +83,9 @@ export default function RankingsPage() {
           setSearchTerm={setSearchTerm}
           total={searchFiltered.length}
         />
+        <div className="flex items-end justify-between mb-5">
+          <Heading as="h2" variant="section" className="mb-1">My Rankings</Heading>
+        </div>
         {grouped.map((section) => (
           <div key={section.group ?? 'all'} className="mb-10">
             {section.group && (
