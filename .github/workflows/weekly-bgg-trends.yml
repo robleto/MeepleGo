@@ -1,0 +1,65 @@
+name: BGG Trends Sync
+
+on:
+  schedule:
+    - cron: '30 4 * * *'   # nightly at 04:30 UTC
+    - cron: '45 5 * * 1'   # weekly recap Monday 05:45 UTC (redundant safety)
+  workflow_dispatch:
+    inputs:
+      dryRun:
+        description: 'Run in dry-run mode'
+        type: boolean
+        required: false
+      timeoutMs:
+        description: 'Override page timeout (ms)'
+        required: false
+      concurrency:
+        description: 'Import concurrency'
+        required: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      - name: Install deps
+        run: npm ci
+      - name: Generate .env from secrets
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          BGG_LIST_OWNER_ID: ${{ secrets.BGG_LIST_OWNER_ID }}
+        run: |
+          echo "NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL" >> .env
+          echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY" >> .env
+          echo "SUPABASE_SERVICE_ROLE_KEY=$SUPABASE_SERVICE_ROLE_KEY" >> .env
+          echo "BGG_LIST_OWNER_ID=$BGG_LIST_OWNER_ID" >> .env
+      - name: Run Playwright trend sync
+        env:
+          BGG_LIST_OWNER_ID: ${{ secrets.BGG_LIST_OWNER_ID }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          CMD="node scripts/sync_bgg_trends_playwright.js --timeout-ms=${{ github.event.inputs.timeoutMs || 8000 }} --concurrency=${{ github.event.inputs.concurrency || 4 }}"
+          if [ "${{ github.event.inputs.dryRun }}" = 'true' ]; then CMD="$CMD --dry-run"; fi
+          echo "Running: $CMD"
+          eval $CMD
+      - name: Summary artifact
+        if: always()
+        run: |
+          echo "Run completed at $(date -u)" > trend_run_summary.txt
+          echo "Options: dryRun=${{ github.event.inputs.dryRun }} timeoutMs=${{ github.event.inputs.timeoutMs }}" >> trend_run_summary.txt
+      - name: Upload summary artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bgg-trend-run-summary
+          path: trend_run_summary.txt

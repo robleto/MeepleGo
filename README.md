@@ -226,6 +226,40 @@ npm start
 - [ ] Game recommendations
 - [ ] Collection value tracking
 
+## Metadata Enrichment & Backfills
+
+Two enrichment phases ensure games have richer BoardGameGeek data beyond the base XML stats:
+
+1. Taglines (marketing meta description scraped from the HTML page)
+2. Extended metadata (artists, type, ranked family categories, expansion/integration relationships)
+
+Scripts:
+
+```
+npm run backfill:taglines        # Only taglines
+npm run backfill:bgg-extended    # Only extended fields
+npm run backfill:all -- --limit 500 --concurrency 3  # Chain both phases
+```
+
+Each script supports --limit and --concurrency plus resume via state files in the project root. The chained script also supports --skip-taglines or --skip-extended.
+
+Nightly Automation:
+
+A GitHub Action workflow `.github/workflows/nightly-metadata-refresh.yml` can run the chained backfill on a schedule. Configure secrets:
+
+- NEXT_PUBLIC_SUPABASE_URL
+- NEXT_PUBLIC_SUPABASE_ANON_KEY
+- SUPABASE_SERVICE_ROLE_KEY (service role; keep secret)
+
+Manual dispatch of the workflow allows overriding limit/concurrency or skipping phases.
+
+UI Integration:
+
+- Game detail modal shows tagline, family badges, and related expansions / integrations (populated once metadata exists).
+- Add Game page surfaces newly imported extended fields immediately when available.
+
+If a game is imported before enrichment completes, use the Refresh BGG button in its detail modal after the nightly run to fill any remaining gaps.
+
 ## License
 
 MIT License - see LICENSE file for details.

@@ -14,13 +14,15 @@ import { useState } from 'react'
 import GameImageFallback from '@/components/GameImageFallback'
 
 interface GameRowCardProps {
-  game: GameWithRanking
+  game: GameWithRanking & { tagline?: string | null }
   index: number
-  onUpdate: (
+  onUpdate?: (
     gameId: string,
     patch: { ranking?: number | null; played_it?: boolean }
   ) => void
   onClick?: () => void
+  listRank?: number | null
+  showTagline?: boolean
 }
 
 export default function GameRowCard({
@@ -28,12 +30,19 @@ export default function GameRowCard({
   index,
   onUpdate,
   onClick,
+  listRank = null,
+  showTagline = false,
 }: GameRowCardProps) {
   const [isRating, setIsRating] = useState(false)
   const r = game.ranking
-  const togglePlayed = () => onUpdate(game.id, { played_it: !r?.played_it })
-  const setRanking = (value: number | null) =>
+  const togglePlayed = () => {
+    if (!onUpdate) return
+    onUpdate(game.id, { played_it: !r?.played_it })
+  }
+  const setRanking = (value: number | null) => {
+    if (!onUpdate) return
     onUpdate(game.id, { ranking: value })
+  }
 
   // ratingTone replaced by HexRatingBadge
 
@@ -42,8 +51,8 @@ export default function GameRowCard({
       className="flex items-center gap-4 py-3 px-4 rounded-md hover:bg-gray-50 cursor-pointer relative"
       onClick={onClick}
     >
-      <div className="w-8 text-gray-400 tabular-nums text-sm font-medium">
-        {index + 1}
+      <div className="w-8 text-gray-400 tabular-nums text-sm font-medium select-none">
+        {listRank != null ? listRank : (index + 1)}
       </div>
 
       {/* Game thumbnail (consistent with GameCard proportions) */}
@@ -64,7 +73,12 @@ export default function GameRowCard({
         <div className="font-semibold text-gray-900 truncate text-base">
           {game.name}
         </div>
-        <div className="text-sm text-gray-500 flex gap-3 mt-1">
+        {showTagline && game.tagline && (
+          <div className="text-xs text-gray-600 dark:text-gray-400 truncate mt-0.5">
+            {game.tagline}
+          </div>
+        )}
+  <div className="text-xs text-gray-500 flex gap-3 mt-1">
           <span>{formatYear(game.year_published)}</span>
           <span>{formatPlayerCount(game.min_players, game.max_players)}</span>
           <span>{formatPlayingTime(game.playtime_minutes)}</span>
@@ -115,21 +129,27 @@ export default function GameRowCard({
         </div>
 
         {/* Rating */}
-        <button
-          onClick={(e) => {
-            e.stopPropagation()
-            setIsRating(true)
-          }}
-          className="px-1 py-1 rounded-md hover:brightness-110 transition"
-          aria-label={r?.ranking ? `Rating ${r.ranking}` : 'Rate game'}
-        >
-          {r?.ranking ? <RatingChip value={r.ranking} size="sm" /> : (
-            <span className="inline-flex items-center justify-center w-8 h-8 rounded bg-gray-200 text-gray-600"><StarIcon className="h-4 w-4" /></span>
-          )}
-        </button>
+        {onUpdate ? (
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              setIsRating(true)
+            }}
+            className="px-1 py-1 rounded-md hover:brightness-110 transition"
+            aria-label={r?.ranking ? `Rating ${r.ranking}` : 'Rate game'}
+          >
+            {r?.ranking ? <RatingChip value={r.ranking} size="sm" /> : (
+              <span className="inline-flex items-center justify-center w-8 h-8 rounded bg-gray-200 text-gray-600"><StarIcon className="h-4 w-4" /></span>
+            )}
+          </button>
+        ) : (
+          <div className="px-1 py-1 min-w-[2.25rem] flex items-center justify-center">
+            {r?.ranking ? <RatingChip value={r.ranking} size="sm" /> : null}
+          </div>
+        )}
       </div>
 
-      {isRating && (
+  {onUpdate && isRating && (
         <div className="absolute inset-0 z-50 pointer-events-none">
           <div
             className="absolute inset-0 bg-black/10 backdrop-blur-[1px] pointer-events-auto"

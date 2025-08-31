@@ -144,9 +144,15 @@ export default function ListCard({
         <div className="flex items-start justify-between mb-2">
           <div className="flex items-center gap-2 min-w-0 flex-1">
             <div className={getListColor()}>{getListIcon()}</div>
-            <h3 className="font-semibold text-gray-900 dark:text-white truncate">
+            <h3 className="font-semibold text-gray-900 dark:text-white truncate tracking-wide uppercase text-[11px]">
               {list.name}
             </h3>
+            {/* System / BGG badge */}
+            {['bgg_bestsellers','bgg_hotness','bgg_trendingplays','bgg_mostplayed'].includes(list.list_type as string) && (
+              <span className="ml-1 inline-flex items-center gap-1 rounded-md bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 px-2 py-0.5 text-[10px] font-semibold tracking-wide uppercase">
+                BGG
+              </span>
+            )}
           </div>
 
           {/* Privacy Indicator */}
@@ -176,7 +182,7 @@ export default function ListCard({
           </p>
         )}
 
-        {/* Metadata */}
+  {/* Metadata */}
         <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
           <span>
             {itemCount} {itemCount === 1 ? 'game' : 'games'}

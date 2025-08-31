@@ -103,7 +103,7 @@ export default function AddPage() {
                     Game Added Successfully!
                   </h3>
                 </div>
-                <div className="text-sm text-green-800">
+                <div className="text-sm text-green-800 space-y-1">
                   <p className="font-medium">{success.name}</p>
                   {success.year_published && (
                     <p>Year: {success.year_published}</p>
@@ -116,7 +116,37 @@ export default function AddPage() {
                   {success.playtime_minutes && (
                     <p>Playing Time: {success.playtime_minutes} minutes</p>
                   )}
+                  {success.artists?.length ? (
+                    <p>
+                      Artists: {success.artists.slice(0, 3).join(', ')}
+                      {success.artists.length > 3 && '…'}
+                    </p>
+                  ) : null}
+                  {success.rank_families?.length ? (
+                    <p>
+                      Families:{' '}
+                      {success.rank_families.slice(0, 4).join(', ')}
+                      {success.rank_families.length > 4 && '…'}
+                    </p>
+                  ) : null}
+                  {success.bgg_type && <p>Type: {success.bgg_type}</p>}
+                  {success.expansion_ids?.length ? (
+                    <p>Expansions Linked: {success.expansion_ids.length}</p>
+                  ) : null}
+                  {success.integrates_with_ids?.length ? (
+                    <p>Integrations: {success.integrates_with_ids.length}</p>
+                  ) : null}
+                  {success.tagline && (
+                    <p className="italic text-green-700/80 line-clamp-2">
+                      “{success.tagline}”
+                    </p>
+                  )}
                 </div>
+                <p className="mt-3 text-xs text-green-700/70">
+                  Need relationships or missing fields? Use the Refresh BGG
+                  button inside the game detail panel later to fill in any
+                  still-empty metadata after background backfills run.
+                </p>
               </div>
             )}
           </form>

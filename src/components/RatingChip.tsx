@@ -3,7 +3,7 @@ import { getRatingLabel } from '@/utils/helpers'
 
 interface RatingChipProps {
   value: number | null | undefined
-  size?: 'xs' | 'sm' | 'md'
+  size?: 'xs' | 'sm' | 'md' | 'lg'
   className?: string
   subtle?: boolean
   interactive?: boolean
@@ -31,8 +31,9 @@ function palette(r?: number | null, subtle = true) {
 const sizeStyles = {
   xs: 'h-5 px-1.5 text-[11px] font-semibold',
   sm: 'h-6 px-2 text-xs font-semibold',
-  md: 'h-7 px-2.5 text-sm font-semibold'
-}
+  md: 'h-7 px-2.5 text-sm font-semibold',
+  lg: 'h-9 px-3 text-sm font-semibold' // custom large size for main header rating (approx 36px height)
+} as const
 
 export default function RatingChip({ value, size='xs', className='', subtle=true, interactive=false }: RatingChipProps) {
   const label = value ?? '—'

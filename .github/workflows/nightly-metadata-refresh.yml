@@ -1,0 +1,57 @@
+name: Nightly Metadata Refresh
+
+on:
+  schedule:
+    - cron: '15 5 * * *' # 05:15 UTC nightly (adjust as desired)
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: 'Optional limit of games to process'
+        required: false
+      concurrency:
+        description: 'Override concurrency'
+        required: false
+      skipTaglines:
+        description: 'Skip tagline phase'
+        type: boolean
+        required: false
+      skipExtended:
+        description: 'Skip extended phase'
+        type: boolean
+        required: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      - name: Install deps
+        run: npm ci
+      - name: Generate .env from secrets
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          BGG_LIST_OWNER_ID: ${{ secrets.BGG_LIST_OWNER_ID }}
+        run: |
+          : # write secrets to .env (they must be configured in repo settings)
+          echo "NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL" >> .env
+          echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY" >> .env
+          echo "SUPABASE_SERVICE_ROLE_KEY=$SUPABASE_SERVICE_ROLE_KEY" >> .env
+          if [ -n "$BGG_LIST_OWNER_ID" ]; then echo "BGG_LIST_OWNER_ID=$BGG_LIST_OWNER_ID" >> .env; fi
+      - name: Run chained backfill
+        run: |
+          CMD="npm run backfill:all --"
+          if [ -n "${{ github.event.inputs.limit }}" ]; then CMD="$CMD --limit ${{ github.event.inputs.limit }}"; fi
+          if [ -n "${{ github.event.inputs.concurrency }}" ]; then CMD="$CMD --concurrency ${{ github.event.inputs.concurrency }}"; fi
+          if [ "${{ github.event.inputs.skipTaglines }}" = 'true' ]; then CMD="$CMD --skip-taglines"; fi
+          if [ "${{ github.event.inputs.skipExtended }}" = 'true' ]; then CMD="$CMD --skip-extended"; fi
+          echo "Running: $CMD"
+          eval $CMD

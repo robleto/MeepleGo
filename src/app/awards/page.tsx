@@ -21,28 +21,38 @@ const AWARD_CATEGORIES = (awardsData as any).categories.map((c: any) => ({
 
 // Debug helper: build per-year breakdown for an award type
 async function getAwardYearBreakdown(awardType: string) {
-  // Get all games with pagination to avoid 1000 record limit
+  const supabase = await getSupabaseServerClient()
   let allGames: any[] = []
   let page = 0
   const pageSize = 1000
-
   while (true) {
-  const supabase = await getSupabaseServerClient()
-  const { data: games, error } = await supabase
-      .from('games')
-      .select('name, honors')
-      .not('honors', 'eq', '[]')
-      .range(page * pageSize, (page + 1) * pageSize - 1)
-
-    if (error) {
-      console.error('Error fetching year breakdown:', error)
+    try {
+      const { data: games, error } = await supabase
+        .from('games')
+        .select('name, honors')
+        .not('honors', 'eq', '[]')
+        .range(page * pageSize, (page + 1) * pageSize - 1)
+      if (error) {
+        console.error('Error fetching year breakdown (page '+page+'):', {
+          message: (error as any)?.message,
+          details: (error as any)?.details,
+          hint: (error as any)?.hint,
+          code: (error as any)?.code,
+        })
+        break
+      }
+      if (!games || games.length === 0) break
+      allGames = allGames.concat(games)
+      if (games.length < pageSize) break
+      page++
+    } catch (e:any) {
+      console.error('Unhandled exception in getAwardYearBreakdown', {
+        page,
+        error: e?.message,
+        stack: e?.stack,
+      })
       break
     }
-
-    if (!games || games.length === 0) break
-    allGames = allGames.concat(games)
-    if (games.length < pageSize) break // Last page
-    page++
   }
 
   const yearMap = new Map<
@@ -79,28 +89,40 @@ interface AwardStats {
 }
 
 async function getAwardStats(awardType: string): Promise<AwardStats> {
-  // Get all games with pagination to avoid 1000 record limit
+  const supabase = await getSupabaseServerClient()
   let allGames: any[] = []
   let page = 0
   const pageSize = 1000
-
   while (true) {
-  const supabase = await getSupabaseServerClient()
-  const { data: games, error } = await supabase
-      .from('games')
-      .select('honors')
-      .not('honors', 'eq', '[]')
-      .range(page * pageSize, (page + 1) * pageSize - 1)
-
-    if (error) {
-      console.error('Error fetching award stats:', error)
+    try {
+      const { data: games, error } = await supabase
+        .from('games')
+        .select('honors')
+        .not('honors', 'eq', '[]')
+        .range(page * pageSize, (page + 1) * pageSize - 1)
+      if (error) {
+        console.error('Error fetching award stats (page '+page+'):', {
+          awardType,
+          message: (error as any)?.message,
+          details: (error as any)?.details,
+          hint: (error as any)?.hint,
+          code: (error as any)?.code,
+        })
+        break
+      }
+      if (!games || games.length === 0) break
+      allGames = allGames.concat(games)
+      if (games.length < pageSize) break
+      page++
+    } catch (e:any) {
+      console.error('Unhandled exception in getAwardStats', {
+        awardType,
+        page,
+        error: e?.message,
+        stack: e?.stack,
+      })
       break
     }
-
-    if (!games || games.length === 0) break
-    allGames = allGames.concat(games)
-    if (games.length < pageSize) break // Last page
-    page++
   }
 
   const years = new Set<number>()

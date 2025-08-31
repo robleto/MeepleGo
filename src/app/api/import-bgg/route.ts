@@ -1,11 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { supabase as publicClient } from '@/lib/supabase'
+import { createClient } from '@supabase/supabase-js'
 import { XMLParser } from 'fast-xml-parser'
 import { decodeHtmlEntities } from '@/utils/csvParser'
 
 // Lightweight server-side Supabase client (use service role via env var if needed)
 function serverClient() {
-  return supabase // assuming supabase already configured with service key when on server
+  // Prefer service role for broader RLS bypass if available server-side
+  const serviceUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (serviceUrl && serviceKey) {
+    return createClient(serviceUrl, serviceKey)
+  }
+  return publicClient
 }
 
 // Extract helper safely
@@ -27,7 +34,7 @@ export async function POST(req: NextRequest) {
     const url = `https://boardgamegeek.com/xmlapi2/thing?id=${bggId}&stats=1`
     const resp = await fetch(url, { next: { revalidate: 0 } })
     if (!resp.ok) {
-      return NextResponse.json({ error: 'BGG fetch failed' }, { status: 502 })
+      return NextResponse.json({ error: 'BGG fetch failed', status: resp.status }, { status: 502 })
     }
     const xml = await resp.text()
 
@@ -40,6 +47,9 @@ export async function POST(req: NextRequest) {
     if (!item) {
       return NextResponse.json({ error: 'BGG item not found' }, { status: 404 })
     }
+
+  // BGG item type (boardgame, boardgameexpansion, etc.)
+  const bgg_type: string | null = item['@_type'] || null
 
     // Name: choose primary name and decode HTML entities
     let name: string | null = null
@@ -107,6 +117,44 @@ export async function POST(req: NextRequest) {
       .map((l: any) => decodeHtmlEntities(l['@_value']))
       .filter(Boolean)
 
+    // Artists
+    const artists: string[] = links
+      .filter((l: any) => l['@_type'] === 'boardgameartist')
+      .map((l: any) => decodeHtmlEntities(l['@_value']))
+      .filter(Boolean)
+
+    // Integrations (games this integrates with)
+    const integrates_with_ids: number[] = links
+      .filter((l: any) => l['@_type'] === 'boardgameintegration' && l['@_id'])
+      .map((l: any) => Number(l['@_id']))
+      .filter((n: any) => Number.isFinite(n))
+
+    // Expansions & parent relation
+    let parent_bgg_id: number | null = null
+    const expansion_ids_set = new Set<number>()
+    links
+      .filter((l: any) => l['@_type'] === 'boardgameexpansion' && l['@_id'])
+      .forEach((l: any) => {
+        const idNum = Number(l['@_id'])
+        if (!Number.isFinite(idNum)) return
+        // inbound="true" indicates the base game when current item is expansion
+        if (l['@_inbound'] === 'true') {
+          // If multiple inbound links exist, prefer first
+          if (!parent_bgg_id) parent_bgg_id = idNum
+        } else {
+          expansion_ids_set.add(idNum)
+        }
+      })
+    const expansion_ids = Array.from(expansion_ids_set)
+
+    // Rank families (strategy / wargames etc.) from statistics.ratings.ranks.rank entries type="family"
+    const ranksNode = item.statistics?.ratings?.ranks?.rank
+    const rankArray = ranksNode ? (Array.isArray(ranksNode) ? ranksNode : [ranksNode]) : []
+    const rank_families: string[] = rankArray
+      .filter((r: any) => r['@_type'] === 'family' && r['@_name'])
+      .map((r: any) => String(r['@_name']).toLowerCase())
+      .filter(Boolean)
+
     // Weight (complexity) from statistics
     let weight: number | null = null
     const ratings = item.statistics?.ratings
@@ -155,6 +203,12 @@ export async function POST(req: NextRequest) {
           description,
           summary, // pre-populated summary
           designer: designers.length ? designers : null,
+          artists: artists.length ? artists : null,
+          bgg_type,
+          rank_families: rank_families.length ? rank_families : null,
+          integrates_with_ids: integrates_with_ids.length ? integrates_with_ids : null,
+          expansion_ids: expansion_ids.length ? expansion_ids : null,
+          parent_bgg_id: parent_bgg_id || null,
           weight,
           rank: null,
           rating: null,
@@ -191,6 +245,16 @@ export async function POST(req: NextRequest) {
       if (!existing.summary && summary) patch.summary = summary
       if ((!existing.designer || !existing.designer.length) && designers.length)
         patch.designer = designers
+      if ((!existing.artists || !existing.artists.length) && artists.length)
+        patch.artists = artists
+      if (!existing.bgg_type && bgg_type) patch.bgg_type = bgg_type
+      if ((!existing.rank_families || !existing.rank_families.length) && rank_families.length)
+        patch.rank_families = rank_families
+      if ((!existing.integrates_with_ids || !existing.integrates_with_ids.length) && integrates_with_ids.length)
+        patch.integrates_with_ids = integrates_with_ids
+      if ((!existing.expansion_ids || !existing.expansion_ids.length) && expansion_ids.length)
+        patch.expansion_ids = expansion_ids
+      if (!existing.parent_bgg_id && parent_bgg_id) patch.parent_bgg_id = parent_bgg_id
       if (!existing.weight && weight) patch.weight = weight
       if (Object.keys(patch).length) {
         const { error: updErr } = await client
@@ -211,7 +275,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ game: finalGame }, { status: 200 })
   } catch (e: any) {
-    console.error(e)
+    console.error('import-bgg error', e?.message, e)
     return NextResponse.json(
       { error: e.message || 'Unexpected error' },
       { status: 500 }
