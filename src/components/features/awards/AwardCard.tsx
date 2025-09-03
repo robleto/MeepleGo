@@ -44,7 +44,7 @@ export function AwardCard({
   return (
     <Wrapper
       href={href as any}
-      className={`group relative flex flex-col items-center text-center rounded-2xl border border-gray-100 bg-white p-8 shadow-sm hover:shadow-lg transition-shadow duration-200 ${className}`}
+      className={`group relative flex flex-col items-center text-center rounded-2xl border border-gray-100 hover:border-amber-200 bg-white p-8 shadow-sm hover:shadow-lg transition-all duration-200 ${className}`}
     >
       {icon ? (
         <div className={`mb-5 flex h-16 w-16 items-center justify-center rounded-full border ${circleBorderClass} ${circleBgClass}`}>
