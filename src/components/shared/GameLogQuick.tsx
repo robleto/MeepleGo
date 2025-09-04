@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import { PlayIcon, XMarkIcon, MagnifyingGlassIcon, ArrowPathIcon } from '@heroicons/react/24/outline'
-import { getRatingColor, formatYear } from '@/utils/helpers'
+import { getRatingSolidClass } from '@/design-system/tokens/ratingColors'
+import { formatYear } from '@/utils/helpers'
 
 interface GameLite {
   id: number
@@ -369,7 +370,7 @@ export default function GameLogQuick({ open, onClose, onLogged }: GameLogQuickPr
                       type="button"
                       key={r}
                       onClick={() => setRating(r === rating ? null : r)}
-                      className={`w-7 h-7 rounded-md text-[11px] font-semibold flex items-center justify-center border ${r===rating ? getRatingColor(r) : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-300 dark:border-gray-600'}`}
+                      className={`w-7 h-7 rounded-md text-[11px] font-semibold flex items-center justify-center border ${r===rating ? getRatingSolidClass(r) : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-300 dark:border-gray-600'}`}
                       aria-label={`Set rating ${r}`}
                     >
                       {r}

@@ -7,29 +7,20 @@ module.exports = {
   ],
   darkMode: 'class',
   safelist: [
-    // Ensure rating colors are never purged - Reawarding color scheme
-    'bg-[#e5dbf3]',
-    'text-[#4c2c65]', // 10 - Purple
-    'bg-[#d5e7f2]',
-    'text-[#1a3448]', // 9 - Blue
-    'bg-[#dcebe3]',
-    'text-[#1f3c30]', // 8 - Green
-    'bg-[#f8e7ba]',
-    'text-[#5b3d00]', // 7 - Yellow
-    'bg-[#f4d8c7]',
-    'text-[#7b3f00]', // 6 - Orange
-    'bg-[#f5d9e8]',
-    'text-[#6a1f45]', // 5 - Pink
-    'bg-[#f6d4d4]',
-    'text-[#7b1818]', // 4 - Red
-    'bg-[#eee0d6]',
-    'text-[#7b5c42]', // 3 - Beige
-    'bg-[#e2e2e2]',
-    'text-[#474747]', // 2 - Gray
-    'bg-[#f5f5f5]',
-    'text-[#474747]', // 1 - Light Gray
-  // Award category dynamic color utilities (from awards.json) safelisted so JIT doesn't purge
-  { pattern: /(bg|border|text)-(amber|yellow|green|blue|rose|violet|fuchsia|orange|cyan|emerald|teal|slate|pink|indigo|lime)-(50|200|600)/ },
+    // Ensure NEW rating colors are never purged - Notion-inspired color scheme
+    'bg-red-400', 'text-white',       // 1 - Red
+    'bg-orange-400', 'text-white',    // 2 - Orange  
+    'bg-amber-400', 'text-white',     // 3 - Amber
+    'bg-yellow-400', 'text-gray-900', // 4 - Yellow
+    'bg-lime-400', 'text-gray-900',   // 5 - Lime
+    'bg-green-400', 'text-white',     // 6 - Green
+    'bg-emerald-400', 'text-white',   // 7 - Emerald
+    'bg-teal-400', 'text-white',      // 8 - Teal
+    'bg-cyan-400', 'text-white',      // 9 - Cyan
+    'bg-purple-400', 'text-white',    // 10 - Purple
+    'text-gray-500', 'bg-white/70', 'backdrop-blur', // Empty state
+    // Award category dynamic color utilities (from awards.json) safelisted so JIT doesn't purge
+    { pattern: /(bg|border|text)-(amber|yellow|green|blue|rose|violet|fuchsia|orange|cyan|emerald|teal|slate|pink|indigo|lime)-(50|200|600)/ },
   ],
   theme: {
     extend: {

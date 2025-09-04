@@ -1,18 +1,19 @@
 // Centralized rating color tokens for 1-10 scale.
 // Keep this file minimal: only pure mappings & helpers (no React import).
 
-// Solid backgrounds (used for buttons, chips, overlays) -> includes text color.
+// Refined pastel palette inspired by modern design systems like Notion
+// Bold enough for overlays, soft enough for elegance
 export const RATING_SOLID_CLASS: Record<number,string> = {
-  1: 'bg-red-600 text-white',
-  2: 'bg-orange-600 text-white',
-  3: 'bg-amber-600 text-white',
-  4: 'bg-yellow-600 text-gray-900',
-  5: 'bg-lime-600 text-gray-900',
-  6: 'bg-green-600 text-white',
-  7: 'bg-emerald-600 text-white',
-  8: 'bg-teal-600 text-white',
-  9: 'bg-cyan-600 text-white',
-  10: 'bg-sky-600 text-white',
+  1: 'bg-red-400 text-white',         // Soft red
+  2: 'bg-orange-400 text-white',      // Soft orange  
+  3: 'bg-amber-400 text-white',       // Soft amber
+  4: 'bg-yellow-400 text-gray-900',   // Soft yellow
+  5: 'bg-lime-400 text-gray-900',     // Soft lime
+  6: 'bg-green-400 text-white',       // Soft green
+  7: 'bg-emerald-400 text-white',     // Soft emerald
+  8: 'bg-teal-400 text-white',        // Soft teal
+  9: 'bg-cyan-400 text-white',        // Soft cyan
+  10: 'bg-purple-400 text-white',     // Soft purple (like Notion's 10)
 }
 
 // Fallback (when no rating) matches prior styling in components using translucent white / gray states.

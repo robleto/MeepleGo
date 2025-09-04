@@ -14,9 +14,9 @@ import {
   ClockIcon,
   UserGroupIcon,
   BookmarkIcon,
-  TrophyIcon,
   HeartIcon,
   BookOpenIcon,
+  TrophyIcon,
 } from '@heroicons/react/24/outline'
 import { Button } from '@/design-system/elements/Button'
 import { supabase } from '@/lib/supabase'
@@ -25,7 +25,6 @@ const GameDetailModal = dynamic(() => import('./GameDetailModal'), { ssr: false 
 import RatingPopup from '@/design-system/elements/RatingPopup'
 import RatingChip from '@/design-system/elements/RatingChip'
 const AddToModal = dynamic(() => import('./AddToModal'), { ssr: false })
-import { getRatingSolidClass } from '@/design-system/tokens/ratingColors'
 
 interface GameCardProps {
   game: GameWithRanking & {
@@ -349,7 +348,18 @@ export default function GameCard({
               <RatingChip 
                 value={ratingValue} 
                 size={variant === 'compact' ? 'xs' : 'sm'} 
-                className={`${saving ? 'opacity-70' : ''} ml-1`} 
+                variant="subtle"
+                interactive
+                className={`${saving ? 'opacity-70' : ''} ml-1`}
+                onClick={(event) => {
+                  event.stopPropagation()
+                  const rect = event.currentTarget.getBoundingClientRect()
+                  setRatingPosition({ 
+                    x: rect.left + rect.width / 2, 
+                    y: rect.bottom + 8 
+                  })
+                  setIsRating(true)
+                }}
               />
             )}
           </div>
@@ -383,8 +393,8 @@ export default function GameCard({
       style={{ cursor: 'pointer' }}
     >
   {/* Removed internal winner pill for grid view; awards page now supplies its own explicit badge */}
-      {/* Unified bookmark button (always visible) */}
-      <div className="absolute top-1 right-1 z-30">
+      {/* Collection bookmark (clearer visual treatment) */}
+      <div className="absolute top-2 right-2 z-30">
   {(showOverlay || membership.library) && (
           <button
             type="button"
@@ -404,17 +414,18 @@ export default function GameCard({
                 })
               }
             }}
-            aria-label="Manage lists"
-            className={`w-9 h-9 rounded-md flex items-center justify-center shadow ring-1 ring-black/5 transition
+            aria-label={membership.library ? "In collection - manage lists" : "Add to collection"}
+            title={membership.library ? "In collection - click to manage" : "Add to collection"}
+            className={`w-8 h-8 rounded-md flex items-center justify-center shadow-sm ring-1 ring-black/5 transition
               ${showOverlay && membership.library
                 ? 'bg-green-600 text-white hover:bg-green-700'
                 : showOverlay && membership.wishlist
                   ? 'bg-pink-500 text-white hover:bg-pink-600'
                   : membership.library
-                    ? 'bg-white/70 backdrop-blur text-gray-500 hover:text-gray-700 hover:bg-white'
-                    : 'bg-white/0 text-transparent pointer-events-none'}`}
+                    ? 'bg-green-600 text-white shadow-md'
+                    : 'bg-white/70 backdrop-blur text-gray-400 hover:text-gray-600 hover:bg-white/90'}`}
           >
-            <BookmarkIcon className="h-5 w-5" />
+            <BookmarkIcon className="h-4 w-4" />
           </button>
         )}
         {showListPicker && (
@@ -487,34 +498,25 @@ export default function GameCard({
 
   {/* Rank badge removed per design request */}
 
-        {/* Hover actions: played toggle + rating square */}
+        {/* Hover actions: rating only (removed redundant played toggle) */}
         {showOverlay && (
-          <>
-            <button
-              onClick={(e) => {
-                e.stopPropagation()
-                handlePlayedToggle()
-              }}
-              className={`absolute bottom-2 left-2 flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium shadow
-                ${localRanking?.played_it ? 'bg-green-600/90 text-white' : 'bg-black/55 text-white'}`}
-              aria-label={localRanking?.played_it ? 'Mark unplayed' : 'Mark played'}
-            >
-              <PlayIcon className="h-4 w-4" />
-              {localRanking?.played_it ? 'Played' : 'Unplayed'}
-            </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation()
-                const rect = e.currentTarget.getBoundingClientRect()
-                setRatingPosition({ x: rect.left + rect.width / 2, y: rect.top })
-                setIsRating(true)
-              }}
-              aria-label={localRanking?.ranking ? `Rating ${localRanking.ranking} (click to change)` : 'Rate this game'}
-              className={`absolute bottom-2 right-2 w-9 h-9 rounded-md flex items-center justify-center text-sm font-semibold shadow ring-1 ring-black/5 ${getRatingSolidClass(localRanking?.ranking)}`}
-            >
-              {localRanking?.ranking ?? '-'}
-            </button>
-          </>
+          <RatingChip
+            value={localRanking?.ranking}
+            size="md"
+            variant="overlay"
+            shape="rounded"
+            interactive
+            className="absolute bottom-2 right-2"
+            onClick={(event) => {
+              event.stopPropagation()
+              const rect = event.currentTarget.getBoundingClientRect()
+              setRatingPosition({ 
+                x: rect.left + rect.width / 2, 
+                y: rect.top - 8 
+              })
+              setIsRating(true)
+            }}
+          />
         )}
       </div>
 
@@ -549,14 +551,20 @@ export default function GameCard({
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 {localRanking?.played_it && (
-                  <span className="text-green-600 font-medium">Played</span>
+                  <span className="inline-flex items-center gap-1 text-green-600 font-medium">
+                    <PlayIcon className="h-3 w-3" />
+                    Played
+                  </span>
+                )}
+                {ratingValue != null && (
+                  <RatingChip 
+                    value={ratingValue} 
+                    size="xs" 
+                    shape="rounded"
+                    interactive={false} 
+                  />
                 )}
               </div>
-              {ratingValue != null && (
-                <div className="shrink-0">
-                  <RatingChip value={ratingValue} size="xs" interactive={false} />
-                </div>
-              )}
             </div>
            {(variant === 'balanced' || variant === 'detailed') && showMeta && (
             <div className="flex items-center justify-between text-xs">

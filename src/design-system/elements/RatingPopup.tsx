@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useLayoutEffect, useEffect } from 'react'
-import { getRatingColor } from '@/utils/helpers'
+import { getRatingSolidClass } from '@/design-system/tokens/ratingColors'
 import { supabase } from '@/lib/supabase'
 
 interface RatingPopupProps {
@@ -160,19 +160,20 @@ export default function RatingPopup({
       {/* Popup */}
       <div
         ref={popupRef}
-        className="bg-white rounded-xl shadow-xl border border-gray-200 z-[9999] overflow-hidden w-[100px] py-3 px-2"
+        className="bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border border-gray-200/60 z-[9999] overflow-hidden w-[90px] py-2 px-2"
         style={style}
         onClick={(e) => e.stopPropagation()}
         onMouseDown={(e) => e.stopPropagation()}
       >
-        <div className="flex flex-col items-center pr-1 max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+        <div className="flex flex-col items-center max-h-72 overflow-y-auto pr-1">
           {[10,9,8,7,6,5,4,3,2,1,null].map((r, idx) => (
             <button
               key={r === null ? 'clear' : r}
               type="button"
               onClick={(e)=>{ e.stopPropagation(); r === null ? handleClearRating() : handleRatingClick(r) }}
               disabled={saving}
-              className={`h-10 w-10 -mt-2 first:mt-0 text-sm font-semibold rounded-full flex items-center justify-center transition-all focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-primary-500 disabled:opacity-50 ${r===null ? 'bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300' : getRatingColor(r)} ${currentRating===r || (r===null && currentRating==null) ? 'outline outline-2 outline-offset-[3px] outline-white/70 ring-2 ring-white' : 'hover:shadow-md hover:scale-[1.04] active:scale-[0.95]'}`}
+              className={`w-8 h-8 mb-1 text-xs font-bold rounded-md flex items-center justify-center transition-all duration-150 focus:outline-none focus:ring-1 focus:ring-primary-500 disabled:opacity-50 ${r===null ? 'bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300' : getRatingSolidClass(r)} ${currentRating===r || (r===null && currentRating==null) ? 'ring-1 ring-white ring-offset-1 ring-offset-primary-500/30' : 'hover:scale-105 active:scale-95'}`}
+              // Alternative: try 'rounded-lg' for softer corners or 'rounded-2xl' for more rounded
               style={{ zIndex: 120 - idx }}
               title={r===null ? 'Clear rating' : `Rate ${r}`}
             >
