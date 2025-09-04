@@ -17,7 +17,7 @@ if (fs.existsSync(envLocal)) {
   dotenv.config() // default .env
 }
 import { createClient } from '@supabase/supabase-js'
-import { inferHonorCategory } from '../src/utils/honors'
+import { inferHonorCategory } from '../../src/utils/honors'
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL
 const serviceKey =

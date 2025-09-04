@@ -131,3 +131,6 @@ data/raw/
 data/derived/
 !data/examples/
 !data/README.md
+
+*storybook.log
+storybook-static

@@ -32,7 +32,10 @@ export const Composite: Story = {
     return (
       <div className="space-y-6">
         <div className="flex items-center gap-4">
-          <GameSearchSelect fetchSuggestions={async(q)=> [{ id:1, name:'Wingspan', year_published:2019, rating:8.1 }, { id:2, name:'Ark Nova', year_published:2021, rating:8.6 }].filter(g=> g.name.toLowerCase().includes(q))} />
+          <GameSearchSelect 
+            onSelect={(game) => console.log('Selected:', game)}
+            placeholder="Search for games..."
+          />
           <button onClick={()=> setOpen(true)} className="px-5 py-2 rounded-full border border-gray-300 bg-white hover:bg-gray-50 text-sm font-medium">Filters</button>
         </div>
         <div className="text-xs text-gray-500">Sort: {sortBy} {sortOrder} • Group: {groupBy || 'none'} • View: {viewMode} • Filter: {filterType !== 'none' ? `${filterType}=${filterValue}` : 'none'}</div>

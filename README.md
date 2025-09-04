@@ -260,6 +260,10 @@ UI Integration:
 
 If a game is imported before enrichment completes, use the Refresh BGG button in its detail modal after the nightly run to fill any remaining gaps.
 
+## Recent Migrations
+
+- 2025-09-01: Added `play_logs` table (user play history). Apply `database/migrations/20250901_create_play_logs.sql` to enable play logging. RLS: owner full access; public can read rows where `is_public = true`.
+
 ## License
 
 MIT License - see LICENSE file for details.

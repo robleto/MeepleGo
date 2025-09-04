@@ -26,3 +26,26 @@ export async function getSupabaseServerClient() {
     },
   })
 }
+
+// Variant that injects an Authorization bearer token so PostgREST & RLS have auth.uid()
+export async function getSupabaseServerClientWithAccessToken(accessToken: string) {
+  const cookieStore = await (nextCookies() as any)
+  return createServerClient<Database>(supabaseUrl, supabaseKey, {
+    cookies: {
+      get(name: string) {
+        return cookieStore.get(name)?.value
+      },
+      set(name: string, value: string, options: any) {
+        try { cookieStore.set({ name, value, ...options }) } catch {}
+      },
+      remove(name: string, options: any) {
+        try { cookieStore.delete({ name, ...options }) } catch {}
+      },
+    },
+    global: {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    },
+  })
+}

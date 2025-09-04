@@ -1,12 +1,12 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
-import PageLayout from '@/components/PageLayout'
-import Heading from '@/components/Heading'
+import PageLayout from '@/components/shared/PageLayout'
+import Heading from '@/components/shared/Heading'
 import { supabase } from '@/lib/supabase'
 import { GameList, GameListWithItems, Profile } from '@/types/supabase'
-import ListCard from '@/components/lists/ListCard'
-import CreateListModal from '@/components/lists/CreateListModal'
+import ListCard from '@/components/features/lists/ListCard'
+import CreateListModal from '@/components/features/lists/CreateListModal'
 import { PlusIcon } from '@heroicons/react/24/outline'
 
 export default function ListsPage() {
@@ -167,29 +167,64 @@ export default function ListsPage() {
       <div className="space-y-8">
         {/* My Lists Section */}
         <div>
-          <div className="mb-2">
-            <h1 className="text-lg font-semibold tracking-wide text-gray-400 uppercase">
-              {isGuest ? 'Discover Lists' : 'My Lists'}
-            </h1>
-          </div>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-6 max-w-2xl">
+            {!isGuest && (
+            <div className="mb-2">
+              <h2 className="heading-display text-2xl font-normal tracking-wide text-gray-700 dark:text-gray-300 mb-1">
+              My Lists
+              </h2>
+            </div>
+            )}
+          {/* <p className="text-sm text-gray-600 dark:text-gray-400 mb-6 max-w-2xl">
             {isGuest
               ? 'Browse public community and BGG powered lists. Sign in to build and curate your own collections.'
               : 'Your personal library, wishlist, and custom curated collections. Create, edit, and share public lists.'}
-          </p>
+          </p> */}
 
           {isGuest ? (
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-8 text-center">
-              <Heading as="h2" size="md" className="mb-2">
-                Create Your Own Lists
-              </Heading>
-              <p className="text-gray-600 dark:text-gray-300 mb-4">
-                Sign up to create custom game lists, organize your collection,
-                and share with friends.
-              </p>
-              <button className="bg-primary-600 text-white px-6 py-2 rounded-md hover:bg-primary-700 transition-colors">
-                Sign Up to Get Started
-              </button>
+            <div className="panel mb-10 flex flex-col md:flex-row md:items-start gap-10 md:gap-20">
+              <div className="flex-1">
+                <Heading as="h1" size="display" align="left" displayFont className="mb-6">
+                  Create your own<br/> Game Lists
+                </Heading>
+                <p className="text-lg md:text-xl text-gray-600 dark:text-gray-400 max-w-xl leading-snug">
+                  Curate collections of favorites, expansions to try, party picks—anything. Share them or keep them private.
+                </p>
+                <button className="mt-8 inline-flex items-center gap-2 px-6 py-3 rounded-full btn-brand text-sm font-medium">
+                  Sign Up to Get Started
+                </button>
+              </div>
+              <ol className="flex-1 space-y-10 md:space-y-12 relative">
+        <li className="flex items-start gap-5">
+          <div className="flex-shrink-0 text-sm font-semibold w-6 h-6 rounded-full bg-sky-100 text-sky-700 flex items-center justify-center mt-1 dark:bg-sky-900/40 dark:text-sky-300">1</div>
+                  <div className="flex-1 border-b border-gray-200 dark:border-gray-700 pb-8 last:border-b-0 last:pb-0">
+                    <div className="flex items-center gap-2 mb-2">
+            <span className="w-5 h-5 rounded bg-sky-600/10 text-sky-600 flex items-center justify-center text-[11px] font-bold">+</span>
+                      <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-lg">Collect & organize</h3>
+                    </div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 leading-snug max-w-md">Add games you own or want. Library & Wishlist seed your personal catalog automatically.</p>
+                  </div>
+                </li>
+                <li className="flex items-start gap-5">
+          <div className="flex-shrink-0 text-sm font-semibold w-6 h-6 rounded-full bg-sky-100 text-sky-700 flex items-center justify-center mt-1 dark:bg-sky-900/40 dark:text-sky-300">2</div>
+                  <div className="flex-1 border-b border-gray-200 dark:border-gray-700 pb-8 last:border-b-0 last:pb-0">
+                    <div className="flex items-center gap-2 mb-2">
+            <span className="w-5 h-5 rounded bg-sky-600/10 text-sky-600 flex items-center justify-center text-[11px] font-bold">★</span>
+                      <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-lg">Rate & rank</h3>
+                    </div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 leading-snug max-w-md">Rate what you play to enrich list sorting & smart suggestions.</p>
+                  </div>
+                </li>
+                <li className="flex items-start gap-5">
+          <div className="flex-shrink-0 text-sm font-semibold w-6 h-6 rounded-full bg-sky-100 text-sky-700 flex items-center justify-center mt-1 dark:bg-sky-900/40 dark:text-sky-300">3</div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="w-5 h-5 rounded bg-amber-500/10 text-amber-600 flex items-center justify-center text-[11px] font-bold">🏆</span>
+                      <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-lg">Unlock awards</h3>
+                    </div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 leading-snug max-w-md">Your curated lists + play data feed personalized award categories—refine nominees & winners later.</p>
+                  </div>
+                </li>
+              </ol>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -248,11 +283,13 @@ export default function ListsPage() {
   {publicLists.length > 0 && (
           <div>
             <div className="mb-2">
-              <h2 className="text-md font-semibold tracking-wide text-gray-400 uppercase">Public Lists</h2>
-            </div>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-6 max-w-2xl">
+              <h2 className="heading-display text-2xl font-normal tracking-wide text-gray-700 dark:text-gray-300 mb-1">
+                Public Lists
+              </h2>
+               </div>
+            {/* <p className="text-sm text-gray-600 dark:text-gray-400 mb-6 max-w-2xl">
               Recently updated public & system generated (BGG) lists.
-            </p>
+            </p> */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {publicLists.map((list) => (
                 <ListCard

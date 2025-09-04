@@ -1,7 +1,8 @@
 import type { Metadata } from 'next'
 import { Inter, Outfit, Geist, Fraunces, Playfair_Display, Archivo_Black, Epilogue } from 'next/font/google'
 import './globals.css'
-import Navigation from '@/components/Navigation'
+import Navigation from '@/components/shared/Navigation'
+import SiteFooter from '@/components/shared/SiteFooter'
 
 // Primary (Set A) fonts
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' })
@@ -59,7 +60,8 @@ export default function RootLayout({
         }
       >
         <Navigation />
-        <div className="pt-16">{children}</div>
+  <div className="pt-16 min-h-[70vh]">{children}</div>
+  <SiteFooter />
       </body>
     </html>
   )

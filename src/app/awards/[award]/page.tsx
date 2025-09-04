@@ -7,9 +7,9 @@ import {
   UserGroupIcon,
   StarIcon,
 } from '@heroicons/react/24/outline'
-import GameCard from '@/components/GameCard'
-import Heading from '@/components/Heading'
-import PageLayout from '@/components/PageLayout'
+import GameCard from '@/components/shared/GameCard'
+import Heading from '@/components/shared/Heading'
+import PageLayout from '@/components/shared/PageLayout'
 
 // Award category configurations
 const AWARD_CATEGORIES = {

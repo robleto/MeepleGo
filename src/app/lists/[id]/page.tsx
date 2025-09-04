@@ -1,10 +1,10 @@
 "use client"
 
 import { useEffect, useState, useMemo } from 'react'
-import ListExplorer from '@/components/lists/ListExplorer'
+import ListExplorer from '@/components/features/lists/ListExplorer'
 import { useParams, useRouter } from 'next/navigation'
-import PageLayout from '@/components/PageLayout'
-import Heading from '@/components/Heading'
+import PageLayout from '@/components/shared/PageLayout'
+import Heading from '@/components/shared/Heading'
 import supabase from '@/lib/supabase'
 import { GameListWithItems } from '@/types/supabase'
 
@@ -19,7 +19,11 @@ interface GameListItemWithGame {
 export default function ListDetailPage() {
   const params = useParams()
   const router = useRouter()
-  const listId = typeof params?.id === 'string' ? params.id : Array.isArray(params?.id) ? params.id[0] : null
+  // Support friendly slug format: name-slugified-<id>
+  const rawParam = typeof params?.id === 'string' ? params.id : Array.isArray(params?.id) ? params.id[0] : null
+  const listId = rawParam ? (rawParam.match(/([a-f0-9-]{36})$/) ? rawParam.match(/([a-f0-9-]{36})$/)![1] : rawParam) : null
+  // If we have a UUID without trailing slug part, once list loads we'll push friendly slug
+  const needsSlug = rawParam === listId
 
   const [list, setList] = useState<GameListWithItems | null>(null)
   const [loading, setLoading] = useState(true)
@@ -49,6 +53,11 @@ export default function ListDetailPage() {
           setNotFound(true)
         } else {
           setList(data as any)
+          if (needsSlug) {
+            // Construct slug (basic)
+            const slug = (data.name || 'list').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,60)
+            router.replace(`/lists/${slug}-${data.id}`)
+          }
         }
         setLoading(false)
       }
@@ -182,19 +191,19 @@ export default function ListDetailPage() {
   }
   const header = (
     <div>
-      <Heading as="h1" size="xl" weightScale className="mb-2 flex items-center gap-3">
+      <Heading as="h2" size="lg" weightScale className="heading-display mb-2 flex items-center">
         {list.name}
-        {isBgg && <span className="inline-flex items-center gap-1 rounded-md bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 px-2 py-0.5 text-[10px] font-semibold tracking-wide uppercase">BGG</span>}
       </Heading>
       {(list.description || (isBgg && bggDefaultDescriptions[list.list_type as string])) && (
-        <p className="text-gray-700 dark:text-gray-300 max-w-3xl">{list.description || bggDefaultDescriptions[list.list_type as string]}</p>
-      )}
+        <p className="text-gray-700 text-sm dark:text-gray-300 max-w-3xl">{list.description || bggDefaultDescriptions[list.list_type as string]}
+        <br />
       {(list.updated_at || list.created_at) && (
-        <div className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-          <span>
+          <span className="text-gray-400">
             Updated {new Date((list.updated_at || list.created_at) as string).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}
           </span>
-        </div>
+        
+      )}
+      </p>
       )}
     </div>
   )

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
-import AuthLayout from '@/components/AuthLayout'
+import AuthLayout from '@/components/shared/AuthLayout'
 
 export default function ResetPasswordPage() {
   const [email, setEmail] = useState('')

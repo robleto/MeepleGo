@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
-import GameDetailModal from '@/components/GameDetailModal'
-import PageLayout from '@/components/PageLayout'
+import GameDetailModal from '@/components/shared/GameDetailModal'
+import PageLayout from '@/components/shared/PageLayout'
 import { getSupabaseServerClient } from '@/lib/supabaseServer'
 
 interface PageProps {

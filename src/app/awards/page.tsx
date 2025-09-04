@@ -1,15 +1,15 @@
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
-import PageLayout from '@/components/PageLayout'
-import Heading from '@/components/Heading'
+import PageLayout from '@/components/shared/PageLayout'
+import Heading from '@/components/shared/Heading'
 import { TrophyIcon, ChevronDownIcon } from '@heroicons/react/24/outline'
 import awardsData from '@/data/awards.json'
 import { getSupabaseServerClient } from '@/lib/supabaseServer'
-import PersonalAwardCategorySection from '@/components/awards/PersonalAwardCategorySection'
-import PersonalAwardsAuto from '@/components/awards/PersonalAwardsAuto'
-import IndustryAwards from '@/components/awards/IndustryAwards'
-import AwardsLoggedOutHero from '@/components/awards/AwardsLoggedOutHero'
-import HeroAuthGate from '@/components/awards/HeroAuthGate'
+import PersonalAwardCategorySection from '@/components/features/awards/AwardShowcase'
+import PersonalAwardsAuto from '@/components/features/awards/PersonalAwardsAuto'
+import IndustryAwards from '@/components/features/awards/IndustryAwards'
+import AwardsLoggedOutHero from '@/components/features/awards/AwardsLoggedOutHero'
+import HeroAuthGate from '@/components/features/awards/HeroAuthGate'
 
 // Award categories loaded from JSON (icon string mapped to actual component below)
 const AWARD_CATEGORIES = (awardsData as any).categories.map((c: any) => ({
@@ -60,7 +60,8 @@ async function getAwardYearBreakdown(awardType: string) {
     { winners: string[]; nominees: string[]; special: string[] }
   >()
   allGames.forEach((g) => {
-    ;(g.honors || [])
+    const honorsArr = Array.isArray(g.honors) ? g.honors : []
+    honorsArr
       .filter((h: any) => h.award_type === awardType)
       .forEach((h: any) => {
         if (typeof h.year !== 'number') return
@@ -130,7 +131,8 @@ async function getAwardStats(awardType: string): Promise<AwardStats> {
   let nominees = 0
 
   allGames.forEach((game: any) => {
-    const relevantHonors = game.honors.filter(
+    const honorsArr = Array.isArray(game.honors) ? game.honors : []
+    const relevantHonors = honorsArr.filter(
       (honor: any) => honor.award_type === awardType
     )
 
@@ -147,8 +149,14 @@ async function getAwardStats(awardType: string): Promise<AwardStats> {
       ? `${yearArray[0]} - ${yearArray[yearArray.length - 1]}`
       : ''
 
+  // Distinct games with at least one relevant honor (avoid double counting)
+  const distinctGameIds = new Set<string>()
+  allGames.forEach((g:any) => {
+    const honorsArr = Array.isArray(g.honors) ? g.honors : []
+    if (honorsArr.some((h:any)=> h.award_type === awardType)) distinctGameIds.add(g.id || JSON.stringify(g))
+  })
   return {
-    totalGames: winners + nominees,
+    totalGames: distinctGameIds.size,
     totalWinners: winners,
     totalNominees: nominees,
     yearSpan,
@@ -311,7 +319,7 @@ export default async function AwardsPage({
           <p className="text-xs text-gray-500 text-center">Rate and rank games you have played to start generating your personal awards.</p>
         )}
         {personalCategoryBlocks.map(block => (
-          <PersonalAwardCategorySection key={block.id} id={block.id} label={block.label} description={block.description} games={block.games as any} />
+          <PersonalAwardCategorySection key={block.id} id={block.id} title={block.label} description={block.description} games={block.games as any} />
         ))}
         {personalCategoryBlocks.length > 0 && (
           <div className="pt-2 text-center text-[11px] text-gray-400">

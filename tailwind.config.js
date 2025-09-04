@@ -34,6 +34,13 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        brand: {
+          light: '#2695E2', // light mode primary accent (hover/alt in dark)
+          DEFAULT: '#096EC2', // core brand blue (logo "Go")
+          dark: '#074f8a', // pressed / darker shade
+          ring: '#1d7fd8', // focus ring accent
+          subtle: '#E7F4FF', // bg subtle tint
+        },
         // Custom color palette for rankings (matching Reawarding)
         rating: {
           1: '#dc2626', // red-600

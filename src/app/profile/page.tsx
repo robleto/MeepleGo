@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
-import PageLayout from '@/components/PageLayout'
+import PageLayout from '@/components/shared/PageLayout'
 import { UserIcon, KeyIcon, CheckIcon, XMarkIcon } from '@heroicons/react/24/outline'
 
 interface Profile {

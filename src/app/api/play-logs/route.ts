@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getSupabaseServerClient } from '@/lib/supabaseServer'
+import { getSupabaseServerClient, getSupabaseServerClientWithAccessToken } from '@/lib/supabaseServer'
 
 // Simple CRUD style handler for play logs
 // GET: /api/play-logs?gameId=... returns current user's logs (or public if user not owner)
@@ -17,10 +17,15 @@ export async function GET(req: NextRequest) {
       Math.max(1, Number(url.searchParams.get('limit') || '25'))
     )
     const cursor = url.searchParams.get('cursor') // ISO timestamp of last seen played_at
-    const supabase = await getSupabaseServerClient()
-    const {
-      data: { session },
-    } = await supabase.auth.getSession()
+    let supabase = await getSupabaseServerClient()
+    let { data: { session } } = await supabase.auth.getSession()
+    const authHeader = req.headers.get('authorization')
+    if ((!session || !session.user) && authHeader?.startsWith('Bearer ')) {
+      const token = authHeader.slice(7)
+      supabase = await getSupabaseServerClientWithAccessToken(token)
+      const { data: userData } = await supabase.auth.getUser(token)
+      if (userData.user) session = { user: userData.user } as any
+    }
 
     let query = supabase
       .from('play_logs')
@@ -31,7 +36,7 @@ export async function GET(req: NextRequest) {
     if (gameId) query = query.eq('game_id', gameId)
 
     // Target user precedence: if provided, show that user's public logs (or all if it's self)
-    if (targetUserId) {
+  if (targetUserId) {
       if (session && session.user.id === targetUserId) {
         query = query.eq('user_id', targetUserId)
       } else {
@@ -72,14 +77,28 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const supabase = await getSupabaseServerClient()
-    const {
-      data: { session },
-    } = await supabase.auth.getSession()
-    if (!session) return NextResponse.json({ error: 'Auth required' }, { status: 401 })
+    const authHeader = req.headers.get('authorization')
+    let supabase = await getSupabaseServerClient()
+    let { data: { session } } = await supabase.auth.getSession()
+    if ((!session || !session.user) && authHeader?.startsWith('Bearer ')) {
+      const token = authHeader.slice(7)
+      supabase = await getSupabaseServerClientWithAccessToken(token)
+      const { data: userData } = await supabase.auth.getUser(token)
+      if (userData.user) session = { user: userData.user } as any
+    }
+    let userId = session?.user.id
+    let bearerToken: string | null = null
+    if (!userId && authHeader?.startsWith('Bearer ')) {
+      bearerToken = authHeader.slice(7)
+      // Recreate client with token so RLS sees auth.uid()
+      supabase = await getSupabaseServerClientWithAccessToken(bearerToken)
+      const { data: userData } = await supabase.auth.getUser(bearerToken)
+      userId = userData.user?.id
+    }
+    if (!userId) return NextResponse.json({ error: 'Auth required' }, { status: 401 })
 
     const insert = {
-      user_id: session.user.id,
+      user_id: userId,
       game_id: body.game_id,
       played_at: body.played_at ?? new Date().toISOString(),
       rating: body.rating ?? null,
@@ -88,7 +107,7 @@ export async function POST(req: NextRequest) {
       location: body.location ?? null,
       notes: body.notes ?? null,
       tags: body.tags ?? null,
-      is_public: body.is_public ?? false,
+  is_public: body.is_public ?? true,
     }
 
     const { data, error } = await supabase
@@ -109,11 +128,17 @@ export async function PATCH(req: NextRequest) {
     if (!body.id) {
       return NextResponse.json({ error: 'id required' }, { status: 400 })
     }
-    const supabase = await getSupabaseServerClient()
-    const {
-      data: { session },
-    } = await supabase.auth.getSession()
-    if (!session) return NextResponse.json({ error: 'Auth required' }, { status: 401 })
+  let supabase = await getSupabaseServerClient()
+  let { data: { session } } = await supabase.auth.getSession()
+  const authHeader = req.headers.get('authorization')
+    let userId = session?.user.id
+    if (!userId && authHeader?.startsWith('Bearer ')) {
+      const token = authHeader.slice(7)
+      supabase = await getSupabaseServerClientWithAccessToken(token)
+      const { data: userData } = await supabase.auth.getUser(token)
+      userId = userData.user?.id
+    }
+    if (!userId) return NextResponse.json({ error: 'Auth required' }, { status: 401 })
 
     // Ensure ownership by selecting first (policy also enforces)
     const { data: existing, error: existingErr } = await supabase
@@ -123,7 +148,7 @@ export async function PATCH(req: NextRequest) {
       .maybeSingle()
     if (existingErr) throw existingErr
     if (!existing) return NextResponse.json({ error: 'Not found' }, { status: 404 })
-    if (existing.user_id !== session.user.id)
+  if (existing.user_id !== userId)
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
     const patch: any = { ...body }
@@ -148,11 +173,17 @@ export async function DELETE(req: NextRequest) {
     if (!body.id) {
       return NextResponse.json({ error: 'id required' }, { status: 400 })
     }
-    const supabase = await getSupabaseServerClient()
-    const {
-      data: { session },
-    } = await supabase.auth.getSession()
-    if (!session) return NextResponse.json({ error: 'Auth required' }, { status: 401 })
+    const authHeader = req.headers.get('authorization')
+    let supabase = await getSupabaseServerClient()
+    let { data: { session } } = await supabase.auth.getSession()
+    let userId = session?.user.id
+    if (!userId && authHeader?.startsWith('Bearer ')) {
+      const token = authHeader.slice(7)
+      supabase = await getSupabaseServerClientWithAccessToken(token)
+      const { data: userData } = await supabase.auth.getUser(token)
+      userId = userData.user?.id
+    }
+    if (!userId) return NextResponse.json({ error: 'Auth required' }, { status: 401 })
 
     const { error } = await supabase
       .from('play_logs')

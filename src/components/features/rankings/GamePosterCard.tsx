@@ -6,7 +6,7 @@ import { formatYear } from '@/utils/helpers'
 import { PlayIcon, StarIcon } from '@heroicons/react/24/outline'
 import RatingChip from '@/design-system/elements/RatingChip'
 import { useState } from 'react'
-import RatingPicker from '@/components/rankings/RatingPicker'
+import RatingPicker from './RatingPicker'
 
 interface GamePosterCardProps {
   game: GameWithRanking

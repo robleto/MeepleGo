@@ -19,7 +19,7 @@ a.unstyled:hover, .dark a.unstyled:hover { color: inherit; }
   --background-start-rgb: 214, 219, 220;
   --background-end-rgb: 255, 255, 255;
   /* Design tokens (Light) */
-  --color-bg: #f8fafc; /* subtle neutral */
+  --color-bg: #E7F4FF; /* light blue-gray background */
   --color-surface: #ffffff;
   --color-surface-alt: #f1f5f9; /* slate-100-ish */
   --color-surface-emphasis: #ffffff;
@@ -71,7 +71,7 @@ html { font-size: 18px; }
     --background-start-rgb: 0, 0, 0;
     --background-end-rgb: 0, 0, 0;
   /* Dark mode token overrides */
-  --color-bg: #0f172a; /* slate-900 */
+  --color-bg: #0f172a; /* keep dark base; optional tinted alt surfaces below */
   --color-surface: #1e293b; /* slate-800 */
   --color-surface-alt: #24324b; /* custom subtle lift */
   --color-surface-emphasis: #334155; /* slate-700 */
@@ -104,6 +104,16 @@ body {
   font-family: 'Proxima Nova', proxima-nova, system-ui, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
   font-weight: 400;
 }
+
+/* Brand button (replacing previous emerald primary actions on certain pages) */
+.btn-brand { background:theme('colors.brand.DEFAULT'); color:#fff; box-shadow: var(--shadow-sm); }
+.btn-brand:hover { background:theme('colors.brand.light'); }
+.dark .btn-brand { background:theme('colors.brand.light'); }
+.dark .btn-brand:hover { background:theme('colors.brand.DEFAULT'); }
+.btn-brand-outline { background:#fff; color:theme('colors.brand.DEFAULT'); border:1px solid theme('colors.brand.DEFAULT'); }
+.btn-brand-outline:hover { background:theme('colors.brand.subtle'); }
+.dark .btn-brand-outline { background:rgba(255,255,255,0.05); color:theme('colors.brand.light'); border:1px solid theme('colors.brand.light'); }
+.dark .btn-brand-outline:hover { background:rgba(38,149,226,0.15); }
 
 /* Reusable panel wrapper (award sections, hero blocks, general cards) */
 .panel { 
@@ -148,7 +158,20 @@ h1, h2, h3, h4, h5, h6 { font-family: inherit; font-weight:600; letter-spacing:-
 .scroll-smooth-touch { -webkit-overflow-scrolling: touch; }
 
 /* UI primitives base classes (can be composed with @apply if desired) */
-.ui-btn { position:relative; display:inline-flex; align-items:center; justify-content:center; gap:0.5rem; font-weight:500; border-radius: var(--radius-sm); padding:0.55rem 0.9rem; font-size:0.875rem; line-height:1.1; transition: background .18s, color .18s, box-shadow .18s; }
+/* Button System - Consistent Border Radius Hierarchy */
+.ui-btn { position:relative; display:inline-flex; align-items:center; justify-content:center; gap:0.5rem; font-weight:500; border-radius: var(--radius-md); padding:0.55rem 0.9rem; font-size:0.875rem; line-height:1.1; transition: background .18s, color .18s, box-shadow .18s; }
+
+/* Size variants */
+.ui-btn-xs { padding:0.25rem 0.5rem; font-size:0.75rem; border-radius: var(--radius-sm); }
+.ui-btn-sm { padding:0.4rem 0.75rem; font-size:0.8125rem; border-radius: var(--radius-sm); }
+.ui-btn-lg { padding:0.75rem 1.25rem; font-size:1rem; border-radius: var(--radius-lg); }
+
+/* Shape variants */
+.ui-btn-rounded { border-radius: var(--radius-lg); } /* More rounded for hero CTAs */
+.ui-btn-pill { border-radius: 9999px; } /* Fully rounded for special actions like search */
+.ui-btn-square { aspect-ratio: 1; padding: 0.55rem; } /* Square buttons for icons */
+
+/* Color variants */
 .ui-btn-primary { background: var(--color-accent); color:#fff; box-shadow: var(--shadow-sm); }
 .ui-btn-primary:hover { background: var(--color-accent-hover); }
 .ui-btn-secondary { background: var(--color-surface-alt); color: var(--color-text); border:1px solid var(--color-border); }
@@ -317,6 +340,30 @@ h1, h2, h3, h4, h5, h6 { font-family: inherit; font-weight:600; letter-spacing:-
     transform: translate(-100px, -50px) scale(1.1);
   }
 }
+
+/* --------------------------------------------------
+   Brand micro‑interaction utilities
+   .animate-fade-slide  – entrance fade + slight upward slide
+   .animate-pulse-soft  – one‑shot subtle brand tint flash (e.g. new item highlight)
+   .focus-outline-brand – consistent focus ring using brand ring color
+-------------------------------------------------- */
+@keyframes fade-slide-up {
+  0% { opacity:0; transform: translateY(6px); }
+  100% { opacity:1; transform: translateY(0); }
+}
+@keyframes pulse-soft-brand {
+  0% { background: theme('colors.brand.subtle'); }
+  60% { background: theme('colors.brand.subtle'); }
+  100% { background: transparent; }
+}
+@media (prefers-reduced-motion: reduce) {
+  @keyframes fade-slide-up { 0% { opacity:0; } 100% { opacity:1; } }
+  @keyframes pulse-soft-brand { 0%,60%,100% { background: theme('colors.brand.subtle'); } }
+}
+.animate-fade-slide { animation: fade-slide-up .35s cubic-bezier(.33,.9,.4,1) both; }
+.animate-pulse-soft { animation: pulse-soft-brand 1.4s ease-out 0s 1 forwards; }
+.focus-outline-brand:focus-visible { outline: none; box-shadow: 0 0 0 2px rgba(255,255,255,0.9), 0 0 0 4px theme('colors.brand.ring'); }
+.dark .focus-outline-brand:focus-visible { box-shadow: 0 0 0 2px rgba(15,23,42,0.9), 0 0 0 4px theme('colors.brand.light'); }
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {

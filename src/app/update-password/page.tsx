@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
-import AuthLayout from '@/components/AuthLayout'
+import AuthLayout from '@/components/shared/AuthLayout'
 
 export default function UpdatePasswordPage() {
   const router = useRouter()

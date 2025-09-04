@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import PageLayout from '@/components/PageLayout'
+import PageLayout from '@/components/shared/PageLayout'
 import {
   useGameDataWithGuest,
   useViewMode,
@@ -11,11 +11,11 @@ import {
   SortOrder,
   GroupKey,
 } from '@/utils/sharedGameUtils'
-import RankingsEmptyStateGames from '@/components/rankings/RankingsEmptyStateGames'
-import GameRowCard from '@/components/rankings/GameRowCard'
-import GamePosterCard from '@/components/rankings/GamePosterCard'
-import RankingsFilters from '@/components/rankings/RankingsFilters'
-import Heading from '@/components/Heading'
+import RankingsEmptyStateGames from '@/components/features/rankings/RankingsEmptyStateGames'
+import GameRowCard from '@/components/features/rankings/GameRowCard'
+import GamePosterCard from '@/components/features/rankings/GamePosterCard'
+import RankingsFilters from '@/components/features/rankings/RankingsFilters'
+import Heading from '@/components/shared/Heading'
 
 export default function RankingsPage() {
   const { games, loading, isGuest, updateGameRanking } = useGameDataWithGuest()

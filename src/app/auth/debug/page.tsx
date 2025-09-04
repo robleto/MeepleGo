@@ -1,5 +1,5 @@
-import PageLayout from '@/components/PageLayout'
-import Heading from '@/components/Heading'
+import PageLayout from '@/components/shared/PageLayout'
+import Heading from '@/components/shared/Heading'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0

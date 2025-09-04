@@ -2,10 +2,11 @@
 
 import { useState, useEffect, Suspense } from 'react'
 import { supabase } from '@/lib/supabase'
-import PageLayout from '@/components/PageLayout'
-import Heading from '@/components/Heading'
-import GameCard from '@/components/GameCard'
-import GameFilters from '@/components/GameFilters'
+import PageLayout from '@/components/shared/PageLayout'
+import Heading from '@/components/shared/Heading'
+import GameCard from '@/components/shared/GameCard'
+import GameRowCard from '@/components/features/rankings/GameRowCard'
+import GameFilters from '@/components/features/filters/GameFilters'
 import { GameWithRanking } from '@/types'
 import { useGameFilters, useViewMode } from '@/utils/gameFilters'
 import { searchGamesFallback } from '@/utils/databaseSearch'
@@ -654,32 +655,49 @@ function GamesPageContent() {
         {/* Games Display - Use raw games for proper BGG rank sorting */}
         {!loading && !error && (
           <div className="mb-10">
-            <div
-              className={
-                viewMode === 'grid'
-                  ? 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4'
-                  : 'space-y-4'
-              }
-            >
-              {games.map((game) => (
-                <GameCard
-                  key={game.id}
-                  game={{
-                    ...game,
-                    list_membership: membershipMap[game.id] || {
-                      library: membershipSets
-                        ? membershipSets.library.has(game.id)
-                        : false,
-                      wishlist: membershipSets
-                        ? membershipSets.wishlist.has(game.id)
-                        : false,
-                    },
-                  }}
-                  viewMode={viewMode}
-                  onMembershipChange={handleMembershipChange}
-                />
-              ))}
-            </div>
+            {viewMode === 'grid' ? (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+                {games.map((game) => (
+                  <GameCard
+                    key={game.id}
+                    game={{
+                      ...game,
+                      list_membership: membershipMap[game.id] || {
+                        library: membershipSets
+                          ? membershipSets.library.has(game.id)
+                          : false,
+                        wishlist: membershipSets
+                          ? membershipSets.wishlist.has(game.id)
+                          : false,
+                      },
+                    }}
+                    viewMode={viewMode}
+                    onMembershipChange={handleMembershipChange}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="divide-y divide-gray-100 dark:divide-gray-800 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
+                {games.map((game, idx) => (
+                  <GameRowCard
+                    key={game.id}
+                    index={idx}
+                    game={{
+                      ...game,
+                      list_membership: membershipMap[game.id] || {
+                        library: membershipSets
+                          ? membershipSets.library.has(game.id)
+                          : false,
+                        wishlist: membershipSets
+                          ? membershipSets.wishlist.has(game.id)
+                          : false,
+                      },
+                    } as any}
+                    onUpdate={() => { /* ranking interactions not on games page for now */ }}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         )}
 

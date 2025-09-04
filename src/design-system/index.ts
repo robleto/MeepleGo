@@ -1,2 +1,2 @@
-export * from './ratingColors'
-export * from './IconCircle'
+export * from './tokens/ratingColors'
+export * from './elements/IconCircle'

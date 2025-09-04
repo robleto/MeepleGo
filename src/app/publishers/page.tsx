@@ -1,5 +1,5 @@
 import { getSupabaseServerClient } from '@/lib/supabaseServer'
-import PageLayout from '@/components/PageLayout'
+import PageLayout from '@/components/shared/PageLayout'
 import Link from 'next/link'
 
 export const revalidate = 60

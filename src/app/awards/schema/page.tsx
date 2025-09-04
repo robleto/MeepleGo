@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
-import PageLayout from '@/components/PageLayout'
-import Heading from '@/components/Heading'
+import PageLayout from '@/components/shared/PageLayout'
+import Heading from '@/components/shared/Heading'
 import SchemaCheckClient from './schemaCheckClient'
 
 export default function AwardsSchemaPage() {

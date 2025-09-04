@@ -1,7 +1,7 @@
 "use client"
 import { useEffect, useState } from 'react'
-import PageLayout from '@/components/PageLayout'
-import ListExplorer from '@/components/lists/ListExplorer'
+import PageLayout from '@/components/shared/PageLayout'
+import ListExplorer from '@/components/features/lists/ListExplorer'
 import { getOrCreateDefaultLists, getMembershipSets } from '@/lib/lists'
 import { supabase } from '@/lib/supabase'
 import { GameWithRanking } from '@/types'
@@ -65,6 +65,7 @@ export default function WishlistPage() {
       headerActions={headerActions}
       contextualMembership={membershipSets}
       emptyMessage={{ title:'Your wishlist is empty', body:'Add games by clicking the heart icon.' }}
+  disableListRanking
     />
   </PageLayout>
 }

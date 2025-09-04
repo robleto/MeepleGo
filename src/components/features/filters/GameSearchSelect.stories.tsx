@@ -21,7 +21,10 @@ const mockData = [
 export const Default: Story = {
   render: () => (
     <div className="max-w-md">
-      <GameSearchSelect fetchSuggestions={async (q)=> mockData.filter(g=> g.name.toLowerCase().includes(q))} />
+      <GameSearchSelect 
+        onSelect={(game) => console.log('Selected:', game)}
+        placeholder="Search for games..."
+      />
     </div>
   )
 }
