@@ -22,7 +22,7 @@ const Alert = ({ variant, children }: AlertProps) => {
 }
 
 const meta: Meta<typeof Alert> = {
-  title: 'Design System/Alerts',
+  title: 'Design System/Components/Alerts',
   component: Alert,
   tags: ['autodocs'],
   parameters: {

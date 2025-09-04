@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 
 const meta: Meta = {
-  title: 'Design System/Form Fields',
+  title: 'Design System/Components/Form Fields',
   tags: ['autodocs'],
   parameters: {
     layout: 'centered',

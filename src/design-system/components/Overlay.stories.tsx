@@ -13,7 +13,7 @@ export const Overlay = ({ children = 'Overlay', color = 'bg-black/60' }: Overlay
 )
 
 const meta: Meta<typeof Overlay> = {
-  title: 'Design System/Overlay',
+  title: 'Design System/Components/Overlay',
   component: Overlay,
   argTypes: {
     children: { control: 'text' },

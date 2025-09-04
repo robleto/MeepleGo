@@ -16,7 +16,7 @@ export const WinnerBadge = ({ text = 'Winner', color = 'bg-yellow-400', icon = <
 )
 
 const meta: Meta<typeof WinnerBadge> = {
-  title: 'Design System/WinnerBadge',
+  title: 'Design System/Components/Winner Badge',
   component: WinnerBadge,
   tags: ['autodocs'],
   parameters: {
