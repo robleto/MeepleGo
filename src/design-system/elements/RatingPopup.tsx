@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useLayoutEffect, useEffect } from 'react'
-import { getRatingSolidClass } from '@/design-system/tokens/ratingColors'
+import { getRatingSubtleClass } from '@/design-system/tokens/ratingColors'
 import { supabase } from '@/lib/supabase'
 
 interface RatingPopupProps {
@@ -172,7 +172,7 @@ export default function RatingPopup({
               type="button"
               onClick={(e)=>{ e.stopPropagation(); r === null ? handleClearRating() : handleRatingClick(r) }}
               disabled={saving}
-              className={`w-8 h-8 mb-1 text-xs font-bold rounded-md flex items-center justify-center transition-all duration-150 focus:outline-none focus:ring-1 focus:ring-primary-500 disabled:opacity-50 ${r===null ? 'bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300' : getRatingSolidClass(r)} ${currentRating===r || (r===null && currentRating==null) ? 'ring-1 ring-white ring-offset-1 ring-offset-primary-500/30' : 'hover:scale-105 active:scale-95'}`}
+              className={`w-8 h-8 mb-1 text-xs font-bold rounded-md flex items-center justify-center transition-all duration-150 focus:outline-none focus:ring-1 focus:ring-primary-500 disabled:opacity-50 ${r===null ? 'bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300' : getRatingSubtleClass(r)} ${currentRating===r || (r===null && currentRating==null) ? 'ring-1 ring-white ring-offset-1 ring-offset-primary-500/30' : 'hover:scale-105 active:scale-95'}`}
               // Alternative: try 'rounded-lg' for softer corners or 'rounded-2xl' for more rounded
               style={{ zIndex: 120 - idx }}
               title={r===null ? 'Clear rating' : `Rate ${r}`}
