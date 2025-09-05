@@ -343,8 +343,8 @@ export default function GameCard({
               </span>
             </Button>
 
-            {/* Rating Chip */}
-            {ratingValue && (
+            {/* Rating Chip or Rate Button */}
+            {ratingValue ? (
               <RatingChip 
                 value={ratingValue} 
                 size={variant === 'compact' ? 'xs' : 'sm'} 
@@ -361,6 +361,21 @@ export default function GameCard({
                   setIsRating(true)
                 }}
               />
+            ) : (
+              <button
+                className={`${variant === 'compact' ? 'text-xs px-2 py-1' : 'text-sm px-3 py-1.5'} text-gray-400 hover:text-gray-600 border border-gray-300 hover:border-gray-400 rounded transition-colors ml-1`}
+                onClick={(event) => {
+                  event.stopPropagation()
+                  const rect = event.currentTarget.getBoundingClientRect()
+                  setRatingPosition({ 
+                    x: rect.left + rect.width / 2, 
+                    y: rect.bottom + 8 
+                  })
+                  setIsRating(true)
+                }}
+              >
+                Rate
+              </button>
             )}
           </div>
         </div>
@@ -374,6 +389,19 @@ export default function GameCard({
             onMembershipChange={onMembershipChange}
           />
         )}
+
+        {/* Rating Popup - same as grid view */}
+        <RatingPopup
+          gameId={game.id}
+          gameName={game.name}
+          currentRating={localRanking?.ranking}
+          isOpen={isRating}
+          onClose={() => { setIsRating(false); setSuppressNextCardOpen(true) }}
+          onRatingChange={async (rating) => {
+            await upsertRanking({ ranking: rating ?? undefined })
+          }}
+          position={ratingPosition || undefined}
+        />
       </div>
     )
   }
@@ -498,26 +526,8 @@ export default function GameCard({
 
   {/* Rank badge removed per design request */}
 
-        {/* Hover actions: rating only (removed redundant played toggle) */}
-        {showOverlay && (
-          <RatingChip
-            value={localRanking?.ranking}
-            size="md"
-            variant="overlay"
-            shape="rounded"
-            interactive
-            className="absolute bottom-2 right-2"
-            onClick={(event) => {
-              event.stopPropagation()
-              const rect = event.currentTarget.getBoundingClientRect()
-              setRatingPosition({ 
-                x: rect.left + rect.width / 2, 
-                y: rect.top - 8 
-              })
-              setIsRating(true)
-            }}
-          />
-        )}
+        {/* Hover actions: removed overlay rating to avoid redundancy with bottom metadata */}
+        {/* Rating is now only displayed in the bottom metadata section for consistency */}
       </div>
 
       {/* Game Info */}
@@ -551,18 +561,42 @@ export default function GameCard({
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 {localRanking?.played_it && (
-                  <span className="inline-flex items-center gap-1 text-green-600 font-medium">
+                  <span className="inline-flex items-center gap-1 text-green-600 font-medium text-xs">
                     <PlayIcon className="h-3 w-3" />
                     Played
                   </span>
                 )}
-                {ratingValue != null && (
+                {ratingValue != null ? (
                   <RatingChip 
                     value={ratingValue} 
                     size="xs" 
                     shape="rounded"
-                    interactive={false} 
+                    interactive={true}
+                    onClick={(event) => {
+                      event.stopPropagation()
+                      const rect = event.currentTarget.getBoundingClientRect()
+                      setRatingPosition({ 
+                        x: rect.left + rect.width / 2, 
+                        y: rect.top - 8 
+                      })
+                      setIsRating(true)
+                    }}
                   />
+                ) : (
+                  <button
+                    className="text-xs text-gray-400 hover:text-gray-600 border border-gray-300 hover:border-gray-400 rounded px-2 py-0.5 transition-colors"
+                    onClick={(event) => {
+                      event.stopPropagation()
+                      const rect = event.currentTarget.getBoundingClientRect()
+                      setRatingPosition({ 
+                        x: rect.left + rect.width / 2, 
+                        y: rect.top - 8 
+                      })
+                      setIsRating(true)
+                    }}
+                  >
+                    Rate
+                  </button>
                 )}
               </div>
             </div>
