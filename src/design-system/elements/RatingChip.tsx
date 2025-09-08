@@ -1,14 +1,16 @@
 import React from 'react'
+import { StarIcon } from '@heroicons/react/24/outline'
 import { getRatingLabel } from '@/utils/helpers'
 import { getRatingSolidClass } from '@/design-system/tokens/ratingColors'
 
 interface RatingChipProps {
-  value: number
+  value: number | null
   size?: 'xs' | 'sm' | 'md' | 'lg'
   variant?: 'subtle' | 'solid' | 'overlay'
   shape?: 'rounded' | 'circle' | 'square'
   interactive?: boolean
   className?: string
+  showEmptyAsStar?: boolean
   onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void
 }
 
@@ -60,6 +62,7 @@ export default function RatingChip({
   variant = 'subtle', 
   interactive = false, 
   shape = 'rounded',
+  showEmptyAsStar = false,
   onClick
 }: RatingChipProps) {
   const label = value ?? '—'
@@ -93,6 +96,13 @@ export default function RatingChip({
     }
   }
   
+  // Determine content: star for empty state if requested, otherwise numeric/dash
+  const content = (!value && showEmptyAsStar) ? (
+    <StarIcon className={`${size === 'xs' ? 'h-3 w-3' : size === 'sm' ? 'h-3.5 w-3.5' : size === 'md' ? 'h-4 w-4' : 'h-5 w-5'}`} />
+  ) : (
+    label
+  )
+  
   return onClick ? (
     <button
       className={finalClasses}
@@ -100,7 +110,7 @@ export default function RatingChip({
       aria-label={aria}
       title={aria}
     >
-      {label}
+      {content}
     </button>
   ) : (
     <span
@@ -108,7 +118,7 @@ export default function RatingChip({
       aria-label={aria}
       title={aria}
     >
-      {label}
+      {content}
     </span>
   )
 }

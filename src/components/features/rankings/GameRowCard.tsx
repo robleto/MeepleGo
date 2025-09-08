@@ -196,13 +196,13 @@ export default function GameRowCard({
             className="rounded-md hover:brightness-110 transition"
             aria-label={rankingValue ? `Rating ${rankingValue}` : 'Rate game'}
           >
-            {rankingValue ? <RatingChip value={rankingValue} size="sm" fixedCircle subtle /> : (
+            {rankingValue ? <RatingChip value={rankingValue} size="sm" shape="circle" variant="subtle" /> : (
               <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-gray-400 ring-1 ring-inset ring-gray-200"><StarIcon className="h-4 w-4" /></span>
             )}
           </button>
         ) : (
           <div className="min-w-[2.25rem] flex items-center justify-center">
-            {rankingValue ? <RatingChip value={rankingValue} size="sm" fixedCircle subtle /> : null}
+            {rankingValue ? <RatingChip value={rankingValue} size="sm" shape="circle" variant="subtle" /> : null}
           </div>
         )}
       </div>

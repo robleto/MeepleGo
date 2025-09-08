@@ -17,6 +17,7 @@ import {
   HeartIcon,
   BookOpenIcon,
   TrophyIcon,
+  StarIcon,
 } from '@heroicons/react/24/outline'
 import { Button } from '@/design-system/elements/Button'
 import { supabase } from '@/lib/supabase'
@@ -363,7 +364,7 @@ export default function GameCard({
               />
             ) : (
               <button
-                className={`${variant === 'compact' ? 'text-xs px-2 py-1' : 'text-sm px-3 py-1.5'} text-gray-400 hover:text-gray-600 border border-gray-300 hover:border-gray-400 rounded transition-colors ml-1`}
+                className={`${variant === 'compact' ? 'w-6 h-6' : 'w-8 h-8'} rounded-full border border-gray-300 hover:border-gray-400 bg-gray-50 hover:bg-gray-100 flex items-center justify-center transition-colors ml-1`}
                 onClick={(event) => {
                   event.stopPropagation()
                   const rect = event.currentTarget.getBoundingClientRect()
@@ -373,8 +374,9 @@ export default function GameCard({
                   })
                   setIsRating(true)
                 }}
+                title="Rate this game"
               >
-                Rate
+                <StarIcon className={`${variant === 'compact' ? 'h-3 w-3' : 'h-4 w-4'} text-gray-400`} />
               </button>
             )}
           </div>
@@ -421,94 +423,6 @@ export default function GameCard({
       style={{ cursor: 'pointer' }}
     >
   {/* Removed internal winner pill for grid view; awards page now supplies its own explicit badge */}
-      {/* Collection bookmark (clearer visual treatment) */}
-      <div className="absolute top-2 right-2 z-30">
-  {(showOverlay || membership.library) && (
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation()
-              setShowListPicker((v)=>!v)
-              if (!userLists) {
-                setLoadingListsQuick(true)
-                supabase.auth.getSession().then(async ({data:{session}})=>{
-                  if (!session) { setUserLists([]); setLoadingListsQuick(false); return }
-                  const { data, error } = await supabase
-                    .from('game_lists')
-                    .select('id,name,icon')
-                    .eq('user_id', session.user.id)
-                  if (!error) setUserLists(data || [])
-                  setLoadingListsQuick(false)
-                })
-              }
-            }}
-            aria-label={membership.library ? "In collection - manage lists" : "Add to collection"}
-            title={membership.library ? "In collection - click to manage" : "Add to collection"}
-            className={`w-8 h-8 rounded-md flex items-center justify-center shadow-sm ring-1 ring-black/5 transition
-              ${showOverlay && membership.library
-                ? 'bg-green-600 text-white hover:bg-green-700'
-                : showOverlay && membership.wishlist
-                  ? 'bg-pink-500 text-white hover:bg-pink-600'
-                  : membership.library
-                    ? 'bg-green-600 text-white shadow-md'
-                    : 'bg-white/70 backdrop-blur text-gray-400 hover:text-gray-600 hover:bg-white/90'}`}
-          >
-            <BookmarkIcon className="h-4 w-4" />
-          </button>
-        )}
-        {showListPicker && (
-          <div
-            className="absolute top-10 right-0 w-56 max-h-80 overflow-y-auto bg-white/95 backdrop-blur shadow-xl rounded-md border border-gray-200 p-2 space-y-1 z-40"
-            onClick={(e)=> e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-xs font-semibold text-gray-500 uppercase">Add To List</span>
-              <button
-                className="text-gray-400 hover:text-gray-600 text-xs"
-                onClick={()=>setShowListPicker(false)}
-              >×</button>
-            </div>
-            <button
-              className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-sm ${membership.library ? 'bg-green-50 text-green-700 ring-1 ring-green-200' : 'hover:bg-green-50 text-gray-700'}`}
-              onClick={async()=>{ setShowListPicker(false); await handleToggle('library') }}
-            >
-              <span className="w-5 h-5 rounded bg-green-600 text-white flex items-center justify-center"><BookOpenIcon className="w-4 h-4" /></span>
-              <span>Library</span>
-            </button>
-            <button
-              className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-sm ${membership.wishlist ? 'bg-pink-50 text-pink-700 ring-1 ring-pink-200' : 'hover:bg-pink-50 text-gray-700'}`}
-              onClick={async()=>{ setShowListPicker(false); await handleToggle('wishlist') }}
-            >
-              <span className="w-5 h-5 rounded bg-pink-500 text-white flex items-center justify-center"><HeartIcon className="w-4 h-4" /></span>
-              <span>Wishlist</span>
-            </button>
-            <div className="h-px bg-gray-200 my-1" />
-            {loadingListsQuick && <div className="text-xs text-gray-500 px-1 py-1">Loading…</div>}
-            {!loadingListsQuick && userLists && userLists.filter(l=>l.name !== 'Library' && l.name !== 'Wishlist').map(l=> (
-              <button
-                key={l.id}
-                className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-sm hover:bg-gray-50 text-gray-700"
-                onClick={async()=>{
-                  // add game to list bottom
-                  setShowListPicker(false)
-                  const { data: { session } } = await supabase.auth.getSession()
-                  if (!session) return
-                  const { error } = await supabase.from('game_list_items').insert({ list_id: l.id, game_id: game.id })
-                  if (error && error.message.includes('duplicate')) return
-                }}
-              >
-                <span className="w-5 h-5 rounded bg-gray-200 text-gray-600 text-[10px] flex items-center justify-center">{(l.icon || l.name.charAt(0)).slice(0,1)}</span>
-                <span className="truncate flex-1 text-left">{l.name}</span>
-              </button>
-            ))}
-            {!loadingListsQuick && userLists && userLists.filter(l=>l.name !== 'Library' && l.name !== 'Wishlist').length === 0 && (
-              <div className="text-xs text-gray-400 px-1 py-1">No custom lists</div>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* Removed L/W pills in favor of bookmark overlay */}
 
       {/* Game Image */}
   <div className={`aspect-square relative w-full mx-auto rounded-t-lg overflow-hidden border border-gray-200 dark:border-gray-700 ${variant === 'compact' ? 'bg-gradient-to-b from-gray-200 to-gray-100 dark:from-gray-800 dark:to-gray-900' : 'bg-gradient-to-b from-gray-300 to-gray-200 dark:from-gray-800 dark:to-gray-700'}`}> 
@@ -524,16 +438,157 @@ export default function GameCard({
           <GameImageFallback name={game.name} />
         )}
 
-  {/* Rank badge removed per design request */}
+        {/* Hover overlay with all interactive controls */}
+        {showOverlay && (
+          <div className="absolute inset-0 bg-black/20 flex flex-col items-stretch justify-between p-2">
+            {/* Top right: Collection bookmark */}
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setShowListPicker((v)=>!v)
+                  if (!userLists) {
+                    setLoadingListsQuick(true)
+                    supabase.auth.getSession().then(async ({data:{session}})=>{
+                      if (!session) { setUserLists([]); setLoadingListsQuick(false); return }
+                      const { data, error } = await supabase
+                        .from('game_lists')
+                        .select('id,name,icon')
+                        .eq('user_id', session.user.id)
+                      if (!error) setUserLists(data || [])
+                      setLoadingListsQuick(false)
+                    })
+                  }
+                }}
+                aria-label={membership.library ? "In collection - manage lists" : "Add to collection"}
+                title={membership.library ? "In collection - click to manage" : "Add to collection"}
+                className={`w-8 h-8 rounded-md flex items-center justify-center shadow-sm transition
+                  ${membership.library
+                    ? 'bg-green-600 text-white hover:bg-green-700'
+                    : membership.wishlist
+                      ? 'bg-pink-500 text-white hover:bg-pink-600'
+                      : 'bg-white/90 text-gray-600 hover:text-gray-800 hover:bg-white'}`}
+              >
+                <BookmarkIcon className="h-4 w-4" />
+              </button>
+            </div>
 
-        {/* Hover actions: removed overlay rating to avoid redundancy with bottom metadata */}
-        {/* Rating is now only displayed in the bottom metadata section for consistency */}
+            {/* Center: Played It and Rating buttons */}
+            <div className="flex items-center justify-center space-x-2">
+              {/* Played It Button */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handlePlayedToggle()
+                }}
+                className={`px-3 py-1.5 rounded-md text-xs font-medium transition shadow-sm ${
+                  localRanking?.played_it
+                    ? 'bg-green-600 text-white hover:bg-green-700'
+                    : 'bg-white/90 text-gray-700 hover:bg-white'
+                }`}
+                title={localRanking?.played_it ? 'Played' : 'Mark as played'}
+              >
+                <PlayIcon className="h-3 w-3 inline mr-1" />
+                Played It
+              </button>
+
+              {/* Rating Button/Chip */}
+              {ratingValue != null ? (
+                <RatingChip 
+                  value={ratingValue} 
+                  size="sm" 
+                  variant="overlay"
+                  interactive={true}
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    const rect = event.currentTarget.getBoundingClientRect()
+                    setRatingPosition({ 
+                      x: rect.left + rect.width / 2, 
+                      y: rect.top - 8 
+                    })
+                    setIsRating(true)
+                  }}
+                />
+              ) : (
+                <button
+                  className="px-3 py-1.5 rounded-md text-xs font-medium bg-white/90 text-gray-700 hover:bg-white transition shadow-sm"
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    const rect = event.currentTarget.getBoundingClientRect()
+                    setRatingPosition({ 
+                      x: rect.left + rect.width / 2, 
+                      y: rect.top - 8 
+                    })
+                    setIsRating(true)
+                  }}
+                  title="Rate this game"
+                >
+                  <StarIcon className="h-3 w-3 inline mr-1" />
+                  Rate
+                </button>
+              )}
+            </div>
+
+            {/* List picker dropdown positioned relative to bookmark */}
+            {showListPicker && (
+              <div
+                className="absolute top-12 right-2 w-56 max-h-80 overflow-y-auto bg-white/95 backdrop-blur shadow-xl rounded-md border border-gray-200 p-2 space-y-1 z-40"
+                onClick={(e)=> e.stopPropagation()}
+              >
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs font-semibold text-gray-500 uppercase">Add To List</span>
+                  <button
+                    className="text-gray-400 hover:text-gray-600 text-xs"
+                    onClick={()=>setShowListPicker(false)}
+                  >×</button>
+                </div>
+                <button
+                  className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-sm ${membership.library ? 'bg-green-50 text-green-700 ring-1 ring-green-200' : 'hover:bg-green-50 text-gray-700'}`}
+                  onClick={async()=>{ setShowListPicker(false); await handleToggle('library') }}
+                >
+                  <span className="w-5 h-5 rounded bg-green-600 text-white flex items-center justify-center"><BookOpenIcon className="w-4 h-4" /></span>
+                  <span>Library</span>
+                </button>
+                <button
+                  className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-sm ${membership.wishlist ? 'bg-pink-50 text-pink-700 ring-1 ring-pink-200' : 'hover:bg-pink-50 text-gray-700'}`}
+                  onClick={async()=>{ setShowListPicker(false); await handleToggle('wishlist') }}
+                >
+                  <span className="w-5 h-5 rounded bg-pink-500 text-white flex items-center justify-center"><HeartIcon className="w-4 h-4" /></span>
+                  <span>Wishlist</span>
+                </button>
+                <div className="h-px bg-gray-200 my-1" />
+                {loadingListsQuick && <div className="text-xs text-gray-500 px-1 py-1">Loading…</div>}
+                {!loadingListsQuick && userLists && userLists.filter(l=>l.name !== 'Library' && l.name !== 'Wishlist').map(l=> (
+                  <button
+                    key={l.id}
+                    className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-sm hover:bg-gray-50 text-gray-700"
+                    onClick={async()=>{
+                      // add game to list bottom
+                      setShowListPicker(false)
+                      const { data: { session } } = await supabase.auth.getSession()
+                      if (!session) return
+                      const { error } = await supabase.from('game_list_items').insert({ list_id: l.id, game_id: game.id })
+                      if (error && error.message.includes('duplicate')) return
+                    }}
+                  >
+                    <span className="w-5 h-5 rounded bg-gray-200 text-gray-600 text-[10px] flex items-center justify-center">{(l.icon || l.name.charAt(0)).slice(0,1)}</span>
+                    <span className="truncate flex-1 text-left">{l.name}</span>
+                  </button>
+                ))}
+                {!loadingListsQuick && userLists && userLists.filter(l=>l.name !== 'Library' && l.name !== 'Wishlist').length === 0 && (
+                  <div className="text-xs text-gray-400 px-1 py-1">No custom lists</div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Game Info */}
-      <div className={`p-3 ${variant === 'compact' ? 'pb-2' : ''} flex flex-col justify-between`}>
+      <div className={`p-3 ${variant === 'compact' ? 'pb-2' : ''} flex flex-col flex-1 min-h-0`}>
         {/* Title (same size for all variants) */}
-        <div>
+        <div className="flex-shrink-0">
           <h3 className={`font-medium text-gray-900 text-md leading-tight line-clamp-2 ${titleClassName || ''}`}>
             {game.name.length > 48 ? `${game.name.substring(0, 48)}...` : game.name}
             {variant === 'compact' && (
@@ -557,49 +612,7 @@ export default function GameCard({
         </div>
 
         {/* Bottom-aligned metadata section - for balanced and detailed variants */}
-          <div className={`mt-2 space-y-1 text-xs ${emphasizeMeta ? 'text-gray-700' : 'text-gray-500'}`}>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                {localRanking?.played_it && (
-                  <span className="inline-flex items-center gap-1 text-green-600 font-medium text-xs">
-                    <PlayIcon className="h-3 w-3" />
-                    Played
-                  </span>
-                )}
-                {ratingValue != null ? (
-                  <RatingChip 
-                    value={ratingValue} 
-                    size="xs" 
-                    shape="rounded"
-                    interactive={true}
-                    onClick={(event) => {
-                      event.stopPropagation()
-                      const rect = event.currentTarget.getBoundingClientRect()
-                      setRatingPosition({ 
-                        x: rect.left + rect.width / 2, 
-                        y: rect.top - 8 
-                      })
-                      setIsRating(true)
-                    }}
-                  />
-                ) : (
-                  <button
-                    className="text-xs text-gray-400 hover:text-gray-600 border border-gray-300 hover:border-gray-400 rounded px-2 py-0.5 transition-colors"
-                    onClick={(event) => {
-                      event.stopPropagation()
-                      const rect = event.currentTarget.getBoundingClientRect()
-                      setRatingPosition({ 
-                        x: rect.left + rect.width / 2, 
-                        y: rect.top - 8 
-                      })
-                      setIsRating(true)
-                    }}
-                  >
-                    Rate
-                  </button>
-                )}
-              </div>
-            </div>
+          <div className={`mt-auto pt-2 space-y-1 text-xs ${emphasizeMeta ? 'text-gray-700' : 'text-gray-500'} flex-shrink-0`}>
            {(variant === 'balanced' || variant === 'detailed') && showMeta && (
             <div className="flex items-center justify-between text-xs">
               <div className="flex items-center space-x-1">

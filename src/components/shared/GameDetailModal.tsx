@@ -496,7 +496,7 @@ export default function GameDetailModal({
                     aria-label={ratingValue ? `Rating ${ratingValue}` : 'Rate this game'}
                   >
                     {ratingValue ? (
-                      <RatingChip value={ratingValue} size="lg" subtle className={`ring-0 shadow-none text-[0.9rem] ${saving ? 'opacity-70':''}`} />
+                      <RatingChip value={ratingValue} size="lg" variant="subtle" className={`ring-0 shadow-none text-[0.9rem] ${saving ? 'opacity-70':''}`} />
                     ) : (
                       <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 text-gray-400 ring-1 ring-inset ring-gray-200">
                         {/* Using a decorative star via unicode */}
@@ -938,7 +938,7 @@ export default function GameDetailModal({
                   className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-gray-700 transition text-xs font-medium ${ratingValue ? 'bg-transparent border-0 shadow-none hover:bg-transparent' : 'border border-gray-300 bg-white hover:bg-gray-50 shadow-sm'}`}
                   title={ratingValue ? 'Change rating' : 'Rate this game'}
                 >
-                  {ratingValue ? <RatingChip value={ratingValue} size="sm" subtle className={`ring-0 shadow-none ${saving?'opacity-70':''}`} /> : <span>Rate</span>}
+                  <RatingChip value={ratingValue} size="sm" variant="subtle" showEmptyAsStar={true} className={`ring-0 shadow-none ${saving?'opacity-70':''}`} />
                 </button>
                 {ratingValue && (
                   <span className="text-[11px] text-gray-500">{ratingValue}/10</span>
