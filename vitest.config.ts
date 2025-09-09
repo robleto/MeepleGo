@@ -15,6 +15,15 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: [],
     projects: [
+      // Unit tests project
+      {
+        test: {
+          name: 'unit',
+          include: ['src/**/__tests__/**/*.test.{ts,tsx}', 'tests/**/*.test.{ts,tsx}'],
+          exclude: ['src/**/*.stories.{ts,tsx}'],
+        },
+      },
+      // Storybook tests project
       {
         extends: true,
         plugins: [

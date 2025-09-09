@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServerClient } from '@/lib/supabaseServer'
 
-export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(_req: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
+    const params = await context.params
     const supabase = await getSupabaseServerClient()
     const { data, error } = await supabase.from('list_slug_cache').select('slug,updated_at').eq('list_id', params.id).maybeSingle()
     if (error) throw error
@@ -13,8 +14,9 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
   }
 }
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
+    const params = await context.params
     const { slug } = await req.json()
     if (!slug) return NextResponse.json({ error: 'slug required' }, { status: 400 })
     const supabase = await getSupabaseServerClient()

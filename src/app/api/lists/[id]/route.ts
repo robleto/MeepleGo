@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServerClient } from '@/lib/supabaseServer'
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
+    const params = await context.params
     const supabase = await getSupabaseServerClient()
     const { data, error } = await supabase.from('game_lists').select('id,name').eq('id', params.id).maybeSingle()
     if (error) throw error

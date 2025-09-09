@@ -4,15 +4,16 @@ import PageLayout from '@/components/shared/PageLayout'
 import { getSupabaseServerClient } from '@/lib/supabaseServer'
 
 interface PageProps {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }
 
 export default async function GamePage({ params }: PageProps) {
+  const resolvedParams = await params
   const supabase = await getSupabaseServerClient()
   const { data: game } = await supabase
     .from('games')
     .select('*')
-    .eq('id', params.id)
+    .eq('id', resolvedParams.id)
     .single()
   if (!game) return notFound()
   return (

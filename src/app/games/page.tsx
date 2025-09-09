@@ -5,7 +5,6 @@ import { supabase } from '@/lib/supabase'
 import PageLayout from '@/components/shared/PageLayout'
 import Heading from '@/components/shared/Heading'
 import GameCard from '@/components/shared/GameCard'
-import GameRowCard from '@/components/features/rankings/GameRowCard'
 import GameFilters from '@/components/features/filters/GameFilters'
 import { GameWithRanking } from '@/types'
 import { useGameFilters, useViewMode } from '@/utils/gameFilters'
@@ -23,6 +22,7 @@ function GamesPageContent() {
   const [searchTerm, setSearchTerm] = useState('')
 
   const [viewMode, setViewMode] = useViewMode('grid')
+  const [cardVariant, setCardVariant] = useState<'detailed' | 'balanced' | 'compact'>('balanced')
 
   const ITEMS_PER_LOAD = 500
 
@@ -605,6 +605,8 @@ function GamesPageContent() {
         <GameFilters
           viewMode={viewMode}
           setViewMode={setViewMode}
+          cardVariant={cardVariant}
+          setCardVariant={setCardVariant}
           sortBy={sortBy}
           setSortBy={setSortBy}
           sortOrder={sortOrder}
@@ -629,6 +631,7 @@ function GamesPageContent() {
           error={error}
           defaults={{
             viewMode: 'grid',
+            cardVariant: 'balanced',
             sortBy: 'rank',
             sortOrder: 'asc',
             groupBy: 'none',
@@ -672,6 +675,7 @@ function GamesPageContent() {
                       },
                     }}
                     viewMode={viewMode}
+                    variant={cardVariant}
                     onMembershipChange={handleMembershipChange}
                   />
                 ))}
@@ -679,9 +683,8 @@ function GamesPageContent() {
             ) : (
               <div className="divide-y divide-gray-100 dark:divide-gray-800 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
                 {games.map((game, idx) => (
-                  <GameRowCard
+                  <GameCard
                     key={game.id}
-                    index={idx}
                     game={{
                       ...game,
                       list_membership: membershipMap[game.id] || {
@@ -692,8 +695,11 @@ function GamesPageContent() {
                           ? membershipSets.wishlist.has(game.id)
                           : false,
                       },
-                    } as any}
-                    onUpdate={() => { /* ranking interactions not on games page for now */ }}
+                    }}
+                    viewMode="list"
+                    variant={cardVariant}
+                    listRank={idx + 1}
+                    onMembershipChange={handleMembershipChange}
                   />
                 ))}
               </div>

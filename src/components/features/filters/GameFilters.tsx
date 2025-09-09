@@ -11,6 +11,9 @@ import {
   XMarkIcon,
   TrophyIcon,
   CubeIcon,
+  Bars3Icon,
+  Bars2Icon,
+  MinusIcon,
 } from '@heroicons/react/24/outline'
 
 interface SuggestionGame {
@@ -122,6 +125,8 @@ function SuggestionItem({
 interface GameFiltersProps {
   viewMode: 'grid' | 'list'
   setViewMode: (mode: 'grid' | 'list') => void
+  cardVariant?: 'detailed' | 'balanced' | 'compact'
+  setCardVariant?: (variant: 'detailed' | 'balanced' | 'compact') => void
   sortBy: SortKey
   setSortBy: (sort: SortKey) => void
   sortOrder: SortOrder
@@ -164,6 +169,7 @@ interface GameFiltersProps {
   error: string | null
   defaults?: {
     viewMode?: 'grid' | 'list'
+    cardVariant?: 'detailed' | 'balanced' | 'compact'
     sortBy?: SortKey
     sortOrder?: SortOrder
     groupBy?: GroupKey
@@ -183,6 +189,8 @@ interface GameFiltersProps {
 export default function GameFilters({
   viewMode,
   setViewMode,
+  cardVariant = 'balanced',
+  setCardVariant,
   sortBy,
   setSortBy,
   sortOrder,
@@ -207,6 +215,7 @@ export default function GameFilters({
   error,
   defaults = {
     viewMode: 'grid',
+    cardVariant: 'balanced',
     sortBy: 'name',
     sortOrder: 'asc',
     groupBy: 'year_published',
@@ -395,7 +404,8 @@ export default function GameFilters({
     groupBy === (defaults.groupBy || 'year_published') &&
     sortBy === (defaults.sortBy || 'name') &&
     sortOrder === (defaults.sortOrder || 'asc') &&
-    viewMode === (defaults.viewMode || 'grid')
+    viewMode === (defaults.viewMode || 'grid') &&
+    cardVariant === (defaults.cardVariant || 'balanced')
 
   const handleClearAll = () => {
     setFilterType(defaults.filterType || 'none')
@@ -404,6 +414,7 @@ export default function GameFilters({
     setSortBy(defaults.sortBy || 'name')
     setSortOrder(defaults.sortOrder || 'asc')
     setViewMode(defaults.viewMode || 'grid')
+    setCardVariant?.(defaults.cardVariant || 'balanced')
     setSearchTerm('')
   }
 
@@ -414,13 +425,14 @@ export default function GameFilters({
     sortBy !== (defaults.sortBy || 'name'),
     sortOrder !== (defaults.sortOrder || 'asc'),
     viewMode !== (defaults.viewMode || 'grid'),
+    cardVariant !== (defaults.cardVariant || 'balanced'),
   ].filter(Boolean).length
 
   return (
     <>
       <div className="mb-6">
-        {/* Centered Search Bar with Filter Button - Airbnb Style */}
-        <div className="flex items-center justify-center">
+        {/* Centered Search Bar with View Controls - Airbnb Style */}
+        <div className="flex items-center justify-center gap-4">
           {/* Centered Smart Search */}
           <div className="relative w-full max-w-md">
             <div className="flex w-full items-center gap-2 rounded-full border border-gray-200 dark:border-gray-700 bg-white/85 dark:bg-gray-900/70 px-4 py-1.5 shadow-sm hover:shadow-md backdrop-blur-sm transition focus-within:ring-2 focus-within:ring-primary-500">
@@ -559,6 +571,26 @@ export default function GameFilters({
             )}
           </div>
 
+          {/* View Mode Toggle (Grid/List only) */}
+          <div className="flex rounded-lg border border-gray-300 bg-white overflow-hidden">
+            <button
+              type="button"
+              className={`flex items-center gap-2 px-3 py-2 text-sm transition-colors ${viewMode === 'grid' ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:bg-gray-50'}`}
+              onClick={() => setViewMode('grid')}
+              title="Grid view"
+            >
+              <Squares2X2Icon className="w-4 h-4" />
+            </button>
+            <button
+              type="button"
+              className={`flex items-center gap-2 px-3 py-2 text-sm transition-colors ${viewMode === 'list' ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:bg-gray-50'}`}
+              onClick={() => setViewMode('list')}
+              title="List view"
+            >
+              <ListBulletIcon className="w-4 h-4" />
+            </button>
+          </div>
+
           {/* Filter Button with Badge */}
           <div className="relative">
             <button
@@ -625,7 +657,7 @@ export default function GameFilters({
 
             {/* Filter Content */}
             <div className="p-6 space-y-6">
-              {/* Sort & View Section */}
+              {/* Sort & Display Section */}
               <div className="space-y-4">
                 <h3 className="text-lg font-medium text-gray-900">Display</h3>
                 
@@ -657,29 +689,67 @@ export default function GameFilters({
                   </div>
                 </div>
 
-                {/* View Mode */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    View
-                  </label>
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors ${viewMode === 'grid' ? 'bg-primary-100 text-primary-600 border-primary-300' : 'text-gray-700 border-gray-300 hover:bg-gray-50 bg-white'}`}
-                      onClick={() => setViewMode('grid')}
-                    >
-                      <Squares2X2Icon className="w-4 h-4" />
-                      <span className="text-sm">Grid</span>
-                    </button>
-                    <button
-                      type="button"
-                      className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors ${viewMode === 'list' ? 'bg-primary-100 text-primary-600 border-primary-300' : 'text-gray-700 border-gray-300 hover:bg-gray-50 bg-white'}`}
-                      onClick={() => setViewMode('list')}
-                    >
-                      <ListBulletIcon className="w-4 h-4" />
-                      <span className="text-sm">List</span>
-                    </button>
+                {/* View & Density Controls - Responsive Layout */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* View Mode Toggle */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      View mode: {viewMode === 'grid' ? 'Grid' : 'List'}
+                    </label>
+                    <div className="flex rounded-lg border border-gray-300 bg-gray-50 p-1">
+                      <button
+                        type="button"
+                        className={`flex-1 flex items-center justify-center px-3 py-2 rounded-md text-sm font-medium transition-all ${viewMode === 'grid' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'}`}
+                        onClick={() => setViewMode('grid')}
+                        title="Grid view"
+                      >
+                        <Squares2X2Icon className="w-5 h-5" />
+                      </button>
+                      <button
+                        type="button"
+                        className={`flex-1 flex items-center justify-center px-3 py-2 rounded-md text-sm font-medium transition-all ${viewMode === 'list' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'}`}
+                        onClick={() => setViewMode('list')}
+                        title="List view"
+                      >
+                        <ListBulletIcon className="w-5 h-5" />
+                      </button>
+                    </div>
                   </div>
+
+                  {/* Card Density Toggle (always show) */}
+                  {setCardVariant && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Card density: {cardVariant === 'detailed' ? 'Detailed' : cardVariant === 'balanced' ? 'Balanced' : 'Compact'}
+                      </label>
+                      <div className="flex rounded-lg border border-gray-300 bg-gray-50 p-1">
+                        <button
+                          type="button"
+                          className={`flex-1 flex items-center justify-center px-2 py-2 rounded-md text-sm font-medium transition-all ${cardVariant === 'detailed' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'}`}
+                          onClick={() => setCardVariant('detailed')}
+                          title="Detailed cards"
+                        >
+                          <Bars3Icon className="w-5 h-5" />
+                        </button>
+                        <button
+                          type="button"
+                          className={`flex-1 flex items-center justify-center px-2 py-2 rounded-md text-sm font-medium transition-all ${cardVariant === 'balanced' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'}`}
+                          onClick={() => setCardVariant('balanced')}
+                          title="Balanced cards"
+                        >
+                          <Bars2Icon className="w-5 h-5" />
+                        </button>
+                        <button
+                          type="button"
+                          className={`flex-1 flex items-center justify-center px-2 py-2 rounded-md text-sm font-medium transition-all ${cardVariant === 'compact' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'}`}
+                          onClick={() => setCardVariant('compact')}
+                          title="Compact cards"
+                        >
+                          <MinusIcon className="w-5 h-5" />
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Group By */}
