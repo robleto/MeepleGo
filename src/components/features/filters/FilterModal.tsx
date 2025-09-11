@@ -33,8 +33,13 @@ export const FilterModal: React.FC<FilterModalProps> = ({ open, onClose, sortBy,
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
       <div className="relative bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2"><FunnelIcon className="h-5 w-5" /> Filters</h2>
-          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full" aria-label="Close"><XMarkIcon className="w-5 h-5" /></button>
+          <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-3">
+            <FunnelIcon className="h-5 w-5" /> 
+            Filters
+          </h2>
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full" aria-label="Close">
+            <XMarkIcon className="w-6 h-6" />
+          </button>
         </div>
         <div className="p-6 space-y-6">
           <div className="space-y-4">

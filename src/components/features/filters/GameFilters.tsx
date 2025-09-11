@@ -571,25 +571,7 @@ export default function GameFilters({
             )}
           </div>
 
-          {/* View Mode Toggle (Grid/List only) */}
-          <div className="flex rounded-lg border border-gray-300 bg-white overflow-hidden">
-            <button
-              type="button"
-              className={`flex items-center gap-2 px-3 py-2 text-sm transition-colors ${viewMode === 'grid' ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:bg-gray-50'}`}
-              onClick={() => setViewMode('grid')}
-              title="Grid view"
-            >
-              <Squares2X2Icon className="w-4 h-4" />
-            </button>
-            <button
-              type="button"
-              className={`flex items-center gap-2 px-3 py-2 text-sm transition-colors ${viewMode === 'list' ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:bg-gray-50'}`}
-              onClick={() => setViewMode('list')}
-              title="List view"
-            >
-              <ListBulletIcon className="w-4 h-4" />
-            </button>
-          </div>
+
 
           {/* Filter Button with Badge */}
           <div className="relative">

@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import SiteFooter from './SiteFooter'
 
 const meta: Meta<typeof SiteFooter> = {
-  title: 'Components/Shared/SiteFooter',
+  title: 'Global/Footer',
   component: SiteFooter,
   parameters: {
     layout: 'fullscreen',

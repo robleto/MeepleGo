@@ -77,7 +77,7 @@ const unratedGame = {
 
 const meta: Meta<typeof GameCard> = {
   // Nest GameCard under Components hierarchy (removed top-level exposure)
-  title: 'Components/GameCard/Grid View',
+  title: 'Archived/GameCard/Grid View',
   component: GameCard,
   tags: ['autodocs'],
   decorators: [

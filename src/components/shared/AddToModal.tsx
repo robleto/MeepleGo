@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useCallback, useEffect } from 'react'
-import { Button } from '@/design-system/elements/Button'
+import { Button } from './Elements/Button'
 import Image from 'next/image'
 import { GameWithRanking } from '@/types'
 import { supabase } from '@/lib/supabase'

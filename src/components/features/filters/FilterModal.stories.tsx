@@ -3,7 +3,7 @@ import { FilterModal } from './FilterModal';
 import React, { useState } from 'react';
 
 const meta: Meta<typeof FilterModal> = {
-  title: 'Components/Features/Filters/FilterModal',
+  title: 'Archived/Features/Filters/FilterModal',
   component: FilterModal,
   tags: ['autodocs'],
   parameters: { 

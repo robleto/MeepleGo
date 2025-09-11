@@ -4,9 +4,9 @@ import React, { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
-import NavItem from './NavItem'
+import NavItem from './Elements/NavItem'
 import { cn } from '@/utils/helpers'
-import { Button } from '@/design-system/elements/Button'
+import { Button } from './Elements/Button'
 import {
   TrophyIcon,
   ChartBarIcon,

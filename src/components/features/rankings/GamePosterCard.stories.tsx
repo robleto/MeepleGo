@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import GamePosterCard from './GamePosterCard'
 
 const meta: Meta<typeof GamePosterCard> = {
-  title: 'Components/Features/Rankings/GamePosterCard',
+  title: 'Archived/Features/Rankings/GamePosterCard',
   component: GamePosterCard,
   parameters: {
     layout: 'centered',

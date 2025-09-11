@@ -1,11 +1,11 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import Navigation from './Navigation';
-import NavItem from './NavItem';
+import NavItem from './Elements/NavItem';
 import { TrophyIcon, CubeIcon, ListBulletIcon, PlayIcon } from '@heroicons/react/24/outline';
 
 const meta: Meta<typeof Navigation> = {
-  title: 'Components/Shared/Navigation',
+  title: 'Global/Header',
   component: Navigation,
   tags: ['autodocs'],
   parameters: {

@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
-import RatingChip from '@/design-system/elements/RatingChip'
+import { RatingChip } from './Elements/Chip'
 import RatingPopup from '@/design-system/elements/RatingPopup'
 import dynamic from 'next/dynamic'
 import {
@@ -27,7 +27,7 @@ import {
   PaintBrushIcon
 } from '@heroicons/react/24/outline'
 import { addGameToDefaultList, removeGameFromDefaultList } from '@/lib/lists'
-import { formatPlayerCount, formatPlayingTime } from '@/utils/helpers'
+import { formatPlayerCount, formatPlayingTime, getGameUrl } from '@/utils/helpers'
 
 const PlayLogEditor = dynamic(() => import('./PlayLogEditor'), { ssr: false })
 
@@ -452,7 +452,16 @@ export default function GameDetailModal({
       {variant === 'modal' && (
         <div className="absolute top-4 right-4 flex items-center gap-1">
           <button
-            onClick={(e)=>{e.stopPropagation(); router.push(`/games/${game.id}`)}}
+            onClick={(e)=>{
+              e.stopPropagation(); 
+              if (variant === 'modal') {
+                onClose?.(); // Close modal first
+                // Use a small delay to ensure modal closes before navigation
+                setTimeout(() => router.push(getGameUrl(game)), 100);
+              } else {
+                router.push(getGameUrl(game));
+              }
+            }}
             className="p-2 rounded-md hover:bg-gray-100"
             aria-label="Open full page"
             title="Open full page"
@@ -486,29 +495,62 @@ export default function GameDetailModal({
         <div className="flex-1 min-w-0 flex flex-col gap-4">
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-3">
-              <div className="flex items-center gap-3 flex-wrap">
-                <h1 id="game-detail-title" className="text-2xl font-bold text-gray-900 leading-tight flex items-center gap-2">
-                  <span>{EG.name}</span>
-                  <button
-                    onClick={(e)=>{e.preventDefault(); e.stopPropagation(); const rect=e.currentTarget.getBoundingClientRect(); setRatingAnchor({x:rect.left+rect.width/2,y:rect.top}); setRatingOpen(o=>!o);}}
-                    className="focus:outline-none translate-y-[2px]"
-                    title={ratingValue ? 'Change rating' : 'Rate this game'}
-                    aria-label={ratingValue ? `Rating ${ratingValue}` : 'Rate this game'}
-                  >
-                    {ratingValue ? (
-                      <RatingChip value={ratingValue} size="lg" variant="subtle" className={`ring-0 shadow-none text-[0.9rem] ${saving ? 'opacity-70':''}`} />
-                    ) : (
-                      <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 text-gray-400 ring-1 ring-inset ring-gray-200">
-                        {/* Using a decorative star via unicode */}
-                        ★
-                      </span>
-                    )}
-                  </button>
-                </h1>
-                <div className="ml-auto flex items-center gap-2">
-                  {/* Future space for small meta chips if needed */}
+              <h1 id="game-detail-title" className="text-2xl font-bold text-gray-900 leading-tight flex items-center gap-2">
+                <span>{EG.name}</span>
+                <button
+                  onClick={(e)=>{e.preventDefault(); e.stopPropagation(); const rect=e.currentTarget.getBoundingClientRect(); setRatingAnchor({x:rect.left+rect.width/2,y:rect.top}); setRatingOpen(o=>!o);}}
+                  className="focus:outline-none translate-y-[2px]"
+                  title={ratingValue ? 'Change rating' : 'Rate this game'}
+                  aria-label={ratingValue ? `Rating ${ratingValue}` : 'Rate this game'}
+                >
+                  {ratingValue ? (
+                    <RatingChip value={ratingValue} size="lg" variant="subtle" className={`ring-0 shadow-none text-[0.9rem] ${saving ? 'opacity-70':''}`} />
+                  ) : (
+                    <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 text-gray-400 ring-1 ring-inset ring-gray-200">
+                      {/* Using a decorative star via unicode */}
+                      ★
+                    </span>
+                  )}
+                </button>
+              </h1>
+              
+              {/* Key metadata chips row */}
+              {(EG.year_published || EG.weight || (EG.min_players && EG.max_players) || EG.playtime_minutes) && (
+                <div className="flex items-center gap-2 flex-wrap">
+                  {EG.year_published && (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-50 text-gray-600 text-xs font-medium ring-1 ring-gray-200">
+                      <CalendarIcon className="w-3 h-3" />
+                      {EG.year_published}
+                    </span>
+                  )}
+                  {EG.weight && (
+                    (() => {
+                      let w = Number(EG.weight)
+                      if (isNaN(w)) return null
+                      if (w < 1) w = 1
+                      if (w > 5) w = 5
+                      return (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-50 text-gray-600 text-xs font-medium ring-1 ring-gray-200">
+                          <ChartBarIcon className="w-3 h-3" />
+                          {w.toFixed(2)}
+                        </span>
+                      )
+                    })()
+                  )}
+                  {EG.min_players && EG.max_players && (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-50 text-gray-600 text-xs font-medium ring-1 ring-gray-200">
+                      <UsersIcon className="w-3 h-3" />
+                      {formatPlayerCount(EG.min_players, EG.max_players)}
+                    </span>
+                  )}
+                  {EG.playtime_minutes && (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-50 text-gray-600 text-xs font-medium ring-1 ring-gray-200">
+                      <TimeIcon className="w-3 h-3" />
+                      {formatPlayingTime(EG.playtime_minutes)}
+                    </span>
+                  )}
                 </div>
-              </div>
+              )}
               {(tagline || summary || description) && (
                 <p className="text-sm text-gray-600 leading-snug">
                   {tagline || summaryDisplay || (description ? (description.length > 170 ? description.slice(0,170)+'…' : description) : '')}
@@ -615,58 +657,10 @@ export default function GameDetailModal({
               {/* Block: Game Details */}
               <div className="pb-6 border-b border-gray-200">
                 <h4 className="heading-display text-xl font-normal tracking-wide text-gray-700 dark:text-gray-300 mb-4 flex items-center gap-2"><AdjustmentsHorizontalIcon className="w-5 h-5 text-gray-400" /> Game Details</h4>
-                <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-5 text-sm">
-                  {EG.year_published && (
-                    <div className="flex items-start gap-3">
-                      <div className="w-7 h-7 rounded-md bg-gray-100 flex items-center justify-center">
-                        <CalendarIcon className="w-4 h-4 text-gray-500" />
-                      </div>
-                      <div>
-                        <dt className="text-gray-500">Year Published</dt>
-                        <dd className="font-medium text-gray-900">{EG.year_published}</dd>
-                      </div>
-                    </div>
-                  )}
-      {EG.weight && (
-        (()=>{
-          let w = Number(EG.weight)
-          if (isNaN(w)) return null
-          if (w < 1) w = 1
-          if (w > 5) w = 5
-          const display = w.toFixed(2)
-          return (
-            <div className="flex items-start gap-3">
-              <div className="w-7 h-7 rounded-md bg-gray-100 flex items-center justify-center">
-                <ChartBarIcon className="w-4 h-4 text-gray-500" />
-              </div>
-              <div>
-                <dt className="text-gray-500">BGG Weight</dt>
-                <dd className="font-medium text-gray-900">{display}</dd>
-              </div>
-            </div>
-          )
-        })()
-      )}
-                  {EG.min_players && EG.max_players && (
-                    <div className="flex items-start gap-3">
-                      <div className="w-7 h-7 rounded-md bg-gray-100 flex items-center justify-center"><UsersIcon className="w-4 h-4 text-gray-500" /></div>
-                      <div>
-                        <dt className="text-gray-500">Players</dt>
-                        <dd className="font-medium text-gray-900">{formatPlayerCount(EG.min_players, EG.max_players)}</dd>
-                      </div>
-                    </div>
-                  )}
-                  {EG.playtime_minutes && (
-                    <div className="flex items-start gap-3">
-                      <div className="w-7 h-7 rounded-md bg-gray-100 flex items-center justify-center"><TimeIcon className="w-4 h-4 text-gray-500" /></div>
-                      <div>
-                        <dt className="text-gray-500">Playing Time</dt>
-                        <dd className="font-medium text-gray-900">{formatPlayingTime(EG.playtime_minutes)}</dd>
-                      </div>
-                    </div>
-                  )}
-                  {/* BGG metrics moved to Rating section (admin toggle) */}
-                </dl>
+                {/* Key game details now shown in header chips - this section can be used for additional metadata */}
+                <div className="text-sm text-gray-500">
+                  <p>Key game information is now displayed in the header above. This section can be expanded with additional game details like designer, publisher, age range, and other metadata as needed.</p>
+                </div>
               </div>
               {/* Description */}
               {/* Block: Description (no heading, inline toggle) */}
@@ -856,6 +850,11 @@ export default function GameDetailModal({
                   const label = h.name || h.award || h.title || 'Award'
                   const year = h.year || h.award_year || null
                   const isWinner = (category+result).toLowerCase().includes('winner')
+                  
+                  // Clean category and result to avoid duplicate "Winner" text
+                  const cleanCategory = category.toLowerCase().includes('winner') ? '' : category
+                  const cleanResult = result.toLowerCase().includes('winner') ? '' : result
+                  
                   return (
                     <li key={i} className="rounded-lg border border-gray-200 bg-white/60 p-3">
                       <div className="flex items-start justify-between gap-4">
@@ -866,10 +865,10 @@ export default function GameDetailModal({
                               <span className="inline-block text-[10px] uppercase tracking-wide bg-amber-500 text-white px-1.5 py-0.5 rounded">Winner</span>
                             )}
                           </div>
-                          {(category || (!isWinner && result)) && (
+                          {(cleanCategory || cleanResult) && (
                             <div className="text-[11px] text-gray-600 mt-1 flex flex-wrap gap-2">
-                              {category && <span className="inline-block bg-gray-100 px-1.5 py-0.5 rounded">{category}</span>}
-                              {!isWinner && result && <span className="inline-block bg-gray-50 px-1.5 py-0.5 rounded text-gray-500">{result}</span>}
+                              {cleanCategory && <span className="inline-block bg-gray-100 px-1.5 py-0.5 rounded">{cleanCategory}</span>}
+                              {cleanResult && <span className="inline-block bg-gray-50 px-1.5 py-0.5 rounded text-gray-500">{cleanResult}</span>}
                             </div>
                           )}
                         </div>
@@ -909,21 +908,40 @@ export default function GameDetailModal({
             <div className="pb-6 border-b border-gray-200">
               <h4 className="heading-display text-xl font-normal tracking-wide text-gray-700 dark:text-gray-300 mb-4">BGG Rating</h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm">
-                {game.rating && (
+                {game.rating ? (
                   <div className="flex items-start gap-3">
                     <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center"><ChartBarIcon className="w-4 h-4 text-gray-500" /></div>
                     <div>
                       <div className="text-xs uppercase tracking-wide text-gray-500">BGG Rating</div>
                       <div className="font-semibold text-gray-900">{Number(game.rating).toFixed(1)}/10</div>
+                      {game.num_ratings && (
+                        <div className="text-xs text-gray-500">{game.num_ratings.toLocaleString()} users</div>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center"><ChartBarIcon className="w-4 h-4 text-gray-400" /></div>
+                    <div>
+                      <div className="text-xs uppercase tracking-wide text-gray-400">BGG Rating</div>
+                      <div className="text-sm text-gray-400">Not available</div>
                     </div>
                   </div>
                 )}
-                {game.rank && (
+                {game.rank ? (
                   <div className="flex items-start gap-3">
                     <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center"><TrophyIcon className="w-4 h-4 text-gray-500" /></div>
                     <div>
                       <div className="text-xs uppercase tracking-wide text-gray-500">BGG Rank</div>
                       <div className="font-semibold text-gray-900">#{game.rank}</div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center"><TrophyIcon className="w-4 h-4 text-gray-400" /></div>
+                    <div>
+                      <div className="text-xs uppercase tracking-wide text-gray-400">BGG Rank</div>
+                      <div className="text-sm text-gray-400">Not available</div>
                     </div>
                   </div>
                 )}

@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 
 const meta: Meta = {
-  title: 'Design System/Foundations/Colors',
+  title: 'Foundations/Colors',
   tags: ['autodocs'],
   parameters: {
     layout: 'centered',

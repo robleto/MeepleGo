@@ -13,6 +13,7 @@ import { getMembershipSets, addGameToDefaultList, removeGameFromDefaultList } fr
 import { BookmarkIcon, HeartIcon } from '@heroicons/react/24/outline'
 import { getRatingSolidClass } from '@/design-system/tokens/ratingColors'
 import PlayLogEditor from '@/components/shared/PlayLogEditor'
+import ZeroState from '@/components/shared/ZeroState'
 
 interface Stats { totalPlays:number; uniqueGames:number; avgRating:number|null; ratingsTimeline:{date:string;avgRating:number;count:number}[]; recentTags:{tag:string;count:number}[] }
 interface SummaryData { streak:{current:number;longest:number}; last30:{date:string;count:number}[]; ratingTrend:{date:string;avg:number}[] }
@@ -346,7 +347,7 @@ export default function PlaysClientPage({ forcedUserId, readOnly }: PlaysClientP
           </div>
         )}
         {showAdd && !selectedGame && !zeroStateActive && isOwner && (
-          <div className="flex justify-center"><div className="w-full max-w-4xl"><GameSearchSelect variant="hero" autoFocus onSelect={(g)=> { setSelectedGame({ id:g.id, name:g.name, year_published:g.year_published, thumbnail_url:g.thumbnail_url }) }} /><div className="mt-3 text-[12px] text-center text-gray-400">Search for a game to log a play</div></div></div>
+          <div className="flex justify-center"><div className="w-full max-w-lg"><GameSearchSelect autoFocus onSelect={(g)=> { setSelectedGame({ id:g.id, name:g.name, year_published:g.year_published, thumbnail_url:g.thumbnail_url }) }} /><div className="mt-3 text-[12px] text-center text-gray-400">Search for a game to log a play</div></div></div>
         )}
         {stats && !zeroStateActive && (
           <section className="grid md:grid-cols-6 gap-4">
@@ -367,20 +368,104 @@ export default function PlaysClientPage({ forcedUserId, readOnly }: PlaysClientP
             {(filter!=='all' || tagFilter || playerFilter!=='all' || durationFilter!=='all') && (<button onClick={()=> { setFilter('all'); setTagFilter(null); setPlayerFilter('all'); setDurationFilter('all') }} className="ml-auto text-[10px] text-gray-500 hover:text-gray-700 underline">Reset Filters</button>)}
           </div>
         )}
+        {/* Zero state for own journal */}
         {zeroStateActive && isOwner && (
           <div className="panel mb-8 flex flex-col md:flex-row md:items-start gap-10 md:gap-20">
             <div className="flex-1">
-              <Heading as="h1" size="display" align="left" displayFont className="mb-6">Start Logging<br/> Your Plays</Heading>
-              <p className="text-lg md:text-xl text-gray-600 dark:text-gray-400 max-w-xl leading-snug">Build a living history of what you play. Ratings turn into rankings, and rankings power personalized awards.</p>
-              {!showAdd && (<button onClick={()=> { setShowAdd(true); setSelectedGame(null); setTimeout(()=> window.scrollTo({ top: 0, behavior: 'smooth' }), 0) }} className="mt-8 inline-flex items-center gap-2 px-6 py-3 rounded-full btn-brand text-sm font-medium">Log Your First Play</button>)}
-              {showAdd && (<div className="mt-8 w-full max-w-md">{!selectedGame && (<><GameSearchSelect variant="hero" autoFocus onSelect={(g)=> { setSelectedGame({ id:g.id, name:g.name, year_published:g.year_published, thumbnail_url:g.thumbnail_url }) }} /><div className="mt-2 text-[11px] text-gray-400">Search for a game to log a play</div><button onClick={()=> setShowAdd(false)} type="button" className="mt-3 text-[11px] text-gray-500 hover:text-gray-700 underline">Cancel</button></>)}{selectedGame && (<div className="border border-dashed border-gray-300 dark:border-gray-700 rounded-xl p-5 bg-white/70 dark:bg-gray-900/70"><div className="flex items-center gap-3 mb-4"><h2 className="text-base font-semibold text-gray-800 dark:text-gray-100 truncate">{selectedGame.name}</h2><button onClick={()=> setSelectedGame(null)} className="ml-auto text-[11px] text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 underline">Change Game</button></div><PlayLogEditor gameId={selectedGame.id} gameName={selectedGame.name} autoFocus onCreated={(log)=> { setLogs(prev=> [log, ...prev]); setShowAdd(false); setSelectedGame(null); setHighlightId(log.id); setTimeout(()=> setHighlightId(null), 3500) }} /></div>)}</div>)}
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-sky-500 to-sky-600 flex items-center justify-center shadow-sm">
+                  <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                  </svg>
+                </div>
+                <div>
+                  <Heading as="h1" size="display" align="left" displayFont className="text-balance tracking-tight leading-none">Start Logging<br/> Your Plays</Heading>
+                </div>
+              </div>
+              <p className="text-lg md:text-xl text-gray-600 dark:text-gray-400 max-w-xl leading-snug mb-8">Build a living history of what you play. Ratings turn into rankings, and rankings power personalized awards.</p>
+              {!showAdd && (
+                <button 
+                  onClick={()=> { setShowAdd(true); setSelectedGame(null); setTimeout(()=> window.scrollTo({ top: 0, behavior: 'smooth' }), 0) }} 
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-full btn-brand text-sm font-medium shadow-sm hover:shadow-md transition-shadow"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  Log Your First Play
+                </button>
+              )}
+              {showAdd && (
+                <div className="w-full max-w-md">
+                  {!selectedGame && (
+                    <>
+                      <GameSearchSelect variant="hero" autoFocus onSelect={(g)=> { setSelectedGame({ id:g.id, name:g.name, year_published:g.year_published, thumbnail_url:g.thumbnail_url }) }} />
+                      <div className="mt-2 text-[11px] text-gray-400">Search for a game to log a play</div>
+                      <button onClick={()=> setShowAdd(false)} type="button" className="mt-3 text-[11px] text-gray-500 hover:text-gray-700 underline">Cancel</button>
+                    </>
+                  )}
+                  {selectedGame && (
+                    <div className="border border-dashed border-gray-300 dark:border-gray-700 rounded-xl p-5 bg-white/70 dark:bg-gray-900/70">
+                      <div className="flex items-center gap-3 mb-4">
+                        <h2 className="text-base font-semibold text-gray-800 dark:text-gray-100 truncate">{selectedGame.name}</h2>
+                        <button onClick={()=> setSelectedGame(null)} className="ml-auto text-[11px] text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 underline">Change Game</button>
+                      </div>
+                      <PlayLogEditor gameId={selectedGame.id} gameName={selectedGame.name} autoFocus onCreated={(log)=> { setLogs(prev=> [log, ...prev]); setShowAdd(false); setSelectedGame(null); setHighlightId(log.id); setTimeout(()=> setHighlightId(null), 3500) }} />
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
             <ol className="flex-1 space-y-10 md:space-y-12 relative">
-              <li className="flex items-start gap-5"><div className="flex-shrink-0 text-sm font-semibold w-6 h-6 rounded-full bg-sky-100 text-sky-700 flex items-center justify-center mt-1 dark:bg-sky-900/40 dark:text-sky-300">1</div><div className="flex-1 border-b border-gray-200 dark:border-gray-800 pb-8 last:border-b-0 last:pb-0"><div className="flex items-center gap-2 mb-2"><span className="w-5 h-5 rounded bg-sky-600/10 text-sky-600 flex items-center justify-center text-[11px] font-bold">P</span><h3 className="font-semibold text-gray-900 dark:text-gray-100 text-lg">Log plays</h3></div><p className="text-sm text-gray-500 dark:text-gray-400 leading-snug max-w-md">Add each session with players, time, notes & tags. A detailed timeline forms automatically.</p></div></li>
-              <li className="flex items-start gap-5"><div className="flex-shrink-0 text-sm font-semibold w-6 h-6 rounded-full bg-sky-100 text-sky-700 flex items-center justify-center mt-1 dark:bg-sky-900/40 dark:text-sky-300">2</div><div className="flex-1 border-b border-gray-200 dark:border-gray-800 pb-8 last:border-b-0 last:pb-0"><div className="flex items-center gap-2 mb-2"><span className="w-5 h-5 rounded bg-sky-600/10 text-sky-600 flex items-center justify-center text-[11px] font-bold">★</span><h3 className="font-semibold text-gray-900 dark:text-gray-100 text-lg">Rate & rank</h3></div><p className="text-sm text-gray-500 dark:text-gray-400 leading-snug max-w-md">Give every played game a 1–10 rating. Your personal ranking list updates and trends emerge.</p></div></li>
-              <li className="flex items-start gap-5"><div className="flex-shrink-0 text-sm font-semibold w-6 h-6 rounded-full bg-sky-100 text-sky-700 flex items-center justify-center mt-1 dark:bg-sky-900/40 dark:text-sky-300">3</div><div className="flex-1"><div className="flex items-center gap-2 mb-2"><span className="w-5 h-5 rounded bg-amber-500/10 text-amber-600 flex items-center justify-center text-[11px] font-bold">🏆</span><h3 className="font-semibold text-gray-900 dark:text-gray-100 text-lg">Unlock awards</h3></div><p className="text-sm text-gray-500 dark:text-gray-400 leading-snug max-w-md">Your plays + ratings auto‑generate personal award categories. Fine‑tune nominees & winners anytime.</p></div></li>
+              <div className="absolute left-3 top-6 bottom-0 w-px bg-gradient-to-b from-sky-200 via-sky-100 to-transparent dark:from-sky-800 dark:via-sky-900/40" aria-hidden="true"></div>
+              <li className="flex items-start gap-5">
+                <div className="flex-shrink-0 text-sm font-semibold w-6 h-6 rounded-full bg-sky-100 text-sky-700 flex items-center justify-center mt-1 dark:bg-sky-900/40 dark:text-sky-300 shadow-sm ring-2 ring-white dark:ring-gray-800">1</div>
+                <div className="flex-1 border-b border-gray-200 dark:border-gray-800 pb-8 last:border-b-0 last:pb-0">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="w-5 h-5 rounded bg-sky-600/10 text-sky-600 flex items-center justify-center text-[11px] font-bold">P</span>
+                    <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-lg">Log plays</h3>
+                  </div>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 leading-snug max-w-md">Add each session with players, time, notes & tags. A detailed timeline forms automatically.</p>
+                </div>
+              </li>
+              <li className="flex items-start gap-5">
+                <div className="flex-shrink-0 text-sm font-semibold w-6 h-6 rounded-full bg-sky-100 text-sky-700 flex items-center justify-center mt-1 dark:bg-sky-900/40 dark:text-sky-300 shadow-sm ring-2 ring-white dark:ring-gray-800">2</div>
+                <div className="flex-1 border-b border-gray-200 dark:border-gray-800 pb-8 last:border-b-0 last:pb-0">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="w-5 h-5 rounded bg-sky-600/10 text-sky-600 flex items-center justify-center text-[11px] font-bold">★</span>
+                    <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-lg">Rate & rank</h3>
+                  </div>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 leading-snug max-w-md">Give every played game a 1–10 rating. Your personal ranking list updates and trends emerge.</p>
+                </div>
+              </li>
+              <li className="flex items-start gap-5">
+                <div className="flex-shrink-0 text-sm font-semibold w-6 h-6 rounded-full bg-sky-100 text-sky-700 flex items-center justify-center mt-1 dark:bg-sky-900/40 dark:text-sky-300 shadow-sm ring-2 ring-white dark:ring-gray-800">3</div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="w-5 h-5 rounded bg-amber-500/10 text-amber-600 flex items-center justify-center text-[11px] font-bold">🏆</span>
+                    <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-lg">Unlock awards</h3>
+                  </div>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 leading-snug max-w-md">Your plays + ratings auto‑generate personal award categories. Fine‑tune nominees & winners anytime.</p>
+                </div>
+              </li>
             </ol>
           </div>
+        )}
+
+        {/* Zero state for viewing someone else's empty journal */}
+        {zeroStateActive && !isOwner && (
+          <ZeroState
+            icon={
+              <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+              </svg>
+            }
+            title="No Plays Yet"
+            description="This user hasn't logged any game plays yet. Check back later to see their gaming journey unfold!"
+            action={{
+              label: "Start Your Own Journal",
+              href: "/plays"
+            }}
+          />
         )}
         {!zeroStateActive && (
           <section className="space-y-6">
@@ -394,7 +479,7 @@ export default function PlaysClientPage({ forcedUserId, readOnly }: PlaysClientP
             )}
             {logs.length > 0 && (
               <div className="relative">
-                <div className="absolute left-24 top-0 bottom-0 w-px bg-gradient-to-b from-sky-300 via-sky-200 to-transparent dark:from-sky-700 dark:via-sky-800/40" aria-hidden="true" />
+                <div className="absolute left-20 top-0 bottom-0 w-px bg-gradient-to-b from-sky-300 via-sky-200 to-transparent dark:from-sky-700 dark:via-sky-800/40" aria-hidden="true" />
                 <div ref={containerRef} className={virtualizationEnabled ? 'max-h-[1600px] overflow-auto pr-2 space-y-12 relative' : 'space-y-12'}>
                   {virtualizationEnabled && (
                     <>
@@ -418,7 +503,7 @@ export default function PlaysClientPage({ forcedUserId, readOnly }: PlaysClientP
                             const ratingDisplay = overallRanking ?? l.rating ?? null
                             return (
                               <div key={l.id} ref={virtualizationEnabled && flatIndex>=0 ? itemRef(flatIndex) : undefined} className={`group relative border rounded-xl bg-white dark:bg-gray-900 px-5 py-4 shadow-sm transition hover:shadow-md hover:-translate-y-0.5 border-gray-200 dark:border-gray-800 flex gap-5 ${highlightId===l.id ? 'ring-2 ring-sky-400 animate-fade-slide' : ''}`}>
-                                <span className="absolute -left-10 top-6 w-3.5 h-3.5 rounded-full bg-white border-2 border-sky-500 dark:bg-gray-900 shadow" aria-hidden="true" />
+                                <span className="absolute -left-6 top-6 w-3.5 h-3.5 rounded-full bg-white border-2 border-sky-500 dark:bg-gray-900 shadow" aria-hidden="true" />
                                 <div className="flex-shrink-0 mt-1">{meta && meta.thumb ? (<img src={meta.thumb} alt="" className="w-20 h-20 rounded-lg object-cover shadow ring-1 ring-gray-200 dark:ring-gray-700" />) : (<div className="w-20 h-20 rounded-lg bg-gray-200 dark:bg-gray-700 animate-pulse" />)}</div>
                                 <div className="flex-1 min-w-0">
                                   <div className="flex items-start justify-between gap-4">

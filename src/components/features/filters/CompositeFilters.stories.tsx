@@ -4,7 +4,7 @@ import GameSearchSelect from './GameSearchSelect';
 import { FilterModal } from './FilterModal';
 
 const meta: Meta = {
-  title: 'Components/Features/Filters/Composite',
+  title: 'Archived/Features/Filters/Composite',
   tags: ['autodocs'],
   parameters: { 
     layout: 'padded',

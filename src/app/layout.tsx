@@ -21,9 +21,63 @@ const archivoBlack = Archivo_Black({ subsets: ['latin'], weight: '400', variable
 const epilogue = Epilogue({ subsets: ['latin'], variable: '--font-display-soft', display: 'swap' })
 
 export const metadata: Metadata = {
-  title: 'MeepleGo - Board Game Tracker',
-  description: 'Track, rate, and organize your board game collection',
-  keywords: ['board games', 'tracking', 'rating', 'collection'],
+  title: {
+    default: 'MeepleGo - Board Game Collection Tracker & Reviews',
+    template: '%s | MeepleGo'
+  },
+  description: 'Discover, track, rate and organize your board game collection. Comprehensive database of board games with ratings, reviews, and detailed information.',
+  keywords: [
+    'board games', 
+    'board game tracker', 
+    'board game collection', 
+    'board game reviews', 
+    'tabletop games',
+    'game ratings',
+    'BoardGameGeek',
+    'game database',
+    'board game awards',
+    'game recommendations'
+  ],
+  authors: [{ name: 'MeepleGo' }],
+  creator: 'MeepleGo',
+  publisher: 'MeepleGo',
+  metadataBase: new URL('https://meeplego.com'),
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://meeplego.com',
+    siteName: 'MeepleGo',
+    title: 'MeepleGo - Board Game Collection Tracker & Reviews',
+    description: 'Discover, track, rate and organize your board game collection. Comprehensive database of board games with ratings, reviews, and detailed information.',
+    images: [
+      {
+        url: '/meeplego-logo.png',
+        width: 1200,
+        height: 630,
+        alt: 'MeepleGo - Board Game Tracker',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'MeepleGo - Board Game Collection Tracker',
+    description: 'Discover, track, rate and organize your board game collection.',
+    images: ['/meeplego-logo.png'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
 }
 
 export default function RootLayout({

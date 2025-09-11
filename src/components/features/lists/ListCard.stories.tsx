@@ -154,7 +154,7 @@ const mockEmptyList: GameListWithItems = {
 };
 
 const meta: Meta<typeof ListCard> = {
-  title: 'Components/Features/Lists/ListCard',
+  title: 'Archived/Features/Lists/ListCard',
   component: ListCard,
   tags: ['autodocs'],
   parameters: {

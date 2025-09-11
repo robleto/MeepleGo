@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import AddToModal from './AddToModal'
 
 const meta: Meta<typeof AddToModal> = {
-  title: 'Components/Shared/AddToModal',
+  title: 'Archived/Shared/AddToModal',
   component: AddToModal,
   parameters: {
     layout: 'centered',

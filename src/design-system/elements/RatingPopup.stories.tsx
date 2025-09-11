@@ -3,7 +3,7 @@ import { useState } from 'react'
 import RatingPopup from './RatingPopup'
 
 const meta: Meta<typeof RatingPopup> = {
-  title: 'Design System/Elements/RatingPopup',
+  title: 'Components/RatingPopup',
   component: RatingPopup,
   parameters: {
     layout: 'centered',

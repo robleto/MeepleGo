@@ -19,7 +19,7 @@ import {
 } from '@heroicons/react/24/outline'
 
 const meta: Meta = {
-  title: 'Design System/Foundations/Iconography',
+  title: 'Foundations/Iconography',
   parameters: {
     layout: 'padded',
     docs: {

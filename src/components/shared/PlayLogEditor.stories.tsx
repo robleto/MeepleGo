@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import PlayLogEditor from './PlayLogEditor';
 
 const meta: Meta<typeof PlayLogEditor> = {
-  title: 'Components/PlayLogEditor',
+  title: 'Archived/PlayLogEditor',
   component: PlayLogEditor,
   tags: ['autodocs'],
   parameters: {

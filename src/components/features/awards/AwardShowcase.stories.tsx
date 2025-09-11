@@ -2,8 +2,8 @@ import type { Meta, StoryObj } from '@storybook/react';
 import AwardShowcase from './AwardShowcase';
 import type { GameWithRanking } from '@/types';
 
-const meta = {
-  title: 'Components/Features/Awards/AwardShowcase',
+const meta: Meta<typeof AwardShowcase> = {
+  title: 'Components/AwardShowcase',
   component: AwardShowcase,
   parameters: {
     layout: 'padded',

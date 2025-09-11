@@ -3,6 +3,19 @@ import '../src/app/globals.css'
 
 const preview: Preview = {
   parameters: {
+    options: {
+      storySort: {
+        order: [
+          'Foundations',
+          'Design System',
+          'Elements',
+          'Components',
+          'Global'
+        ],
+        method: 'alphabetical',
+        includeNames: true,
+      },
+    },
     backgrounds: {
       default: 'site',
       values: [

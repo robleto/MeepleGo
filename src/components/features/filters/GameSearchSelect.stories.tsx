@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import GameSearchSelect from './GameSearchSelect'
 
 const meta: Meta<typeof GameSearchSelect> = {
-  title: 'Components/Filters/GameSearchSelect',
+  title: 'Archived/Shared/GameSearchSelect',
   component: GameSearchSelect,
   parameters: { layout: 'padded' }
 }

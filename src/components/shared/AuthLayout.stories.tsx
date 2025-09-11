@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { AuthLayout } from './AuthLayout'
 
 const meta: Meta<typeof AuthLayout> = {
-  title: 'Components/Shared/AuthLayout',
+  title: 'Archived/Shared/AuthLayout',
   component: AuthLayout,
   parameters: {
     layout: 'fullscreen',

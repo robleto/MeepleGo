@@ -3,7 +3,7 @@ import WinnerCard from './WinnerCard';
 import type { GameWithRanking } from '@/types';
 
 const meta = {
-  title: 'Components/Features/Awards/WinnerCard',
+  title: 'Archived/Features/Awards/WinnerCard',
   component: WinnerCard,
   parameters: {
     layout: 'padded',

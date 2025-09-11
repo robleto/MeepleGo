@@ -10,12 +10,12 @@ import { StarIcon, BookmarkIcon, HeartIcon } from '@heroicons/react/24/outline'
 import GameDetailModal from '@/components/shared/GameDetailModal'
 import dynamic from 'next/dynamic'
 const PlayLogEditor = dynamic(()=> import('@/components/shared/PlayLogEditor'), { ssr:false })
-import RatingChip from '@/design-system/elements/RatingChip'
+import { RatingChip } from '@/components/shared/Elements/Chip'
 import { EyeIcon } from '@heroicons/react/24/solid'
 import { useState, useEffect } from 'react'
 import RatingPicker from '@/components/features/rankings/RatingPicker'
 import { addGameToDefaultList, removeGameFromDefaultList } from '@/lib/lists'
-import GameImageFallback from '@/components/shared/GameImageFallback'
+import { GameImage } from '@/components/shared/GameImage'
 
 interface GameRowCardProps {
   game: GameWithRanking & { tagline?: string | null }
@@ -108,7 +108,13 @@ export default function GameRowCard({
               loading="lazy"
             />
           ) : (
-            <GameImageFallback name={game.name} variant="thumb" className="!w-full !h-full" />
+            <GameImage
+              src={null}
+              alt={`${game.name} thumbnail`}
+              name={game.name}
+              variant="thumb"
+              className="!w-full !h-full"
+            />
           )}
         </div>
 

@@ -3,7 +3,7 @@ import PageLayout from './PageLayout'
 import Heading from './Heading'
 
 const meta: Meta<typeof PageLayout> = {
-  title: 'Components/Shared/PageLayout',
+  title: 'Archived/Shared/PageLayout',
   component: PageLayout,
   parameters: {
     layout: 'fullscreen',

@@ -9,7 +9,7 @@ const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 );
 
 const meta: Meta<typeof GameCard> = {
-  title: 'Components/GameCard/List View',
+  title: 'Archived/GameCard/List View',
   component: GameCard,
   tags: ['autodocs'],
   decorators: [Story => <Wrapper><Story /></Wrapper>],

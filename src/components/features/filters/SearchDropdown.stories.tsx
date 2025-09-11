@@ -3,7 +3,7 @@ import { SearchDropdown } from './SearchDropdown';
 import { GroupedSuggestions } from './types';
 
 const meta: Meta<typeof SearchDropdown> = {
-  title: 'Components/Features/Filters/SearchDropdown',
+  title: 'Archived/Features/Filters/SearchDropdown',
   component: SearchDropdown,
   tags: ['autodocs'],
   parameters: { 

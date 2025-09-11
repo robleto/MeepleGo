@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import HeroCTA, { HeroCTAProps } from './AwardsLoggedOutHero';
 
 const meta: Meta<typeof HeroCTA> = {
-  title: 'Components/Features/Awards/AwardsLoggedOutHero',
+  title: 'Archived/Features/Awards/AwardsLoggedOutHero',
   component: HeroCTA,
   tags: ['autodocs'],
   parameters: {

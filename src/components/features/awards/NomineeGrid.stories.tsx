@@ -3,7 +3,7 @@ import NomineeGrid from './NomineeGrid';
 import type { GameWithRanking } from '@/types';
 
 const meta = {
-  title: 'Components/Features/Awards/NomineeGrid',
+  title: 'Archived/Features/Awards/NomineeGrid',
   component: NomineeGrid,
   parameters: {
     layout: 'padded',

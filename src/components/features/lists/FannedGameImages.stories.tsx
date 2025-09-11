@@ -10,7 +10,7 @@ const thumbs: Thumb[] = Array.from({ length: 5 }).map((_, i) => ({
 }));
 
 const meta: Meta = {
-  title: 'Components/Features/Lists/FannedGameImages',
+  title: 'Components/FannedGameImages',
   tags: ['autodocs'],
   parameters: {
     layout: 'centered',

@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { AwardCard } from './AwardCard';
 
 const meta: Meta<typeof AwardCard> = {
-  title: 'Components/Features/Awards/AwardCard',
+  title: 'Components/AwardCard',
   component: AwardCard,
   tags: ['autodocs'],
   parameters: {

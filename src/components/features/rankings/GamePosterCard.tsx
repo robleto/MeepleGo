@@ -4,7 +4,7 @@ import Image from 'next/image'
 import { GameWithRanking } from '@/types'
 import { formatYear } from '@/utils/helpers'
 import { PlayIcon, StarIcon } from '@heroicons/react/24/outline'
-import RatingChip from '@/design-system/elements/RatingChip'
+import { RatingChip } from '@/components/shared/Elements/Chip'
 import { useState } from 'react'
 import RatingPicker from './RatingPicker'
 

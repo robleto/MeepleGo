@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import dynamic from 'next/dynamic'
 import Image from 'next/image'
-import GameImageFallback from './GameImageFallback'
+import { GameImage } from './Elements/GameImage'
 import { GameWithRanking } from '@/types'
 import { Game, Ranking } from '@/types/supabase'
 import { addGameToDefaultList, removeGameFromDefaultList } from '@/lib/lists'
@@ -19,12 +19,12 @@ import {
   TrophyIcon,
   StarIcon,
 } from '@heroicons/react/24/outline'
-import { Button } from '@/design-system/elements/Button'
+import { Button } from './Elements/Button'
 import { supabase } from '@/lib/supabase'
 // Lazy-load heavy modal components so Storybook (without Next App Router context) doesn't mount them unless needed
 const GameDetailModal = dynamic(() => import('./GameDetailModal'), { ssr: false })
 import RatingPopup from '@/design-system/elements/RatingPopup'
-import RatingChip from '@/design-system/elements/RatingChip'
+import { RatingChip } from './Elements/Chip'
 const AddToModal = dynamic(() => import('./AddToModal'), { ssr: false })
 
 interface GameCardProps {
@@ -250,7 +250,12 @@ export default function GameCard({
                 className="object-contain"
               />
             ) : (
-              <GameImageFallback name={game.name} variant="thumb" />
+              <GameImage
+                src={null}
+                alt={game.name}
+                name={game.name}
+                variant="thumb"
+              />
             )}
           </div>
           <div className="flex-1 min-w-0">
@@ -435,7 +440,12 @@ export default function GameCard({
             sizes="(max-width: 640px) 150px, (max-width: 768px) 150px, (max-width: 1024px) 150px, 150px"
           />
         ) : (
-          <GameImageFallback name={game.name} />
+          <GameImage
+            src={null}
+            alt={game.name}
+            name={game.name}
+            variant="square"
+          />
         )}
 
         {/* Hover overlay with all interactive controls */}
