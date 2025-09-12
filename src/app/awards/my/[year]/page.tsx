@@ -7,10 +7,10 @@ import { CATEGORY_CONFIGS } from '@/lib/awards/deriveUserAwards'
 import { deriveAwards } from '@/lib/awards/deriveUserAwards'
 // Updated import paths after component reorganization
 import AwardCategoryEditor from '@/components/Components/AwardCategoryEditor'
-// These components currently only exist in archived awards folder
-import AwardYearSelect from '@/components/_archived/features/awards/AwardYearSelect'
-import AwardsRebuildButtons from '@/components/_archived/features/awards/AwardsRebuildButtons'
-import AwardsDebugInfo from '@/components/_archived/features/awards/AwardsDebugInfo'
+// Replaced archived imports with new implementations
+import AwardYearSelect from '@/components/Components/Awards/AwardYearSelect'
+import AwardsRebuildButtons from '@/components/Components/Awards/AwardsRebuildButtons'
+import AwardsDebugInfo from '@/components/Components/Awards/AwardsDebugInfo'
 import Link from 'next/link'
 import SessionFallback from './SessionFallback'
 

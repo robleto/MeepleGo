@@ -7,13 +7,13 @@ import {
   formatPlayerCount,
 } from '@/utils/helpers'
 import { StarIcon, BookmarkIcon, HeartIcon } from '@heroicons/react/24/outline'
-import GameDetailModal from '@/components/shared/GameDetailModal'
+import GameDetailModal from '@/components/Components/Modals/GameDetailModal'
 import dynamic from 'next/dynamic'
 const PlayLogEditor = dynamic(()=> import('@/components/Components/PlayLogEditor'), { ssr:false })
 import { RatingChip } from '../Elements/Chip'
 import { EyeIcon } from '@heroicons/react/24/solid'
 import { useState, useEffect } from 'react'
-import RatingPicker from '../_archived/features/rankings/RatingPicker'
+import RatingPicker from '@/components/Components/Rankings/RatingPicker'
 import { addGameToDefaultList, removeGameFromDefaultList } from '@/lib/lists'
 import { GameImage } from '../Elements/GameImage'
 

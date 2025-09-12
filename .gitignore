@@ -133,4 +133,15 @@ data/derived/
 !data/README.md
 
 *storybook.log
-storybook-static
+storybook-static/
+
+# Dropbox sync conflict artifacts
+*.dropbox.attr
+*.dropbox
+*.dropbox.attr.tmp
+* (Case Conflict)*
+* (Case Conflict).*
+* (conflicted copy *).*
+
+# Archived legacy component/story folders (still versioned for reference unless moved). Add pattern below to ignore if needed.
+# src/components/_archived/

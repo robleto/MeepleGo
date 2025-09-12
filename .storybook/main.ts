@@ -2,11 +2,12 @@ import type { StorybookConfig } from "@storybook/nextjs-vite";
 
 const config: StorybookConfig = {
   "stories": [
-    // Focus on active component/story locations; exclude legacy `features` & `shared` empty placeholders
+    // Active story locations only. Legacy design-system & feature/shared placeholders archived.
     "../src/components/Components/**/*.stories.@(js|jsx|mjs|ts|tsx)",
     "../src/components/Elements/**/*.stories.@(js|jsx|mjs|ts|tsx)",
     "../src/components/Foundations/**/*.stories.@(js|jsx|mjs|ts|tsx)",
-    "../src/design-system/**/*.stories.@(js|jsx|mjs|ts|tsx)",
+    // Optional: keep design-system glob commented if directory removed.
+    // "../src/design-system/**/*.stories.@(js|jsx|mjs|ts|tsx)",
     "../src/stories/**/*.stories.@(js|jsx|mjs|ts|tsx)"
   ],
   "addons": [

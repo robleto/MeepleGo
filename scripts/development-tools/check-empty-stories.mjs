@@ -2,9 +2,11 @@
 import { readdir, stat, readFile } from 'fs/promises'
 import { join } from 'path'
 
+// Scan only active story roots (exclude archived + legacy placeholders)
 const roots = [
-  'src/components/features',
-  'src/components/shared'
+  'src/components/Components',
+  'src/components/Elements',
+  'src/components/Foundations'
 ]
 
 const STORY_REGEX = /\.stories\.(t|j)sx?$/

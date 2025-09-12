@@ -7,9 +7,9 @@ import awardsData from '@/data/awards.json'
 import { getSupabaseServerClient } from '@/lib/supabaseServer'
 import PersonalAwardCategorySection from '@/components/Components/AwardShowcase'
 // Updated awards component import paths
-import PersonalAwardsAuto from '@/components/_archived/features/awards/PersonalAwardsAuto'
+import PersonalAwardsAuto from '@/components/Components/Awards/PersonalAwardsAuto'
 // Removed IndustryAwards component in favor of direct AwardCard composition (subset of AwardCard story patterns)
-import { AwardCard } from '@/components/_archived/features/awards/AwardCard'
+import AwardCard from '@/components/Components/Awards/AwardCard'
 // Removed AwardsLoggedOutHero in favor of inline Hero variant here
 import Hero from '@/components/Components/Hero'
 
