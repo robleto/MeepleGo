@@ -1,4 +1,4 @@
-import PageLayout from '@/components/shared/PageLayout'
+import PageLayout from '@/components/Components/PageLayout'
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline'
 
 export default function SearchPage() {

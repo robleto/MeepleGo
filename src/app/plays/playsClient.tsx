@@ -7,13 +7,14 @@ import { useEffect, useRef, useState, useMemo } from 'react'
 import { useMeasuredWindow } from '@/hooks/useMeasuredWindow'
 import { supabase } from '@/lib/supabase'
 import type { PlayLog } from '@/types/supabase'
-import GameSearchSelect from '@/components/features/filters/GameSearchSelect'
-import Heading from '@/components/shared/Heading'
+import GameSearchSelect from '@/components/Components/GameSearchSelect'
+import type { SuggestionGame } from '@/components/Components/GameSearchSelect'
+import Heading from '@/components/Components/Heading'
 import { getMembershipSets, addGameToDefaultList, removeGameFromDefaultList } from '@/lib/lists'
 import { BookmarkIcon, HeartIcon } from '@heroicons/react/24/outline'
 import { getRatingSolidClass } from '@/design-system/tokens/ratingColors'
-import PlayLogEditor from '@/components/shared/PlayLogEditor'
-import ZeroState from '@/components/shared/ZeroState'
+import PlayLogEditor from '@/components/Components/PlayLogEditor'
+import ZeroState from '@/components/Components/ZeroState'
 
 interface Stats { totalPlays:number; uniqueGames:number; avgRating:number|null; ratingsTimeline:{date:string;avgRating:number;count:number}[]; recentTags:{tag:string;count:number}[] }
 interface SummaryData { streak:{current:number;longest:number}; last30:{date:string;count:number}[]; ratingTrend:{date:string;avg:number}[] }
@@ -347,7 +348,7 @@ export default function PlaysClientPage({ forcedUserId, readOnly }: PlaysClientP
           </div>
         )}
         {showAdd && !selectedGame && !zeroStateActive && isOwner && (
-          <div className="flex justify-center"><div className="w-full max-w-lg"><GameSearchSelect autoFocus onSelect={(g)=> { setSelectedGame({ id:g.id, name:g.name, year_published:g.year_published, thumbnail_url:g.thumbnail_url }) }} /><div className="mt-3 text-[12px] text-center text-gray-400">Search for a game to log a play</div></div></div>
+          <div className="flex justify-center"><div className="w-full max-w-lg"><GameSearchSelect autoFocus onSelect={(g: SuggestionGame)=> { setSelectedGame({ id:g.id, name:g.name, year_published:g.year_published, thumbnail_url:g.thumbnail_url }) }} /><div className="mt-3 text-[12px] text-center text-gray-400">Search for a game to log a play</div></div></div>
         )}
         {stats && !zeroStateActive && (
           <section className="grid md:grid-cols-6 gap-4">
@@ -398,7 +399,7 @@ export default function PlaysClientPage({ forcedUserId, readOnly }: PlaysClientP
                 <div className="w-full max-w-md">
                   {!selectedGame && (
                     <>
-                      <GameSearchSelect variant="hero" autoFocus onSelect={(g)=> { setSelectedGame({ id:g.id, name:g.name, year_published:g.year_published, thumbnail_url:g.thumbnail_url }) }} />
+                      <GameSearchSelect variant="hero" autoFocus onSelect={(g: SuggestionGame)=> { setSelectedGame({ id:g.id, name:g.name, year_published:g.year_published, thumbnail_url:g.thumbnail_url }) }} />
                       <div className="mt-2 text-[11px] text-gray-400">Search for a game to log a play</div>
                       <button onClick={()=> setShowAdd(false)} type="button" className="mt-3 text-[11px] text-gray-500 hover:text-gray-700 underline">Cancel</button>
                     </>

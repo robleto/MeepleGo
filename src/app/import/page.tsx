@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
-import PageLayout from '@/components/shared/PageLayout'
+import PageLayout from '@/components/Components/PageLayout'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import { addGameToDefaultList, getOrCreateDefaultLists } from '@/lib/lists'

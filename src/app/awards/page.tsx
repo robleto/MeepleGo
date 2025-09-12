@@ -1,15 +1,16 @@
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
-import PageLayout from '@/components/shared/PageLayout'
-import Heading from '@/components/shared/Heading'
+import PageLayout from '@/components/Components/PageLayout'
+import Heading from '@/components/Components/Heading'
 import { TrophyIcon, ChevronDownIcon } from '@heroicons/react/24/outline'
 import awardsData from '@/data/awards.json'
 import { getSupabaseServerClient } from '@/lib/supabaseServer'
-import PersonalAwardCategorySection from '@/components/features/awards/AwardShowcase'
-import PersonalAwardsAuto from '@/components/features/awards/PersonalAwardsAuto'
-import IndustryAwards from '@/components/features/awards/IndustryAwards'
-import AwardsLoggedOutHero from '@/components/features/awards/AwardsLoggedOutHero'
-import HeroAuthGate from '@/components/features/awards/HeroAuthGate'
+import PersonalAwardCategorySection from '@/components/Components/AwardShowcase'
+// Updated awards component import paths
+import PersonalAwardsAuto from '@/components/_archived/features/awards/PersonalAwardsAuto'
+import IndustryAwards from '@/components/Components/IndustryAwards'
+import AwardsLoggedOutHero from '@/components/_archived/features/awards/AwardsLoggedOutHero'
+import HeroAuthGate from '@/components/_archived/features/awards/HeroAuthGate'
 
 // Award categories loaded from JSON (icon string mapped to actual component below)
 const AWARD_CATEGORIES = (awardsData as any).categories.map((c: any) => ({

@@ -1,8 +1,8 @@
 "use client"
 
 import { useState } from 'react'
-import PageLayout from '@/components/shared/PageLayout'
-import Heading from '@/components/shared/Heading'
+import PageLayout from '@/components/Components/PageLayout'
+import Heading from '@/components/Components/Heading'
 import supabase from '@/lib/supabase'
 
 export default function AddMissingGamePage() {

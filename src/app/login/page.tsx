@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
-import AuthLayout from '@/components/shared/AuthLayout'
+import AuthLayout from '@/components/Components/AuthLayout'
 
 function LoginForm() {
   const router = useRouter()

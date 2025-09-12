@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { AwardCard } from '../features/awards/AwardCard';
+import { AwardCard } from './AwardCard';
+import { TrophyIcon, StarIcon, LightBulbIcon, HeartIcon } from '@heroicons/react/24/outline';
 
 const meta: Meta<typeof AwardCard> = {
   title: 'Components/AwardCard',
@@ -9,7 +10,7 @@ const meta: Meta<typeof AwardCard> = {
     layout: 'centered',
     docs: { 
       description: { 
-        component: 'Award summary card component displaying award categories with optional statistics. Features consistent circular icon styling and clean typography hierarchy.' 
+        component: 'Award summary card component displaying award categories with optional statistics. Features the distinctive IconCircle treatment with proper Heroicons for a polished, professional appearance.' 
       } 
     }
   }
@@ -23,7 +24,7 @@ export const Default: Story = {
     title: 'Best Strategy Game',
     yearSpan: '2024',
     description: 'Outstanding strategic gameplay and depth',
-    icon: '🏆',
+    // No icon prop - uses default IconCircle with TrophyIcon
   }
 };
 
@@ -32,10 +33,10 @@ export const WithStats: Story = {
     title: 'People\'s Choice',
     yearSpan: '2024',
     description: 'Most popular game voted by the community',
-    icon: '⭐',
     showStats: true,
     winners: 3,
     nominees: 8
+    // No icon prop - shows default IconCircle treatment
   }
 };
 
@@ -44,10 +45,10 @@ export const Innovation: Story = {
     title: 'Most Innovative',
     yearSpan: '2024',
     description: 'Revolutionary mechanics and creative design',
-    icon: '💡',
     showStats: true,
     winners: 2,
     nominees: 5
+    // No icon prop - shows default IconCircle treatment
   }
 };
 
@@ -56,10 +57,10 @@ export const Artwork: Story = {
     title: 'Best Artwork',
     yearSpan: '2024',
     description: 'Exceptional visual design and illustration',
-    icon: '🎨',
     showStats: true,
     winners: 1,
     nominees: 12
+    // No icon prop - uses default IconCircle treatment
   }
 };
 
@@ -68,10 +69,10 @@ export const Accessibility: Story = {
     title: 'Most Accessible',
     yearSpan: '2024',
     description: 'Excellence in inclusive game design',
-    icon: '♿',
     showStats: true,
     winners: 1,
     nominees: 6
+    // No icon prop - uses default IconCircle treatment
   }
 };
 
@@ -82,7 +83,6 @@ export const CardCollection: Story = {
         title="Best Strategy Game"
         yearSpan="2024"
         description="Outstanding strategic gameplay"
-        icon="🏆"
         showStats={true}
         winners={1}
         nominees={8}
@@ -91,7 +91,6 @@ export const CardCollection: Story = {
         title="Best Family Game"
         yearSpan="2024"
         description="Perfect for family game nights"
-        icon="👨‍👩‍👧‍👦"
         showStats={true}
         winners={1}
         nominees={10}
@@ -100,7 +99,6 @@ export const CardCollection: Story = {
         title="Best Solo Game"
         yearSpan="2024"
         description="Exceptional single-player experience"
-        icon="🎯"
         showStats={true}
         winners={1}
         nominees={7}
@@ -109,7 +107,6 @@ export const CardCollection: Story = {
         title="Best Cooperative Game"
         yearSpan="2024"
         description="Outstanding teamwork mechanics"
-        icon="🤝"
         showStats={true}
         winners={1}
         nominees={9}
@@ -118,7 +115,6 @@ export const CardCollection: Story = {
         title="Best Thematic Game"
         yearSpan="2024"
         description="Immersive theme integration"
-        icon="🎭"
         showStats={true}
         winners={1}
         nominees={11}
@@ -127,7 +123,6 @@ export const CardCollection: Story = {
         title="Most Innovative"
         yearSpan="2024"
         description="Revolutionary game mechanics"
-        icon="💡"
         showStats={true}
         winners={1}
         nominees={5}

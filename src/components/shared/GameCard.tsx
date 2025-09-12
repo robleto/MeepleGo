@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import dynamic from 'next/dynamic'
 import Image from 'next/image'
-import { GameImage } from './Elements/GameImage'
+import { GameImage } from '@/components/Elements/GameImage'
 import { GameWithRanking } from '@/types'
 import { Game, Ranking } from '@/types/supabase'
 import { addGameToDefaultList, removeGameFromDefaultList } from '@/lib/lists'
@@ -19,13 +19,13 @@ import {
   TrophyIcon,
   StarIcon,
 } from '@heroicons/react/24/outline'
-import { Button } from './Elements/Button'
+import { Button } from '@/components/Elements/Button'
 import { supabase } from '@/lib/supabase'
 // Lazy-load heavy modal components so Storybook (without Next App Router context) doesn't mount them unless needed
 const GameDetailModal = dynamic(() => import('./GameDetailModal'), { ssr: false })
-import RatingPopup from '@/design-system/elements/RatingPopup'
-import { RatingChip } from './Elements/Chip'
-const AddToModal = dynamic(() => import('./AddToModal'), { ssr: false })
+import RatingPopup from '../Elements/RatingPopup'
+import { RatingChip } from '@/components/Elements/Chip'
+const AddToModal = dynamic(() => import('@/components/Components/AddToModal'), { ssr: false })
 
 interface GameCardProps {
   game: GameWithRanking & {
@@ -80,7 +80,7 @@ export default function GameCard({
   const [showModal, setShowModal] = useState(false)
   const [saving, setSaving] = useState(false)
   const [showPlayLog, setShowPlayLog] = useState(false)
-  const PlayLogEditor = dynamic(()=> import('@/components/shared/PlayLogEditor'), { ssr:false })
+  const PlayLogEditor = dynamic(()=> import('@/components/Components/PlayLogEditor'), { ssr:false })
   // localRanking can be a Ranking object or just a number (from lightweight award derivations)
   const [localRanking, setLocalRanking] = useState<any>(
     typeof game.ranking === 'number'

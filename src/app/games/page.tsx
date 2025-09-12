@@ -2,10 +2,10 @@
 
 import { useState, useEffect, Suspense } from 'react'
 import { supabase } from '@/lib/supabase'
-import PageLayout from '@/components/shared/PageLayout'
-import Heading from '@/components/shared/Heading'
-import GameCard from '@/components/shared/GameCard'
-import GameFilters from '@/components/features/filters/GameFilters'
+import PageLayout from '@/components/Components/PageLayout'
+import Heading from '@/components/Components/Heading'
+import GameCard from '@/components/Components/GameCard'
+import GameFilters from '@/components/Components/GameFilters'
 import { GameWithRanking } from '@/types'
 import { useGameFilters, useViewMode } from '@/utils/gameFilters'
 import { searchGamesFallback } from '@/utils/databaseSearch'
@@ -605,39 +605,13 @@ function GamesPageContent() {
         <GameFilters
           viewMode={viewMode}
           setViewMode={setViewMode}
-          cardVariant={cardVariant}
-          setCardVariant={setCardVariant}
-          sortBy={sortBy}
-          setSortBy={setSortBy}
-          sortOrder={sortOrder}
-          setSortOrder={setSortOrder}
-          groupBy={groupBy}
-          setGroupBy={setGroupBy}
-          filterType={filterType}
-          setFilterType={setFilterType}
-          filterValue={filterValue}
-          setFilterValue={setFilterValue}
-          uniqueYears={uniqueYears}
-          uniquePublishers={uniquePublishers}
-          uniquePlayerCounts={uniquePlayerCounts}
-          uniqueCategories={uniqueCategories}
-          uniqueMechanics={uniqueMechanics}
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          gamesCount={games.length}
-          filteredGamesCount={filteredGames.length}
-          hasMore={hasMore}
-          loading={loading}
-          error={error}
-          defaults={{
-            viewMode: 'grid',
-            cardVariant: 'balanced',
-            sortBy: 'rank',
-            sortOrder: 'asc',
-            groupBy: 'none',
-            filterType: 'none',
-            filterValue: 'all',
-          }}
+          sortBy={sortBy as any}
+          setSortBy={setSortBy as any}
+          sortOrder={sortOrder as any}
+          setSortOrder={setSortOrder as any}
+          groupBy={groupBy as any}
+          setGroupBy={setGroupBy as any}
+          total={games.length}
         />
 
         {/* Loading State */}

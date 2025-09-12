@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import GameFilters from '../features/filters/GameFilters';
-import { SearchInput, FilterButton, ToggleGroup } from '../shared/Controls';
+import GameFilters from './GameFilters';
+import { SearchInput, FilterButton, ToggleGroup } from '../Controls';
 import { 
   Squares2X2Icon, 
   ListBulletIcon, 
@@ -30,44 +30,13 @@ type Story = StoryObj<typeof GameFilters>;
 export const Default: Story = {
   render: () => {
     const [viewMode, setViewMode] = useState<'grid'|'list'>('grid');
-    const [cardVariant, setCardVariant] = useState<'compact'|'balanced'|'detailed'>('balanced');
-    const [sortBy, setSortBy] = useState<any>('name');
-    const [sortOrder, setSortOrder] = useState<'asc'|'desc'>('asc');
-    const [groupBy, setGroupBy] = useState<any>('year_published');
-    const [filterType, setFilterType] = useState<'none'|'year'|'publisher'|'players'|'category'|'mechanic'|'game'|'award'>('none');
-    const [filterValue, setFilterValue] = useState('all');
-    const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState<any>('name');
+  const [sortOrder, setSortOrder] = useState<'asc'|'desc'>('asc');
+  const [groupBy, setGroupBy] = useState<any>('year_published');
 
     return (
       <div className="max-w-4xl mx-auto">
-        <GameFilters
-          viewMode={viewMode}
-          setViewMode={setViewMode}
-          cardVariant={cardVariant}
-          setCardVariant={setCardVariant}
-          sortBy={sortBy}
-          setSortBy={setSortBy}
-          sortOrder={sortOrder}
-          setSortOrder={setSortOrder}
-          groupBy={groupBy}
-          setGroupBy={setGroupBy}
-          filterType={filterType}
-          setFilterType={setFilterType}
-          filterValue={filterValue}
-          setFilterValue={setFilterValue}
-          uniqueYears={[2025, 2024, 2023, 2022, 2021]}
-          uniquePublishers={['Stonemaier Games', 'CMON', 'Fantasy Flight Games']}
-          uniquePlayerCounts={[1, 2, 3, 4, 5, 6]}
-          uniqueCategories={['Strategy', 'Family', 'Thematic', 'Abstract']}
-          uniqueMechanics={['Deck Building', 'Worker Placement', 'Engine Building']}
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          gamesCount={150}
-          filteredGamesCount={150}
-          hasMore={true}
-          loading={false}
-          error={null}
-        />
+  <GameFilters viewMode={viewMode} setViewMode={setViewMode} sortBy={sortBy} setSortBy={setSortBy} sortOrder={sortOrder} setSortOrder={setSortOrder} groupBy={groupBy} setGroupBy={setGroupBy} total={150} />
       </div>
     );
   }
@@ -76,44 +45,13 @@ export const Default: Story = {
 export const WithActiveSearch: Story = {
   render: () => {
     const [viewMode, setViewMode] = useState<'grid'|'list'>('list');
-    const [cardVariant, setCardVariant] = useState<'compact'|'balanced'|'detailed'>('compact');
-    const [sortBy, setSortBy] = useState<any>('year_published');
-    const [sortOrder, setSortOrder] = useState<'asc'|'desc'>('desc');
-    const [groupBy, setGroupBy] = useState<any>('publisher');
-    const [filterType, setFilterType] = useState<'none'|'year'|'publisher'|'players'|'category'|'mechanic'|'game'|'award'>('year');
-    const [filterValue, setFilterValue] = useState('2024');
-    const [searchTerm, setSearchTerm] = useState('wingspan');
+  const [sortBy, setSortBy] = useState<any>('year_published');
+  const [sortOrder, setSortOrder] = useState<'asc'|'desc'>('desc');
+  const [groupBy, setGroupBy] = useState<any>('publisher');
 
     return (
       <div className="max-w-4xl mx-auto">
-        <GameFilters
-          viewMode={viewMode}
-          setViewMode={setViewMode}
-          cardVariant={cardVariant}
-          setCardVariant={setCardVariant}
-          sortBy={sortBy}
-          setSortBy={setSortBy}
-          sortOrder={sortOrder}
-          setSortOrder={setSortOrder}
-          groupBy={groupBy}
-          setGroupBy={setGroupBy}
-          filterType={filterType}
-          setFilterType={setFilterType}
-          filterValue={filterValue}
-          setFilterValue={setFilterValue}
-          uniqueYears={[2025, 2024, 2023, 2022, 2021]}
-          uniquePublishers={['Stonemaier Games', 'Jamey Stegmaier', 'Elizabeth Hargrave Games']}
-          uniquePlayerCounts={[1, 2, 3, 4, 5]}
-          uniqueCategories={['Strategy', 'Animals', 'Economic']}
-          uniqueMechanics={['Engine Building', 'Card Drafting', 'Set Collection']}
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          gamesCount={42}
-          filteredGamesCount={42}
-          hasMore={false}
-          loading={false}
-          error={null}
-        />
+  <GameFilters viewMode={viewMode} setViewMode={setViewMode} sortBy={sortBy} setSortBy={setSortBy} sortOrder={sortOrder} setSortOrder={setSortOrder} groupBy={groupBy} setGroupBy={setGroupBy} total={42} />
       </div>
     );
   }
@@ -122,44 +60,13 @@ export const WithActiveSearch: Story = {
 export const GridViewMode: Story = {
   render: () => {
     const [viewMode, setViewMode] = useState<'grid'|'list'>('grid');
-    const [cardVariant, setCardVariant] = useState<'compact'|'balanced'|'detailed'>('detailed');
-    const [sortBy, setSortBy] = useState<any>('rank');
-    const [sortOrder, setSortOrder] = useState<'asc'|'desc'>('asc');
-    const [groupBy, setGroupBy] = useState<any>('none');
-    const [filterType, setFilterType] = useState<'none'|'year'|'publisher'|'players'|'category'|'mechanic'|'game'|'award'>('category');
-    const [filterValue, setFilterValue] = useState('Strategy');
-    const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState<any>('rank');
+  const [sortOrder, setSortOrder] = useState<'asc'|'desc'>('asc');
+  const [groupBy, setGroupBy] = useState<any>('none');
 
     return (
       <div className="max-w-4xl mx-auto">
-        <GameFilters
-          viewMode={viewMode}
-          setViewMode={setViewMode}
-          cardVariant={cardVariant}
-          setCardVariant={setCardVariant}
-          sortBy={sortBy}
-          setSortBy={setSortBy}
-          sortOrder={sortOrder}
-          setSortOrder={setSortOrder}
-          groupBy={groupBy}
-          setGroupBy={setGroupBy}
-          filterType={filterType}
-          setFilterType={setFilterType}
-          filterValue={filterValue}
-          setFilterValue={setFilterValue}
-          uniqueYears={[2025, 2024, 2023, 2022]}
-          uniquePublishers={['Stonemaier Games', 'CMON', 'Fantasy Flight Games']}
-          uniquePlayerCounts={[1, 2, 3, 4, 5]}
-          uniqueCategories={['Strategy', 'Family', 'Thematic']}
-          uniqueMechanics={['Worker Placement', 'Area Control', 'Deck Building']}
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          gamesCount={89}
-          filteredGamesCount={89}
-          hasMore={true}
-          loading={false}
-          error={null}
-        />
+  <GameFilters viewMode={viewMode} setViewMode={setViewMode} sortBy={sortBy} setSortBy={setSortBy} sortOrder={sortOrder} setSortOrder={setSortOrder} groupBy={groupBy} setGroupBy={setGroupBy} total={89} />
       </div>
     );
   }

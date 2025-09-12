@@ -1,0 +1,167 @@
+import { Meta } from '@storybook/blocks';
+
+import { Meta } from '@storybook/blocks';
+
+<Meta title="Get Started" />
+
+# Getting Started with MeepleGo Components
+
+# Getting Started with MeepleGo Components
+
+<div style={{ 
+  background: 'linear-gradient(135deg, #059669 0%, #047857 100%)', 
+  padding: '2rem', 
+  borderRadius: '12px', 
+  marginBottom: '2rem',
+  color: 'white'
+}}>
+  <h2 style={{ margin: 0, marginBottom: '0.5rem' }}>🛠️ Implementation Guide</h2>
+  <p style={{ margin: 0, opacity: 0.9 }}>
+    Learn how to use and implement MeepleGo components in your development workflow.
+  </p>
+</div>
+
+## Installation & Setup
+
+### Prerequisites
+- Node.js 18+ 
+- Next.js 15+
+- Tailwind CSS 3.4+
+- TypeScript
+
+### Project Structure
+
+Our components are organized in atomic design principles:
+
+- **Foundations/**: Core design tokens (Logo, Colors, etc.)
+- **Controls/**: Form controls and input elements  
+- **Components/**: Complex reusable components
+- **Elements/**: Basic UI building blocks
+- **Global/**: App-wide layout components
+
+## Component Usage Patterns
+
+### 1. Import Components
+
+```typescript
+// Main components
+import { AwardCard } from '@/components/Components/AwardCard'
+import { GameCard } from '@/components/Components/GameCard'
+import { SearchandFilters } from '@/components/Components/SearchandFilters'
+
+// Controls
+import { SearchInput } from '@/components/Controls/SearchInput'
+import { FilterButton } from '@/components/Controls/FilterButton'
+import { ToggleGroup } from '@/components/Controls/ToggleGroup'
+
+// Elements
+import { RatingPopup } from '@/components/Elements/RatingPopup'
+```
+
+### 2. Basic Component Usage
+
+#### SearchInput Example
+```typescript
+<SearchInput
+  value={searchQuery}
+  onChange={setSearchQuery}
+  placeholder="Search games..."
+  onClear={() => setSearchQuery('')}
+  className="w-full"
+/>
+```
+
+#### GameCard Example
+```typescript
+<GameCard
+  game={game}
+  viewMode="grid"
+  variant="balanced"
+  onMembershipChange={(gameId, change) => handleMembershipChange(gameId, change)}
+/>
+```
+
+### 3. Rating System
+
+Use our standardized 1-10 rating system:
+
+- **1**: red-600 (Awful)
+- **2**: orange-600 (Bad)  
+- **3**: amber-600 (Poor)
+- **4**: yellow-600 (Below Average)
+- **5**: lime-600 (Average)
+- **6**: green-600 (Above Average)
+- **7**: emerald-600 (Good)
+- **8**: teal-600 (Very Good)
+- **9**: cyan-600 (Great)
+- **10**: sky-600 (Masterpiece)
+
+## Design System Usage
+
+### Responsive Design
+
+All components follow mobile-first responsive design:
+
+```typescript
+<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+  <GameCard game={game} viewMode="grid" />
+</div>
+```
+
+### Dark Mode Support
+
+Components support dark mode through Tailwind's dark variant:
+
+```typescript
+<div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
+  {/* Component content */}
+</div>
+```
+
+## Common Patterns
+
+### 1. Loading States
+```typescript
+{isLoading ? (
+  <div className="animate-pulse bg-gray-200 rounded-lg h-48" />
+) : (
+  <GameCard game={game} />
+)}
+```
+
+### 2. Empty States
+```typescript
+{games.length === 0 ? (
+  <div className="text-gray-500 text-center py-12">
+    <CubeIcon className="w-12 h-12 mx-auto mb-4" />
+    <p>No games found matching your criteria.</p>
+  </div>
+) : (
+  <GameList games={games} />
+)}
+```
+
+## Accessibility Guidelines
+
+All components support:
+- Semantic HTML structure
+- ARIA labels and descriptions  
+- Keyboard navigation
+- Focus management
+- Screen reader compatibility
+
+---
+
+<div style={{ 
+  background: '#fef3c7', 
+  padding: '1.5rem', 
+  borderRadius: '8px', 
+  marginTop: '2rem',
+  borderLeft: '4px solid #f59e0b'
+}}>
+  <h3 style={{ margin: 0, marginBottom: '0.5rem' }}>💡 Need Help?</h3>
+  <p style={{ margin: 0 }}>
+    Check the individual component stories for detailed examples and props documentation.
+    All components follow atomic design principles for consistency.
+  </p>
+</div>

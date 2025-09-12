@@ -1,9 +1,9 @@
 "use client"
 
 import { useEffect, useState, useRef } from 'react'
-import PageLayout from '@/components/shared/PageLayout'
-import Heading from '@/components/shared/Heading'
-import PlayLogEditor from '@/components/shared/PlayLogEditor'
+import PageLayout from '@/components/Components/PageLayout'
+import Heading from '@/components/Components/Heading'
+import PlayLogEditor from '@/components/Components/PlayLogEditor'
 import supabase from '@/lib/supabase'
 
 interface SearchResultGame {

@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
 import { Inter, Outfit, Geist, Fraunces, Playfair_Display, Archivo_Black, Epilogue } from 'next/font/google'
 import './globals.css'
-import Navigation from '@/components/shared/Navigation'
-import SiteFooter from '@/components/shared/SiteFooter'
+import Navigation from '@/components/Global/Navigation'
+import SiteFooter from '@/components/Global/SiteFooter'
 
 // Primary (Set A) fonts
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' })

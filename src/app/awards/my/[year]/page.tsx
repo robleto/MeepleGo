@@ -1,14 +1,16 @@
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
-import PageLayout from '@/components/shared/PageLayout'
-import Heading from '@/components/shared/Heading'
+import PageLayout from '@/components/Components/PageLayout'
+import Heading from '@/components/Components/Heading'
 import { getSupabaseServerClient } from '@/lib/supabaseServer'
 import { CATEGORY_CONFIGS } from '@/lib/awards/deriveUserAwards'
 import { deriveAwards } from '@/lib/awards/deriveUserAwards'
-import AwardCategoryEditor from '@/components/features/awards/AwardCategoryEditor'
-import AwardYearSelect from '@/components/features/awards/AwardYearSelect'
-import AwardsRebuildButtons from '@/components/features/awards/AwardsRebuildButtons'
-import AwardsDebugInfo from '@/components/features/awards/AwardsDebugInfo'
+// Updated import paths after component reorganization
+import AwardCategoryEditor from '@/components/Components/AwardCategoryEditor'
+// These components currently only exist in archived awards folder
+import AwardYearSelect from '@/components/_archived/features/awards/AwardYearSelect'
+import AwardsRebuildButtons from '@/components/_archived/features/awards/AwardsRebuildButtons'
+import AwardsDebugInfo from '@/components/_archived/features/awards/AwardsDebugInfo'
 import Link from 'next/link'
 import SessionFallback from './SessionFallback'
 

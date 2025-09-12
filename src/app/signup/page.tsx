@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
-import AuthLayout from '@/components/shared/AuthLayout'
+import AuthLayout from '@/components/Components/AuthLayout'
 
 export default function SignUpPage() {
   const router = useRouter()

@@ -1,4 +1,4 @@
-import PageLayout from '@/components/shared/PageLayout'
+import PageLayout from '@/components/Components/PageLayout'
 import Link from 'next/link'
 import {
   TrophyIcon,

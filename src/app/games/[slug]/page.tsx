@@ -1,7 +1,7 @@
 import { notFound, redirect } from 'next/navigation'
 import { Metadata } from 'next'
-import GameDetailModal from '@/components/shared/GameDetailModal'
-import PageLayout from '@/components/shared/PageLayout'
+import GameDetailModal from '@/components/Components/GameDetailModal'
+import PageLayout from '@/components/Components/PageLayout'
 import { getSupabaseServerClient } from '@/lib/supabaseServer'
 import { slugify, generateGameKeywords, getGameUrl } from '@/utils/helpers'
 

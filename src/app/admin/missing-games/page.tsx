@@ -1,9 +1,9 @@
 "use client"
 import { useEffect, useState, useMemo } from 'react'
-import PageLayout from '@/components/shared/PageLayout'
-import Heading from '@/components/shared/Heading'
+import PageLayout from '@/components/Components/PageLayout'
+import Heading from '@/components/Components/Heading'
 import supabase from '@/lib/supabase'
-import RequireAdmin from '@/components/features/admin/RequireAdmin'
+import RequireAdmin from '@/components/Components/RequireAdmin'
 
 interface MissingGameRequest { id: string; name: string; year_published: number|null; publisher: string|null; status: string; created_at: string; processed_at: string|null; user_id: string|null }
 

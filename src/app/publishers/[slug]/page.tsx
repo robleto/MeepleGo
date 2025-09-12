@@ -1,6 +1,6 @@
 import { getSupabaseServerClient } from '@/lib/supabaseServer'
-import PageLayout from '@/components/shared/PageLayout'
-import GameCard from '@/components/shared/GameCard'
+import PageLayout from '@/components/Components/PageLayout'
+import GameCard from '@/components/Components/GameCard'
 import { GameWithRanking } from '@/types'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'

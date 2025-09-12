@@ -6,15 +6,21 @@ const preview: Preview = {
     options: {
       storySort: {
         order: [
+          'Introduction',
+          'Get Started', 
+          'Contributions',
           'Foundations',
-          'Design System',
-          'Elements',
+          'Controls',
           'Components',
-          'Global'
+          'Elements',
+          'Archived'
         ],
         method: 'alphabetical',
         includeNames: true,
       },
+    },
+    docs: {
+      defaultName: 'Docs', // This makes Docs the default page
     },
     backgrounds: {
       default: 'site',

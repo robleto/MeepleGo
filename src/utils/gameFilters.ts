@@ -65,6 +65,20 @@ export function useGameFilters(
   const { disableClientSorting = false } = options || {}
   const [hasMounted, setHasMounted] = useState(false)
 
+  // Local view mode state (duplicated here so consumers can rely on single hook)
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('gamesViewMode') as 'grid' | 'list'
+      return stored || 'grid'
+    }
+    return 'grid'
+  })
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('gamesViewMode', viewMode)
+    }
+  }, [viewMode])
+
   // Search state
   const [searchTerm, setSearchTerm] = useState('')
 
@@ -440,6 +454,8 @@ export function useGameFilters(
   return {
     // State
     hasMounted,
+  viewMode,
+  setViewMode,
     searchTerm,
     setSearchTerm,
     sortBy,

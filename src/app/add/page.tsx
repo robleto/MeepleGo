@@ -1,6 +1,6 @@
 'use client'
 
-import PageLayout from '@/components/shared/PageLayout'
+import PageLayout from '@/components/Components/PageLayout'
 import {
   PlusIcon,
   ArrowPathIcon,

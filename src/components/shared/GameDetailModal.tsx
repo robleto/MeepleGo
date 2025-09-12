@@ -3,8 +3,8 @@ import React, { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
-import { RatingChip } from './Elements/Chip'
-import RatingPopup from '@/design-system/elements/RatingPopup'
+import { RatingChip } from '@/components/Elements/Chip'
+import RatingPopup from '../Elements/RatingPopup'
 import dynamic from 'next/dynamic'
 import {
   XMarkIcon,
@@ -29,7 +29,7 @@ import {
 import { addGameToDefaultList, removeGameFromDefaultList } from '@/lib/lists'
 import { formatPlayerCount, formatPlayingTime, getGameUrl } from '@/utils/helpers'
 
-const PlayLogEditor = dynamic(() => import('./PlayLogEditor'), { ssr: false })
+const PlayLogEditor = dynamic(() => import('@/components/Components/PlayLogEditor'), { ssr: false })
 
 interface GameDetailModalProps {
   game: any

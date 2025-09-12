@@ -1,8 +1,24 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import GameCard from '../shared/GameCard';
+import GameCard from './GameCard';
 
 // Mock Next.js router for Storybook
+const mockRouter = {
+  push: () => Promise.resolve(true),
+  replace: () => Promise.resolve(true),
+  prefetch: () => Promise.resolve(),
+  back: () => {},
+  forward: () => {},
+  refresh: () => {},
+  pathname: '/',
+  route: '/',
+  query: {},
+  asPath: '/',
+  events: { on: () => {}, off: () => {}, emit: () => {} }
+};
+
+// Create a wrapper that mocks the router context
 const RouterWrapper = ({ children }: { children: React.ReactNode }) => {
+  // This will prevent the useRouter hook from being called in Storybook
   return <div suppressHydrationWarning>{children}</div>;
 };
 
@@ -38,22 +54,29 @@ const mockGame = {
 
 const wishlistGame = {
   ...mockGame,
-  id: '2',
-  name: 'Gloomhaven',
   list_membership: { library: false, wishlist: true },
-  ranking: { ...mockGame.ranking, played_it: false, ranking: null },
+  ranking: { ...mockGame.ranking, played_it: false },
+};
+
+const playedGame = {
+  ...mockGame,
+  ranking: { ...mockGame.ranking, played_it: true },
 };
 
 const winnerGame = {
   ...mockGame,
-  id: '3', 
-  name: 'Brass: Birmingham',
   honors: [
     { category: 'Winner', result_raw: 'Winner', result_category: 'Winner', derived_result: 'Winner' },
   ],
 };
 
+const unratedGame = {
+  ...mockGame,
+  ranking: { ...mockGame.ranking, ranking: null, played_it: false },
+};
+
 const meta: Meta<typeof GameCard> = {
+  // GameCard as main component in Components section
   title: 'Components/GameCard',
   component: GameCard,
   tags: ['autodocs'],
@@ -66,12 +89,12 @@ const meta: Meta<typeof GameCard> = {
   ],
   argTypes: {
     viewMode: { control: 'select', options: ['grid', 'list'] },
-    variant: { control: 'select', options: ['detailed', 'balanced', 'compact'] },
     hideWinnerBadge: { control: 'boolean' },
     showSummary: { control: 'boolean' },
     emphasizeMeta: { control: 'boolean' },
     showMeta: { control: 'boolean' },
     allowWinnerBadgeInListView: { control: 'boolean' },
+    variant: { control: 'select', options: ['detailed', 'balanced', 'compact'] },
     listRank: { control: 'number' }
   },
   parameters: {
@@ -79,27 +102,30 @@ const meta: Meta<typeof GameCard> = {
     nextjs: {
       appDirectory: true,
     },
-    docs: {
-      description: {
-        component: 'Versatile game card component that displays game information in both grid and list view modes with different density levels.'
-      }
-    }
+    viewport: {
+      defaultViewport: 'responsive',
+    },
   },
 };
 
 export default meta;
+
 type Story = StoryObj<typeof GameCard>;
 
+// Removed granular overlay demo stories (rating chip, bookmark, played status, winner badge)
+// to keep Storybook concise. Those concepts are covered in the States Showcase.
+
 // ========================================
-// GRID VIEW VARIATIONS
+// GAMECARD LAYOUT STORIES
 // ========================================
 
-export const GridView: Story = {
-  name: 'Grid View',
+// These stories focus on the GameCard layouts (grid vs list) rather than states
+
+export const GridLayout: Story = {
+  name: 'Grid/Layout',
   args: {
     game: mockGame,
     viewMode: 'grid',
-    variant: 'balanced',
   },
   decorators: [
     (Story) => (
@@ -110,8 +136,14 @@ export const GridView: Story = {
   ],
 };
 
-export const GridViewDetailed: Story = {
-  name: 'Grid View - Detailed',
+// ========================================
+// DENSITY VARIATIONS
+// ========================================
+
+// These stories focus on the three information density levels for GameCard
+
+export const DensityDetailed: Story = {
+  name: 'Grid/Density Detailed',
   args: {
     game: mockGame,
     viewMode: 'grid',
@@ -129,8 +161,27 @@ export const GridViewDetailed: Story = {
   ],
 };
 
-export const GridViewCompact: Story = {
-  name: 'Grid View - Compact',
+export const DensityBalanced: Story = {
+  name: 'Grid/Density Balanced',
+  args: {
+    game: mockGame,
+    viewMode: 'grid',
+    variant: 'balanced',
+    showSummary: false,
+    showMeta: true,
+    emphasizeMeta: false,
+  },
+  decorators: [
+    (Story) => (
+      <div className="max-w-xs">
+        <Story />
+      </div>
+    ),
+  ],
+};
+
+export const DensityCompact: Story = {
+  name: 'Grid/Density Compact',
   args: {
     game: mockGame,
     viewMode: 'grid',
@@ -147,50 +198,14 @@ export const GridViewCompact: Story = {
   ],
 };
 
-// ========================================
-// LIST VIEW VARIATIONS  
-// ========================================
-
-export const ListView: Story = {
-  name: 'List View',
-  args: {
-    game: mockGame,
-    viewMode: 'list',
-    variant: 'balanced',
-    listRank: 1,
-  },
-};
-
-export const ListViewDetailed: Story = {
-  name: 'List View - Detailed',
-  args: {
-    game: mockGame,
-    viewMode: 'list',
-    variant: 'detailed',
-    listRank: 1,
-  },
-};
-
-export const ListViewCompact: Story = {
-  name: 'List View - Compact',
-  args: {
-    game: mockGame,
-    viewMode: 'list',
-    variant: 'compact',
-    listRank: 1,
-  },
-};
-
-// ========================================
-// COMPARISON STORIES
-// ========================================
-
-export const GridViewComparison: Story = {
-  name: 'Grid View - All Variants',
+export const DensityComparison: Story = {
+  name: 'Grid/Density All Variants',
   render: () => (
     <div className="space-y-6">
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold">Grid View Density Comparison</h3>
+        <h3 className="text-lg font-semibold">Density Comparison</h3>
+        <p className="text-sm text-gray-600">Three information density levels for different use cases</p>
+        
         <div className="grid grid-cols-3 gap-6">
           <div className="space-y-2">
             <GameCard 
@@ -202,8 +217,8 @@ export const GridViewComparison: Story = {
               emphasizeMeta={true}
             />
             <div className="text-center">
-              <div className="text-sm font-medium">Detailed</div>
-              <div className="text-xs text-gray-500">Rich information display</div>
+              <div className="text-sm font-medium">Rich Detail</div>
+              <div className="text-xs text-gray-500">Summary + emphasized metadata</div>
             </div>
           </div>
 
@@ -218,7 +233,7 @@ export const GridViewComparison: Story = {
             />
             <div className="text-center">
               <div className="text-sm font-medium">Balanced</div>
-              <div className="text-xs text-gray-500">Standard display</div>
+              <div className="text-xs text-gray-500">Basic metadata shown</div>
             </div>
           </div>
 
@@ -232,7 +247,7 @@ export const GridViewComparison: Story = {
             />
             <div className="text-center">
               <div className="text-sm font-medium">Compact</div>
-              <div className="text-xs text-gray-500">Minimal information</div>
+              <div className="text-xs text-gray-500">Title + year only</div>
             </div>
           </div>
         </div>
@@ -241,62 +256,71 @@ export const GridViewComparison: Story = {
   ),
 };
 
-export const ListViewComparison: Story = {
-  name: 'List View - All Variants',
+// ========================================
+// COLLECTION VIEWS
+// ========================================
+
+// These stories show multiple GameCards together to demonstrate layout patterns
+
+export const GridCollection: Story = {
+  name: 'Grid/Collection Example',
   render: () => (
-    <div className="space-y-6 max-w-4xl">
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold">List View Density Comparison</h3>
-        
-        <div className="space-y-4">
-          <div>
-            <div className="text-sm font-medium mb-2">Detailed</div>
-            <GameCard game={mockGame} viewMode="list" variant="detailed" listRank={1} />
-          </div>
-          
-          <div>
-            <div className="text-sm font-medium mb-2">Balanced</div>
-            <GameCard game={mockGame} viewMode="list" variant="balanced" listRank={1} />
-          </div>
-          
-          <div>
-            <div className="text-sm font-medium mb-2">Compact</div>
-            <GameCard game={mockGame} viewMode="list" variant="compact" listRank={1} />
-          </div>
-        </div>
-      </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <GameCard game={mockGame} viewMode="grid" />
+      <GameCard game={wishlistGame} viewMode="grid" />
+      <GameCard game={winnerGame} viewMode="grid" />
+      <GameCard game={unratedGame} viewMode="grid" />
     </div>
   ),
 };
 
-export const GameStatesShowcase: Story = {
-  name: 'Game States',
+export const StatesShowcase: Story = {
+  name: 'Grid/States Showcase',
   render: () => (
     <div className="space-y-8">
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold">Grid View - Different Game States</h3>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+        <h3 className="text-lg font-semibold">Overlay States (Balanced Density)</h3>
+        <p className="text-sm text-gray-600">Different overlay combinations at standard density</p>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           <div className="space-y-2">
-            <GameCard game={mockGame} viewMode="grid" variant="balanced" />
-            <div className="text-center text-xs text-gray-600">Library + Rated</div>
+            <GameCard game={mockGame} viewMode="grid" variant="balanced" showMeta={true} />
+            <div className="text-center text-xs text-gray-600">Rated + Library</div>
           </div>
           <div className="space-y-2">
-            <GameCard game={wishlistGame} viewMode="grid" variant="balanced" />
+            <GameCard game={wishlistGame} viewMode="grid" variant="balanced" showMeta={true} />
             <div className="text-center text-xs text-gray-600">Wishlist</div>
           </div>
           <div className="space-y-2">
-            <GameCard game={winnerGame} viewMode="grid" variant="balanced" />
+            <GameCard game={winnerGame} viewMode="grid" variant="balanced" showMeta={true} />
             <div className="text-center text-xs text-gray-600">Award Winner</div>
+          </div>
+          <div className="space-y-2">
+            <GameCard game={unratedGame} viewMode="grid" variant="balanced" showMeta={true} />
+            <div className="text-center text-xs text-gray-600">Unrated</div>
           </div>
         </div>
       </div>
       
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold">List View - Different Game States</h3>
-        <div className="space-y-3 max-w-4xl">
-          <GameCard game={mockGame} viewMode="list" variant="balanced" listRank={1} />
-          <GameCard game={wishlistGame} viewMode="list" variant="balanced" listRank={2} />
-          <GameCard game={winnerGame} viewMode="list" variant="balanced" listRank={3} />
+        <h3 className="text-lg font-semibold">Compact Density with Overlays</h3>
+        <p className="text-sm text-gray-600">How overlays work at compact density level</p>
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
+          <div className="space-y-1">
+            <GameCard game={mockGame} viewMode="grid" variant="compact" showMeta={false} />
+            <div className="text-center text-xs text-gray-600">Rated</div>
+          </div>
+          <div className="space-y-1">
+            <GameCard game={wishlistGame} viewMode="grid" variant="compact" showMeta={false} />
+            <div className="text-center text-xs text-gray-600">Wishlist</div>
+          </div>
+          <div className="space-y-1">
+            <GameCard game={winnerGame} viewMode="grid" variant="compact" showMeta={false} />
+            <div className="text-center text-xs text-gray-600">Winner</div>
+          </div>
+          <div className="space-y-1">
+            <GameCard game={unratedGame} viewMode="grid" variant="compact" showMeta={false} />
+            <div className="text-center text-xs text-gray-600">Unrated</div>
+          </div>
         </div>
       </div>
     </div>

@@ -1,10 +1,10 @@
 "use client"
 
 import { useEffect, useState, useMemo } from 'react'
-import ListExplorer from '@/components/features/lists/ListExplorer'
+import ListExplorer from '@/components/Components/ListExplorer'
 import { useParams, useRouter } from 'next/navigation'
-import PageLayout from '@/components/shared/PageLayout'
-import Heading from '@/components/shared/Heading'
+import PageLayout from '@/components/Components/PageLayout'
+import Heading from '@/components/Components/Heading'
 import supabase from '@/lib/supabase'
 import { GameListWithItems } from '@/types/supabase'
 

@@ -1,12 +1,12 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
-import PageLayout from '@/components/shared/PageLayout'
-import Heading from '@/components/shared/Heading'
+import PageLayout from '@/components/Components/PageLayout'
+import Heading from '@/components/Components/Heading'
 import { supabase } from '@/lib/supabase'
 import { GameList, GameListWithItems, Profile } from '@/types/supabase'
-import ListCard from '@/components/features/lists/ListCard'
-import CreateListModal from '@/components/features/lists/CreateListModal'
+import ListCard from '@/components/Components/ListCard'
+import CreateListModal from '@/components/Components/CreateListModal'
 import { PlusIcon } from '@heroicons/react/24/outline'
 
 export default function ListsPage() {

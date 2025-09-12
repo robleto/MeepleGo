@@ -1,8 +1,8 @@
-import PageLayout from '@/components/shared/PageLayout'
+import PageLayout from '@/components/Components/PageLayout'
 import awardsData from '@/data/awards.json'
 import { TrophyIcon, ChevronLeftIcon } from '@heroicons/react/24/outline'
 import { getSupabaseServerClient } from '@/lib/supabaseServer'
-import IndustryAwards from '@/components/features/awards/IndustryAwards'
+import IndustryAwards from '@/components/Components/IndustryAwards'
 import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'

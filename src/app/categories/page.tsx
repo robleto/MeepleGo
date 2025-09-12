@@ -1,5 +1,5 @@
 import { getSupabaseServerClient } from '@/lib/supabaseServer'
-import PageLayout from '@/components/shared/PageLayout'
+import PageLayout from '@/components/Components/PageLayout'
 import Link from 'next/link'
 
 // Server Component: Categories index
