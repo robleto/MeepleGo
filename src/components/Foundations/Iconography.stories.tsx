@@ -21,6 +21,7 @@ import { IconCircle } from '../Elements/IconCircle'
 
 const meta: Meta = {
   title: 'Foundations/Iconography',
+  tags: ['autodocs'],
   parameters: {
     layout: 'padded',
     docs: {
@@ -29,10 +30,9 @@ const meta: Meta = {
       },
     },
   },
-} satisfies Meta
-
+}
 export default meta
-type Story = StoryObj<Meta>
+type Story = StoryObj
 
 const IconShowcase = ({ 
   title, 

@@ -2,7 +2,12 @@ import type { StorybookConfig } from "@storybook/nextjs-vite";
 
 const config: StorybookConfig = {
   "stories": [
-    "../src/**/*.stories.@(js|jsx|mjs|ts|tsx)"
+    // Focus on active component/story locations; exclude legacy `features` & `shared` empty placeholders
+    "../src/components/Components/**/*.stories.@(js|jsx|mjs|ts|tsx)",
+    "../src/components/Elements/**/*.stories.@(js|jsx|mjs|ts|tsx)",
+    "../src/components/Foundations/**/*.stories.@(js|jsx|mjs|ts|tsx)",
+    "../src/design-system/**/*.stories.@(js|jsx|mjs|ts|tsx)",
+    "../src/stories/**/*.stories.@(js|jsx|mjs|ts|tsx)"
   ],
   "addons": [
     "@chromatic-com/storybook",

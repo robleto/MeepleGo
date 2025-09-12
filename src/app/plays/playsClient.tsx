@@ -12,7 +12,7 @@ import type { SuggestionGame } from '@/components/Components/GameSearchSelect'
 import Heading from '@/components/Components/Heading'
 import { getMembershipSets, addGameToDefaultList, removeGameFromDefaultList } from '@/lib/lists'
 import { BookmarkIcon, HeartIcon } from '@heroicons/react/24/outline'
-import { getRatingSolidClass } from '@/design-system/tokens/ratingColors'
+import { getRatingSolidClass } from '@/components/Foundations/ratingColors'
 import PlayLogEditor from '@/components/Components/PlayLogEditor'
 import ZeroState from '@/components/Components/ZeroState'
 

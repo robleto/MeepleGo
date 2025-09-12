@@ -9,6 +9,7 @@
     "start": "next start",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
+  "lint:stories": "node scripts/development-tools/check-empty-stories.mjs",
     "format": "prettier --write .",
     "type-check": "tsc --noEmit",
     "backfill:honors": "ts-node --compiler-options '{\"module\":\"commonjs\"}' scripts/backfill_honor_categories.ts",
@@ -21,8 +22,9 @@
     "admin:reset": "node scripts/admin_reset_password.cjs",
     "test": "vitest run",
     "supabase:types": "supabase gen types typescript --project-id $SUPABASE_PROJECT_ID > src/types/supabase.generated.ts",
-    "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+  "storybook": "storybook dev -p 6006",
+  "build-storybook": "storybook build",
+  "chromatic": "chromatic --exit-once-uploaded || echo 'Chromatic optional'"
   },
   "keywords": [
     "board games",

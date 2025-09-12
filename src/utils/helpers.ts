@@ -33,7 +33,7 @@ export function formatPlayerCount(
   return `${min}–${max} players`
 }
 
-// NOTE: getRatingColor removed - use getRatingSolidClass from @/design-system/tokens/ratingColors instead
+// NOTE: getRatingColor removed - use getRatingSolidClass from @/components/Foundations/ratingColors instead
 
 export function getRatingLabel(rating: number | null): string {
   if (!rating) return 'Not Rated'

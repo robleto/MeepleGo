@@ -1,7 +1,7 @@
 import React from 'react'
 import { StarIcon } from '@heroicons/react/24/outline'
 import { getRatingLabel } from '@/utils/helpers'
-import { getRatingSolidClass, getRatingSubtleClass } from '@/design-system/tokens/ratingColors'
+import { getRatingSolidClass, getRatingSubtleClass } from '@/components/Foundations/ratingColors'
 
 interface ChipProps {
   /**

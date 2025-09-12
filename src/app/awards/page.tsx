@@ -8,9 +8,10 @@ import { getSupabaseServerClient } from '@/lib/supabaseServer'
 import PersonalAwardCategorySection from '@/components/Components/AwardShowcase'
 // Updated awards component import paths
 import PersonalAwardsAuto from '@/components/_archived/features/awards/PersonalAwardsAuto'
-import IndustryAwards from '@/components/Components/IndustryAwards'
-import AwardsLoggedOutHero from '@/components/_archived/features/awards/AwardsLoggedOutHero'
-import HeroAuthGate from '@/components/_archived/features/awards/HeroAuthGate'
+// Removed IndustryAwards component in favor of direct AwardCard composition (subset of AwardCard story patterns)
+import { AwardCard } from '@/components/_archived/features/awards/AwardCard'
+// Removed AwardsLoggedOutHero in favor of inline Hero variant here
+import Hero from '@/components/Components/Hero'
 
 // Award categories loaded from JSON (icon string mapped to actual component below)
 const AWARD_CATEGORIES = (awardsData as any).categories.map((c: any) => ({
@@ -296,17 +297,37 @@ export default async function AwardsPage({
     <PageLayout>
 <div className="max-w-6xl mx-auto px-4 py-8">
 
-  {/* Intro hero (client-gated; hides immediately if authenticated) */}
-  <HeroAuthGate serverLoggedIn={serverLoggedIn} />
+  {!serverLoggedIn && <Hero variant="awards" />}
 
 
-  {/* Industry Awards */}
-  <IndustryAwards
-    preview
-    categories={AWARD_CATEGORIES.map(({ icon, ...rest }) => rest)}
-    stats={allStats}
-    limit={3}
-  />
+  {/* Industry Awards (direct AwardCard grid) */}
+  <section>
+    <div className="flex items-end justify-between mb-5">
+      <Heading as="h2" variant="section" className="mb-1">Industry Awards</Heading>
+    </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {AWARD_CATEGORIES.slice(0,3).map((category, idx) => {
+        const stat = allStats[idx]
+        if (!stat) return null
+        return (
+          <AwardCard
+            key={category.id}
+            href={`/awards/${category.id}`}
+            title={category.name}
+            description={category.description}
+            yearSpan={undefined}
+            winners={undefined as any}
+            nominees={undefined as any}
+            total={undefined}
+            circleBorderClass={category.borderColor}
+            circleBgClass={category.backgroundColor}
+            iconColorClass={category.iconColor}
+            showStats={false}
+          />
+        )
+      })}
+    </div>
+  </section>
 
 
   {/* Personal Awards (server-rendered if session known; else client fallback) */}

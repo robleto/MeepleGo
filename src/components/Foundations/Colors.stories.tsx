@@ -4,7 +4,7 @@ const meta: Meta = {
   title: 'Foundations/Colors',
   tags: ['autodocs'],
   parameters: {
-    layout: 'centered',
+    layout: 'fullscreen',
     docs: {
       description: {
         component: 'Color system including the 1-10 rating scale palette used throughout MeepleGo.'

@@ -1,20 +1,19 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react'
 
 const meta: Meta = {
   title: 'Foundations/Typography',
   tags: ['autodocs'],
   parameters: {
-    layout: 'centered',
+    layout: 'fullscreen',
     docs: {
       description: {
         component: 'Typography system with heading hierarchy and text variants used throughout MeepleGo.'
       }
     }
   }
-};
-
-export default meta;
-type Story = StoryObj;
+}
+export default meta
+type Story = StoryObj
 
 export const Headings: StoryObj = {
   render: () => (

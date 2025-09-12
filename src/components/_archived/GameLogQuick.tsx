@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import { PlayIcon, XMarkIcon, MagnifyingGlassIcon, ArrowPathIcon } from '@heroicons/react/24/outline'
-import { getRatingSolidClass } from '@/design-system/tokens/ratingColors'
+import { getRatingSolidClass } from '@/components/Foundations/ratingColors'
 import { formatYear } from '@/utils/helpers'
 
 interface GameLite {

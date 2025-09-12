@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useLayoutEffect, useEffect } from 'react'
-import { getRatingSubtleClass } from '@/design-system/tokens/ratingColors'
+import { getRatingSubtleClass } from '@/components/Foundations/ratingColors'
 import { supabase } from '@/lib/supabase'
 
 interface RatingPopupProps {

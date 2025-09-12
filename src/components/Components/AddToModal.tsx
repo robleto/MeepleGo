@@ -8,7 +8,7 @@ import { supabase } from '@/lib/supabase'
 import { addGameToDefaultList, removeGameFromDefaultList } from '@/lib/lists'
 import { formatYear } from '@/utils/helpers'
 import { XMarkIcon } from '@heroicons/react/24/outline'
-import { RATING_SOLID_CLASS, RATING_SELECTION_VALUES } from '@/design-system/tokens/ratingColors'
+import { RATING_SOLID_CLASS, RATING_SELECTION_VALUES } from '@/components/Foundations/ratingColors'
 
 interface AddToModalProps {
   game?: (GameWithRanking & { list_membership?: { library: boolean; wishlist: boolean } }) | null
