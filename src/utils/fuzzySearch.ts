@@ -13,7 +13,7 @@ export function normalizeForSearch(text: string): string {
       .toLowerCase()
       .trim()
       // Remove common punctuation and special characters
-      .replace(/['"''""!@#$%^&*()_+\-=\[\]{};:,.<>?/\\|`~]/g, ' ')
+      .replace(/[^A-Za-z0-9\s]/g, ' ')
       // Normalize spaces
       .replace(/\s+/g, ' ')
       .trim()

@@ -111,12 +111,20 @@ export default function ListCard({
   const itemCount = list.game_list_items?.length || 0
 
   // Determine the correct route based on list type
-  const slugify = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,60)
+  const slugify = (s: string) =>
+    s
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 60)
   const getListHref = () => {
     switch (list.list_type) {
-      case 'library': return '/library'
-      case 'wishlist': return '/wishlist'
-      default: return `/lists/${slugify(list.name)}-${list.id}`
+      case 'library':
+        return '/library'
+      case 'wishlist':
+        return '/wishlist'
+      default:
+        return `/lists/${slugify(list.name)}-${list.id}`
     }
   }
 
@@ -184,7 +192,12 @@ export default function ListCard({
               {list.name}
             </h3>
             {/* System / BGG badge */}
-            {['bgg_bestsellers','bgg_hotness','bgg_trendingplays','bgg_mostplayed'].includes(list.list_type as string) && (
+            {[
+              'bgg_bestsellers',
+              'bgg_hotness',
+              'bgg_trendingplays',
+              'bgg_mostplayed',
+            ].includes(list.list_type as string) && (
               <span className="ml-1 inline-flex items-center gap-1 rounded-md bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 px-2 py-0.5 text-[10px] font-semibold tracking-wide uppercase">
                 BGG
               </span>
@@ -218,7 +231,7 @@ export default function ListCard({
           </p>
         )}
 
-  {/* Metadata */}
+        {/* Metadata */}
         <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
           <span>
             {itemCount} {itemCount === 1 ? 'game' : 'games'}

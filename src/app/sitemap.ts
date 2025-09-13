@@ -3,20 +3,21 @@ import { getGameUrl } from '@/utils/helpers'
 
 export default async function sitemap() {
   const supabase = await getSupabaseServerClient()
-  
+
   // Get all games
   const { data: games } = await supabase
     .from('games')
     .select('id, name, updated_at')
     .order('id')
-  
-  const gameUrls = games?.map((game) => ({
-    url: `https://meeplego.com${getGameUrl(game)}`,
-    lastModified: new Date(game.updated_at),
-    changeFrequency: 'weekly' as const,
-    priority: 0.7,
-  })) || []
-  
+
+  const gameUrls =
+    games?.map((game) => ({
+      url: `https://meeplego.com${getGameUrl(game)}`,
+      lastModified: new Date(game.updated_at),
+      changeFrequency: 'weekly' as const,
+      priority: 0.7,
+    })) || []
+
   return [
     {
       url: 'https://meeplego.com',

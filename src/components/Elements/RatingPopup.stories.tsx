@@ -1,4 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import React from 'react'
+import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { useState } from 'react'
 import RatingPopup from './RatingPopup'
 
@@ -77,10 +78,12 @@ export const InteractiveDemo: Story = {
     return (
       <div className="p-8 space-y-6">
         <h2 className="text-2xl font-bold">RatingPopup Interactive Demo</h2>
-        
+
         <div className="space-y-4">
           <div className="bg-white rounded-lg p-4 shadow-sm border">
-            <h3 className="font-semibold mb-2">Current Rating: {rating || 'None'}</h3>
+            <h3 className="font-semibold mb-2">
+              Current Rating: {rating || 'None'}
+            </h3>
             <button
               onClick={handleOpenPopup}
               className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
@@ -135,12 +138,14 @@ export const PositionVariants: Story = {
   render: () => (
     <div className="p-8 space-y-6">
       <h2 className="text-2xl font-bold">RatingPopup Positioning</h2>
-      
+
       <div className="relative bg-gray-100 rounded-lg p-8 min-h-96">
         <div className="grid grid-cols-3 gap-8 h-full">
           {/* Top Left */}
           <div className="relative">
-            <div className="bg-white p-3 rounded shadow text-center text-sm">Top Left</div>
+            <div className="bg-white p-3 rounded shadow text-center text-sm">
+              Top Left
+            </div>
             <RatingPopup
               gameId="1"
               gameName="Azul"
@@ -154,7 +159,9 @@ export const PositionVariants: Story = {
 
           {/* Top Center */}
           <div className="relative">
-            <div className="bg-white p-3 rounded shadow text-center text-sm">Top Center</div>
+            <div className="bg-white p-3 rounded shadow text-center text-sm">
+              Top Center
+            </div>
             <RatingPopup
               gameId="2"
               gameName="Ticket to Ride"
@@ -168,7 +175,9 @@ export const PositionVariants: Story = {
 
           {/* Top Right */}
           <div className="relative">
-            <div className="bg-white p-3 rounded shadow text-center text-sm">Top Right</div>
+            <div className="bg-white p-3 rounded shadow text-center text-sm">
+              Top Right
+            </div>
             <RatingPopup
               gameId="3"
               gameName="Splendor"
@@ -185,8 +194,9 @@ export const PositionVariants: Story = {
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
         <h4 className="font-semibold text-blue-900 mb-2">Usage Notes</h4>
         <p className="text-blue-800 text-sm">
-          RatingPopup provides a quick way to rate games with visual feedback. It automatically
-          positions itself relative to the trigger element and handles saving to the database.
+          RatingPopup provides a quick way to rate games with visual feedback.
+          It automatically positions itself relative to the trigger element and
+          handles saving to the database.
         </p>
       </div>
     </div>

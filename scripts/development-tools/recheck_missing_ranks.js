@@ -19,8 +19,13 @@ const dotenv = require('dotenv')
 dotenv.config({ path: '.env' })
 const { createClient } = require('@supabase/supabase-js')
 
-if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-  console.error('Missing Supabase env vars (NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)')
+if (
+  !process.env.NEXT_PUBLIC_SUPABASE_URL ||
+  !process.env.SUPABASE_SERVICE_ROLE_KEY
+) {
+  console.error(
+    'Missing Supabase env vars (NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)'
+  )
   process.exit(1)
 }
 
@@ -32,13 +37,21 @@ const getArg = (key, def = null) => {
 const has = (key) => args.includes(key)
 
 const testMode = has('--test')
-const limit = testMode ? 10 : (getArg('--limit') ? parseInt(getArg('--limit'), 10) : null)
+const limit = testMode
+  ? 10
+  : getArg('--limit')
+    ? parseInt(getArg('--limit'), 10)
+    : null
 const concurrency = parseInt(getArg('--concurrency', '1'), 10)
 const delayMin = parseInt(getArg('--delay-min', '2000'), 10)
 const delayMax = parseInt(getArg('--delay-max', '2000'), 10)
-const sinceDays = getArg('--since-days') ? parseInt(getArg('--since-days'), 10) : null
+const sinceDays = getArg('--since-days')
+  ? parseInt(getArg('--since-days'), 10)
+  : null
 const dryRun = has('--dry-run')
-const orderField = ['bgg_id','id'].includes(getArg('--order','bgg_id')) ? getArg('--order','bgg_id') : 'bgg_id'
+const orderField = ['bgg_id', 'id'].includes(getArg('--order', 'bgg_id'))
+  ? getArg('--order', 'bgg_id')
+  : 'bgg_id'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -76,15 +89,15 @@ async function fetchRank(bggId, attempt = 0) {
   const res = await fetch(url)
   if (res.status === 429) {
     const wait = Math.min(30000, 4000 + attempt * 3000)
-    console.log(`⏳ 429 rate limited (BGG ${bggId}) waiting ${wait/1000}s`)
-    await new Promise(r=>setTimeout(r, wait))
-    return fetchRank(bggId, attempt+1)
+    console.log(`⏳ 429 rate limited (BGG ${bggId}) waiting ${wait / 1000}s`)
+    await new Promise((r) => setTimeout(r, wait))
+    return fetchRank(bggId, attempt + 1)
   }
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   const xml = await res.text()
   if (!xml.includes('<item')) return 'NOT_FOUND'
   const m = xml.match(/<rank[^>]+name="boardgame"[^>]+value="(\d+)"/)
-  return m ? parseInt(m[1],10) : 'UNRANKED'
+  return m ? parseInt(m[1], 10) : 'UNRANKED'
 }
 
 async function updateRank(gameId, rank) {
@@ -109,7 +122,9 @@ async function worker(id, queue) {
         console.log(`[${id}] ❓ ${game.name} (bgg:${game.bgg_id}) not found`)
       } else if (rank === 'UNRANKED') {
         unranked++
-        console.log(`[${id}] ↕️  ${game.name} (bgg:${game.bgg_id}) still unranked`)
+        console.log(
+          `[${id}] ↕️  ${game.name} (bgg:${game.bgg_id}) still unranked`
+        )
       } else {
         await updateRank(game.id, rank)
         updated++
@@ -120,14 +135,16 @@ async function worker(id, queue) {
       console.log(`[${id}] ❌ ${game.name} (${game.bgg_id}) ${e.message}`)
     }
     const jitter = delayMin + Math.random() * delayMax
-    await new Promise(r=>setTimeout(r, jitter))
+    await new Promise((r) => setTimeout(r, jitter))
     if (limit && processed >= limit) break
   }
 }
 
 async function run() {
   console.log('🔁 Rechecking missing ranks...')
-  console.log(`Options: limit=${limit||'∞'} concurrency=${concurrency} delay=${delayMin}-${delayMax}ms order=${orderField} sinceDays=${sinceDays||'ALL'} dryRun=${dryRun}`)
+  console.log(
+    `Options: limit=${limit || '∞'} concurrency=${concurrency} delay=${delayMin}-${delayMax}ms order=${orderField} sinceDays=${sinceDays || 'ALL'} dryRun=${dryRun}`
+  )
   const batch = await fetchMissingGames(limit || 500)
   if (!batch.length) {
     console.log('🎉 No games need re-check (all ranked or missing bgg_id).')
@@ -136,17 +153,20 @@ async function run() {
   console.log(`Found ${batch.length} candidate games (processing up to limit).`)
   const queue = batch.slice(0, limit || batch.length)
   const workers = []
-  for (let i=0;i<concurrency;i++) workers.push(worker(i+1, queue))
+  for (let i = 0; i < concurrency; i++) workers.push(worker(i + 1, queue))
   await Promise.all(workers)
-  const elapsed = (Date.now()-start)/1000
+  const elapsed = (Date.now() - start) / 1000
   console.log('\n📊 Summary:')
   console.log(`  Processed: ${processed}`)
   console.log(`  Updated:   ${updated}`)
   console.log(`  Unranked:  ${unranked}`)
   console.log(`  NotFound:  ${skipped}`)
   console.log(`  Errors:    ${errors}`)
-  console.log(`  Rate:      ${(processed/elapsed).toFixed(2)} games/sec`)
+  console.log(`  Rate:      ${(processed / elapsed).toFixed(2)} games/sec`)
   if (dryRun) console.log('🛈 Dry-run mode (no DB writes).')
 }
 
-run().catch(e=>{ console.error('Fatal:', e); process.exit(1) })
+run().catch((e) => {
+  console.error('Fatal:', e)
+  process.exit(1)
+})

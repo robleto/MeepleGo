@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 
 const meta: Meta = {
   title: 'Foundations/Spacing',
@@ -7,10 +7,11 @@ const meta: Meta = {
     layout: 'centered',
     docs: {
       description: {
-        component: 'Spacing system showing Tailwind spacing scale used for consistent layout throughout MeepleGo.'
-      }
-    }
-  }
+        component:
+          'Spacing system showing Tailwind spacing scale used for consistent layout throughout MeepleGo.',
+      },
+    },
+  },
 }
 export default meta
 
@@ -26,14 +27,16 @@ export const SpacingScale: StoryObj = {
         { value: 8, rem: '2rem', px: '32px' },
         { value: 12, rem: '3rem', px: '48px' },
         { value: 16, rem: '4rem', px: '64px' },
-        { value: 24, rem: '6rem', px: '96px' }
+        { value: 24, rem: '6rem', px: '96px' },
       ].map(({ value, rem, px }) => (
         <div key={value} className="flex items-center gap-4">
           <div className={`h-4 bg-blue-500 rounded`} style={{ width: rem }} />
           <div className="text-sm font-mono min-w-[4rem]">w-{value}</div>
-          <div className="text-xs text-gray-600">{rem} ({px})</div>
+          <div className="text-xs text-gray-600">
+            {rem} ({px})
+          </div>
         </div>
       ))}
     </div>
-  )
+  ),
 }

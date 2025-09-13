@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { Button } from './Button'
 import { PlusIcon, TrashIcon, HeartIcon } from '@heroicons/react/24/outline'
 
@@ -66,10 +66,18 @@ export const Outline: Story = {
 export const Sizes: Story = {
   render: () => (
     <div className="flex items-center gap-4">
-      <Button variant="primary" size="xs">Extra Small</Button>
-      <Button variant="primary" size="sm">Small</Button>
-      <Button variant="primary" size="md">Medium</Button>
-      <Button variant="primary" size="lg">Large</Button>
+      <Button variant="primary" size="xs">
+        Extra Small
+      </Button>
+      <Button variant="primary" size="sm">
+        Small
+      </Button>
+      <Button variant="primary" size="md">
+        Medium
+      </Button>
+      <Button variant="primary" size="lg">
+        Large
+      </Button>
     </div>
   ),
 }
@@ -77,10 +85,18 @@ export const Sizes: Story = {
 export const Shapes: Story = {
   render: () => (
     <div className="flex items-center gap-4">
-      <Button variant="primary" shape="default">Default</Button>
-      <Button variant="primary" shape="rounded">Rounded</Button>
-      <Button variant="primary" shape="pill">Pill</Button>
-      <Button variant="primary" shape="square">Square</Button>
+      <Button variant="primary" shape="default">
+        Default
+      </Button>
+      <Button variant="primary" shape="rounded">
+        Rounded
+      </Button>
+      <Button variant="primary" shape="pill">
+        Pill
+      </Button>
+      <Button variant="primary" shape="square">
+        Square
+      </Button>
     </div>
   ),
 }
@@ -94,7 +110,11 @@ export const WithIcons: Story = {
       <Button variant="danger" rightIcon={<TrashIcon className="w-4 h-4" />}>
         Delete
       </Button>
-      <Button variant="ghost" leftIcon={<HeartIcon className="w-4 h-4" />} rightIcon={<PlusIcon className="w-4 h-4" />}>
+      <Button
+        variant="ghost"
+        leftIcon={<HeartIcon className="w-4 h-4" />}
+        rightIcon={<PlusIcon className="w-4 h-4" />}
+      >
         Like & Share
       </Button>
     </div>
@@ -125,7 +145,9 @@ export const AllVariants: Story = {
       <Button variant="ghost">Ghost</Button>
       <Button variant="danger">Danger</Button>
       <Button variant="outline">Outline</Button>
-      <Button variant="primary" disabled>Disabled</Button>
+      <Button variant="primary" disabled>
+        Disabled
+      </Button>
     </div>
   ),
 }

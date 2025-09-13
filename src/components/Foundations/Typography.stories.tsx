@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 
 const meta: Meta = {
   title: 'Foundations/Typography',
@@ -7,10 +7,11 @@ const meta: Meta = {
     layout: 'fullscreen',
     docs: {
       description: {
-        component: 'Typography system with heading hierarchy and text variants used throughout MeepleGo.'
-      }
-    }
-  }
+        component:
+          'Typography system with heading hierarchy and text variants used throughout MeepleGo.',
+      },
+    },
+  },
 }
 export default meta
 type Story = StoryObj
@@ -26,7 +27,7 @@ export const Headings: StoryObj = {
       <p className="text-sm text-gray-600">Small text - Captions and meta</p>
       <p className="text-xs text-gray-500">Micro text - Labels and hints</p>
     </div>
-  )
+  ),
 }
 
 export const Subhead: StoryObj = {
@@ -36,8 +37,9 @@ export const Subhead: StoryObj = {
         Subhead Example
       </h2>
       <p className="text-sm text-gray-600 max-w-md">
-        Subheads provide additional context below main headings. They use lighter weight and subtle colors.
+        Subheads provide additional context below main headings. They use
+        lighter weight and subtle colors.
       </p>
     </div>
-  )
+  ),
 }

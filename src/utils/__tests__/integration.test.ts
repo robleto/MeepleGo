@@ -10,7 +10,7 @@ const mockGames = [
     playtime_minutes: 75,
     min_players: 1,
     max_players: 5,
-    ranking: { ranking: 8.5 }
+    ranking: { ranking: 8.5 },
   },
   {
     id: '2',
@@ -19,7 +19,7 @@ const mockGames = [
     playtime_minutes: 45,
     min_players: 2,
     max_players: 4,
-    ranking: { ranking: 7.8 }
+    ranking: { ranking: 7.8 },
   },
   {
     id: '3',
@@ -28,14 +28,14 @@ const mockGames = [
     playtime_minutes: 60,
     min_players: 2,
     max_players: 5,
-    ranking: null
-  }
+    ranking: null,
+  },
 ]
 
 describe('Game Data Integration', () => {
   it('formats game metadata consistently', () => {
     const game = mockGames[0]
-    
+
     expect(game.name).toBe('Wingspan')
     expect(game.year_published).toBe(2019)
     expect(game.playtime_minutes).toBe(75)
@@ -45,7 +45,7 @@ describe('Game Data Integration', () => {
 
   it('handles games with missing ratings', () => {
     const unratedGame = mockGames[2]
-    
+
     expect(unratedGame.ranking).toBeNull()
     expect(unratedGame.name).toBe('Ticket to Ride')
   })

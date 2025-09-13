@@ -8,9 +8,13 @@ export default function AwardsSchemaPage() {
   return (
     <PageLayout>
       <div className="max-w-3xl mx-auto px-4 py-8">
-        <Heading as="h1" size="lg" soft>Awards Schema Check</Heading>
+        <Heading as="h1" size="lg" soft>
+          Awards Schema Check
+        </Heading>
         <SchemaCheckClient />
-        <p className="mt-4 text-sm text-gray-500">If needsAction = true, run the pending migration(s) shown earlier.</p>
+        <p className="mt-4 text-sm text-gray-500">
+          If needsAction = true, run the pending migration(s) shown earlier.
+        </p>
       </div>
     </PageLayout>
   )

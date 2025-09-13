@@ -1,42 +1,80 @@
 import type { Metadata } from 'next'
-import { Inter, Outfit, Geist, Fraunces, Playfair_Display, Archivo_Black, Epilogue } from 'next/font/google'
+import {
+  Inter,
+  Outfit,
+  Geist,
+  Fraunces,
+  Playfair_Display,
+  Archivo_Black,
+  Epilogue,
+} from 'next/font/google'
 import './globals.css'
 import Navigation from '@/components/Global/Navigation'
 import SiteFooter from '@/components/Global/SiteFooter'
 
 // Primary (Set A) fonts
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' })
-const outfit = Outfit({ subsets: ['latin'], variable: '--font-display', display: 'swap' })
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
+  display: 'swap',
+})
+const outfit = Outfit({
+  subsets: ['latin'],
+  variable: '--font-display',
+  display: 'swap',
+})
 
 // Alternative (Set B) fonts for prestige vibe
 // Geist (body) + Fraunces (award / display serif) + optional Playfair Display variant
 // We expose separate CSS variables so we can remap --font-inter & --font-display when the
 // html element has the class `typography-b` (see globals.css for the variable remapping).
-const geist = Geist({ subsets: ['latin'], variable: '--font-sans-b', display: 'swap' })
-const fraunces = Fraunces({ subsets: ['latin'], variable: '--font-award-b', display: 'swap' })
-const playfair = Playfair_Display({ subsets: ['latin'], variable: '--font-award-b-alt', display: 'swap' })
+const geist = Geist({
+  subsets: ['latin'],
+  variable: '--font-sans-b',
+  display: 'swap',
+})
+const fraunces = Fraunces({
+  subsets: ['latin'],
+  variable: '--font-award-b',
+  display: 'swap',
+})
+const playfair = Playfair_Display({
+  subsets: ['latin'],
+  variable: '--font-award-b-alt',
+  display: 'swap',
+})
 // Poster / bold award title experiment
-const archivoBlack = Archivo_Black({ subsets: ['latin'], weight: '400', variable: '--font-award-poster', display: 'swap' })
+const archivoBlack = Archivo_Black({
+  subsets: ['latin'],
+  weight: '400',
+  variable: '--font-award-poster',
+  display: 'swap',
+})
 // Softer geometric option (lighter presence vs Outfit / Archivo)
-const epilogue = Epilogue({ subsets: ['latin'], variable: '--font-display-soft', display: 'swap' })
+const epilogue = Epilogue({
+  subsets: ['latin'],
+  variable: '--font-display-soft',
+  display: 'swap',
+})
 
 export const metadata: Metadata = {
   title: {
     default: 'MeepleGo - Board Game Collection Tracker & Reviews',
-    template: '%s | MeepleGo'
+    template: '%s | MeepleGo',
   },
-  description: 'Discover, track, rate and organize your board game collection. Comprehensive database of board games with ratings, reviews, and detailed information.',
+  description:
+    'Discover, track, rate and organize your board game collection. Comprehensive database of board games with ratings, reviews, and detailed information.',
   keywords: [
-    'board games', 
-    'board game tracker', 
-    'board game collection', 
-    'board game reviews', 
+    'board games',
+    'board game tracker',
+    'board game collection',
+    'board game reviews',
     'tabletop games',
     'game ratings',
     'BoardGameGeek',
     'game database',
     'board game awards',
-    'game recommendations'
+    'game recommendations',
   ],
   authors: [{ name: 'MeepleGo' }],
   creator: 'MeepleGo',
@@ -51,7 +89,8 @@ export const metadata: Metadata = {
     url: 'https://meeplego.com',
     siteName: 'MeepleGo',
     title: 'MeepleGo - Board Game Collection Tracker & Reviews',
-    description: 'Discover, track, rate and organize your board game collection. Comprehensive database of board games with ratings, reviews, and detailed information.',
+    description:
+      'Discover, track, rate and organize your board game collection. Comprehensive database of board games with ratings, reviews, and detailed information.',
     images: [
       {
         url: '/meeplego-logo.png',
@@ -64,7 +103,8 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'MeepleGo - Board Game Collection Tracker',
-    description: 'Discover, track, rate and organize your board game collection.',
+    description:
+      'Discover, track, rate and organize your board game collection.',
     images: ['/meeplego-logo.png'],
   },
   robots: {
@@ -86,21 +126,21 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-  <html
+    <html
       lang="en"
       className={[
         inter.variable,
         outfit.variable,
         geist.variable,
         fraunces.variable,
-  playfair.variable,
-  archivoBlack.variable,
-  epilogue.variable,
+        playfair.variable,
+        archivoBlack.variable,
+        epilogue.variable,
       ].join(' ')}
     >
       <head>
         <link rel="preconnect" href="https://use.typekit.net" />
-  <link rel="preconnect" href="https://p.typekit.net" />
+        <link rel="preconnect" href="https://p.typekit.net" />
         {process.env.NEXT_PUBLIC_ADOBE_FONTS_KIT_ID && (
           <link
             rel="stylesheet"
@@ -110,12 +150,12 @@ export default function RootLayout({
       </head>
       <body
         className={
-      'font-sans min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-white'
+          'font-sans min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-white'
         }
       >
         <Navigation />
-  <div className="pt-16 min-h-[70vh]">{children}</div>
-  <SiteFooter />
+        <div className="pt-16 min-h-[70vh]">{children}</div>
+        <SiteFooter />
       </body>
     </html>
   )

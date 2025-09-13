@@ -167,13 +167,13 @@ export default function ListsPage() {
       <div className="space-y-8">
         {/* My Lists Section */}
         <div>
-            {!isGuest && (
+          {!isGuest && (
             <div className="mb-2">
               <h2 className="heading-display text-2xl font-normal tracking-wide text-gray-700 dark:text-gray-300 mb-1">
-              My Lists
+                My Lists
               </h2>
             </div>
-            )}
+          )}
           {/* <p className="text-sm text-gray-600 dark:text-gray-400 mb-6 max-w-2xl">
             {isGuest
               ? 'Browse public community and BGG powered lists. Sign in to build and curate your own collections.'
@@ -183,45 +183,80 @@ export default function ListsPage() {
           {isGuest ? (
             <div className="panel mb-10 flex flex-col md:flex-row md:items-start gap-10 md:gap-20">
               <div className="flex-1">
-                <Heading as="h1" size="display" align="left" displayFont className="mb-6">
-                  Create your own<br/> Game Lists
+                <Heading
+                  as="h1"
+                  size="display"
+                  align="left"
+                  displayFont
+                  className="mb-6"
+                >
+                  Create your own
+                  <br /> Game Lists
                 </Heading>
                 <p className="text-lg md:text-xl text-gray-600 dark:text-gray-400 max-w-xl leading-snug">
-                  Curate collections of favorites, expansions to try, party picks—anything. Share them or keep them private.
+                  Curate collections of favorites, expansions to try, party
+                  picks—anything. Share them or keep them private.
                 </p>
                 <button className="mt-8 inline-flex items-center gap-2 px-6 py-3 rounded-full btn-brand text-sm font-medium">
                   Sign Up to Get Started
                 </button>
               </div>
               <ol className="flex-1 space-y-10 md:space-y-12 relative">
-        <li className="flex items-start gap-5">
-          <div className="flex-shrink-0 text-sm font-semibold w-6 h-6 rounded-full bg-sky-100 text-sky-700 flex items-center justify-center mt-1 dark:bg-sky-900/40 dark:text-sky-300">1</div>
+                <li className="flex items-start gap-5">
+                  <div className="flex-shrink-0 text-sm font-semibold w-6 h-6 rounded-full bg-sky-100 text-sky-700 flex items-center justify-center mt-1 dark:bg-sky-900/40 dark:text-sky-300">
+                    1
+                  </div>
                   <div className="flex-1 border-b border-gray-200 dark:border-gray-700 pb-8 last:border-b-0 last:pb-0">
                     <div className="flex items-center gap-2 mb-2">
-            <span className="w-5 h-5 rounded bg-sky-600/10 text-sky-600 flex items-center justify-center text-[11px] font-bold">+</span>
-                      <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-lg">Collect & organize</h3>
+                      <span className="w-5 h-5 rounded bg-sky-600/10 text-sky-600 flex items-center justify-center text-[11px] font-bold">
+                        +
+                      </span>
+                      <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-lg">
+                        Collect & organize
+                      </h3>
                     </div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 leading-snug max-w-md">Add games you own or want. Library & Wishlist seed your personal catalog automatically.</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 leading-snug max-w-md">
+                      Add games you own or want. Library & Wishlist seed your
+                      personal catalog automatically.
+                    </p>
                   </div>
                 </li>
                 <li className="flex items-start gap-5">
-          <div className="flex-shrink-0 text-sm font-semibold w-6 h-6 rounded-full bg-sky-100 text-sky-700 flex items-center justify-center mt-1 dark:bg-sky-900/40 dark:text-sky-300">2</div>
+                  <div className="flex-shrink-0 text-sm font-semibold w-6 h-6 rounded-full bg-sky-100 text-sky-700 flex items-center justify-center mt-1 dark:bg-sky-900/40 dark:text-sky-300">
+                    2
+                  </div>
                   <div className="flex-1 border-b border-gray-200 dark:border-gray-700 pb-8 last:border-b-0 last:pb-0">
                     <div className="flex items-center gap-2 mb-2">
-            <span className="w-5 h-5 rounded bg-sky-600/10 text-sky-600 flex items-center justify-center text-[11px] font-bold">★</span>
-                      <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-lg">Rate & rank</h3>
+                      <span className="w-5 h-5 rounded bg-sky-600/10 text-sky-600 flex items-center justify-center text-[11px] font-bold">
+                        ★
+                      </span>
+                      <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-lg">
+                        Rate & rank
+                      </h3>
                     </div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 leading-snug max-w-md">Rate what you play to enrich list sorting & smart suggestions.</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 leading-snug max-w-md">
+                      Rate what you play to enrich list sorting & smart
+                      suggestions.
+                    </p>
                   </div>
                 </li>
                 <li className="flex items-start gap-5">
-          <div className="flex-shrink-0 text-sm font-semibold w-6 h-6 rounded-full bg-sky-100 text-sky-700 flex items-center justify-center mt-1 dark:bg-sky-900/40 dark:text-sky-300">3</div>
+                  <div className="flex-shrink-0 text-sm font-semibold w-6 h-6 rounded-full bg-sky-100 text-sky-700 flex items-center justify-center mt-1 dark:bg-sky-900/40 dark:text-sky-300">
+                    3
+                  </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="w-5 h-5 rounded bg-amber-500/10 text-amber-600 flex items-center justify-center text-[11px] font-bold">🏆</span>
-                      <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-lg">Unlock awards</h3>
+                      <span className="w-5 h-5 rounded bg-amber-500/10 text-amber-600 flex items-center justify-center text-[11px] font-bold">
+                        🏆
+                      </span>
+                      <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-lg">
+                        Unlock awards
+                      </h3>
                     </div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 leading-snug max-w-md">Your curated lists + play data feed personalized award categories—refine nominees & winners later.</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 leading-snug max-w-md">
+                      Your curated lists + play data feed personalized award
+                      categories—refine nominees & winners later.
+                    </p>
                   </div>
                 </li>
               </ol>
@@ -280,13 +315,13 @@ export default function ListsPage() {
         </div>
 
         {/* Public Lists Section */}
-  {publicLists.length > 0 && (
+        {publicLists.length > 0 && (
           <div>
             <div className="mb-2">
               <h2 className="heading-display text-2xl font-normal tracking-wide text-gray-700 dark:text-gray-300 mb-1">
                 Public Lists
               </h2>
-               </div>
+            </div>
             {/* <p className="text-sm text-gray-600 dark:text-gray-400 mb-6 max-w-2xl">
               Recently updated public & system generated (BGG) lists.
             </p> */}
@@ -295,7 +330,7 @@ export default function ListsPage() {
                 <ListCard
                   key={list.id}
                   list={list}
-      isPublic={true}
+                  isPublic={true}
                   onUpdate={fetchPublicLists}
                 />
               ))}

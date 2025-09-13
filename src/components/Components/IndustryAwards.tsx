@@ -1,4 +1,4 @@
-"use client"
+'use client'
 import Link from 'next/link'
 import { TrophyIcon } from '@heroicons/react/24/outline'
 import AwardCard from './AwardCard'
@@ -27,7 +27,7 @@ export default function IndustryAwards({
   stats,
   preview = false,
   limit = 3,
-  seeAllHref = '/awards/industry'
+  seeAllHref = '/awards/industry',
 }: {
   categories: Category[]
   stats: AwardStats[]
@@ -40,13 +40,17 @@ export default function IndustryAwards({
   return (
     <section>
       <div className="flex items-end justify-between mb-5">
-  <Heading as="h2" variant="section" className="mb-1">Industry Awards</Heading>
+        <Heading as="h2" variant="section" className="mb-1">
+          Industry Awards
+        </Heading>
         {preview && categories.length > limit && (
-          <Link href={seeAllHref} className="text-xs font-medium rounded px-2 py-1">
+          <Link
+            href={seeAllHref}
+            className="text-xs font-medium rounded px-2 py-1"
+          >
             See All
           </Link>
         )}
-
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {visible.map((category, idx) => {

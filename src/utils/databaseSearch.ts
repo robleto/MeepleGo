@@ -2,7 +2,45 @@
  * Database search utilities for enhanced server-side search
  */
 import { supabase } from '@/lib/supabase'
+// Ranking is exported from '@/types/supabase' via '@/types' re-export chain (ensure correct import)
 import type { GameWithRanking } from '@/types'
+import type { Ranking } from '@/types/supabase'
+
+// Reusable punctuation matcher (kept broad to mirror previous behavior)
+const PUNCTUATION_REGEX = /[^A-Za-z0-9\s]/g
+
+// Raw shape returned by the search_games_ranked RPC.
+// (Columns should mirror the games table plus any ranking score fields the function returns.)
+// We purposely allow extra unknown keys but type the ones we use.
+interface RawSearchGame {
+  id: string
+  bgg_id: number
+  name: string
+  year_published: number | null
+  image_url: string | null
+  thumbnail_url: string | null
+  categories: string[] | null
+  mechanics: string[] | null
+  min_players: number | null
+  max_players: number | null
+  playtime_minutes: number | null
+  publisher: string | null
+  description: string | null
+  summary: string | null
+  rank: number | null
+  rating: number | null
+  num_ratings: number | null
+  cached_at: string | null
+  created_at: string
+  updated_at: string
+  // Optional score field produced by ranking function (ignore for now)
+  search_rank?: number
+  // Unknown additional props (avoid any index access elsewhere)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- TODO(meeplego#types): relax when RPC typed via generated types
+  [key: string]: any
+}
+
+type RankingsRow = Ranking
 
 /**
  * Enhanced database search using PostgreSQL full-text search (with fallback)
@@ -25,26 +63,25 @@ export async function searchGamesDatabase(
       })
 
       if (!error && data) {
-        // Get the game IDs for a separate rankings query if needed
-        const gameIds = data.map((game: any) => game.id)
+        const rawData = data as RawSearchGame[]
+        // Collect game ids (skip falsy just in case)
+        const gameIds = rawData.map((g) => g.id).filter(Boolean)
 
-        let rankings: any[] = []
+        let rankings: RankingsRow[] = []
         if (userId && gameIds.length > 0) {
           const { data: rankingsData } = await supabase
             .from('rankings')
             .select('*')
             .in('game_id', gameIds)
             .eq('user_id', userId)
-
-          rankings = rankingsData || []
+          rankings = (rankingsData as RankingsRow[]) || []
         }
 
-        // Transform the data to match our GameWithRanking type
-        const games: GameWithRanking[] = data
-          .map((game: any) => ({
-            ...game,
-            ranking: rankings.find((r) => r.game_id === game.id) || null,
-          }))
+        const games: GameWithRanking[] = rawData
+          .map<GameWithRanking>((game) => {
+            const ranking = rankings.find((r) => r.game_id === game.id) || null
+            return { ...game, ranking }
+          })
           .slice(offset, offset + limit)
 
         return { games, error: null }
@@ -82,8 +119,8 @@ export async function searchGamesFallback(
     // Create multiple search patterns to handle punctuation and subtitles
     const searchPatterns = [
       term, // Original term
-      term.replace(/['"''""!@#$%^&*()_+\-=\[\]{};:,.<>?/\\|`~]/g, ' '), // Remove punctuation
-      term.replace(/['"''""!@#$%^&*()_+\-=\[\]{};:,.<>?/\\|`~]/g, ''), // Remove punctuation completely
+      term.replace(PUNCTUATION_REGEX, ' '), // Remove punctuation (spaces)
+      term.replace(PUNCTUATION_REGEX, ''), // Remove punctuation completely
       term.replace(/:/g, ''), // Specifically handle colons
       term.replace(/:/g, ' '), // Replace colons with spaces
     ]
@@ -141,12 +178,18 @@ export async function searchGamesFallback(
       return { games: [], error: error.message }
     }
 
-    // Transform the data to match our GameWithRanking type
-    const games: GameWithRanking[] =
-      data?.map((game) => ({
-        ...game,
-        ranking: game.rankings?.[0] || null,
-      })) || []
+    const games: GameWithRanking[] = (data || []).map((game) => {
+      const ranking = Array.isArray(
+        (game as unknown as { rankings?: Ranking[] }).rankings
+      )
+        ? (game as unknown as { rankings?: Ranking[] }).rankings![0] || null
+        : null
+      const { rankings: _omit, ...rest } = game as Record<string, unknown>
+      return {
+        ...(rest as Omit<GameWithRanking, 'ranking'>),
+        ranking,
+      } as GameWithRanking
+    })
 
     // Sort results to prioritize exact matches
     const sortedGames = games.sort((a, b) => {

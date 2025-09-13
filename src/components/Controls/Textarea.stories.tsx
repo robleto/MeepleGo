@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import Textarea from './Textarea'
 
 const meta: Meta<typeof Textarea> = {
@@ -8,9 +8,10 @@ const meta: Meta<typeof Textarea> = {
     layout: 'centered',
     docs: {
       description: {
-        component: 'A flexible textarea component with support for different sizes, states, and auto-resize functionality for dynamic content.'
-      }
-    }
+        component:
+          'A flexible textarea component with support for different sizes, states, and auto-resize functionality for dynamic content.',
+      },
+    },
   },
   argTypes: {
     size: {
@@ -18,7 +19,7 @@ const meta: Meta<typeof Textarea> = {
       options: ['sm', 'md', 'lg'],
     },
     state: {
-      control: 'select', 
+      control: 'select',
       options: ['default', 'error', 'success'],
     },
     disabled: {
@@ -52,27 +53,17 @@ export const Sizes: Story = {
     <div className="space-y-4 w-80">
       <div>
         <label className="block text-sm font-medium mb-1">Small</label>
-        <Textarea 
-          size="sm" 
-          placeholder="Small textarea" 
-          rows={2}
-        />
+        <Textarea size="sm" placeholder="Small textarea" rows={2} />
       </div>
       <div>
-        <label className="block text-sm font-medium mb-1">Medium (Default)</label>
-        <Textarea 
-          size="md" 
-          placeholder="Medium textarea" 
-          rows={3}
-        />
+        <label className="block text-sm font-medium mb-1">
+          Medium (Default)
+        </label>
+        <Textarea size="md" placeholder="Medium textarea" rows={3} />
       </div>
       <div>
         <label className="block text-sm font-medium mb-1">Large</label>
-        <Textarea 
-          size="lg" 
-          placeholder="Large textarea" 
-          rows={4}
-        />
+        <Textarea size="lg" placeholder="Large textarea" rows={4} />
       </div>
     </div>
   ),
@@ -83,34 +74,37 @@ export const States: Story = {
     <div className="space-y-4 w-80">
       <div>
         <label className="block text-sm font-medium mb-1">Default</label>
-        <Textarea 
-          placeholder="Default state" 
-          rows={3}
-        />
+        <Textarea placeholder="Default state" rows={3} />
       </div>
       <div>
-        <label className="block text-sm font-medium mb-1 text-red-700">Error</label>
-        <Textarea 
-          state="error" 
-          placeholder="Error state" 
+        <label className="block text-sm font-medium mb-1 text-red-700">
+          Error
+        </label>
+        <Textarea
+          state="error"
+          placeholder="Error state"
           rows={3}
           defaultValue="This text contains errors and needs to be reviewed."
         />
       </div>
       <div>
-        <label className="block text-sm font-medium mb-1 text-green-700">Success</label>
-        <Textarea 
-          state="success" 
-          placeholder="Success state" 
+        <label className="block text-sm font-medium mb-1 text-green-700">
+          Success
+        </label>
+        <Textarea
+          state="success"
+          placeholder="Success state"
           rows={3}
           defaultValue="This text has been validated successfully!"
         />
       </div>
       <div>
-        <label className="block text-sm font-medium mb-1 text-gray-400">Disabled</label>
-        <Textarea 
-          disabled 
-          placeholder="Disabled textarea" 
+        <label className="block text-sm font-medium mb-1 text-gray-400">
+          Disabled
+        </label>
+        <Textarea
+          disabled
+          placeholder="Disabled textarea"
           rows={3}
           defaultValue="This content cannot be edited."
         />
@@ -123,16 +117,20 @@ export const AutoResize: Story = {
   render: () => (
     <div className="space-y-4 w-80">
       <div>
-        <label className="block text-sm font-medium mb-1">Auto-resize (Default Max Height)</label>
-        <Textarea 
-          autoResize 
+        <label className="block text-sm font-medium mb-1">
+          Auto-resize (Default Max Height)
+        </label>
+        <Textarea
+          autoResize
           placeholder="Start typing... This textarea will grow as you type!"
         />
       </div>
       <div>
-        <label className="block text-sm font-medium mb-1">Auto-resize (Custom Max Height: 100px)</label>
-        <Textarea 
-          autoResize 
+        <label className="block text-sm font-medium mb-1">
+          Auto-resize (Custom Max Height: 100px)
+        </label>
+        <Textarea
+          autoResize
           maxHeight={100}
           placeholder="This will only grow up to 100px"
         />
@@ -146,24 +144,15 @@ export const VariousRowSizes: Story = {
     <div className="space-y-4 w-80">
       <div>
         <label className="block text-sm font-medium mb-1">2 Rows</label>
-        <Textarea 
-          rows={2}
-          placeholder="Short textarea"
-        />
+        <Textarea rows={2} placeholder="Short textarea" />
       </div>
       <div>
         <label className="block text-sm font-medium mb-1">4 Rows</label>
-        <Textarea 
-          rows={4}
-          placeholder="Medium textarea"
-        />
+        <Textarea rows={4} placeholder="Medium textarea" />
       </div>
       <div>
         <label className="block text-sm font-medium mb-1">6 Rows</label>
-        <Textarea 
-          rows={6}
-          placeholder="Tall textarea"
-        />
+        <Textarea rows={6} placeholder="Tall textarea" />
       </div>
     </div>
   ),
@@ -174,47 +163,49 @@ export const GameReviewForm: Story = {
   render: () => (
     <div className="space-y-6 w-96">
       <div>
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Write a Game Review</h3>
-        
+        <h3 className="text-lg font-medium text-gray-900 mb-4">
+          Write a Game Review
+        </h3>
+
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Quick Thoughts
             </label>
-            <Textarea 
+            <Textarea
               size="sm"
               rows={2}
               placeholder="Brief impression of the game..."
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Detailed Review
             </label>
-            <Textarea 
+            <Textarea
               autoResize
               maxHeight={150}
               placeholder="Share your detailed thoughts about gameplay, components, theme, and overall experience..."
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Teaching Notes
             </label>
-            <Textarea 
+            <Textarea
               size="lg"
               rows={4}
               placeholder="How easy is it to teach? Any tips for new players?"
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Personal Notes (Private)
             </label>
-            <Textarea 
+            <Textarea
               rows={3}
               placeholder="Private notes that only you can see..."
               defaultValue="Remember to check if expansion is worth it"
@@ -236,13 +227,9 @@ export const CharacterLimits: Story = {
           </label>
           <span className="text-xs text-gray-500">0 / 100</span>
         </div>
-        <Textarea 
-          maxLength={100}
-          rows={2}
-          placeholder="Keep it brief..."
-        />
+        <Textarea maxLength={100} rows={2} placeholder="Keep it brief..." />
       </div>
-      
+
       <div>
         <div className="flex justify-between items-center mb-1">
           <label className="block text-sm font-medium text-gray-700">
@@ -250,7 +237,7 @@ export const CharacterLimits: Story = {
           </label>
           <span className="text-xs text-gray-500">0 / 500</span>
         </div>
-        <Textarea 
+        <Textarea
           maxLength={500}
           autoResize
           placeholder="Share your complete thoughts..."

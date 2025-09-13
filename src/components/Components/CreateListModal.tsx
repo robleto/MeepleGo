@@ -98,9 +98,13 @@ export default function CreateListModal({
       onClose()
       onSuccess?.()
 
-  // Navigate to the new list with friendly slug
-  const slug = data.name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,60)
-  router.push(`/lists/${slug}-${data.id}`)
+      // Navigate to the new list with friendly slug
+      const slug = data.name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .slice(0, 60)
+      router.push(`/lists/${slug}-${data.id}`)
     } catch (error) {
       console.error('Error creating list:', error)
       showMessage('Failed to create list', 'error')

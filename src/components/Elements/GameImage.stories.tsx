@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { GameImage } from './GameImage'
 
 const meta: Meta<typeof GameImage> = {
@@ -74,7 +74,6 @@ export const ImageStates: Story = {
         <div>
           <h3 className="text-lg font-semibold mb-4">Image States</h3>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            
             {/* Loading State */}
             <div className="text-center">
               <div className="w-32 h-32 bg-gray-200 dark:bg-gray-700 animate-pulse rounded mb-2" />
@@ -105,7 +104,9 @@ export const ImageStates: Story = {
                 className="w-32 h-32 mb-2"
               />
               <p className="text-sm font-medium">Error</p>
-              <p className="text-xs text-gray-500">Falls back to generated image</p>
+              <p className="text-xs text-gray-500">
+                Falls back to generated image
+              </p>
             </div>
 
             {/* No Image */}
@@ -142,9 +143,11 @@ export const VariantComparison: Story = {
               className="w-40 h-40 mb-3"
             />
             <p className="text-sm font-medium">Square Variant</p>
-            <p className="text-xs text-gray-500">Full size with title overlay</p>
+            <p className="text-xs text-gray-500">
+              Full size with title overlay
+            </p>
           </div>
-          
+
           <div className="text-center">
             <GameImage
               src="https://cf.geekdo-images.com/yLZJCVLlIx4c7eJEWUNJ7w__thumb/img/ZPTOLpQKdTbPmtF3VGXz5VnGLxs=/fit-in/200x150/filters:strip_icc()/pic4458123.jpg"
@@ -165,7 +168,11 @@ export const VariantComparison: Story = {
 export const GameCollection: Story = {
   render: () => {
     const games = [
-      { name: 'Wingspan', image: 'https://cf.geekdo-images.com/yLZJCVLlIx4c7eJEWUNJ7w__thumb/img/ZPTOLpQKdTbPmtF3VGXz5VnGLxs=/fit-in/200x150/filters:strip_icc()/pic4458123.jpg' },
+      {
+        name: 'Wingspan',
+        image:
+          'https://cf.geekdo-images.com/yLZJCVLlIx4c7eJEWUNJ7w__thumb/img/ZPTOLpQKdTbPmtF3VGXz5VnGLxs=/fit-in/200x150/filters:strip_icc()/pic4458123.jpg',
+      },
       { name: 'Azul', image: null },
       { name: 'Ticket to Ride', image: 'https://invalid-url.jpg' },
       { name: 'Splendor', image: null },
@@ -178,7 +185,9 @@ export const GameCollection: Story = {
     return (
       <div className="space-y-4">
         <h3 className="text-lg font-semibold">Mixed Game Collection</h3>
-        <p className="text-sm text-gray-600">Shows mix of real images, broken images, and fallbacks</p>
+        <p className="text-sm text-gray-600">
+          Shows mix of real images, broken images, and fallbacks
+        </p>
         <div className="grid grid-cols-4 gap-4">
           {games.map((game) => (
             <div key={game.name} className="text-center">

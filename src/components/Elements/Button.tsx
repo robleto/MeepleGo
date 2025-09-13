@@ -1,32 +1,33 @@
 import React from 'react'
 import { cn } from '@/utils/helpers'
 
-export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   /**
    * Button visual style variant
    */
   variant?: 'primary' | 'secondary' | 'ghost' | 'danger' | 'outline'
-  
+
   /**
    * Button size
    */
   size?: 'xs' | 'sm' | 'md' | 'lg'
-  
+
   /**
    * Shape/border radius style
    */
   shape?: 'default' | 'rounded' | 'pill' | 'square'
-  
+
   /**
    * Loading state
    */
   loading?: boolean
-  
+
   /**
    * Icon to display before text
    */
   leftIcon?: React.ReactNode
-  
+
   /**
    * Icon to display after text
    */
@@ -35,50 +36,53 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 
 /**
  * Consistent button component following MeepleGo design system
- * 
+ *
  * Shape hierarchy:
  * - default: Standard rounded corners (--radius-md)
- * - rounded: More rounded for hero CTAs (--radius-lg) 
+ * - rounded: More rounded for hero CTAs (--radius-lg)
  * - pill: Fully rounded for special actions like search
  * - square: For icon-only buttons
  */
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ 
-    className, 
-    variant = 'primary', 
-    size = 'md', 
-    shape = 'default',
-    loading = false,
-    leftIcon,
-    rightIcon,
-    children, 
-    disabled,
-    ...props 
-  }, ref) => {
+  (
+    {
+      className,
+      variant = 'primary',
+      size = 'md',
+      shape = 'default',
+      loading = false,
+      leftIcon,
+      rightIcon,
+      children,
+      disabled,
+      ...props
+    },
+    ref
+  ) => {
     const baseClasses = 'ui-btn'
-    
+
     const variantClasses = {
       primary: 'ui-btn-primary',
-      secondary: 'ui-btn-secondary', 
+      secondary: 'ui-btn-secondary',
       ghost: 'ui-btn-ghost',
       danger: 'ui-btn-danger',
-      outline: 'ui-btn-outline'
+      outline: 'ui-btn-outline',
     }
-    
+
     const sizeClasses = {
       xs: 'ui-btn-xs',
-      sm: 'ui-btn-sm', 
+      sm: 'ui-btn-sm',
       md: '', // default size
-      lg: 'ui-btn-lg'
+      lg: 'ui-btn-lg',
     }
-    
+
     const shapeClasses = {
       default: '', // uses default border-radius from .ui-btn
       rounded: 'ui-btn-rounded',
       pill: 'ui-btn-pill',
-      square: 'ui-btn-square'
+      square: 'ui-btn-square',
     }
-    
+
     return (
       <button
         ref={ref}

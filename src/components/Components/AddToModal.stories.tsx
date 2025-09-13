@@ -1,8 +1,8 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import AddToModal from './AddToModal'
 
 const meta: Meta<typeof AddToModal> = {
-  title: 'Archived/Shared/AddToModal',
+  title: 'Components/AddToModal',
   component: AddToModal,
   parameters: {
     layout: 'centered',
@@ -21,13 +21,14 @@ const mockGame = {
   min_players: 1,
   max_players: 5,
   playing_time: 70,
-  thumb_url: 'https://cf.geekdo-images.com/yLZJCVLlIx4c7eJEWUNJ7w__thumb/img/ZPTOLpQKdTbPmtF3VGXz5VnGLxs=/fit-in/200x150/filters:strip_icc()/pic4458123.jpg',
+  thumb_url:
+    'https://cf.geekdo-images.com/yLZJCVLlIx4c7eJEWUNJ7w__thumb/img/ZPTOLpQKdTbPmtF3VGXz5VnGLxs=/fit-in/200x150/filters:strip_icc()/pic4458123.jpg',
   ranking: null,
   played_it: false,
   list_membership: {
     library: false,
-    wishlist: false
-  }
+    wishlist: false,
+  },
 }
 
 export const Closed: Story = {
@@ -35,7 +36,8 @@ export const Closed: Story = {
     game: mockGame as any, // Type assertion for story simplicity
     open: false,
     onClose: () => console.log('Modal closed'),
-    onMembershipChange: (gameId, change) => console.log('Membership changed:', gameId, change),
+    onMembershipChange: (gameId, change) =>
+      console.log('Membership changed:', gameId, change),
   },
 }
 
@@ -44,7 +46,8 @@ export const Open: Story = {
     game: mockGame as any,
     open: true,
     onClose: () => console.log('Modal closed'),
-    onMembershipChange: (gameId, change) => console.log('Membership changed:', gameId, change),
+    onMembershipChange: (gameId, change) =>
+      console.log('Membership changed:', gameId, change),
   },
 }
 
@@ -57,7 +60,8 @@ export const WithRating: Story = {
     } as any,
     open: true,
     onClose: () => console.log('Modal closed'),
-    onMembershipChange: (gameId, change) => console.log('Membership changed:', gameId, change),
+    onMembershipChange: (gameId, change) =>
+      console.log('Membership changed:', gameId, change),
   },
 }
 
@@ -69,12 +73,13 @@ export const InLibrary: Story = {
       played_it: true,
       list_membership: {
         library: true,
-        wishlist: false
-      }
+        wishlist: false,
+      },
     } as any,
     open: true,
     onClose: () => console.log('Modal closed'),
-    onMembershipChange: (gameId, change) => console.log('Membership changed:', gameId, change),
+    onMembershipChange: (gameId, change) =>
+      console.log('Membership changed:', gameId, change),
   },
 }
 
@@ -84,12 +89,13 @@ export const OnWishlist: Story = {
       ...mockGame,
       list_membership: {
         library: false,
-        wishlist: true
-      }
+        wishlist: true,
+      },
     } as any,
     open: true,
     onClose: () => console.log('Modal closed'),
-    onMembershipChange: (gameId, change) => console.log('Membership changed:', gameId, change),
+    onMembershipChange: (gameId, change) =>
+      console.log('Membership changed:', gameId, change),
   },
 }
 
@@ -98,7 +104,8 @@ export const NoGame: Story = {
     game: null,
     open: true,
     onClose: () => console.log('Modal closed'),
-    onMembershipChange: (gameId, change) => console.log('Membership changed:', gameId, change),
+    onMembershipChange: (gameId, change) =>
+      console.log('Membership changed:', gameId, change),
   },
 }
 
@@ -106,7 +113,7 @@ export const ModalStates: Story = {
   render: () => (
     <div className="space-y-6 p-8">
       <h2 className="text-2xl font-bold">AddToModal States</h2>
-      
+
       <div className="grid gap-6 md:grid-cols-2">
         <div className="bg-white rounded-lg p-4 shadow-sm border">
           <h3 className="font-semibold mb-2">🎮 Rating & Status</h3>
@@ -152,8 +159,9 @@ export const ModalStates: Story = {
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
         <h4 className="font-semibold text-blue-900 mb-2">Usage Notes</h4>
         <p className="text-blue-800 text-sm">
-          AddToModal allows users to quickly rate games, add them to lists, and track
-          their play status. It's typically triggered from game cards or the game detail modal.
+          AddToModal allows users to quickly rate games, add them to lists, and
+          track their play status. It's typically triggered from game cards or
+          the game detail modal.
         </p>
       </div>
     </div>

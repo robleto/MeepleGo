@@ -6,7 +6,7 @@
  */
 import 'dotenv/config'
 
-const [,, userIdArg, newPasswordArg] = process.argv
+const [, , userIdArg, newPasswordArg] = process.argv
 
 const userId = userIdArg || process.env.SUPABASE_TEST_USER
 const newPassword = newPasswordArg || process.env.SUPABASE_TEST_PASSWORD
@@ -29,11 +29,11 @@ async function run() {
   const res = await fetch(endpoint, {
     method: 'PATCH',
     headers: {
-      'apikey': serviceRoleKey,
-      'Authorization': `Bearer ${serviceRoleKey}`,
-      'Content-Type': 'application/json'
+      apikey: serviceRoleKey,
+      Authorization: `Bearer ${serviceRoleKey}`,
+      'Content-Type': 'application/json',
     } as any,
-    body: JSON.stringify({ password: newPassword })
+    body: JSON.stringify({ password: newPassword }),
   })
   if (!res.ok) {
     const text = await res.text()
@@ -44,4 +44,7 @@ async function run() {
   console.log('Password updated for user:', json.id || userId)
 }
 
-run().catch(e => { console.error(e); process.exit(1) })
+run().catch((e) => {
+  console.error(e)
+  process.exit(1)
+})

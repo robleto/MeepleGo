@@ -3,8 +3,13 @@
 // Load environment variables (.env only per project convention)
 const dotenv = require('dotenv')
 dotenv.config({ path: '.env' })
-if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-  console.log('⚠️  Missing Supabase env vars. Ensure NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are set in .env')
+if (
+  !process.env.NEXT_PUBLIC_SUPABASE_URL ||
+  !process.env.SUPABASE_SERVICE_ROLE_KEY
+) {
+  console.log(
+    '⚠️  Missing Supabase env vars. Ensure NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are set in .env'
+  )
 }
 const { createClient } = require('@supabase/supabase-js')
 
@@ -30,11 +35,13 @@ class BGGRankBackfiller {
 
       if (response.status === 429) {
         // Rate limited - progressive backoff
-        const waitTime = Math.min(30000, 5000 + (this.consecutiveErrors * 2000))
-        console.log(`⏳ Rate limited on game ${bggId}, waiting ${waitTime/1000}s...`)
+        const waitTime = Math.min(30000, 5000 + this.consecutiveErrors * 2000)
+        console.log(
+          `⏳ Rate limited on game ${bggId}, waiting ${waitTime / 1000}s...`
+        )
         await new Promise((resolve) => setTimeout(resolve, waitTime))
         this.consecutiveErrors++
-        
+
         if (this.consecutiveErrors < 5) {
           return await this.fetchGameRank(bggId)
         } else {
@@ -49,7 +56,11 @@ class BGGRankBackfiller {
       const xmlText = await response.text()
 
       // Check if response is valid
-      if (!xmlText || xmlText.includes('Item not found') || !xmlText.includes('<item')) {
+      if (
+        !xmlText ||
+        xmlText.includes('Item not found') ||
+        !xmlText.includes('<item')
+      ) {
         return 'NOT_FOUND'
       }
 
@@ -72,7 +83,9 @@ class BGGRankBackfiller {
     try {
       const { error } = await this.supabase
         .from('games')
-        .update({ rank: rank === 'UNRANKED' || rank === 'NOT_FOUND' ? null : rank })
+        .update({
+          rank: rank === 'UNRANKED' || rank === 'NOT_FOUND' ? null : rank,
+        })
         .eq('id', gameId)
 
       if (error) {
@@ -89,7 +102,7 @@ class BGGRankBackfiller {
   logProgress() {
     const elapsed = (Date.now() - this.startTime) / 1000
     const rate = this.processedCount / elapsed
-    
+
     console.log(`\n📊 Progress Update:`)
     console.log(`  • Processed: ${this.processedCount} games`)
     console.log(`  • Updated with ranks: ${this.updatedCount}`)
@@ -117,13 +130,13 @@ class BGGRankBackfiller {
         }
       } catch (_) {}
 
-  const pageSize = this.pageSize || 100
-  let batchNumber = 0
-  let globalLimitRemaining = limit || null
-  let startAfterConsumed = false
+      const pageSize = this.pageSize || 100
+      let batchNumber = 0
+      let globalLimitRemaining = limit || null
+      let startAfterConsumed = false
 
-  let consecutiveEmptyBatches = 0
-  const emptyStopThreshold = this.emptyStopThreshold || 10 // configurable
+      let consecutiveEmptyBatches = 0
+      const emptyStopThreshold = this.emptyStopThreshold || 10 // configurable
 
       // If we have an explicit onlyIds list, process just those then exit
       if (Array.isArray(this.onlyBggIds) && this.onlyBggIds.length > 0) {
@@ -134,7 +147,9 @@ class BGGRankBackfiller {
             .eq('bgg_id', bggId)
             .limit(1)
           if (fetchErr) {
-            console.error(`❌ Fetch error for BGG ID ${bggId}: ${fetchErr.message}`)
+            console.error(
+              `❌ Fetch error for BGG ID ${bggId}: ${fetchErr.message}`
+            )
             this.errorCount++
             continue
           }
@@ -150,7 +165,9 @@ class BGGRankBackfiller {
           }
           this.processedCount++
           try {
-            console.log(`🔍 [${this.processedCount}] ${game.name} (BGG ID: ${game.bgg_id})`)
+            console.log(
+              `🔍 [${this.processedCount}] ${game.name} (BGG ID: ${game.bgg_id})`
+            )
             const rank = await this.fetchGameRank(game.bgg_id)
             if (rank === 'NOT_FOUND') {
               console.log('⚠️  Game not found on BGG')
@@ -172,20 +189,26 @@ class BGGRankBackfiller {
             this.errorCount++
           }
         }
-  // Skip normal loop by setting counters so outer processing concludes
-  consecutiveEmptyBatches = emptyStopThreshold
-  // Jump to final results section
-  const totalTime = (Date.now() - this.startTime) / 1000
-  console.log(`\n🏆 BGG rank backfill completed!`)
-  console.log(`📊 Final Results:`)
-  console.log(`  • Total processed: ${this.processedCount} games`)
-  console.log(`  • Successfully updated: ${this.updatedCount} games`)
-  console.log(`  • Skipped (unranked/not found/missing id): ${this.skippedCount} games`)
-  console.log(`  • Errors: ${this.errorCount} games`)
-  console.log(`  • Success rate: ${this.processedCount ? ((this.updatedCount / this.processedCount) * 100).toFixed(1) : '0.0'}%`)
-  console.log(`  • Total time: ${Math.round(totalTime / 60)} minutes`)
-  console.log(`  • Average rate: ${this.processedCount ? (this.processedCount / totalTime).toFixed(2) : '0.00'} games/sec`)
-  return
+        // Skip normal loop by setting counters so outer processing concludes
+        consecutiveEmptyBatches = emptyStopThreshold
+        // Jump to final results section
+        const totalTime = (Date.now() - this.startTime) / 1000
+        console.log(`\n🏆 BGG rank backfill completed!`)
+        console.log(`📊 Final Results:`)
+        console.log(`  • Total processed: ${this.processedCount} games`)
+        console.log(`  • Successfully updated: ${this.updatedCount} games`)
+        console.log(
+          `  • Skipped (unranked/not found/missing id): ${this.skippedCount} games`
+        )
+        console.log(`  • Errors: ${this.errorCount} games`)
+        console.log(
+          `  • Success rate: ${this.processedCount ? ((this.updatedCount / this.processedCount) * 100).toFixed(1) : '0.0'}%`
+        )
+        console.log(`  • Total time: ${Math.round(totalTime / 60)} minutes`)
+        console.log(
+          `  • Average rate: ${this.processedCount ? (this.processedCount / totalTime).toFixed(2) : '0.00'} games/sec`
+        )
+        return
       }
 
       while (true) {
@@ -193,7 +216,10 @@ class BGGRankBackfiller {
           break
         }
 
-        const effectiveLimit = globalLimitRemaining !== null ? Math.min(pageSize, globalLimitRemaining) : pageSize
+        const effectiveLimit =
+          globalLimitRemaining !== null
+            ? Math.min(pageSize, globalLimitRemaining)
+            : pageSize
 
         let query = this.supabase
           .from('games')
@@ -208,14 +234,15 @@ class BGGRankBackfiller {
           if (this.lastBggId) {
             query = query.gt('bgg_id', this.lastBggId)
           }
-        } else { // default id
+        } else {
+          // default id
           query = query.order('id', { ascending: true })
           if (this.startAfterId && !startAfterConsumed) {
             query = query.gt('id', this.startAfterId)
           }
         }
 
-  // (id advancement handled above now)
+        // (id advancement handled above now)
 
         const { data: games, error } = await query
 
@@ -224,29 +251,35 @@ class BGGRankBackfiller {
         }
 
         if (!games || games.length === 0) {
-          console.log('✅ No more games found that need rank updates in remaining ID range!')
+          console.log(
+            '✅ No more games found that need rank updates in remaining ID range!'
+          )
           break
         }
 
         batchNumber++
-        console.log(`\n� Batch #${batchNumber} – processing ${games.length} games (IDs ${games[0].id}..${games[games.length - 1].id})`)
+        console.log(
+          `\n� Batch #${batchNumber} – processing ${games.length} games (IDs ${games[0].id}..${games[games.length - 1].id})`
+        )
 
-  let batchUpdated = 0
-  for (const game of games) {
+        let batchUpdated = 0
+        for (const game of games) {
           if (testMode && this.processedCount >= 10) {
             break
           }
 
-            // Skip if no BGG id
+          // Skip if no BGG id
           if (!game.bgg_id) {
-            console.log(`⚠️  Skipping ${game.name} (no BGG ID)`) 
+            console.log(`⚠️  Skipping ${game.name} (no BGG ID)`)
             this.skippedCount++
             continue
           }
 
           this.processedCount++
           try {
-            console.log(`🔍 [${this.processedCount}] ${game.name} (BGG ID: ${game.bgg_id})`)
+            console.log(
+              `🔍 [${this.processedCount}] ${game.name} (BGG ID: ${game.bgg_id})`
+            )
             const rank = await this.fetchGameRank(game.bgg_id)
 
             if (rank === 'NOT_FOUND') {
@@ -273,14 +306,19 @@ class BGGRankBackfiller {
             console.error(`❌ Error processing ${game.name}: ${error.message}`)
             this.errorCount++
             if (this.consecutiveErrors >= 3) {
-              const breakTime = Math.min(60000, 15000 + (this.consecutiveErrors * 5000))
-              console.log(`⚠️ Taking ${breakTime/1000}s break due to errors...`)
+              const breakTime = Math.min(
+                60000,
+                15000 + this.consecutiveErrors * 5000
+              )
+              console.log(
+                `⚠️ Taking ${breakTime / 1000}s break due to errors...`
+              )
               await new Promise((resolve) => setTimeout(resolve, breakTime))
             }
           }
 
           // Respectful rate limiting (2-4s)
-          const delay = testMode ? 500 : (2000 + Math.random() * 2000)
+          const delay = testMode ? 500 : 2000 + Math.random() * 2000
           await new Promise((r) => setTimeout(r, delay))
 
           if (globalLimitRemaining !== null) {
@@ -296,7 +334,9 @@ class BGGRankBackfiller {
         // If nothing was updated (all unranked / missing ids / errors), avoid infinite loop
         if (batchUpdated === 0) {
           consecutiveEmptyBatches++
-          console.log(`⚠️  Empty batch (${consecutiveEmptyBatches}/${emptyStopThreshold}) – continuing search for rankable games...`)
+          console.log(
+            `⚠️  Empty batch (${consecutiveEmptyBatches}/${emptyStopThreshold}) – continuing search for rankable games...`
+          )
           if (consecutiveEmptyBatches >= emptyStopThreshold) {
             console.log('⛔ Reached empty batch threshold. Stopping.')
             break
@@ -337,11 +377,17 @@ class BGGRankBackfiller {
       console.log(`📊 Final Results:`)
       console.log(`  • Total processed: ${this.processedCount} games`)
       console.log(`  • Successfully updated: ${this.updatedCount} games`)
-      console.log(`  • Skipped (unranked/not found/missing id): ${this.skippedCount} games`)
+      console.log(
+        `  • Skipped (unranked/not found/missing id): ${this.skippedCount} games`
+      )
       console.log(`  • Errors: ${this.errorCount} games`)
-      console.log(`  • Success rate: ${this.processedCount ? ((this.updatedCount / this.processedCount) * 100).toFixed(1) : '0.0'}%`)
+      console.log(
+        `  • Success rate: ${this.processedCount ? ((this.updatedCount / this.processedCount) * 100).toFixed(1) : '0.0'}%`
+      )
       console.log(`  • Total time: ${Math.round(totalTime / 60)} minutes`)
-      console.log(`  • Average rate: ${this.processedCount ? (this.processedCount / totalTime).toFixed(2) : '0.00'} games/sec`)
+      console.log(
+        `  • Average rate: ${this.processedCount ? (this.processedCount / totalTime).toFixed(2) : '0.00'} games/sec`
+      )
 
       if (this.updatedCount > 0) {
         const { data: topRankedGames } = await this.supabase
@@ -353,11 +399,15 @@ class BGGRankBackfiller {
         if (topRankedGames?.length > 0) {
           console.log(`\n🥇 Top BGG ranked games in your collection:`)
           topRankedGames.forEach((game) => {
-            console.log(`  #${game.rank} - ${game.name} (${game.year_published || 'Unknown'}) - Rating: ${game.rating || 'N/A'}`)
+            console.log(
+              `  #${game.rank} - ${game.name} (${game.year_published || 'Unknown'}) - Rating: ${game.rating || 'N/A'}`
+            )
           })
         }
       }
-      console.log(`\n🚀 Your games can now be (better) sorted by actual BGG rankings!`)
+      console.log(
+        `\n🚀 Your games can now be (better) sorted by actual BGG rankings!`
+      )
     } catch (error) {
       console.error(`💥 Fatal error in backfill process: ${error.message}`)
       process.exit(1)
@@ -368,18 +418,35 @@ class BGGRankBackfiller {
 // Parse command line arguments
 const args = process.argv.slice(2)
 const testMode = args.includes('--test')
-const limit = testMode ? 10 : (args.includes('--limit') ? parseInt(args[args.indexOf('--limit') + 1]) : null)
-const pageSize = args.includes('--page-size') ? parseInt(args[args.indexOf('--page-size') + 1]) : 100
-const orderStrategy = args.includes('--order') ? args[args.indexOf('--order') + 1] : 'id' // id | bgg
-const emptyStopThreshold = args.includes('--empty-stop') ? parseInt(args[args.indexOf('--empty-stop') + 1]) : 10
-const startAfterId = args.includes('--start-after') ? parseInt(args[args.indexOf('--start-after') + 1]) : 0
+const limit = testMode
+  ? 10
+  : args.includes('--limit')
+    ? parseInt(args[args.indexOf('--limit') + 1])
+    : null
+const pageSize = args.includes('--page-size')
+  ? parseInt(args[args.indexOf('--page-size') + 1])
+  : 100
+const orderStrategy = args.includes('--order')
+  ? args[args.indexOf('--order') + 1]
+  : 'id' // id | bgg
+const emptyStopThreshold = args.includes('--empty-stop')
+  ? parseInt(args[args.indexOf('--empty-stop') + 1])
+  : 10
+const startAfterId = args.includes('--start-after')
+  ? parseInt(args[args.indexOf('--start-after') + 1])
+  : 0
 
 // Create and run the backfiller
 const backfiller = new BGGRankBackfiller()
 backfiller.pageSize = pageSize
 if (startAfterId > 0) backfiller.startAfterId = startAfterId
-backfiller.orderStrategy = ['bgg', 'id'].includes(orderStrategy) ? orderStrategy : 'id'
-backfiller.emptyStopThreshold = Number.isFinite(emptyStopThreshold) && emptyStopThreshold > 0 ? emptyStopThreshold : 10
+backfiller.orderStrategy = ['bgg', 'id'].includes(orderStrategy)
+  ? orderStrategy
+  : 'id'
+backfiller.emptyStopThreshold =
+  Number.isFinite(emptyStopThreshold) && emptyStopThreshold > 0
+    ? emptyStopThreshold
+    : 10
 
 // Handle graceful shutdown
 process.on('SIGINT', () => {

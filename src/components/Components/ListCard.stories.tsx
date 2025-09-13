@@ -1,6 +1,6 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import ListCard from './ListCard';
-import { GameListWithItems } from '@/types/supabase';
+import type { Meta, StoryObj } from '@storybook/nextjs-vite'
+import ListCard from './ListCard'
+import { GameListWithItems } from '@/types/supabase'
 
 const mockGames = [
   {
@@ -8,8 +8,10 @@ const mockGames = [
     bgg_id: 266192,
     name: 'Wingspan',
     year_published: 2019,
-    image_url: 'https://cf.geekdo-images.com/yLZJCVLlIx4c7eJEWUNJ7w__itemrep@2x/img/veohwKEtFpERbDq7xGMggHqLKX8=/fit-in/246x300/filters:strip_icc()/pic4458123.jpg',
-    thumbnail_url: 'https://cf.geekdo-images.com/yLZJCVLlIx4c7eJEWUNJ7w__itemrep@2x/img/veohwKEtFpERbDq7xGMggHqLKX8=/fit-in/246x300/filters:strip_icc()/pic4458123.jpg',
+    image_url:
+      'https://cf.geekdo-images.com/yLZJCVLlIx4c7eJEWUNJ7w__itemrep@2x/img/veohwKEtFpERbDq7xGMggHqLKX8=/fit-in/246x300/filters:strip_icc()/pic4458123.jpg',
+    thumbnail_url:
+      'https://cf.geekdo-images.com/yLZJCVLlIx4c7eJEWUNJ7w__itemrep@2x/img/veohwKEtFpERbDq7xGMggHqLKX8=/fit-in/246x300/filters:strip_icc()/pic4458123.jpg',
     categories: ['Card Game'],
     mechanics: ['Engine Building'],
     publisher: 'Stonemaier Games',
@@ -34,8 +36,10 @@ const mockGames = [
     bgg_id: 230802,
     name: 'Azul',
     year_published: 2017,
-    image_url: 'https://cf.geekdo-images.com/aPSHJO0d0XOpQR5X-wJonw__itemrep@2x/img/YhqlW4jj12TeSDlxXPlbOAZ8DAM=/fit-in/246x300/filters:strip_icc()/pic3718275.jpg',
-    thumbnail_url: 'https://cf.geekdo-images.com/aPSHJO0d0XOpQR5X-wJonw__itemrep@2x/img/YhqlW4jj12TeSDlxXPlbOAZ8DAM=/fit-in/246x300/filters:strip_icc()/pic3718275.jpg',
+    image_url:
+      'https://cf.geekdo-images.com/aPSHJO0d0XOpQR5X-wJonw__itemrep@2x/img/YhqlW4jj12TeSDlxXPlbOAZ8DAM=/fit-in/246x300/filters:strip_icc()/pic3718275.jpg',
+    thumbnail_url:
+      'https://cf.geekdo-images.com/aPSHJO0d0XOpQR5X-wJonw__itemrep@2x/img/YhqlW4jj12TeSDlxXPlbOAZ8DAM=/fit-in/246x300/filters:strip_icc()/pic3718275.jpg',
     categories: ['Abstract Strategy'],
     mechanics: ['Tile Placement'],
     publisher: 'Plan B Games',
@@ -56,8 +60,10 @@ const mockGames = [
     bgg_id: 9209,
     name: 'Ticket to Ride',
     year_published: 2004,
-    image_url: 'https://cf.geekdo-images.com/ZWJg0dCdrWHIaeuIgcMaeg__itemrep@2x/img/vfXWOe-yMJ1nA-hrmj8SH9Q-vXA=/fit-in/246x300/filters:strip_icc()/pic38668.jpg',
-    thumbnail_url: 'https://cf.geekdo-images.com/ZWJg0dCdrWHIaeuIgcMaeg__itemrep@2x/img/vfXWOe-yMJ1nA-hrmj8SH9Q-vXA=/fit-in/246x300/filters:strip_icc()/pic38668.jpg',
+    image_url:
+      'https://cf.geekdo-images.com/ZWJg0dCdrWHIaeuIgcMaeg__itemrep@2x/img/vfXWOe-yMJ1nA-hrmj8SH9Q-vXA=/fit-in/246x300/filters:strip_icc()/pic38668.jpg',
+    thumbnail_url:
+      'https://cf.geekdo-images.com/ZWJg0dCdrWHIaeuIgcMaeg__itemrep@2x/img/vfXWOe-yMJ1nA-hrmj8SH9Q-vXA=/fit-in/246x300/filters:strip_icc()/pic38668.jpg',
     categories: ['Family Game'],
     mechanics: ['Set Collection'],
     publisher: 'Days of Wonder',
@@ -78,13 +84,16 @@ const mockGames = [
     bgg_id: 148228,
     name: 'Splendor',
     year_published: 2014,
-    image_url: 'https://cf.geekdo-images.com/rwOMxx_NDD2iOnJ93xOqfA__itemrep@2x/img/hhAVIL5WnONvFLQEDCiX1_LZ-QY=/fit-in/246x300/filters:strip_icc()/pic1904079.jpg',
-    thumbnail_url: 'https://cf.geekdo-images.com/rwOMxx_NDD2iOnJ93xOqfA__itemrep@2x/img/hhAVIL5WnONvFLQEDCiX1_LZ-QY=/fit-in/246x300/filters:strip_icc()/pic1904079.jpg',
+    image_url:
+      'https://cf.geekdo-images.com/rwOMxx_NDD2iOnJ93xOqfA__itemrep@2x/img/hhAVIL5WnONvFLQEDCiX1_LZ-QY=/fit-in/246x300/filters:strip_icc()/pic1904079.jpg',
+    thumbnail_url:
+      'https://cf.geekdo-images.com/rwOMxx_NDD2iOnJ93xOqfA__itemrep@2x/img/hhAVIL5WnONvFLQEDCiX1_LZ-QY=/fit-in/246x300/filters:strip_icc()/pic1904079.jpg',
     categories: ['Card Game'],
     mechanics: ['Engine Building'],
     publisher: 'Space Cowboys',
     designer: 'Marc André',
-    description: 'As a wealthy Renaissance merchant, acquire mines and transportation.',
+    description:
+      'As a wealthy Renaissance merchant, acquire mines and transportation.',
     min_players: 2,
     max_players: 4,
     playtime_minutes: 30,
@@ -100,8 +109,10 @@ const mockGames = [
     bgg_id: 13,
     name: 'Catan',
     year_published: 1995,
-    image_url: 'https://cf.geekdo-images.com/W3Bsga_uLP9kO91gZ7H8yw__itemrep@2x/img/M_3Vg7bCoyNFSV3T-VeDYUo2pNQ=/fit-in/246x300/filters:strip_icc()/pic2419375.jpg',
-    thumbnail_url: 'https://cf.geekdo-images.com/W3Bsga_uLP9kO91gZ7H8yw__itemrep@2x/img/M_3Vg7bCoyNFSV3T-VeDYUo2pNQ=/fit-in/246x300/filters:strip_icc()/pic2419375.jpg',
+    image_url:
+      'https://cf.geekdo-images.com/W3Bsga_uLP9kO91gZ7H8yw__itemrep@2x/img/M_3Vg7bCoyNFSV3T-VeDYUo2pNQ=/fit-in/246x300/filters:strip_icc()/pic2419375.jpg',
+    thumbnail_url:
+      'https://cf.geekdo-images.com/W3Bsga_uLP9kO91gZ7H8yw__itemrep@2x/img/M_3Vg7bCoyNFSV3T-VeDYUo2pNQ=/fit-in/246x300/filters:strip_icc()/pic2419375.jpg',
     categories: ['Family Game'],
     mechanics: ['Trading'],
     publisher: 'Catan Studio',
@@ -116,8 +127,8 @@ const mockGames = [
     honors: [],
     created_at: '2023-01-01T00:00:00Z',
     updated_at: '2023-01-01T00:00:00Z',
-  }
-];
+  },
+]
 
 const mockListWithGames: GameListWithItems = {
   id: '1',
@@ -137,9 +148,9 @@ const mockListWithGames: GameListWithItems = {
     score: null,
     created_at: '',
     updated_at: null,
-    game: game as any
+    game: game as any,
   })),
-};
+}
 
 const mockEmptyList: GameListWithItems = {
   id: '2',
@@ -151,7 +162,7 @@ const mockEmptyList: GameListWithItems = {
   updated_at: '',
   user_id: 'user1',
   game_list_items: [],
-};
+}
 
 const meta: Meta<typeof ListCard> = {
   title: 'Components/ListCard',
@@ -161,26 +172,27 @@ const meta: Meta<typeof ListCard> = {
     layout: 'centered',
     docs: {
       description: {
-        component: 'Card component displaying user-created game lists with metadata and visibility status. Features fanned game images for visual appeal.'
-      }
-    }
-  }
-};
+        component:
+          'Card component displaying user-created game lists with metadata and visibility status. Features fanned game images for visual appeal.',
+      },
+    },
+  },
+}
 
-export default meta;
-type Story = StoryObj<typeof ListCard>;
+export default meta
+type Story = StoryObj<typeof ListCard>
 
 export const LibraryCard: Story = {
   args: {
     list: mockListWithGames,
   },
-};
+}
 
 export const EmptyList: Story = {
   args: {
     list: mockEmptyList,
   },
-};
+}
 
 export const WishlistCard: Story = {
   args: {
@@ -193,7 +205,7 @@ export const WishlistCard: Story = {
       game_list_items: mockListWithGames.game_list_items.slice(0, 3), // Fewer games
     },
   },
-};
+}
 
 export const CustomList: Story = {
   args: {
@@ -206,14 +218,14 @@ export const CustomList: Story = {
       is_public: true,
     },
   },
-};
+}
 
 export const CreateNewList: Story = {
   args: {
     variant: 'create',
     onCreateClick: () => console.log('Create new list clicked!'),
   },
-};
+}
 
 export const CreateNewListCustomText: Story = {
   args: {
@@ -222,4 +234,4 @@ export const CreateNewListCustomText: Story = {
     createDescription: 'Start building your custom game collection',
     onCreateClick: () => console.log('Create collection clicked!'),
   },
-};
+}

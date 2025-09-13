@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useLayoutEffect, useEffect } from 'react'
+import React, { useState, useRef, useLayoutEffect, useEffect } from 'react'
 import { getRatingSubtleClass } from '@/components/Foundations/ratingColors'
 import { supabase } from '@/lib/supabase'
 
@@ -16,7 +16,7 @@ interface RatingPopupProps {
 
 export default function RatingPopup({
   gameId,
-  gameName,
+  gameName: _gameName,
   currentRating,
   isOpen,
   onClose,
@@ -30,7 +30,9 @@ export default function RatingPopup({
   // Close on Escape
   useEffect(() => {
     if (!isOpen) return
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [isOpen, onClose])
@@ -42,7 +44,10 @@ export default function RatingPopup({
     const compute = () => {
       const viewportW = window.innerWidth
       const viewportH = window.innerHeight
-      const tentative = { width: popupRef.current?.offsetWidth || 0, height: popupRef.current?.offsetHeight || 0 }
+      const tentative = {
+        width: popupRef.current?.offsetWidth || 0,
+        height: popupRef.current?.offsetHeight || 0,
+      }
       let x = position.x
       let y = position.y
       let placeAbove = true
@@ -61,8 +66,16 @@ export default function RatingPopup({
       if (!placeAbove && y + tentative.height + 16 > viewportH) {
         placeAbove = true
       }
-      const transform = placeAbove ? 'translate(-50%, -100%)' : 'translate(-50%, 8px)'
-      setPopupStyle({ position: 'fixed', left: x, top: y, transform, zIndex: 9999 })
+      const transform = placeAbove
+        ? 'translate(-50%, -100%)'
+        : 'translate(-50%, 8px)'
+      setPopupStyle({
+        position: 'fixed',
+        left: x,
+        top: y,
+        transform,
+        zIndex: 9999,
+      })
     }
     // Defer compute to next frame so dimensions are available
     requestAnimationFrame(compute)
@@ -87,7 +100,7 @@ export default function RatingPopup({
         .eq('user_id', session.user.id)
         .eq('game_id', gameId)
         .maybeSingle()
-  const { error } = await supabase.from('rankings').upsert(
+      const { error } = await supabase.from('rankings').upsert(
         {
           user_id: session.user.id,
           game_id: gameId,
@@ -101,7 +114,7 @@ export default function RatingPopup({
         console.error('Failed to save rating:', error)
         // Could optionally rollback but leaving optimistic value
       }
-  // Attempt to mark awards stale (game year unknown here; optional improvement: pass year prop)
+      // Attempt to mark awards stale (game year unknown here; optional improvement: pass year prop)
     } catch (error) {
       console.error('Failed to save rating:', error)
     } finally {
@@ -125,7 +138,7 @@ export default function RatingPopup({
         .eq('user_id', session.user.id)
         .eq('game_id', gameId)
         .maybeSingle()
-  const { error } = await supabase.from('rankings').upsert(
+      const { error } = await supabase.from('rankings').upsert(
         {
           user_id: session.user.id,
           game_id: gameId,
@@ -136,7 +149,6 @@ export default function RatingPopup({
         { onConflict: 'user_id,game_id' }
       )
       if (error) console.error('Failed to clear rating:', error)
-  // stale marking skipped (no year)
     } catch (error) {
       console.error('Failed to clear rating:', error)
     } finally {
@@ -153,8 +165,11 @@ export default function RatingPopup({
       {/* Backdrop (stop propagation so parent card doesn't open) */}
       <div
         className="fixed inset-0 z-[9998]"
-        onClick={(e)=> { e.stopPropagation(); onClose() }}
-        onMouseDown={(e)=> e.stopPropagation()}
+        onClick={(e) => {
+          e.stopPropagation()
+          onClose()
+        }}
+        onMouseDown={(e) => e.stopPropagation()}
       />
 
       {/* Popup */}
@@ -166,20 +181,28 @@ export default function RatingPopup({
         onMouseDown={(e) => e.stopPropagation()}
       >
         <div className="flex flex-col items-center max-h-72 overflow-y-auto pr-1">
-          {[10,9,8,7,6,5,4,3,2,1,null].map((r, idx) => (
-            <button
-              key={r === null ? 'clear' : r}
-              type="button"
-              onClick={(e)=>{ e.stopPropagation(); r === null ? handleClearRating() : handleRatingClick(r) }}
-              disabled={saving}
-              className={`w-8 h-8 mb-1 text-xs font-bold rounded-md flex items-center justify-center transition-all duration-150 focus:outline-none focus:ring-1 focus:ring-primary-500 disabled:opacity-50 ${r===null ? 'bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300' : getRatingSubtleClass(r)} ${currentRating===r || (r===null && currentRating==null) ? 'ring-1 ring-white ring-offset-1 ring-offset-primary-500/30' : 'hover:scale-105 active:scale-95'}`}
-              // Alternative: try 'rounded-lg' for softer corners or 'rounded-2xl' for more rounded
-              style={{ zIndex: 120 - idx }}
-              title={r===null ? 'Clear rating' : `Rate ${r}`}
-            >
-              {r===null ? '–' : r}
-            </button>
-          ))}
+          {[10, 9, 8, 7, 6, 5, 4, 3, 2, 1, null].map((r, idx) => {
+            return (
+              <button
+                key={r === null ? 'clear' : r}
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  if (r === null) {
+                    void handleClearRating()
+                  } else {
+                    void handleRatingClick(r)
+                  }
+                }}
+                disabled={saving}
+                className={`w-8 h-8 mb-1 text-xs font-bold rounded-md flex items-center justify-center transition-all duration-150 focus:outline-none focus:ring-1 focus:ring-primary-500 disabled:opacity-50 ${r === null ? 'bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300' : getRatingSubtleClass(r)} ${currentRating === r || (r === null && currentRating == null) ? 'ring-1 ring-white ring-offset-1 ring-offset-primary-500/30' : 'hover:scale-105 active:scale-95'}`}
+                style={{ zIndex: 120 - idx }}
+                title={r === null ? 'Clear rating' : `Rate ${r}`}
+              >
+                {r === null ? '–' : r}
+              </button>
+            )
+          })}
         </div>
       </div>
     </>

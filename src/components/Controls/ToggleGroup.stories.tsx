@@ -1,16 +1,16 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import { ToggleGroup } from './ToggleGroup';
-import { 
-  Squares2X2Icon, 
-  ListBulletIcon, 
-  Bars3Icon, 
-  Bars2Icon, 
+import type { Meta, StoryObj } from '@storybook/nextjs-vite'
+import { ToggleGroup } from './ToggleGroup'
+import {
+  Squares2X2Icon,
+  ListBulletIcon,
+  Bars3Icon,
+  Bars2Icon,
   MinusIcon,
   SunIcon,
   MoonIcon,
-  ComputerDesktopIcon
-} from '@heroicons/react/24/outline';
-import { useState } from 'react';
+  ComputerDesktopIcon,
+} from '@heroicons/react/24/outline'
+import { useState } from 'react'
 
 const meta: Meta<typeof ToggleGroup> = {
   title: 'Controls/ToggleGroup',
@@ -20,41 +20,57 @@ const meta: Meta<typeof ToggleGroup> = {
     layout: 'padded',
     docs: {
       description: {
-        component: 'Toggle group component for switching between mutually exclusive options. Supports icons, different sizes, and variants.'
-      }
-    }
+        component:
+          'Toggle group component for switching between mutually exclusive options. Supports icons, different sizes, and variants.',
+      },
+    },
   },
   argTypes: {
     size: { control: 'select', options: ['sm', 'md', 'lg'] },
     variant: { control: 'select', options: ['default', 'pills', 'cards'] },
     iconOnly: { control: 'boolean' },
     disabled: { control: 'boolean' },
-  }
-};
+  },
+}
 
-export default meta;
-type Story = StoryObj<typeof ToggleGroup>;
+export default meta
+type Story = StoryObj<typeof ToggleGroup>
 
 const viewModeOptions = [
   { value: 'grid', label: 'Grid', icon: Squares2X2Icon, tooltip: 'Grid view' },
-  { value: 'list', label: 'List', icon: ListBulletIcon, tooltip: 'List view' }
-];
+  { value: 'list', label: 'List', icon: ListBulletIcon, tooltip: 'List view' },
+]
 
 const densityOptions = [
-  { value: 'detailed', label: 'Detailed', icon: Bars3Icon, tooltip: 'Detailed cards' },
-  { value: 'balanced', label: 'Balanced', icon: Bars2Icon, tooltip: 'Balanced cards' },
-  { value: 'compact', label: 'Compact', icon: MinusIcon, tooltip: 'Compact cards' }
-];
+  {
+    value: 'detailed',
+    label: 'Detailed',
+    icon: Bars3Icon,
+    tooltip: 'Detailed cards',
+  },
+  {
+    value: 'balanced',
+    label: 'Balanced',
+    icon: Bars2Icon,
+    tooltip: 'Balanced cards',
+  },
+  {
+    value: 'compact',
+    label: 'Compact',
+    icon: MinusIcon,
+    tooltip: 'Compact cards',
+  },
+]
 
 const themeOptions = [
   { value: 'light', label: 'Light', icon: SunIcon },
   { value: 'dark', label: 'Dark', icon: MoonIcon },
-  { value: 'system', label: 'System', icon: ComputerDesktopIcon }
-];
+  { value: 'system', label: 'System', icon: ComputerDesktopIcon },
+]
 
 export const ViewModeToggle: Story = {
   render: (args) => {
-    const [value, setValue] = useState('grid');
+    const [value, setValue] = useState('grid')
     return (
       <ToggleGroup
         {...args}
@@ -62,18 +78,18 @@ export const ViewModeToggle: Story = {
         onChange={setValue}
         options={viewModeOptions}
       />
-    );
+    )
   },
   args: {
     size: 'md',
     variant: 'default',
     iconOnly: false,
-  }
-};
+  },
+}
 
 export const DensityToggle: Story = {
   render: (args) => {
-    const [value, setValue] = useState('balanced');
+    const [value, setValue] = useState('balanced')
     return (
       <ToggleGroup
         {...args}
@@ -81,18 +97,18 @@ export const DensityToggle: Story = {
         onChange={setValue}
         options={densityOptions}
       />
-    );
+    )
   },
   args: {
     size: 'md',
     variant: 'default',
     iconOnly: false,
-  }
-};
+  },
+}
 
 export const IconOnly: Story = {
   render: (args) => {
-    const [value, setValue] = useState('grid');
+    const [value, setValue] = useState('grid')
     return (
       <ToggleGroup
         {...args}
@@ -100,16 +116,16 @@ export const IconOnly: Story = {
         onChange={setValue}
         options={viewModeOptions}
       />
-    );
+    )
   },
   args: {
     iconOnly: true,
-  }
-};
+  },
+}
 
 export const ThreeOptions: Story = {
   render: (args) => {
-    const [value, setValue] = useState('system');
+    const [value, setValue] = useState('system')
     return (
       <ToggleGroup
         {...args}
@@ -117,18 +133,18 @@ export const ThreeOptions: Story = {
         onChange={setValue}
         options={themeOptions}
       />
-    );
+    )
   },
   args: {
     size: 'md',
-  }
-};
+  },
+}
 
 export const Sizes: Story = {
   render: () => {
-    const [small, setSmall] = useState('grid');
-    const [medium, setMedium] = useState('list');
-    const [large, setLarge] = useState('grid');
+    const [small, setSmall] = useState('grid')
+    const [medium, setMedium] = useState('list')
+    const [large, setLarge] = useState('grid')
 
     return (
       <div className="space-y-6">
@@ -141,7 +157,7 @@ export const Sizes: Story = {
             size="sm"
           />
         </div>
-        
+
         <div>
           <p className="text-sm font-medium mb-2">Medium (Default)</p>
           <ToggleGroup
@@ -151,7 +167,7 @@ export const Sizes: Story = {
             size="md"
           />
         </div>
-        
+
         <div>
           <p className="text-sm font-medium mb-2">Large</p>
           <ToggleGroup
@@ -162,15 +178,15 @@ export const Sizes: Story = {
           />
         </div>
       </div>
-    );
-  }
-};
+    )
+  },
+}
 
 export const Variants: Story = {
   render: () => {
-    const [default1, setDefault1] = useState('grid');
-    const [pills, setPills] = useState('list');
-    const [cards, setCards] = useState('grid');
+    const [default1, setDefault1] = useState('grid')
+    const [pills, setPills] = useState('list')
+    const [cards, setCards] = useState('grid')
 
     return (
       <div className="space-y-6">
@@ -183,7 +199,7 @@ export const Variants: Story = {
             variant="default"
           />
         </div>
-        
+
         <div>
           <p className="text-sm font-medium mb-2">Pills</p>
           <ToggleGroup
@@ -193,7 +209,7 @@ export const Variants: Story = {
             variant="pills"
           />
         </div>
-        
+
         <div>
           <p className="text-sm font-medium mb-2">Cards</p>
           <ToggleGroup
@@ -204,13 +220,13 @@ export const Variants: Story = {
           />
         </div>
       </div>
-    );
-  }
-};
+    )
+  },
+}
 
 export const Disabled: Story = {
   render: (args) => {
-    const [value, setValue] = useState('grid');
+    const [value, setValue] = useState('grid')
     return (
       <ToggleGroup
         {...args}
@@ -218,18 +234,18 @@ export const Disabled: Story = {
         onChange={setValue}
         options={viewModeOptions}
       />
-    );
+    )
   },
   args: {
     disabled: true,
-  }
-};
+  },
+}
 
 export const RealWorldExamples: Story = {
   render: () => {
-    const [viewMode, setViewMode] = useState('grid');
-    const [density, setDensity] = useState('balanced');
-    const [theme, setTheme] = useState('system');
+    const [viewMode, setViewMode] = useState('grid')
+    const [density, setDensity] = useState('balanced')
+    const [theme, setTheme] = useState('system')
 
     return (
       <div className="space-y-8 max-w-md">
@@ -241,7 +257,7 @@ export const RealWorldExamples: Story = {
             options={viewModeOptions}
           />
         </div>
-        
+
         <div>
           <label className="block text-sm font-medium mb-2">Card Density</label>
           <ToggleGroup
@@ -250,9 +266,11 @@ export const RealWorldExamples: Story = {
             options={densityOptions}
           />
         </div>
-        
+
         <div>
-          <label className="block text-sm font-medium mb-2">Theme Preference</label>
+          <label className="block text-sm font-medium mb-2">
+            Theme Preference
+          </label>
           <ToggleGroup
             value={theme}
             onChange={setTheme}
@@ -268,6 +286,6 @@ export const RealWorldExamples: Story = {
           </p>
         </div>
       </div>
-    );
-  }
-};
+    )
+  },
+}

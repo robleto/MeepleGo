@@ -34,7 +34,9 @@ export default function SignUpPage() {
     <AuthLayout
       title="Create your account"
       subtitle="Start tracking and ranking your collection"
-      footer={<span>By creating an account you agree to basic usage terms.</span>}
+      footer={
+        <span>By creating an account you agree to basic usage terms.</span>
+      }
     >
       <form onSubmit={onSubmit} className="space-y-5">
         <div className="space-y-1">
@@ -73,7 +75,12 @@ export default function SignUpPage() {
           {loading ? 'Creating…' : 'Sign up'}
         </button>
         <div className="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400 pt-1">
-          <a href="/login" className="font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300">Have an account? Log in</a>
+          <a
+            href="/login"
+            className="font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
+          >
+            Have an account? Log in
+          </a>
         </div>
       </form>
     </AuthLayout>

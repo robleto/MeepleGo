@@ -3,22 +3,23 @@
 import React, { forwardRef } from 'react'
 import { cn } from '@/utils/helpers'
 
-export interface RadioProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
+export interface RadioProps
+  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
   /**
    * Radio button size variant
    */
   size?: 'sm' | 'md' | 'lg'
-  
+
   /**
    * Visual state of the radio button
    */
   state?: 'default' | 'error' | 'success'
-  
+
   /**
    * Label text for the radio button
    */
   label?: string
-  
+
   /**
    * Description text below the label
    */
@@ -26,41 +27,46 @@ export interface RadioProps extends Omit<React.InputHTMLAttributes<HTMLInputElem
 }
 
 const Radio = forwardRef<HTMLInputElement, RadioProps>(
-  ({ 
-    className, 
-    size = 'md', 
-    state = 'default',
-    label,
-    description,
-    disabled,
-    id,
-    ...props 
-  }, ref) => {
-    
+  (
+    {
+      className,
+      size = 'md',
+      state = 'default',
+      label,
+      description,
+      disabled,
+      id,
+      ...props
+    },
+    ref
+  ) => {
     const sizeClasses = {
       sm: 'h-4 w-4',
-      md: 'h-5 w-5', 
-      lg: 'h-6 w-6'
+      md: 'h-5 w-5',
+      lg: 'h-6 w-6',
     }
-    
+
     const stateClasses = {
-      default: 'border-gray-300 dark:border-gray-600 text-sky-600 focus:ring-sky-500',
-      error: 'border-red-300 dark:border-red-600 text-red-600 focus:ring-red-500',
-      success: 'border-green-300 dark:border-green-600 text-green-600 focus:ring-green-500'
+      default:
+        'border-gray-300 dark:border-gray-600 text-sky-600 focus:ring-sky-500',
+      error:
+        'border-red-300 dark:border-red-600 text-red-600 focus:ring-red-500',
+      success:
+        'border-green-300 dark:border-green-600 text-green-600 focus:ring-green-500',
     }
-    
+
     const labelSize = {
       sm: 'text-sm',
       md: 'text-sm',
-      lg: 'text-base'
+      lg: 'text-base',
     }
-    
+
     const descriptionSize = {
       sm: 'text-xs',
       md: 'text-xs',
-      lg: 'text-sm'
+      lg: 'text-sm',
     }
-    
+
     // Generate ID if not provided
     const radioId = id || `radio-${Math.random().toString(36).substr(2, 9)}`
 
@@ -74,25 +80,25 @@ const Radio = forwardRef<HTMLInputElement, RadioProps>(
             className={cn(
               // Base styles
               'border bg-white dark:bg-gray-700 focus:ring-2 focus:ring-offset-0 transition-colors cursor-pointer',
-              
+
               // Size styles
               sizeClasses[size],
-              
+
               // State styles
               stateClasses[state],
-              
+
               // Disabled styles
-              disabled && 'opacity-50 cursor-not-allowed',
+              disabled && 'opacity-50 cursor-not-allowed'
             )}
             disabled={disabled}
             {...props}
           />
         </div>
-        
+
         {(label || description) && (
           <div className={cn('ml-2', size === 'lg' ? 'ml-3' : 'ml-2')}>
             {label && (
-              <label 
+              <label
                 htmlFor={radioId}
                 className={cn(
                   'font-medium text-gray-900 dark:text-white cursor-pointer',
@@ -104,11 +110,13 @@ const Radio = forwardRef<HTMLInputElement, RadioProps>(
               </label>
             )}
             {description && (
-              <p className={cn(
-                'text-gray-500 dark:text-gray-400',
-                descriptionSize[size],
-                disabled && 'opacity-50'
-              )}>
+              <p
+                className={cn(
+                  'text-gray-500 dark:text-gray-400',
+                  descriptionSize[size],
+                  disabled && 'opacity-50'
+                )}
+              >
                 {description}
               </p>
             )}

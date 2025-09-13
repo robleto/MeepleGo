@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import TimelineMarker from './TimelineMarker'
 
 const meta: Meta<typeof TimelineMarker> = {
@@ -8,24 +8,26 @@ const meta: Meta<typeof TimelineMarker> = {
     layout: 'padded',
     docs: {
       description: {
-        component: 'A timeline marker component used in awards pages to show year progression with a vertical line, dot marker, and rotated year label.'
-      }
-    }
+        component:
+          'A timeline marker component used in awards pages to show year progression with a vertical line, dot marker, and rotated year label.',
+      },
+    },
   },
   argTypes: {
     year: {
       control: { type: 'number', min: 1900, max: 2030, step: 1 },
-      description: 'The year to display on the timeline marker'
+      description: 'The year to display on the timeline marker',
     },
     isLast: {
       control: 'boolean',
-      description: 'Whether this is the last marker (affects vertical line length)'
+      description:
+        'Whether this is the last marker (affects vertical line length)',
     },
     className: {
       control: 'text',
-      description: 'Additional CSS classes to apply'
-    }
-  }
+      description: 'Additional CSS classes to apply',
+    },
+  },
 }
 
 export default meta
@@ -34,22 +36,23 @@ type Story = StoryObj<typeof TimelineMarker>
 export const Default: Story = {
   args: {
     year: 2024,
-    isLast: false
-  }
+    isLast: false,
+  },
 }
 
 export const LastMarker: Story = {
   args: {
     year: 2025,
-    isLast: true
+    isLast: true,
   },
   parameters: {
     docs: {
       description: {
-        story: 'Timeline marker for the last/most recent year with shortened vertical line.'
-      }
-    }
-  }
+        story:
+          'Timeline marker for the last/most recent year with shortened vertical line.',
+      },
+    },
+  },
 }
 
 export const MultipleMarkers: Story = {
@@ -88,24 +91,26 @@ export const MultipleMarkers: Story = {
   parameters: {
     docs: {
       description: {
-        story: 'Multiple timeline markers showing how they connect vertically with content alongside.'
-      }
-    }
-  }
+        story:
+          'Multiple timeline markers showing how they connect vertically with content alongside.',
+      },
+    },
+  },
 }
 
 export const DarkMode: Story = {
   args: {
     year: 2024,
-    isLast: false
+    isLast: false,
   },
   parameters: {
     backgrounds: { default: 'dark' },
     docs: {
       description: {
-        story: 'Timeline marker in dark mode with appropriate color adjustments.'
-      }
-    }
+        story:
+          'Timeline marker in dark mode with appropriate color adjustments.',
+      },
+    },
   },
   decorators: [
     (Story) => (
@@ -114,20 +119,20 @@ export const DarkMode: Story = {
           <Story />
         </div>
       </div>
-    )
-  ]
+    ),
+  ],
 }
 
 export const CustomYear: Story = {
   args: {
     year: 1995,
-    isLast: false
+    isLast: false,
   },
   parameters: {
     docs: {
       description: {
-        story: 'Timeline marker with a custom year to show flexibility.'
-      }
-    }
-  }
+        story: 'Timeline marker with a custom year to show flexibility.',
+      },
+    },
+  },
 }

@@ -4,6 +4,9 @@
 import Fuse, { FuseResult, IFuseOptions } from 'fuse.js'
 import type { GameWithRanking } from '@/types'
 
+// Matches any non-alphanumeric (ASCII) and non-whitespace character
+const PUNCTUATION_REGEX = /[^A-Za-z0-9\s]/g
+
 // Fuse.js options optimized for game search
 const fuseOptions: IFuseOptions<GameWithRanking> = {
   // Keys to search - with weights for importance
@@ -125,7 +128,7 @@ export function searchGamesWithExactBoost(
   const normalizedQuery = query
     .trim()
     .toLowerCase()
-    .replace(/['"''""!@#$%^&*()_+\-=\[\]{};:,.<>?/\\|`~]/g, ' ')
+    .replace(PUNCTUATION_REGEX, ' ')
     .replace(/\s+/g, ' ')
     .trim()
 
@@ -138,7 +141,7 @@ export function searchGamesWithExactBoost(
   const normalizedExactMatches = games.filter((game) => {
     const normalizedName = game.name
       .toLowerCase()
-      .replace(/['"''""!@#$%^&*()_+\-=\[\]{};:,.<>?/\\|`~]/g, ' ')
+      .replace(PUNCTUATION_REGEX, ' ')
       .replace(/\s+/g, ' ')
       .trim()
 
@@ -150,7 +153,7 @@ export function searchGamesWithExactBoost(
     const gameLower = game.name.toLowerCase()
     const normalizedName = game.name
       .toLowerCase()
-      .replace(/['"''""!@#$%^&*()_+\-=\[\]{};:,.<>?/\\|`~]/g, ' ')
+      .replace(PUNCTUATION_REGEX, ' ')
       .replace(/\s+/g, ' ')
       .trim()
 

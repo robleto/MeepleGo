@@ -3,7 +3,7 @@
     {
       "id": "golden-geek",
       "name": "Golden Geek Awards",
-    "description": "Annual BoardGameGeek community awards honoring top games in a series of categories.",
+      "description": "Annual BoardGameGeek community awards honoring top games in a series of categories.",
       "icon": "TrophyIcon",
       "color": "amber",
       "backgroundColor": "bg-amber-50",

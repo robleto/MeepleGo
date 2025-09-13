@@ -2,8 +2,8 @@ name: BGG Trends Sync
 
 on:
   schedule:
-    - cron: '30 4 * * *'   # nightly at 04:30 UTC
-    - cron: '45 5 * * 1'   # weekly recap Monday 05:45 UTC (redundant safety)
+    - cron: '30 4 * * *' # nightly at 04:30 UTC
+    - cron: '45 5 * * 1' # weekly recap Monday 05:45 UTC (redundant safety)
   workflow_dispatch:
     inputs:
       dryRun:

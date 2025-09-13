@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import Toggle from './Toggle'
 
 const meta: Meta<typeof Toggle> = {
@@ -8,9 +8,10 @@ const meta: Meta<typeof Toggle> = {
     layout: 'centered',
     docs: {
       description: {
-        component: 'A toggle switch component for boolean settings. Provides an alternative to checkboxes with a more modern switch appearance.'
-      }
-    }
+        component:
+          'A toggle switch component for boolean settings. Provides an alternative to checkboxes with a more modern switch appearance.',
+      },
+    },
   },
   argTypes: {
     size: {
@@ -18,7 +19,7 @@ const meta: Meta<typeof Toggle> = {
       options: ['sm', 'md', 'lg'],
     },
     state: {
-      control: 'select', 
+      control: 'select',
       options: ['default', 'error', 'success'],
     },
     labelPosition: {
@@ -63,30 +64,30 @@ export const Sizes: Story = {
 export const States: Story = {
   render: () => (
     <div className="space-y-4">
-      <Toggle 
-        label="Default state" 
-        description="This is the default appearance" 
+      <Toggle
+        label="Default state"
+        description="This is the default appearance"
       />
-      <Toggle 
-        state="error" 
-        label="Error state" 
+      <Toggle
+        state="error"
+        label="Error state"
         description="Something is wrong with this setting"
       />
-      <Toggle 
-        state="success" 
-        label="Success state" 
+      <Toggle
+        state="success"
+        label="Success state"
         description="This setting is configured correctly"
         defaultChecked
       />
-      <Toggle 
-        disabled 
-        label="Disabled state" 
+      <Toggle
+        disabled
+        label="Disabled state"
         description="This option is not available"
       />
-      <Toggle 
-        disabled 
-        defaultChecked 
-        label="Disabled and on" 
+      <Toggle
+        disabled
+        defaultChecked
+        label="Disabled and on"
         description="This option is locked in the on position"
       />
     </div>
@@ -97,33 +98,37 @@ export const LabelPositions: Story = {
   render: () => (
     <div className="space-y-6">
       <div>
-        <h4 className="text-sm font-medium text-gray-900 mb-3">Label on Right (Default)</h4>
+        <h4 className="text-sm font-medium text-gray-900 mb-3">
+          Label on Right (Default)
+        </h4>
         <div className="space-y-3">
-          <Toggle 
+          <Toggle
             labelPosition="right"
-            label="Push notifications" 
+            label="Push notifications"
             description="Receive notifications on your device"
           />
-          <Toggle 
+          <Toggle
             labelPosition="right"
-            label="Email digest" 
+            label="Email digest"
             description="Get weekly summaries via email"
             defaultChecked
           />
         </div>
       </div>
-      
+
       <div>
-        <h4 className="text-sm font-medium text-gray-900 mb-3">Label on Left</h4>
+        <h4 className="text-sm font-medium text-gray-900 mb-3">
+          Label on Left
+        </h4>
         <div className="space-y-3">
-          <Toggle 
+          <Toggle
             labelPosition="left"
-            label="Dark mode" 
+            label="Dark mode"
             description="Use dark theme throughout the app"
           />
-          <Toggle 
+          <Toggle
             labelPosition="left"
-            label="Auto-save" 
+            label="Auto-save"
             description="Automatically save your changes"
             defaultChecked
           />
@@ -155,18 +160,18 @@ export const WithoutLabels: Story = {
 export const CheckedStates: Story = {
   render: () => (
     <div className="space-y-4">
-      <Toggle 
-        label="Unchecked toggle" 
+      <Toggle
+        label="Unchecked toggle"
         description="This toggle is currently off"
         checked={false}
       />
-      <Toggle 
-        label="Checked toggle" 
+      <Toggle
+        label="Checked toggle"
         description="This toggle is currently on"
         checked={true}
       />
-      <Toggle 
-        label="Default checked" 
+      <Toggle
+        label="Default checked"
         description="This toggle defaults to on"
         defaultChecked
       />
@@ -179,71 +184,73 @@ export const GameSettingsForm: Story = {
   render: () => (
     <div className="space-y-6 max-w-md">
       <div>
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Game Collection Settings</h3>
-        
+        <h3 className="text-lg font-medium text-gray-900 mb-4">
+          Game Collection Settings
+        </h3>
+
         <div className="space-y-4">
-          <Toggle 
+          <Toggle
             label="Public Collection"
             description="Allow others to see your game collection"
             defaultChecked
           />
-          
-          <Toggle 
+
+          <Toggle
             label="Show Ratings"
             description="Display your ratings on public games"
             size="sm"
           />
-          
-          <Toggle 
+
+          <Toggle
             label="Auto-track Plays"
             description="Automatically log plays when you rate games"
             state="success"
             defaultChecked
           />
-          
-          <Toggle 
+
+          <Toggle
             label="Expansion Grouping"
             description="Group expansions with their base games"
             defaultChecked
           />
         </div>
       </div>
-      
+
       <div className="border-t pt-4">
         <h4 className="font-medium text-gray-900 mb-3">Notifications</h4>
         <div className="space-y-3">
-          <Toggle 
+          <Toggle
             label="Friend Activity"
             description="Get notified when friends add games"
             size="sm"
           />
-          
-          <Toggle 
+
+          <Toggle
             label="New Releases"
             description="Alerts for games matching your wishlist"
             size="sm"
             defaultChecked
           />
-          
-          <Toggle 
+
+          <Toggle
             label="Weekly Digest"
             description="Summary of collection activity"
             size="sm"
           />
         </div>
       </div>
-      
+
       <div className="border-t pt-4">
         <h4 className="font-medium text-gray-900 mb-3">Advanced</h4>
         <div className="space-y-3">
-          <Toggle 
+          <Toggle
             label="Sync with BGG"
             description="Keep BoardGameGeek in sync"
             labelPosition="left"
             state="error"
           />
-          
-          <Toggle 
+
+          <Toggle
             label="Beta Features"
             description="Try experimental features"
             labelPosition="left"

@@ -1,8 +1,8 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import GamePosterCard from './GamePosterCard'
 
 const meta: Meta<typeof GamePosterCard> = {
-  title: 'Archived/Features/Rankings/GamePosterCard',
+  title: 'Components/Rankings/GamePosterCard',
   component: GamePosterCard,
   parameters: {
     layout: 'centered',
@@ -17,10 +17,12 @@ const mockGame = {
   id: '1',
   name: 'Wingspan',
   year_published: 2019,
-  image_url: 'https://cf.geekdo-images.com/yLZJCVLlIx4c7eJEWUNJ7w__original/img/Tbuekz3--8SfIryKDd8Yc8QjL8A=/0x0/filters:format(jpeg)/pic4458123.jpg',
+  image_url:
+    'https://cf.geekdo-images.com/yLZJCVLlIx4c7eJEWUNJ7w__original/img/Tbuekz3--8SfIryKDd8Yc8QjL8A=/0x0/filters:format(jpeg)/pic4458123.jpg',
   ranking: null,
   bgg_id: 266192,
-  thumbnail_url: 'https://cf.geekdo-images.com/yLZJCVLlIx4c7eJEWUNJ7w__thumb/img/ZPTOLpQKdTbPmtF3VGXz5VnGLxs=/fit-in/200x150/filters:strip_icc()/pic4458123.jpg',
+  thumbnail_url:
+    'https://cf.geekdo-images.com/yLZJCVLlIx4c7eJEWUNJ7w__thumb/img/ZPTOLpQKdTbPmtF3VGXz5VnGLxs=/fit-in/200x150/filters:strip_icc()/pic4458123.jpg',
   categories: ['Animals', 'Card Game'],
   mechanics: ['Engine Building'],
   min_players: 1,
@@ -51,7 +53,7 @@ export const Rated: Story = {
       ranking: {
         ranking: 8.5,
         played_it: true,
-      }
+      },
     } as any,
     onUpdate: (gameId, patch) => console.log('Update:', gameId, patch),
     onClick: () => console.log('Card clicked'),
@@ -65,7 +67,7 @@ export const NotPlayed: Story = {
       ranking: {
         ranking: null,
         played_it: false,
-      }
+      },
     } as any,
     onUpdate: (gameId, patch) => console.log('Update:', gameId, patch),
     onClick: () => console.log('Card clicked'),
@@ -79,7 +81,7 @@ export const HighRating: Story = {
       ranking: {
         ranking: 10,
         played_it: true,
-      }
+      },
     } as any,
     onUpdate: (gameId, patch) => console.log('Update:', gameId, patch),
     onClick: () => console.log('Card clicked'),
@@ -93,7 +95,7 @@ export const LowRating: Story = {
       ranking: {
         ranking: 3.2,
         played_it: true,
-      }
+      },
     } as any,
     onUpdate: (gameId, patch) => console.log('Update:', gameId, patch),
     onClick: () => console.log('Card clicked'),
@@ -108,7 +110,7 @@ export const LongTitle: Story = {
       ranking: {
         ranking: 7.8,
         played_it: true,
-      }
+      },
     } as any,
     onUpdate: (gameId, patch) => console.log('Update:', gameId, patch),
     onClick: () => console.log('Card clicked'),
@@ -119,7 +121,7 @@ export const GameGrid: Story = {
   render: () => (
     <div className="space-y-6 p-8">
       <h2 className="text-2xl font-bold">GamePosterCard Grid</h2>
-      
+
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
         {[
           { name: 'Wingspan', rating: 8.5, played: true },
@@ -131,15 +133,19 @@ export const GameGrid: Story = {
         ].map((gameData, i) => (
           <GamePosterCard
             key={i}
-            game={{
-              ...mockGame,
-              id: String(i),
-              name: gameData.name,
-              ranking: gameData.rating ? {
-                ranking: gameData.rating,
-                played_it: gameData.played,
-              } : null
-            } as any}
+            game={
+              {
+                ...mockGame,
+                id: String(i),
+                name: gameData.name,
+                ranking: gameData.rating
+                  ? {
+                      ranking: gameData.rating,
+                      played_it: gameData.played,
+                    }
+                  : null,
+              } as any
+            }
             onUpdate={(gameId, patch) => console.log('Update:', gameId, patch)}
             onClick={() => console.log('Clicked:', gameData.name)}
           />
@@ -171,8 +177,9 @@ export const GameGrid: Story = {
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
         <h4 className="font-semibold text-blue-900 mb-2">Usage Notes</h4>
         <p className="text-blue-800 text-sm">
-          GamePosterCard is used in grid layouts for rankings and game collections. 
-          It provides a compact, visual way to display games with quick rating and status controls.
+          GamePosterCard is used in grid layouts for rankings and game
+          collections. It provides a compact, visual way to display games with
+          quick rating and status controls.
         </p>
       </div>
     </div>

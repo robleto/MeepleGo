@@ -222,7 +222,9 @@ export default function RankingsFilters({
         // Search from ranked games only for rankings page
         const { data, error } = await supabase
           .from('rankings')
-          .select('id,game:games!inner(id,name,year_published,thumbnail_url,rating),ranking')
+          .select(
+            'id,game:games!inner(id,name,year_published,thumbnail_url,rating),ranking'
+          )
           .ilike('game.name', `%${raw}%`)
           .not('ranking', 'is', null)
           .order('game.rating', { ascending: false })
@@ -231,8 +233,8 @@ export default function RankingsFilters({
         if (!error && data) {
           // Transform the data to match SuggestionGame interface
           const transformedData = data
-            .filter(r => r.game)
-            .map(r => ({
+            .filter((r) => r.game)
+            .map((r) => ({
               id: (r.game as any).id,
               name: (r.game as any).name,
               year_published: (r.game as any).year_published,
@@ -257,7 +259,11 @@ export default function RankingsFilters({
           setGrouped({ exactMatches: exact, popular, other })
           setFlat(flatArr)
           setActiveIndex((prev) =>
-            prev === -1 ? (flatArr.length ? 0 : -1) : Math.min(prev, flatArr.length - 1)
+            prev === -1
+              ? flatArr.length
+                ? 0
+                : -1
+              : Math.min(prev, flatArr.length - 1)
           )
           setShowSuggestions(true)
         }
@@ -479,7 +485,9 @@ export default function RankingsFilters({
                         </div>
                         {grouped.other.map((g, i) => {
                           const idx =
-                            grouped.exactMatches.length + grouped.popular.length + i
+                            grouped.exactMatches.length +
+                            grouped.popular.length +
+                            i
                           return (
                             <SuggestionItem
                               key={`o-${g.id}`}
@@ -527,8 +535,8 @@ export default function RankingsFilters({
           {searchTerm ? (
             <>
               Search results for "
-              <span className="font-medium text-gray-700">{searchTerm}</span>": showing{' '}
-              {total} ranked game{total !== 1 ? 's' : ''}
+              <span className="font-medium text-gray-700">{searchTerm}</span>":
+              showing {total} ranked game{total !== 1 ? 's' : ''}
             </>
           ) : (
             <>
@@ -542,11 +550,11 @@ export default function RankingsFilters({
       {showFilterModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           {/* Backdrop */}
-          <div 
+          <div
             className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm"
             onClick={() => setShowFilterModal(false)}
           />
-          
+
           {/* Modal Content */}
           <div className="relative bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             {/* Header */}
@@ -565,7 +573,7 @@ export default function RankingsFilters({
               {/* Sort & View Section */}
               <div className="space-y-4">
                 <h3 className="text-lg font-medium text-gray-900">Display</h3>
-                
+
                 {/* Sort By */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -584,12 +592,16 @@ export default function RankingsFilters({
                       ))}
                     </select>
                     <button
-                      onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                      onClick={() =>
+                        setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
+                      }
                       className="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 bg-white transition-colors"
                       title={`Currently sorting ${sortOrder === 'asc' ? 'ascending' : 'descending'}`}
                     >
                       <ChevronUpDownIcon className="w-4 h-4" />
-                      <span className="text-sm">{sortOrder === 'asc' ? 'A→Z' : 'Z→A'}</span>
+                      <span className="text-sm">
+                        {sortOrder === 'asc' ? 'A→Z' : 'Z→A'}
+                      </span>
                     </button>
                   </div>
                 </div>

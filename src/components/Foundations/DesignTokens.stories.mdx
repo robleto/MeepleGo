@@ -1,6 +1,17 @@
 import { Meta } from '@storybook/blocks'
 
-<Meta title="Foundations/Design Tokens" parameters={{ layout: 'fullscreen', docs: { description: { component: 'Central reference for design tokens used across MeepleGo (colors, typography, sizing). This page currently focuses on the 1–10 rating color scale.' } } }} />
+<Meta
+  title="Foundations/Design Tokens"
+  parameters={{
+    layout: 'fullscreen',
+    docs: {
+      description: {
+        component:
+          'Central reference for design tokens used across MeepleGo (colors, typography, sizing). This page currently focuses on the 1–10 rating color scale.',
+      },
+    },
+  }}
+/>
 
 # Design Tokens
 
@@ -8,18 +19,18 @@ MeepleGo uses a pragmatic token approach. This initial reference documents the r
 
 ## Rating Scale (1 – 10)
 
-| Rating | Tailwind Classes | Semantic Label |
-|--------|------------------|----------------|
-| 1 | `bg-red-600` / `text-red-600` subtle shades | Awful |
-| 2 | `bg-orange-600` | Bad |
-| 3 | `bg-amber-600` | Poor |
-| 4 | `bg-yellow-600` | Below Average |
-| 5 | `bg-lime-600` | Average |
-| 6 | `bg-green-600` | Above Average |
-| 7 | `bg-emerald-600` | Good |
-| 8 | `bg-teal-600` | Very Good |
-| 9 | `bg-cyan-600` | Great |
-| 10 | `bg-sky-600` | Masterpiece |
+| Rating | Tailwind Classes                            | Semantic Label |
+| ------ | ------------------------------------------- | -------------- |
+| 1      | `bg-red-600` / `text-red-600` subtle shades | Awful          |
+| 2      | `bg-orange-600`                             | Bad            |
+| 3      | `bg-amber-600`                              | Poor           |
+| 4      | `bg-yellow-600`                             | Below Average  |
+| 5      | `bg-lime-600`                               | Average        |
+| 6      | `bg-green-600`                              | Above Average  |
+| 7      | `bg-emerald-600`                            | Good           |
+| 8      | `bg-teal-600`                               | Very Good      |
+| 9      | `bg-cyan-600`                               | Great          |
+| 10     | `bg-sky-600`                                | Masterpiece    |
 
 > Solid vs subtle variants are generated via helper functions in `getRatingSolidClass` and `getRatingSubtleClass`.
 
@@ -32,6 +43,7 @@ MeepleGo uses a pragmatic token approach. This initial reference documents the r
 ## Future Tokens
 
 Planned additions:
+
 - Spacing scale reference
 - Elevation / shadow levels
 - Typography scale & responsive ramp

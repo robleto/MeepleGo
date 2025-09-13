@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { Alert } from './Alert'
 import { useState } from 'react'
 
@@ -9,9 +9,10 @@ const meta: Meta<typeof Alert> = {
     layout: 'centered',
     docs: {
       description: {
-        component: 'Alert component for displaying status messages with semantic color variants, icons, and optional dismissal.'
-      }
-    }
+        component:
+          'Alert component for displaying status messages with semantic color variants, icons, and optional dismissal.',
+      },
+    },
   },
   tags: ['autodocs'],
   argTypes: {
@@ -111,18 +112,30 @@ export const WithoutIcons: Story = {
 export const Dismissible: Story = {
   render: () => {
     const [alerts, setAlerts] = useState([
-      { id: 1, variant: 'success' as const, message: 'Task completed successfully!' },
-      { id: 2, variant: 'warning' as const, message: 'Please save your work before continuing.' },
-      { id: 3, variant: 'info' as const, message: 'New features are now available.' },
+      {
+        id: 1,
+        variant: 'success' as const,
+        message: 'Task completed successfully!',
+      },
+      {
+        id: 2,
+        variant: 'warning' as const,
+        message: 'Please save your work before continuing.',
+      },
+      {
+        id: 3,
+        variant: 'info' as const,
+        message: 'New features are now available.',
+      },
     ])
 
     const dismissAlert = (id: number) => {
-      setAlerts(alerts.filter(alert => alert.id !== id))
+      setAlerts(alerts.filter((alert) => alert.id !== id))
     }
 
     return (
       <div className="space-y-3 w-96">
-        {alerts.map(alert => (
+        {alerts.map((alert) => (
           <Alert
             key={alert.id}
             variant={alert.variant}
@@ -133,7 +146,9 @@ export const Dismissible: Story = {
           </Alert>
         ))}
         {alerts.length === 0 && (
-          <p className="text-gray-500 text-center py-4">All alerts dismissed!</p>
+          <p className="text-gray-500 text-center py-4">
+            All alerts dismissed!
+          </p>
         )}
       </div>
     )
@@ -146,7 +161,7 @@ export const ComplexContent: Story = {
       <Alert variant="warning" title="Update Available" dismissible>
         <div className="mt-2">
           <p className="text-sm">
-            A new version of the application is available. 
+            A new version of the application is available.
             <a href="#" className="font-medium underline hover:no-underline">
               View changelog
             </a>

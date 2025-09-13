@@ -15,14 +15,25 @@ interface PlayLogEditorProps {
   editLog?: PlayLog | null
 }
 
-export function PlayLogEditor({ gameId, gameName, onCreated, onUpdated, autoFocus, startCollapsed = false, openForm, editLog }: PlayLogEditorProps) {
+export function PlayLogEditor({
+  gameId,
+  gameName,
+  onCreated,
+  onUpdated,
+  autoFocus,
+  startCollapsed = false,
+  openForm,
+  editLog,
+}: PlayLogEditorProps) {
   // TODO: Restore full PlayLogEditor implementation
   return (
     <div className="space-y-6">
       <div className="text-center text-gray-500 py-8">
         PlayLogEditor Component - Implementation Needed
         <br />
-        <small>Game: {gameName} ({gameId})</small>
+        <small>
+          Game: {gameName} ({gameId})
+        </small>
       </div>
     </div>
   )

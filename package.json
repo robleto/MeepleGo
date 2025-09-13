@@ -7,10 +7,11 @@
     "dev": "next dev",
     "build": "NEXT_DISABLE_ESLINT=1 next build",
     "start": "next start",
-  "lint": "next lint",
-  "lint:archived": "node scripts/development-tools/check-archived-imports.mjs",
+    "lint": "next lint",
+  "lint:legacy": "node scripts/development-tools/check-legacy-imports.mjs",
+    "lint:archived": "node scripts/development-tools/check-archived-imports.mjs",
     "lint:fix": "next lint --fix",
-  "lint:stories": "node scripts/development-tools/check-empty-stories.mjs",
+    "lint:stories": "node scripts/development-tools/check-empty-stories.mjs",
     "format": "prettier --write .",
     "type-check": "tsc --noEmit",
     "backfill:honors": "ts-node --compiler-options '{\"module\":\"commonjs\"}' scripts/backfill_honor_categories.ts",
@@ -23,9 +24,9 @@
     "admin:reset": "node scripts/admin_reset_password.cjs",
     "test": "vitest run",
     "supabase:types": "supabase gen types typescript --project-id $SUPABASE_PROJECT_ID > src/types/supabase.generated.ts",
-  "storybook": "storybook dev -p 6006",
-  "build-storybook": "storybook build",
-  "chromatic": "chromatic --exit-once-uploaded || echo 'Chromatic optional'"
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build",
+    "chromatic": "chromatic --exit-once-uploaded || echo 'Chromatic optional'"
   },
   "keywords": [
     "board games",

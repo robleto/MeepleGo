@@ -1,10 +1,10 @@
 import React from 'react'
-import { 
-  CheckCircleIcon, 
-  XCircleIcon, 
-  ExclamationTriangleIcon, 
+import {
+  CheckCircleIcon,
+  XCircleIcon,
+  ExclamationTriangleIcon,
   InformationCircleIcon,
-  XMarkIcon 
+  XMarkIcon,
 } from '@heroicons/react/24/outline'
 
 export interface AlertProps {
@@ -12,37 +12,37 @@ export interface AlertProps {
    * Visual style variant
    */
   variant?: 'success' | 'error' | 'warning' | 'info'
-  
+
   /**
    * Alert content
    */
   children: React.ReactNode
-  
+
   /**
    * Alert title (optional)
    */
   title?: string
-  
+
   /**
    * Size variant
    */
   size?: 'sm' | 'md' | 'lg'
-  
+
   /**
    * Show or hide the icon
    */
   showIcon?: boolean
-  
+
   /**
    * Show or hide the close button
    */
   dismissible?: boolean
-  
+
   /**
    * Callback when alert is dismissed
    */
   onDismiss?: () => void
-  
+
   /**
    * Additional CSS classes
    */
@@ -51,25 +51,29 @@ export interface AlertProps {
 
 const variants = {
   success: {
-    container: 'bg-green-50 border-green-200 text-green-800 dark:bg-green-900/20 dark:border-green-800 dark:text-green-300',
+    container:
+      'bg-green-50 border-green-200 text-green-800 dark:bg-green-900/20 dark:border-green-800 dark:text-green-300',
     icon: CheckCircleIcon,
-    iconColor: 'text-green-400'
+    iconColor: 'text-green-400',
   },
   error: {
-    container: 'bg-red-50 border-red-200 text-red-800 dark:bg-red-900/20 dark:border-red-800 dark:text-red-300',
+    container:
+      'bg-red-50 border-red-200 text-red-800 dark:bg-red-900/20 dark:border-red-800 dark:text-red-300',
     icon: XCircleIcon,
-    iconColor: 'text-red-400'
+    iconColor: 'text-red-400',
   },
   warning: {
-    container: 'bg-yellow-50 border-yellow-200 text-yellow-800 dark:bg-yellow-900/20 dark:border-yellow-800 dark:text-yellow-300',
+    container:
+      'bg-yellow-50 border-yellow-200 text-yellow-800 dark:bg-yellow-900/20 dark:border-yellow-800 dark:text-yellow-300',
     icon: ExclamationTriangleIcon,
-    iconColor: 'text-yellow-400'
+    iconColor: 'text-yellow-400',
   },
   info: {
-    container: 'bg-blue-50 border-blue-200 text-blue-800 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-300',
+    container:
+      'bg-blue-50 border-blue-200 text-blue-800 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-300',
     icon: InformationCircleIcon,
-    iconColor: 'text-blue-400'
-  }
+    iconColor: 'text-blue-400',
+  },
 }
 
 const sizes = {
@@ -77,23 +81,23 @@ const sizes = {
     container: 'p-3 text-sm',
     icon: 'h-4 w-4',
     title: 'text-sm font-medium',
-    close: 'h-4 w-4'
+    close: 'h-4 w-4',
   },
   md: {
     container: 'p-4 text-sm',
     icon: 'h-5 w-5',
     title: 'text-base font-medium',
-    close: 'h-5 w-5'
+    close: 'h-5 w-5',
   },
   lg: {
     container: 'p-5 text-base',
     icon: 'h-6 w-6',
     title: 'text-lg font-medium',
-    close: 'h-6 w-6'
-  }
+    close: 'h-6 w-6',
+  },
 }
 
-export function Alert({ 
+export function Alert({
   variant = 'info',
   children,
   title,
@@ -101,34 +105,32 @@ export function Alert({
   showIcon = true,
   dismissible = false,
   onDismiss,
-  className = ''
+  className = '',
 }: AlertProps) {
   const variantConfig = variants[variant]
   const sizeConfig = sizes[size]
   const IconComponent = variantConfig.icon
 
   return (
-    <div className={`border rounded-lg ${variantConfig.container} ${sizeConfig.container} ${className}`}>
+    <div
+      className={`border rounded-lg ${variantConfig.container} ${sizeConfig.container} ${className}`}
+    >
       <div className="flex">
         {/* Icon */}
         {showIcon && (
           <div className="flex-shrink-0">
-            <IconComponent className={`${sizeConfig.icon} ${variantConfig.iconColor}`} />
+            <IconComponent
+              className={`${sizeConfig.icon} ${variantConfig.iconColor}`}
+            />
           </div>
         )}
-        
+
         {/* Content */}
         <div className={`${showIcon ? 'ml-3' : ''} flex-1`}>
-          {title && (
-            <h3 className={`${sizeConfig.title} mb-1`}>
-              {title}
-            </h3>
-          )}
-          <div>
-            {children}
-          </div>
+          {title && <h3 className={`${sizeConfig.title} mb-1`}>{title}</h3>}
+          <div>{children}</div>
         </div>
-        
+
         {/* Dismiss button */}
         {dismissible && (
           <div className="ml-auto pl-3">

@@ -9,11 +9,13 @@ describe('Awards Display Logic', () => {
       const label = h.name || h.award || h.title || 'Award'
       const year = h.year || h.award_year || null
       const isWinner = (category + result).toLowerCase().includes('winner')
-      
+
       // Clean category and result to avoid duplicate "Winner" text
-      const cleanCategory = category.toLowerCase().includes('winner') ? '' : category
+      const cleanCategory = category.toLowerCase().includes('winner')
+        ? ''
+        : category
       const cleanResult = result.toLowerCase().includes('winner') ? '' : result
-      
+
       return {
         label,
         year,
@@ -21,7 +23,7 @@ describe('Awards Display Logic', () => {
         cleanCategory,
         cleanResult,
         originalCategory: category,
-        originalResult: result
+        originalResult: result,
       }
     })
   }
@@ -32,16 +34,16 @@ describe('Awards Display Logic', () => {
         name: 'Spiel des Jahres',
         category: 'Winner',
         result_raw: 'Winner',
-        year: 2023
-      }
+        year: 2023,
+      },
     ]
 
     const processed = processAwardsData(testHonors)
     const award = processed[0]
 
     expect(award.isWinner).toBe(true)
-    expect(award.cleanCategory).toBe('')  // Should be empty to avoid duplicate
-    expect(award.cleanResult).toBe('')    // Should be empty to avoid duplicate
+    expect(award.cleanCategory).toBe('') // Should be empty to avoid duplicate
+    expect(award.cleanResult).toBe('') // Should be empty to avoid duplicate
     expect(award.label).toBe('Spiel des Jahres')
   })
 
@@ -51,16 +53,16 @@ describe('Awards Display Logic', () => {
         name: 'Golden Geek Award',
         category: 'Board Game of the Year Winner',
         result_raw: '',
-        year: 2023
-      }
+        year: 2023,
+      },
     ]
 
     const processed = processAwardsData(testHonors)
     const award = processed[0]
 
     expect(award.isWinner).toBe(true)
-    expect(award.cleanCategory).toBe('')  // Should be cleaned
-    expect(award.cleanResult).toBe('')    // Empty result should remain empty
+    expect(award.cleanCategory).toBe('') // Should be cleaned
+    expect(award.cleanResult).toBe('') // Empty result should remain empty
     expect(award.originalCategory).toBe('Board Game of the Year Winner')
   })
 
@@ -70,16 +72,16 @@ describe('Awards Display Logic', () => {
         name: 'Origins Award',
         category: '',
         result_raw: 'Winner - Best Strategy Game',
-        year: 2022
-      }
+        year: 2022,
+      },
     ]
 
     const processed = processAwardsData(testHonors)
     const award = processed[0]
 
     expect(award.isWinner).toBe(true)
-    expect(award.cleanCategory).toBe('')  // Empty category should remain empty
-    expect(award.cleanResult).toBe('')    // Should be cleaned
+    expect(award.cleanCategory).toBe('') // Empty category should remain empty
+    expect(award.cleanResult).toBe('') // Should be cleaned
     expect(award.originalResult).toBe('Winner - Best Strategy Game')
   })
 
@@ -89,14 +91,14 @@ describe('Awards Display Logic', () => {
         name: 'International Gamers Award',
         category: 'Nominee',
         result_raw: 'Nominated',
-        year: 2023
+        year: 2023,
       },
       {
         name: 'Board Game Quest Award',
         category: 'Strategy Game Category',
         result_raw: 'Honorable Mention',
-        year: 2023
-      }
+        year: 2023,
+      },
     ]
 
     const processed = processAwardsData(testHonors)
@@ -118,15 +120,15 @@ describe('Awards Display Logic', () => {
         name: 'Test Award',
         category: 'WINNER',
         result_raw: 'winner',
-        year: 2023
-      }
+        year: 2023,
+      },
     ]
 
     const processed = processAwardsData(testHonors)
     const award = processed[0]
 
     expect(award.isWinner).toBe(true)
-    expect(award.cleanCategory).toBe('')  // Should be cleaned regardless of case
-    expect(award.cleanResult).toBe('')    // Should be cleaned regardless of case
+    expect(award.cleanCategory).toBe('') // Should be cleaned regardless of case
+    expect(award.cleanResult).toBe('') // Should be cleaned regardless of case
   })
 })

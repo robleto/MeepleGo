@@ -7,11 +7,13 @@ Automates enrichment of game records (taglines + extended metadata) on a schedul
 Add these repository secrets (Settings → Secrets and variables → Actions → New repository secret):
 
 Required:
+
 - NEXT_PUBLIC_SUPABASE_URL (public Supabase project URL)
 - NEXT_PUBLIC_SUPABASE_ANON_KEY (public anon key)
 - SUPABASE_SERVICE_ROLE_KEY (service role key – keep private)
 
 Optional (if used elsewhere):
+
 - BGG_API_BASE_URL (defaults to https://boardgamegeek.com/xmlapi2)
 
 Do NOT commit `.env` with real values.
@@ -99,6 +101,7 @@ jobs:
 ## 4. Local Parity
 
 Create `.env.local` (ignored) with same keys for local runs:
+
 ```
 NEXT_PUBLIC_SUPABASE_URL=...
 NEXT_PUBLIC_SUPABASE_ANON_KEY=...
@@ -106,6 +109,7 @@ SUPABASE_SERVICE_ROLE_KEY=...
 ```
 
 Then:
+
 ```
 npm run backfill:all -- --limit 200 --concurrency 3
 ```
@@ -121,6 +125,7 @@ State/resume files (e.g. `.taglines-state.json`) allow safe restarts.
 ## 6. Manual Dispatch Usage
 
 From Actions tab → select workflow → Run workflow:
+
 - Provide `limit` for a focused refresh (e.g. 100)
 - Use `skipTaglines` or `skipExtended` for partial runs
 
@@ -132,16 +137,17 @@ From Actions tab → select workflow → Run workflow:
 
 ## 8. Common Pitfalls
 
-| Issue | Cause | Fix |
-|-------|-------|-----|
-| Secrets show as `***` in logs | GitHub masking | Normal |
-| 403 / unauthorized | Wrong service role key | Regenerate & update secret |
-| No changes processed | Limit too low or all rows already enriched | Run without `--limit` |
-| Rate limits | BGG API throttling | Keep concurrency ≤ 3 |
+| Issue                         | Cause                                      | Fix                        |
+| ----------------------------- | ------------------------------------------ | -------------------------- |
+| Secrets show as `***` in logs | GitHub masking                             | Normal                     |
+| 403 / unauthorized            | Wrong service role key                     | Regenerate & update secret |
+| No changes processed          | Limit too low or all rows already enriched | Run without `--limit`      |
+| Rate limits                   | BGG API throttling                         | Keep concurrency ≤ 3       |
 
 ## 9. Verifying After Run
 
 Check workflow logs:
+
 - Phase 1 and Phase 2 summaries
 - No stack traces
 - Sample game rows now have `tagline`, `artists`, `rank_families`, relationship arrays
@@ -151,6 +157,7 @@ Spot-check in database or the UI detail modal (Refresh BGG button triggers targe
 ## 10. Updating the Workflow
 
 When adding new enrichment phases:
+
 1. Add new script.
 2. Extend chained script invocation.
 3. Add new skip flag and update this doc.

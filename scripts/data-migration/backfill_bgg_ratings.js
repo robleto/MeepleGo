@@ -3,8 +3,13 @@
 // Load environment variables (.env only per project convention)
 const dotenv = require('dotenv')
 dotenv.config({ path: '.env' })
-if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-  console.log('⚠️  Missing Supabase env vars. Ensure NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are set in .env')
+if (
+  !process.env.NEXT_PUBLIC_SUPABASE_URL ||
+  !process.env.SUPABASE_SERVICE_ROLE_KEY
+) {
+  console.log(
+    '⚠️  Missing Supabase env vars. Ensure NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are set in .env'
+  )
 }
 const { createClient } = require('@supabase/supabase-js')
 
@@ -30,11 +35,13 @@ class BGGRatingBackfiller {
 
       if (response.status === 429) {
         // Rate limited - progressive backoff
-        const waitTime = Math.min(30000, 5000 + (this.consecutiveErrors * 2000))
-        console.log(`⏳ Rate limited on game ${bggId}, waiting ${waitTime/1000}s...`)
+        const waitTime = Math.min(30000, 5000 + this.consecutiveErrors * 2000)
+        console.log(
+          `⏳ Rate limited on game ${bggId}, waiting ${waitTime / 1000}s...`
+        )
         await new Promise((resolve) => setTimeout(resolve, waitTime))
         this.consecutiveErrors++
-        
+
         if (this.consecutiveErrors < 5) {
           return await this.fetchGameData(bggId)
         } else {
@@ -49,14 +56,20 @@ class BGGRatingBackfiller {
       const xmlText = await response.text()
 
       // Check if response is valid
-      if (!xmlText || xmlText.includes('Item not found') || !xmlText.includes('<item')) {
+      if (
+        !xmlText ||
+        xmlText.includes('Item not found') ||
+        !xmlText.includes('<item')
+      ) {
         return 'NOT_FOUND'
       }
 
       // Parse rating and rank from XML
       const ratingMatch = xmlText.match(/<average[^>]*value="([0-9.]+)"/)
       const numRatingsMatch = xmlText.match(/<usersrated[^>]*value="([0-9]+)"/)
-      const rankMatch = xmlText.match(/<rank[^>]+name="boardgame"[^>]+value="(\d+)"/)
+      const rankMatch = xmlText.match(
+        /<rank[^>]+name="boardgame"[^>]+value="(\d+)"/
+      )
 
       const rating = ratingMatch ? parseFloat(ratingMatch[1]) : null
       const numRatings = numRatingsMatch ? parseInt(numRatingsMatch[1]) : null
@@ -68,7 +81,7 @@ class BGGRatingBackfiller {
       return {
         rating: rating || null,
         num_ratings: numRatings || null,
-        rank: rank || null
+        rank: rank || null,
       }
     } catch (error) {
       this.consecutiveErrors++
@@ -106,7 +119,7 @@ class BGGRatingBackfiller {
   logProgress() {
     const elapsed = (Date.now() - this.startTime) / 1000
     const rate = this.processedCount / elapsed
-    
+
     console.log(`\n📊 Progress Update:`)
     console.log(`  • Processed: ${this.processedCount} games`)
     console.log(`  • Updated with BGG data: ${this.updatedCount}`)
@@ -133,7 +146,9 @@ class BGGRatingBackfiller {
           break
         }
 
-        const effectiveLimit = limit ? Math.min(pageSize, limit - totalProcessed) : pageSize
+        const effectiveLimit = limit
+          ? Math.min(pageSize, limit - totalProcessed)
+          : pageSize
 
         const { data: games, error } = await this.supabase
           .from('games')
@@ -152,7 +167,9 @@ class BGGRatingBackfiller {
           break
         }
 
-        console.log(`\n📦 Processing batch of ${games.length} games (offset ${offset})`)
+        console.log(
+          `\n📦 Processing batch of ${games.length} games (offset ${offset})`
+        )
 
         for (const game of games) {
           if (testMode && this.processedCount >= 10) {
@@ -163,7 +180,9 @@ class BGGRatingBackfiller {
           totalProcessed++
 
           try {
-            console.log(`🔍 [${this.processedCount}] ${game.name} (BGG ID: ${game.bgg_id})`)
+            console.log(
+              `🔍 [${this.processedCount}] ${game.name} (BGG ID: ${game.bgg_id})`
+            )
             const data = await this.fetchGameData(game.bgg_id)
 
             if (data === 'NOT_FOUND') {
@@ -172,7 +191,9 @@ class BGGRatingBackfiller {
             } else {
               const updateSuccess = await this.updateGameData(game.id, data)
               if (updateSuccess) {
-                console.log(`✅ Updated - Rating: ${data.rating || 'N/A'}, Rank: ${data.rank ? '#' + data.rank : 'N/A'}, Users: ${data.num_ratings || 'N/A'}`)
+                console.log(
+                  `✅ Updated - Rating: ${data.rating || 'N/A'}, Rank: ${data.rank ? '#' + data.rank : 'N/A'}, Users: ${data.num_ratings || 'N/A'}`
+                )
                 this.updatedCount++
               } else {
                 console.log(`⚠️ No BGG data to update`)
@@ -187,14 +208,19 @@ class BGGRatingBackfiller {
             console.error(`❌ Error processing ${game.name}: ${error.message}`)
             this.errorCount++
             if (this.consecutiveErrors >= 3) {
-              const breakTime = Math.min(60000, 15000 + (this.consecutiveErrors * 5000))
-              console.log(`⚠️ Taking ${breakTime/1000}s break due to errors...`)
+              const breakTime = Math.min(
+                60000,
+                15000 + this.consecutiveErrors * 5000
+              )
+              console.log(
+                `⚠️ Taking ${breakTime / 1000}s break due to errors...`
+              )
               await new Promise((resolve) => setTimeout(resolve, breakTime))
             }
           }
 
           // Respectful rate limiting (2-4s)
-          const delay = testMode ? 500 : (2000 + Math.random() * 2000)
+          const delay = testMode ? 500 : 2000 + Math.random() * 2000
           await new Promise((r) => setTimeout(r, delay))
 
           if (limit && totalProcessed >= limit) {
@@ -217,9 +243,13 @@ class BGGRatingBackfiller {
       console.log(`  • Successfully updated: ${this.updatedCount} games`)
       console.log(`  • Skipped (not found/no data): ${this.skippedCount} games`)
       console.log(`  • Errors: ${this.errorCount} games`)
-      console.log(`  • Success rate: ${this.processedCount ? ((this.updatedCount / this.processedCount) * 100).toFixed(1) : '0.0'}%`)
+      console.log(
+        `  • Success rate: ${this.processedCount ? ((this.updatedCount / this.processedCount) * 100).toFixed(1) : '0.0'}%`
+      )
       console.log(`  • Total time: ${Math.round(totalTime / 60)} minutes`)
-      console.log(`  • Average rate: ${this.processedCount ? (this.processedCount / totalTime).toFixed(2) : '0.00'} games/sec`)
+      console.log(
+        `  • Average rate: ${this.processedCount ? (this.processedCount / totalTime).toFixed(2) : '0.00'} games/sec`
+      )
 
       if (this.updatedCount > 0) {
         const { data: topRatedGames } = await this.supabase
@@ -228,15 +258,19 @@ class BGGRatingBackfiller {
           .not('rating', 'is', null)
           .order('rating', { ascending: false })
           .limit(Math.min(10, this.updatedCount))
-        
+
         if (topRatedGames?.length > 0) {
           console.log(`\n🏆 Top BGG rated games in your collection:`)
           topRatedGames.forEach((game, index) => {
-            console.log(`  ${index + 1}. ${game.name} (${game.year_published || 'Unknown'}) - Rating: ${game.rating?.toFixed(1)} (${game.num_ratings} users)${game.rank ? `, Rank: #${game.rank}` : ''}`)
+            console.log(
+              `  ${index + 1}. ${game.name} (${game.year_published || 'Unknown'}) - Rating: ${game.rating?.toFixed(1)} (${game.num_ratings} users)${game.rank ? `, Rank: #${game.rank}` : ''}`
+            )
           })
         }
       }
-      console.log(`\n🚀 Your games now have BGG ratings and can be sorted by rating!`)
+      console.log(
+        `\n🚀 Your games now have BGG ratings and can be sorted by rating!`
+      )
     } catch (error) {
       console.error(`💥 Fatal error in backfill process: ${error.message}`)
       process.exit(1)
@@ -247,7 +281,11 @@ class BGGRatingBackfiller {
 // Parse command line arguments
 const args = process.argv.slice(2)
 const testMode = args.includes('--test')
-const limit = testMode ? 10 : (args.includes('--limit') ? parseInt(args[args.indexOf('--limit') + 1]) : null)
+const limit = testMode
+  ? 10
+  : args.includes('--limit')
+    ? parseInt(args[args.indexOf('--limit') + 1])
+    : null
 
 // Create and run the backfiller
 const backfiller = new BGGRatingBackfiller()
@@ -275,7 +313,9 @@ if (testMode) {
 if (limit && !testMode) {
   console.log(`📊 Limited to ${limit} games`)
 }
-console.log('This will fetch BGG ratings, user counts, and ranks for your games')
+console.log(
+  'This will fetch BGG ratings, user counts, and ranks for your games'
+)
 console.log('Press Ctrl+C to stop gracefully\n')
 
 backfiller.backfillRatingsAndRanks(limit, testMode).catch((error) => {

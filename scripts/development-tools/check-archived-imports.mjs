@@ -27,7 +27,9 @@ walk(SRC)
 if (failures.length) {
   console.error('\n[FAIL] Archived import references detected:')
   for (const f of failures) console.error(' - ' + f)
-  console.error('\nRemove or migrate these imports. (_archived/ usage is disallowed)')
+  console.error(
+    '\nRemove or migrate these imports. (_archived/ usage is disallowed)'
+  )
   process.exit(1)
 } else {
   console.log('[OK] No _archived import paths found.')

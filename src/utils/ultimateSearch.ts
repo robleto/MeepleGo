@@ -5,21 +5,18 @@ import Fuse from 'fuse.js'
 import * as levenshtein from 'fast-levenshtein'
 import type { GameWithRanking } from '@/types'
 
-/**
- * Normalize text for better searching - removes punctuation and extra spaces
- */
+const PUNCTUATION_REGEX = /[^A-Za-z0-9\s]/g
+
 function normalizeSearchText(text: string): string {
   if (!text) return ''
-
   return (
     text
       .toLowerCase()
       .trim()
       // Remove common punctuation that can interfere with matching
-      .replace(/['"''""!@#$%^&*()_+\-=\[\]{};:,.<>?/\\|`~]/g, ' ')
+      .replace(PUNCTUATION_REGEX, ' ')
       // Normalize multiple spaces to single space
       .replace(/\s+/g, ' ')
-      .trim()
   )
 }
 

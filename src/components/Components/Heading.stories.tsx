@@ -1,17 +1,18 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import Heading from './Heading';
+import type { Meta, StoryObj } from '@storybook/nextjs-vite'
+import Heading from './Heading'
 
 const meta: Meta<typeof Heading> = {
-  title: 'Archived/Shared/Heading',
+  title: 'Components/Heading',
   component: Heading,
   tags: ['autodocs'],
   parameters: {
     layout: 'centered',
     docs: {
       description: {
-        component: 'Configurable heading component with semantic HTML and display font options.'
-      }
-    }
+        component:
+          'Configurable heading component with semantic HTML and display font options.',
+      },
+    },
   },
   argTypes: {
     as: { control: 'text' },
@@ -21,10 +22,10 @@ const meta: Meta<typeof Heading> = {
     className: { control: 'text' },
     children: { control: 'text' },
   },
-};
-export default meta;
+}
+export default meta
 
-type Story = StoryObj<typeof Heading>;
+type Story = StoryObj<typeof Heading>
 
 export const Default: Story = {
   args: {
@@ -34,7 +35,7 @@ export const Default: Story = {
     displayFont: true,
     children: 'MeepleGo Heading',
   },
-};
+}
 
 export const SubHead: Story = {
   args: {
@@ -42,7 +43,8 @@ export const SubHead: Story = {
     size: 'display',
     align: 'left',
     displayFont: false,
-    className: 'heading-display text-2xl font-normal tracking-wide text-gray-700 dark:text-gray-300 mb-1',
+    className:
+      'heading-display text-2xl font-normal tracking-wide text-gray-700 dark:text-gray-300 mb-1',
     children: 'My Lists',
   },
-};
+}

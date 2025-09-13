@@ -7,7 +7,10 @@ const dotenv = require('dotenv')
 dotenv.config({ path: '.env' })
 const { createClient } = require('@supabase/supabase-js')
 
-if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+if (
+  !process.env.NEXT_PUBLIC_SUPABASE_URL ||
+  !process.env.SUPABASE_SERVICE_ROLE_KEY
+) {
   console.error('Missing Supabase env vars.')
   process.exit(1)
 }
@@ -47,4 +50,7 @@ async function run() {
   console.log(`✅ Migration complete. Migrated ${migrated} rows.`)
 }
 
-run().catch(e=>{ console.error('💥 Fatal:', e); process.exit(1) })
+run().catch((e) => {
+  console.error('💥 Fatal:', e)
+  process.exit(1)
+})

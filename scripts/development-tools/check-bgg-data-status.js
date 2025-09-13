@@ -53,27 +53,55 @@ async function checkBggDataStatus() {
       .is('rank', null)
       .limit(5)
 
-    if (totalError || ratingError || rankError || bothError || sampleError || sampleWithoutError) {
-      console.error('Error querying database:', { totalError, ratingError, rankError, bothError, sampleError, sampleWithoutError })
+    if (
+      totalError ||
+      ratingError ||
+      rankError ||
+      bothError ||
+      sampleError ||
+      sampleWithoutError
+    ) {
+      console.error('Error querying database:', {
+        totalError,
+        ratingError,
+        rankError,
+        bothError,
+        sampleError,
+        sampleWithoutError,
+      })
       return
     }
 
     console.log('📊 BGG Data Status Report')
     console.log('========================')
-    console.log(`📚 Total games in database: ${totalGames?.toLocaleString() || 'Unknown'}`)
-    console.log(`⭐ Games with BGG ratings: ${gamesWithRating?.toLocaleString() || 0} (${totalGames ? ((gamesWithRating / totalGames) * 100).toFixed(1) : 0}%)`)
-    console.log(`🏆 Games with BGG ranks: ${gamesWithRank?.toLocaleString() || 0} (${totalGames ? ((gamesWithRank / totalGames) * 100).toFixed(1) : 0}%)`)
-    console.log(`✅ Games with both rating & rank: ${gamesWithBoth?.toLocaleString() || 0} (${totalGames ? ((gamesWithBoth / totalGames) * 100).toFixed(1) : 0}%)`)
-    
+    console.log(
+      `📚 Total games in database: ${totalGames?.toLocaleString() || 'Unknown'}`
+    )
+    console.log(
+      `⭐ Games with BGG ratings: ${gamesWithRating?.toLocaleString() || 0} (${totalGames ? ((gamesWithRating / totalGames) * 100).toFixed(1) : 0}%)`
+    )
+    console.log(
+      `🏆 Games with BGG ranks: ${gamesWithRank?.toLocaleString() || 0} (${totalGames ? ((gamesWithRank / totalGames) * 100).toFixed(1) : 0}%)`
+    )
+    console.log(
+      `✅ Games with both rating & rank: ${gamesWithBoth?.toLocaleString() || 0} (${totalGames ? ((gamesWithBoth / totalGames) * 100).toFixed(1) : 0}%)`
+    )
+
     const missingRatings = totalGames - (gamesWithRating || 0)
     const missingRanks = totalGames - (gamesWithRank || 0)
-    console.log(`\n❌ Missing BGG ratings: ${missingRatings?.toLocaleString() || 'Unknown'}`)
-    console.log(`❌ Missing BGG ranks: ${missingRanks?.toLocaleString() || 'Unknown'}`)
+    console.log(
+      `\n❌ Missing BGG ratings: ${missingRatings?.toLocaleString() || 'Unknown'}`
+    )
+    console.log(
+      `❌ Missing BGG ranks: ${missingRanks?.toLocaleString() || 'Unknown'}`
+    )
 
     if (sampleWithBgg?.length > 0) {
       console.log(`\n🏆 Sample games WITH BGG data:`)
       sampleWithBgg.forEach((game, i) => {
-        console.log(`  ${i + 1}. ${game.name} - Rating: ${game.rating?.toFixed(2) || 'N/A'}, Rank: ${game.rank ? '#' + game.rank : 'N/A'}${game.num_ratings ? `, Users: ${game.num_ratings}` : ''}`)
+        console.log(
+          `  ${i + 1}. ${game.name} - Rating: ${game.rating?.toFixed(2) || 'N/A'}, Rank: ${game.rank ? '#' + game.rank : 'N/A'}${game.num_ratings ? `, Users: ${game.num_ratings}` : ''}`
+        )
       })
     }
 
@@ -91,7 +119,6 @@ async function checkBggDataStatus() {
     } else {
       console.log(`\n✅ All games have BGG rating data!`)
     }
-
   } catch (error) {
     console.error('💥 Error:', error.message)
   }

@@ -53,7 +53,9 @@ export default function GamePosterCard({
           className="absolute top-2 right-2 hover:brightness-95"
           aria-label={r?.ranking ? `Rating ${r.ranking}` : 'Rate game'}
         >
-          {r?.ranking ? <RatingChip value={r.ranking} size="xs" /> : (
+          {r?.ranking ? (
+            <RatingChip value={r.ranking} size="xs" />
+          ) : (
             <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-gray-400 ring-1 ring-inset ring-gray-200">
               <StarIcon className="h-4 w-4" />
             </span>

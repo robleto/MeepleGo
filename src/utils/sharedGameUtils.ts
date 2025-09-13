@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import { GameWithRanking } from '@/types'
+import type { Ranking } from '@/types/supabase'
 
 export type SortKey = 'ranking' | 'year' | 'name' | 'playtime'
 export type SortOrder = 'asc' | 'desc'
@@ -27,11 +28,13 @@ interface UpdatePatch {
 // Minimal Ranking shape compatible with GameWithRanking.ranking (keep existing optional fields untouched)
 interface LightweightRanking {
   id?: string
-  user_id: string
-  game_id: string
+  user_id: string | null
+  game_id: string | null
   ranking: number | null
-  played_it: boolean
+  played_it: boolean | null
   notes?: string | null
+  public_note?: string | null
+  private_note?: string | null
   created_at?: string | null
   imported_from?: string | null
   updated_at?: string | null
@@ -61,7 +64,9 @@ export function useGameDataWithGuest() {
       // Fetch rankings with game data
       const { data, error } = await supabase
         .from('rankings')
-        .select('id, game:games(*), ranking, played_it, user_id, game_id, public_note')
+        .select(
+          'id, game:games(*), ranking, played_it, user_id, game_id, public_note'
+        )
         .eq('user_id', session.user.id)
       if (error) throw error
 
@@ -77,38 +82,59 @@ export function useGameDataWithGuest() {
         string,
         { library: boolean; wishlist: boolean }
       > = {}
-      libraryData?.forEach((item: any) => {
+      type MembershipRow = {
+        game_id: string
+        list: { list_type: 'library' | 'wishlist' } | null
+      }
+      ;(libraryData as MembershipRow[] | null)?.forEach((item) => {
+        if (!item.game_id) return
         if (!membershipMap[item.game_id]) {
           membershipMap[item.game_id] = { library: false, wishlist: false }
         }
-        if (item.list?.list_type === 'library') {
-          membershipMap[item.game_id].library = true
-        } else if (item.list?.list_type === 'wishlist') {
-          membershipMap[item.game_id].wishlist = true
-        }
+        const type = item.list?.list_type
+        if (type === 'library') membershipMap[item.game_id].library = true
+        if (type === 'wishlist') membershipMap[item.game_id].wishlist = true
       })
 
-      const mapped: GameWithRanking[] = (data || []).map((r: any) => ({
-        ...r.game,
-        ranking: r.id
-          ? {
-              id: r.id,
-              user_id: r.user_id,
-              game_id: r.game_id,
-              ranking: r.ranking,
-              played_it: r.played_it,
-              notes: null,
-              public_note: r.public_note ?? null,
-              created_at: null,
-              imported_from: null,
-              updated_at: null,
-            }
-          : null,
-        list_membership: membershipMap[r.game_id] || {
-          library: false,
-          wishlist: false,
-        },
-      }))
+      // Data rows contain "game" (joined) plus flat ranking columns
+      // NOTE: Supabase typed client not yet generating joined types for this composite select.
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- TODO(meeplego#types): Replace with generated type when available
+      const mapped: GameWithRanking[] =
+        (
+          data as unknown as Array<{
+            id: string
+            game: GameWithRanking
+            ranking: number | null
+            played_it: boolean | null
+            user_id: string | null
+            game_id: string | null
+            public_note: string | null
+          }> | null
+        )?.map((r) => {
+          const ranking: Ranking | null = r.id
+            ? {
+                id: r.id,
+                user_id: r.user_id,
+                game_id: r.game_id,
+                ranking: r.ranking,
+                played_it: r.played_it,
+                notes: null,
+                public_note: r.public_note,
+                private_note: null,
+                created_at: null,
+                imported_from: null,
+                updated_at: null,
+              }
+            : null
+          return {
+            ...r.game,
+            ranking,
+            list_membership:
+              r.game_id && membershipMap[r.game_id]
+                ? membershipMap[r.game_id]
+                : { library: false, wishlist: false },
+          }
+        }) || []
       setGames(mapped)
     } finally {
       setLoading(false)
@@ -142,11 +168,13 @@ export function useGameDataWithGuest() {
                 ? (g.ranking?.played_it ?? false)
                 : patch.played_it,
             notes: g.ranking?.notes ?? null,
+            public_note: g.ranking?.public_note ?? null,
+            private_note: g.ranking?.private_note ?? null,
             created_at: g.ranking?.created_at ?? null,
             imported_from: g.ranking?.imported_from ?? null,
             updated_at: g.ranking?.updated_at ?? null,
           }
-          return { ...g, ranking: newRanking as any }
+          return { ...g, ranking: newRanking as Ranking }
         })
       )
       // find existing values to preserve when omitted
@@ -161,17 +189,23 @@ export function useGameDataWithGuest() {
         played_it:
           patch.played_it === undefined ? existingPlayed : patch.played_it,
       }
-      const { error, data } = await supabase
-        .from('rankings')
-        .upsert(upsertObj, { onConflict: 'user_id,game_id' })
-        .select()
-        .single()
-      if (error) {
-        fetch()
-      } else if (data) {
-        setGames((prev) =>
-          prev.map((g) => (g.id === gameId ? { ...g, ranking: data } : g))
-        )
+      try {
+        const { error, data } = await supabase
+          .from('rankings')
+          .upsert(upsertObj, { onConflict: 'user_id,game_id' })
+          .select()
+          .single()
+        if (error) {
+          // fallback refresh if optimistic update diverged
+          await fetch()
+        } else if (data) {
+          setGames((prev) =>
+            prev.map((g) => (g.id === gameId ? { ...g, ranking: data } : g))
+          )
+        }
+      } catch (err) {
+        // network / unexpected error -> refetch to restore consistency
+        await fetch()
       }
     },
     [fetch, games]

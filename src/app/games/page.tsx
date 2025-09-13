@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase'
 import PageLayout from '@/components/Components/PageLayout'
 import Heading from '@/components/Components/Heading'
 import GameCard from '@/components/Components/GameCard'
-import GameFilters from '@/components/Components/GameFilters'
+import SearchandFilters from '@/components/Components/SearchandFilters'
 import { GameWithRanking } from '@/types'
 import { useGameFilters, useViewMode } from '@/utils/gameFilters'
 import { searchGamesFallback } from '@/utils/databaseSearch'
@@ -22,7 +22,9 @@ function GamesPageContent() {
   const [searchTerm, setSearchTerm] = useState('')
 
   const [viewMode, setViewMode] = useViewMode('grid')
-  const [cardVariant, setCardVariant] = useState<'detailed' | 'balanced' | 'compact'>('balanced')
+  const [cardVariant, setCardVariant] = useState<
+    'detailed' | 'balanced' | 'compact'
+  >('balanced')
 
   const ITEMS_PER_LOAD = 500
 
@@ -114,16 +116,18 @@ function GamesPageContent() {
       ]
     }
     const single = buildOrderClause(sortField, order)
-    
+
     // For BGG rank sorting, we need to handle nulls properly
     if (sortField === 'rank') {
-      return [{
-        column: single.column,
-        ascending: single.ascending as boolean,
-        nullsFirst: false as const, // Push NULL rankings to the end
-      }]
+      return [
+        {
+          column: single.column,
+          ascending: single.ascending as boolean,
+          nullsFirst: false as const, // Push NULL rankings to the end
+        },
+      ]
     }
-    
+
     return [{ column: single.column, ascending: single.ascending as boolean }]
   }
 
@@ -219,8 +223,12 @@ function GamesPageContent() {
       const effectiveSortBy = sortBy || 'rank'
       const effectiveSortOrder = sortOrder || 'asc'
       const effectiveGroupBy = groupBy || 'none'
-      
-      const orders = buildServerOrders(effectiveSortBy, effectiveSortOrder, effectiveGroupBy)
+
+      const orders = buildServerOrders(
+        effectiveSortBy,
+        effectiveSortOrder,
+        effectiveGroupBy
+      )
       orders.forEach((o) => {
         if ('nullsFirst' in o && typeof o.nullsFirst === 'boolean') {
           query = query.order(o.column as any, {
@@ -305,19 +313,19 @@ function GamesPageContent() {
 
         if (noActiveFilter) {
           // 1. Fetch ranked games (non-null rank) ordered ascending
-            let rankedQuery = supabase
-              .from('games')
-              .select(`*, rankings(*)`)
-              .not('rank', 'is', null)
-              .order('rank', { ascending: true, nullsFirst: false })
-              .range(0, ITEMS_PER_LOAD - 1)
+          let rankedQuery = supabase
+            .from('games')
+            .select(`*, rankings(*)`)
+            .not('rank', 'is', null)
+            .order('rank', { ascending: true, nullsFirst: false })
+            .range(0, ITEMS_PER_LOAD - 1)
 
-            if (userId) rankedQuery = rankedQuery.eq('rankings.user_id', userId)
-            rankedQuery = applyServerFilters(rankedQuery)
+          if (userId) rankedQuery = rankedQuery.eq('rankings.user_id', userId)
+          rankedQuery = applyServerFilters(rankedQuery)
 
-            const { data: rankedData, error: rankedErr } = await rankedQuery
-            if (rankedErr) throw rankedErr
-            rankedBatch = rankedData || []
+          const { data: rankedData, error: rankedErr } = await rankedQuery
+          if (rankedErr) throw rankedErr
+          rankedBatch = rankedData || []
 
           // If we didn't fill the page, top up with unranked ordered by name (stable fallback)
           if (rankedBatch.length < ITEMS_PER_LOAD) {
@@ -328,9 +336,11 @@ function GamesPageContent() {
               .is('rank', null)
               .order('name', { ascending: true })
               .range(0, remaining - 1)
-            if (userId) unrankedQuery = unrankedQuery.eq('rankings.user_id', userId)
+            if (userId)
+              unrankedQuery = unrankedQuery.eq('rankings.user_id', userId)
             unrankedQuery = applyServerFilters(unrankedQuery)
-            const { data: unrankedData, error: unrankedErr } = await unrankedQuery
+            const { data: unrankedData, error: unrankedErr } =
+              await unrankedQuery
             if (unrankedErr) throw unrankedErr
             unrankedBatch = unrankedData || []
           }
@@ -352,16 +362,20 @@ function GamesPageContent() {
         // Diagnostics
         const nonNullRanks = gamesData.filter((g) => g.rank != null)
         const nullRanks = gamesData.length - nonNullRanks.length
-        const topSample = gamesData.slice(0, 10).map((g) => ({ n: g.name, r: g.rank }))
+        const topSample = gamesData
+          .slice(0, 10)
+          .map((g) => ({ n: g.name, r: g.rank }))
         const topRanksSorted = [...nonNullRanks]
           .sort((a, b) => a.rank - b.rank)
           .slice(0, 15)
           .map((g) => ({ n: g.name, r: g.rank }))
-        const gloom = gamesData.find((g) => g.name.toLowerCase().includes('gloomhaven'))
+        const gloom = gamesData.find((g) =>
+          g.name.toLowerCase().includes('gloomhaven')
+        )
         console.log('🩺 Rank Debug:', {
           fetched: gamesData.length,
           rankedBatch: rankedBatch.length,
-            unrankedBatch: unrankedBatch.length,
+          unrankedBatch: unrankedBatch.length,
           nonNull: nonNullRanks.length,
           nulls: nullRanks,
           sample: topSample,
@@ -576,15 +590,22 @@ function GamesPageContent() {
           const nonNull = first.filter((g: any) => g.rank != null)
           const nullCount = first.length - nonNull.length
           const globalNonNull = games.filter((g: any) => g.rank != null)
-          const ranks = globalNonNull.map((g: any) => g.rank).filter((r: any) => typeof r === 'number')
+          const ranks = globalNonNull
+            .map((g: any) => g.rank)
+            .filter((r: any) => typeof r === 'number')
           const minRank = ranks.length ? Math.min(...ranks) : '—'
-            const maxRank = ranks.length ? Math.max(...ranks) : '—'
+          const maxRank = ranks.length ? Math.max(...ranks) : '—'
           return (
             <div className="border border-amber-300 bg-amber-50 rounded-md p-4 text-sm space-y-2">
-              <div className="font-semibold text-amber-800">Rank Debug (first {first.length} games in current list)</div>
+              <div className="font-semibold text-amber-800">
+                Rank Debug (first {first.length} games in current list)
+              </div>
               <div className="flex flex-wrap gap-2 font-mono">
                 {first.map((g: any) => (
-                  <span key={g.id} className="px-2 py-1 rounded bg-white border text-xs shadow-sm">
+                  <span
+                    key={g.id}
+                    className="px-2 py-1 rounded bg-white border text-xs shadow-sm"
+                  >
                     {(g.rank ?? '∅') + ':' + g.name.slice(0, 20)}
                   </span>
                 ))}
@@ -596,13 +617,30 @@ function GamesPageContent() {
                 <span>Min rank seen: {minRank}</span>
                 <span>Max rank seen: {maxRank}</span>
               </div>
-              <div className="text-amber-600">Hide this panel by removing <code>?debug=ranks</code> from the URL.</div>
+              <div className="text-amber-600">
+                Hide this panel by removing <code>?debug=ranks</code> from the
+                URL.
+              </div>
             </div>
           )
         })()}
 
-        {/* Filters */}
-        <GameFilters
+        {/* Search + Filters */}
+        <SearchandFilters
+          // search integration: update URL param so nav search consistent
+          value={searchTerm}
+          onChange={(val) => {
+            const params = new URLSearchParams(searchParams.toString())
+            if (val) params.set('search', val)
+            else params.delete('search')
+            router.replace(`${pathname}?${params.toString()}`)
+          }}
+          onSearch={(val) => {
+            const params = new URLSearchParams(searchParams.toString())
+            if (val) params.set('search', val)
+            else params.delete('search')
+            router.replace(`${pathname}?${params.toString()}`)
+          }}
           viewMode={viewMode}
           setViewMode={setViewMode}
           sortBy={sortBy as any}

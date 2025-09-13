@@ -2,19 +2,28 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServerClient } from '@/lib/supabaseServer'
 
 // GET /api/awards/:year -> returns stored awards rows for that user & year
-export async function GET(req: NextRequest, { params }: { params: Promise<{ year: string }> }) {
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{ year: string }> }
+) {
   const resolvedParams = await params
   const yearNum = Number(resolvedParams.year)
-  if (!yearNum || Number.isNaN(yearNum)) return NextResponse.json({ error: 'Invalid year' }, { status: 400 })
+  if (!yearNum || Number.isNaN(yearNum))
+    return NextResponse.json({ error: 'Invalid year' }, { status: 400 })
 
   const supabase = await getSupabaseServerClient()
-  const { data: { session } } = await supabase.auth.getSession()
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+  if (!session)
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { data, error } = await supabase
     .from('awards')
-    .select('id, year, category, nominees, winner_id, updated_at, created_at, threshold_used, manual_override, refreshed_at, stale')
-  .eq('user_id', session.user.id)
+    .select(
+      'id, year, category, nominees, winner_id, updated_at, created_at, threshold_used, manual_override, refreshed_at, stale'
+    )
+    .eq('user_id', session.user.id)
     .eq('year', yearNum)
     .order('category')
 

@@ -1,3 +1,4 @@
+import React from 'react'
 import { Game, Ranking } from './supabase'
 
 export type ViewMode = 'grid' | 'list'

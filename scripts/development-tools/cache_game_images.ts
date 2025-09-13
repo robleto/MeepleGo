@@ -8,17 +8,25 @@ import { fileURLToPath } from 'url'
 // Basic script: fetch thumbnail/image URLs from games table and store locally under public/games/{id}-{hash}.jpg
 // Resize strategy is deferred (Next/Image can optimize), but we ensure consistent naming and skip already cached files.
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
+const SUPABASE_URL =
+  process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
 
 if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-  console.error('Missing SUPABASE env vars (SUPABASE_URL & SUPABASE_SERVICE_ROLE_KEY)')
+  console.error(
+    'Missing SUPABASE env vars (SUPABASE_URL & SUPABASE_SERVICE_ROLE_KEY)'
+  )
   process.exit(1)
 }
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
-interface GameRecord { id: number; name: string; image_url: string | null; thumbnail_url: string | null }
+interface GameRecord {
+  id: number
+  name: string
+  image_url: string | null
+  thumbnail_url: string | null
+}
 
 async function fetchGames(batch = 1000): Promise<GameRecord[]> {
   const { data, error } = await supabase
@@ -61,7 +69,7 @@ async function main() {
 
   console.log('Fetching games...')
   const games = await fetchGames()
-  console.log(`Found ${games.length} games`)    
+  console.log(`Found ${games.length} games`)
 
   let downloaded = 0
   for (const g of games) {

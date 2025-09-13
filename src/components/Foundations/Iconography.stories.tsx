@@ -1,10 +1,11 @@
-import type { Meta, StoryObj } from '@storybook/react'
-import { 
-  PlayIcon, 
-  BookOpenIcon, 
-  HeartIcon, 
-  ListBulletIcon, 
-  CubeIcon, 
+import React from 'react'
+import type { Meta, StoryObj } from '@storybook/nextjs-vite'
+import {
+  PlayIcon,
+  BookOpenIcon,
+  HeartIcon,
+  ListBulletIcon,
+  CubeIcon,
   TrophyIcon,
   BookmarkIcon,
   MagnifyingGlassIcon,
@@ -15,7 +16,7 @@ import {
   ClockIcon,
   CalendarIcon,
   StarIcon,
-  ArrowPathIcon
+  ArrowPathIcon,
 } from '@heroicons/react/24/outline'
 import { IconCircle } from '../Elements/IconCircle'
 
@@ -26,7 +27,8 @@ const meta: Meta = {
     layout: 'padded',
     docs: {
       description: {
-        component: 'MeepleGo standard iconography system using Heroicons. Consistent icons for all core concepts.',
+        component:
+          'MeepleGo standard iconography system using Heroicons. Consistent icons for all core concepts.',
       },
     },
   },
@@ -34,22 +36,28 @@ const meta: Meta = {
 export default meta
 type Story = StoryObj
 
-const IconShowcase = ({ 
-  title, 
-  icons 
-}: { 
+const IconShowcase = ({
+  title,
+  icons,
+}: {
   title: string
-  icons: Array<{ name: string; icon: React.ReactNode; usage: string; color?: string }>
+  icons: Array<{
+    name: string
+    icon: React.ReactNode
+    usage: string
+    color?: string
+  }>
 }) => (
   <div className="mb-8">
     <h3 className="text-lg font-semibold mb-4 text-gray-900">{title}</h3>
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {icons.map(({ name, icon, usage, color = 'text-gray-600' }) => (
-        <div key={name} className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow">
+        <div
+          key={name}
+          className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow"
+        >
           <div className="flex items-center gap-3 mb-2">
-            <div className={`${color}`}>
-              {icon}
-            </div>
+            <div className={`${color}`}>{icon}</div>
             <code className="text-sm font-mono bg-gray-100 px-2 py-1 rounded">
               {name}
             </code>
@@ -65,9 +73,12 @@ export const IconographySystem: Story = {
   render: () => (
     <div className="max-w-6xl">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">MeepleGo Iconography System</h1>
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">
+          MeepleGo Iconography System
+        </h1>
         <p className="text-gray-600">
-          Consistent icon usage across all components using Heroicons (24/outline).
+          Consistent icon usage across all components using Heroicons
+          (24/outline).
         </p>
       </div>
 
@@ -78,38 +89,38 @@ export const IconographySystem: Story = {
             name: 'PlayIcon',
             icon: <PlayIcon className="h-5 w-5" />,
             usage: 'Played status, game logs',
-            color: 'text-blue-600'
+            color: 'text-blue-600',
           },
           {
             name: 'BookOpenIcon',
             icon: <BookOpenIcon className="h-5 w-5" />,
             usage: 'Library/Collection membership',
-            color: 'text-green-600'
+            color: 'text-green-600',
           },
           {
             name: 'HeartIcon',
             icon: <HeartIcon className="h-5 w-5" />,
             usage: 'Wishlist membership',
-            color: 'text-pink-500'
+            color: 'text-pink-500',
           },
           {
             name: 'ListBulletIcon',
             icon: <ListBulletIcon className="h-5 w-5" />,
             usage: 'Custom lists, list management',
-            color: 'text-gray-600'
+            color: 'text-gray-600',
           },
           {
             name: 'CubeIcon',
             icon: <CubeIcon className="h-5 w-5" />,
             usage: 'Games section, game references',
-            color: 'text-indigo-600'
+            color: 'text-indigo-600',
           },
           {
             name: 'TrophyIcon',
             icon: <TrophyIcon className="h-5 w-5" />,
             usage: 'Awards, winners, achievements',
-            color: 'text-amber-500'
-          }
+            color: 'text-amber-500',
+          },
         ]}
       />
 
@@ -120,32 +131,32 @@ export const IconographySystem: Story = {
             name: 'BookmarkIcon',
             icon: <BookmarkIcon className="h-5 w-5" />,
             usage: 'Collection management indicator',
-            color: 'text-gray-600'
+            color: 'text-gray-600',
           },
           {
             name: 'MagnifyingGlassIcon',
             icon: <MagnifyingGlassIcon className="h-5 w-5" />,
             usage: 'Search functionality',
-            color: 'text-gray-600'
+            color: 'text-gray-600',
           },
           {
             name: 'FunnelIcon',
             icon: <FunnelIcon className="h-5 w-5" />,
             usage: 'Filtering options',
-            color: 'text-gray-600'
+            color: 'text-gray-600',
           },
           {
             name: 'XMarkIcon',
             icon: <XMarkIcon className="h-5 w-5" />,
             usage: 'Modal close, cancel actions',
-            color: 'text-gray-600'
+            color: 'text-gray-600',
           },
           {
             name: 'Squares2X2Icon',
             icon: <Squares2X2Icon className="h-5 w-5" />,
             usage: 'Grid view toggle',
-            color: 'text-gray-600'
-          }
+            color: 'text-gray-600',
+          },
         ]}
       />
 
@@ -156,32 +167,32 @@ export const IconographySystem: Story = {
             name: 'UserGroupIcon',
             icon: <UserGroupIcon className="h-5 w-5" />,
             usage: 'Player count information',
-            color: 'text-gray-600'
+            color: 'text-gray-600',
           },
           {
             name: 'ClockIcon',
             icon: <ClockIcon className="h-5 w-5" />,
             usage: 'Playing time information',
-            color: 'text-gray-600'
+            color: 'text-gray-600',
           },
           {
             name: 'CalendarIcon',
             icon: <CalendarIcon className="h-5 w-5" />,
             usage: 'Publication year, dates',
-            color: 'text-gray-600'
+            color: 'text-gray-600',
           },
           {
             name: 'StarIcon',
             icon: <StarIcon className="h-5 w-5" />,
             usage: 'Award nominees, favorites',
-            color: 'text-yellow-500'
+            color: 'text-yellow-500',
           },
           {
             name: 'ArrowPathIcon',
             icon: <ArrowPathIcon className="h-5 w-5" />,
             usage: 'Loading states, refresh',
-            color: 'text-gray-600'
-          }
+            color: 'text-gray-600',
+          },
         ]}
       />
 
@@ -208,7 +219,9 @@ export const IconographySystem: Story = {
       </div>
 
       <div className="mt-4 p-4 bg-green-50 rounded-lg">
-        <h4 className="font-semibold text-green-900 mb-2">Color Associations</h4>
+        <h4 className="font-semibold text-green-900 mb-2">
+          Color Associations
+        </h4>
         <div className="grid grid-cols-2 gap-4 text-sm text-green-800">
           <div className="flex items-center gap-2">
             <BookOpenIcon className="h-4 w-4 text-green-600" />
@@ -236,7 +249,7 @@ export const InContext: Story = {
   render: () => (
     <div className="space-y-6">
       <h2 className="text-xl font-semibold">Icons in Context</h2>
-      
+
       {/* Game Card Example */}
       <div className="bg-white rounded-lg shadow p-4 max-w-sm">
         <div className="flex items-center justify-between mb-3">
@@ -289,8 +302,9 @@ export const IconCircles: Story = {
       <div>
         <h3 className="text-lg font-semibold mb-4">IconCircle Component</h3>
         <p className="text-gray-600 mb-6">
-          The IconCircle component provides consistent circular backgrounds for icons, 
-          used prominently in AwardCard components and other featured elements.
+          The IconCircle component provides consistent circular backgrounds for
+          icons, used prominently in AwardCard components and other featured
+          elements.
         </p>
       </div>
 

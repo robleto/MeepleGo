@@ -244,12 +244,10 @@ if (dryRun) {
       const missing = allIds.filter((id) => !found.has(id))
       console.log(`ℹ️  Games present in dataset: ${allIds.length}`)
       console.log(`❗ Missing in games table: ${missing.length}`)
-      const sampleMissing = missing
-        .slice(0, 20)
-        .map((id) => ({
-          bgg: id,
-          honors: perGame.get(id) && perGame.get(id).slice(0, 2),
-        }))
+      const sampleMissing = missing.slice(0, 20).map((id) => ({
+        bgg: id,
+        honors: perGame.get(id) && perGame.get(id).slice(0, 2),
+      }))
       console.log(
         '🔎 Sample missing entries:',
         JSON.stringify(sampleMissing, null, 2)
@@ -286,13 +284,11 @@ if (dryRun) {
         const exportList = missing.map((id) => ({
           bgg: id,
           honorCount: perGame.get(id) ? perGame.get(id).length : 0,
-          sampleHonors: (perGame.get(id) || [])
-            .slice(0, 3)
-            .map((h) => ({
-              name: h.name,
-              year: h.year,
-              description: h.description,
-            })),
+          sampleHonors: (perGame.get(id) || []).slice(0, 3).map((h) => ({
+            name: h.name,
+            year: h.year,
+            description: h.description,
+          })),
         }))
         try {
           fs.writeFileSync(
@@ -310,12 +306,10 @@ if (dryRun) {
       console.log(
         `🏷️  Honors that would attach to newly created games: ${honorsToAttach}`
       )
-      const sampleMissing = missing
-        .slice(0, 20)
-        .map((id) => ({
-          bgg: id,
-          sampleHonorCount: perGame.get(id) && perGame.get(id).length,
-        }))
+      const sampleMissing = missing.slice(0, 20).map((id) => ({
+        bgg: id,
+        sampleHonorCount: perGame.get(id) && perGame.get(id).length,
+      }))
       console.log(
         '🔎 Sample missing entries:',
         JSON.stringify(sampleMissing, null, 2)

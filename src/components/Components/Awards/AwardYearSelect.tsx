@@ -1,4 +1,4 @@
-"use client";
+'use client'
 import { useRouter } from 'next/navigation'
 import React from 'react'
 
@@ -7,7 +7,10 @@ interface AwardYearSelectProps {
   currentYear: number
 }
 
-export default function AwardYearSelect({ years, currentYear }: AwardYearSelectProps) {
+export default function AwardYearSelect({
+  years,
+  currentYear,
+}: AwardYearSelectProps) {
   let router: any
   try {
     router = useRouter()
@@ -20,12 +23,16 @@ export default function AwardYearSelect({ years, currentYear }: AwardYearSelectP
       name="year"
       defaultValue={currentYear}
       className="text-sm border rounded px-2 py-1 bg-white dark:bg-gray-800"
-      onChange={(e)=> {
+      onChange={(e) => {
         const y = e.target.value
         if (y) router.push(`/awards/my/${y}`)
       }}
     >
-      {years.map(y=> <option key={y} value={y}>{y}</option>)}
+      {years.map((y) => (
+        <option key={y} value={y}>
+          {y}
+        </option>
+      ))}
     </select>
   )
 }

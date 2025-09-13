@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import SiteFooter from './SiteFooter'
 
 const meta: Meta<typeof SiteFooter> = {
@@ -20,7 +20,9 @@ export const InPageContext: Story = {
     <div className="min-h-screen flex flex-col">
       <div className="flex-1 bg-gray-50 p-8">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-3xl font-bold text-gray-900 mb-6">Page Content</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-6">
+            Page Content
+          </h1>
           <p className="text-gray-600 mb-8">
             This shows how the footer appears at the bottom of a typical page.
             The footer provides consistent navigation and company information.

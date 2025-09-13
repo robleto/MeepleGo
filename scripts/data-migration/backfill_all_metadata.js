@@ -16,7 +16,12 @@ const path = require('path')
 
 function parseArgs() {
   const args = process.argv.slice(2)
-  const opts = { limit: null, concurrency: null, skipTaglines: false, skipExtended: false }
+  const opts = {
+    limit: null,
+    concurrency: null,
+    skipTaglines: false,
+    skipExtended: false,
+  }
   for (let i = 0; i < args.length; i++) {
     const a = args[i]
     if (a === '--limit') opts.limit = Number(args[++i])
@@ -30,7 +35,9 @@ function parseArgs() {
 async function runScript(relPath, baseArgs) {
   return new Promise((resolve, reject) => {
     const abs = path.join(__dirname, relPath)
-    const proc = spawn(process.execPath, [abs, ...baseArgs], { stdio: 'inherit' })
+    const proc = spawn(process.execPath, [abs, ...baseArgs], {
+      stdio: 'inherit',
+    })
     proc.on('exit', (code) => {
       if (code === 0) resolve()
       else reject(new Error(`${relPath} exited with code ${code}`))

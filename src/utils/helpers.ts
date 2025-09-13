@@ -58,7 +58,8 @@ export function debounce<T extends (...args: any[]) => any>(
   func: T,
   wait: number
 ): (...args: Parameters<T>) => void {
-  let timeout: NodeJS.Timeout
+  // Use inferred timeout type for browser/Node portability
+  let timeout: ReturnType<typeof setTimeout>
 
   return (...args: Parameters<T>) => {
     clearTimeout(timeout)
@@ -78,7 +79,10 @@ export function truncate(text: string, length: number): string {
   return text.slice(0, length) + '...'
 }
 
-export function getGameUrl(game: { id: number | string; name: string }): string {
+export function getGameUrl(game: {
+  id: number | string
+  name: string
+}): string {
   const slug = `${slugify(game.name)}-${game.id}`
   return `/games/${slug}`
 }
@@ -97,31 +101,31 @@ export function generateGameKeywords(game: {
     `${game.name} review`,
     `${game.name} rules`,
   ]
-  
+
   if (game.year_published) {
     keywords.push(`${game.year_published} board games`)
   }
-  
+
   if (game.designer) {
     keywords.push(`${game.designer} games`)
   }
-  
+
   if (game.publisher) {
     keywords.push(`${game.publisher} games`)
   }
-  
+
   if (game.categories?.length) {
-    game.categories.forEach(category => {
+    game.categories.forEach((category) => {
       keywords.push(`${category.toLowerCase()} board games`)
       keywords.push(`${category.toLowerCase()} games`)
     })
   }
-  
+
   if (game.mechanics?.length) {
-    game.mechanics.forEach(mechanic => {
+    game.mechanics.forEach((mechanic) => {
       keywords.push(`${mechanic.toLowerCase()} games`)
     })
   }
-  
+
   return keywords
 }

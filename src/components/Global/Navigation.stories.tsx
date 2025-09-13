@@ -1,8 +1,13 @@
-import React from 'react';
-import type { Meta, StoryObj } from '@storybook/react';
-import Navigation from './Navigation';
-import NavItem from '../Elements/NavItem';
-import { TrophyIcon, CubeIcon, ListBulletIcon, PlayIcon } from '@heroicons/react/24/outline';
+import React from 'react'
+import type { Meta, StoryObj } from '@storybook/nextjs-vite'
+import Navigation from './Navigation'
+import NavItem from '../Elements/NavItem'
+import {
+  TrophyIcon,
+  CubeIcon,
+  ListBulletIcon,
+  PlayIcon,
+} from '@heroicons/react/24/outline'
 
 const meta: Meta<typeof Navigation> = {
   title: 'Global/Header',
@@ -12,8 +17,9 @@ const meta: Meta<typeof Navigation> = {
     layout: 'fullscreen',
     docs: {
       description: {
-        component: 'Main site navigation with responsive design and router integration.'
-      }
+        component:
+          'Main site navigation with responsive design and router integration.',
+      },
     },
     backgrounds: {
       default: 'site',
@@ -29,7 +35,7 @@ const meta: Meta<typeof Navigation> = {
       ],
     },
   },
-};
+}
 export default meta
 
 type Story = StoryObj<typeof Navigation>
@@ -39,7 +45,7 @@ export const Default: Story = {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-0 m-0">
       <Navigation />
     </div>
-  )
+  ),
 }
 
 export const DarkMode: Story = {
@@ -50,7 +56,7 @@ export const DarkMode: Story = {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-0 m-0">
       <Navigation />
     </div>
-  )
+  ),
 }
 
 // Removed NavItemShowcase - excessive documentation content

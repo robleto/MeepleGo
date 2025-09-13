@@ -1,5 +1,10 @@
-import type { Meta, StoryObj } from '@storybook/react'
-import { MagnifyingGlassIcon, UserIcon, ExclamationCircleIcon, CheckCircleIcon } from '@heroicons/react/24/outline'
+import type { Meta, StoryObj } from '@storybook/nextjs-vite'
+import {
+  MagnifyingGlassIcon,
+  UserIcon,
+  ExclamationCircleIcon,
+  CheckCircleIcon,
+} from '@heroicons/react/24/outline'
 import TextInput from './TextInput'
 
 const meta: Meta<typeof TextInput> = {
@@ -9,9 +14,10 @@ const meta: Meta<typeof TextInput> = {
     layout: 'centered',
     docs: {
       description: {
-        component: 'A versatile text input component with support for different sizes, states, and icons. Supports all standard HTML input attributes.'
-      }
-    }
+        component:
+          'A versatile text input component with support for different sizes, states, and icons. Supports all standard HTML input attributes.',
+      },
+    },
   },
   argTypes: {
     size: {
@@ -19,7 +25,7 @@ const meta: Meta<typeof TextInput> = {
       options: ['sm', 'md', 'lg'],
     },
     state: {
-      control: 'select', 
+      control: 'select',
       options: ['default', 'error', 'success'],
     },
     disabled: {
@@ -49,7 +55,9 @@ export const Sizes: Story = {
         <TextInput size="sm" placeholder="Small input" />
       </div>
       <div>
-        <label className="block text-sm font-medium mb-1">Medium (Default)</label>
+        <label className="block text-sm font-medium mb-1">
+          Medium (Default)
+        </label>
         <TextInput size="md" placeholder="Medium input" />
       </div>
       <div>
@@ -68,15 +76,21 @@ export const States: Story = {
         <TextInput placeholder="Default state" />
       </div>
       <div>
-        <label className="block text-sm font-medium mb-1 text-red-700">Error</label>
+        <label className="block text-sm font-medium mb-1 text-red-700">
+          Error
+        </label>
         <TextInput state="error" placeholder="Error state" />
       </div>
       <div>
-        <label className="block text-sm font-medium mb-1 text-green-700">Success</label>
+        <label className="block text-sm font-medium mb-1 text-green-700">
+          Success
+        </label>
         <TextInput state="success" placeholder="Success state" />
       </div>
       <div>
-        <label className="block text-sm font-medium mb-1 text-gray-400">Disabled</label>
+        <label className="block text-sm font-medium mb-1 text-gray-400">
+          Disabled
+        </label>
         <TextInput disabled placeholder="Disabled state" />
       </div>
     </div>
@@ -88,29 +102,27 @@ export const WithIcons: Story = {
     <div className="space-y-4 w-80">
       <div>
         <label className="block text-sm font-medium mb-1">Left Icon</label>
-        <TextInput 
-          leftIcon={<MagnifyingGlassIcon />}
-          placeholder="Search..." 
-        />
+        <TextInput leftIcon={<MagnifyingGlassIcon />} placeholder="Search..." />
       </div>
       <div>
         <label className="block text-sm font-medium mb-1">Right Icon</label>
-        <TextInput 
-          rightIcon={<UserIcon />}
-          placeholder="Username" 
-        />
+        <TextInput rightIcon={<UserIcon />} placeholder="Username" />
       </div>
       <div>
-        <label className="block text-sm font-medium mb-1">Error with Icon</label>
-        <TextInput 
+        <label className="block text-sm font-medium mb-1">
+          Error with Icon
+        </label>
+        <TextInput
           state="error"
           leftIcon={<ExclamationCircleIcon />}
-          placeholder="Invalid input" 
+          placeholder="Invalid input"
         />
       </div>
       <div>
-        <label className="block text-sm font-medium mb-1">Success with Icon</label>
-        <TextInput 
+        <label className="block text-sm font-medium mb-1">
+          Success with Icon
+        </label>
+        <TextInput
           state="success"
           rightIcon={<CheckCircleIcon />}
           placeholder="Valid input"

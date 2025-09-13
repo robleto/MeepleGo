@@ -7,13 +7,13 @@ const preview: Preview = {
       storySort: {
         order: [
           'Introduction',
-          'Get Started', 
+          'Get Started',
           'Contributions',
           'Foundations',
           'Controls',
           'Components',
           'Elements',
-          'Archived'
+          'Archived',
         ],
         method: 'alphabetical',
         includeNames: true,

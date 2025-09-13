@@ -1,4 +1,4 @@
-"use client"
+'use client'
 import React from 'react'
 import Heading from '@/components/Components/Heading'
 import {
@@ -23,7 +23,9 @@ export interface HeroProps {
   className?: string
 }
 
-const awardsDefaults: Required<Pick<HeroProps, 'title' | 'subtitle' | 'steps'>> = {
+const awardsDefaults: Required<
+  Pick<HeroProps, 'title' | 'subtitle' | 'steps'>
+> = {
   title: 'Create your own Game Awards',
   subtitle:
     'Auto‑generate personal awards from the games you play and rate—then fine‑tune the winners.',
@@ -62,13 +64,23 @@ export function Hero({
   }
 
   return (
-    <div className={`panel mb-14 md:mb-20 flex flex-col md:flex-row md:items-start gap-10 md:gap-20 ${className}`}>      
+    <div
+      className={`panel mb-14 md:mb-20 flex flex-col md:flex-row md:items-start gap-10 md:gap-20 ${className}`}
+    >
       <div className="flex-1">
-        <Heading as="h1" size="display" align="left" displayFont className="mb-6">
+        <Heading
+          as="h1"
+          size="display"
+          align="left"
+          displayFont
+          className="mb-6"
+        >
           {title}
         </Heading>
         {subtitle && (
-          <p className="text-lg md:text-xl text-gray-600 max-w-xl leading-snug">{subtitle}</p>
+          <p className="text-lg md:text-xl text-gray-600 max-w-xl leading-snug">
+            {subtitle}
+          </p>
         )}
         {ctaText && (
           <button
@@ -89,9 +101,13 @@ export function Hero({
               <div className="flex-1 border-b border-gray-200 pb-8 last:border-b-0 last:pb-0">
                 <div className="flex items-center gap-2 mb-2">
                   {step.icon}
-                  <h3 className="font-semibold text-gray-900 text-lg">{step.heading}</h3>
+                  <h3 className="font-semibold text-gray-900 text-lg">
+                    {step.heading}
+                  </h3>
                 </div>
-                <p className="text-sm text-gray-500 leading-snug max-w-md">{step.text}</p>
+                <p className="text-sm text-gray-500 leading-snug max-w-md">
+                  {step.text}
+                </p>
               </div>
             </li>
           ))}

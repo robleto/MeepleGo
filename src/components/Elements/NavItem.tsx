@@ -15,7 +15,7 @@ export default function NavItem({
   href,
   icon: Icon,
   isActive = false,
-  className
+  className,
 }: NavItemProps) {
   return (
     <Link

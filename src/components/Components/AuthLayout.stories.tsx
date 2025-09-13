@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { AuthLayout } from './AuthLayout'
 import { TextInput } from '../Controls'
 
@@ -21,20 +21,20 @@ export const Login: Story = {
     children: (
       <form className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
-          <TextInput 
-            type="email" 
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Email
+          </label>
+          <TextInput
+            type="email"
             placeholder="you@example.com"
             hasLabel={true}
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Password</label>
-          <TextInput 
-            type="password" 
-            placeholder="••••••••"
-            hasLabel={true}
-          />
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Password
+          </label>
+          <TextInput type="password" placeholder="••••••••" hasLabel={true} />
         </div>
         <button className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors">
           Sign In
@@ -43,7 +43,10 @@ export const Login: Story = {
     ),
     footer: (
       <>
-        Don't have an account? <a href="#" className="text-blue-600 hover:underline">Sign up</a>
+        Don't have an account?{' '}
+        <a href="#" className="text-blue-600 hover:underline">
+          Sign up
+        </a>
       </>
     ),
   },
@@ -56,28 +59,26 @@ export const Signup: Story = {
     children: (
       <form className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Full Name</label>
-          <TextInput 
-            type="text" 
-            placeholder="John Doe"
-            hasLabel={true}
-          />
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Full Name
+          </label>
+          <TextInput type="text" placeholder="John Doe" hasLabel={true} />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
-          <TextInput 
-            type="email" 
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Email
+          </label>
+          <TextInput
+            type="email"
             placeholder="you@example.com"
             hasLabel={true}
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Password</label>
-          <TextInput 
-            type="password" 
-            placeholder="••••••••"
-            hasLabel={true}
-          />
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Password
+          </label>
+          <TextInput type="password" placeholder="••••••••" hasLabel={true} />
         </div>
         <button className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors">
           Create Account
@@ -86,7 +87,10 @@ export const Signup: Story = {
     ),
     footer: (
       <>
-        Already have an account? <a href="#" className="text-blue-600 hover:underline">Sign in</a>
+        Already have an account?{' '}
+        <a href="#" className="text-blue-600 hover:underline">
+          Sign in
+        </a>
       </>
     ),
   },
@@ -95,13 +99,15 @@ export const Signup: Story = {
 export const ResetPassword: Story = {
   args: {
     title: 'Reset your password',
-    subtitle: 'Enter your email and we\'ll send you a reset link',
+    subtitle: "Enter your email and we'll send you a reset link",
     children: (
       <form className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
-          <TextInput 
-            type="email" 
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Email
+          </label>
+          <TextInput
+            type="email"
             placeholder="you@example.com"
             hasLabel={true}
           />
@@ -113,7 +119,10 @@ export const ResetPassword: Story = {
     ),
     footer: (
       <>
-        Remember your password? <a href="#" className="text-blue-600 hover:underline">Sign in</a>
+        Remember your password?{' '}
+        <a href="#" className="text-blue-600 hover:underline">
+          Sign in
+        </a>
       </>
     ),
   },

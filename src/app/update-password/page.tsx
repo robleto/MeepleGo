@@ -32,10 +32,23 @@ export default function UpdatePasswordPage() {
   }
 
   return (
-    <AuthLayout title="Choose a new password" subtitle="Set a strong password you haven't used before" footer={<a href="/login" className="underline hover:text-gray-700 dark:hover:text-gray-300">Return to login</a>}>
+    <AuthLayout
+      title="Choose a new password"
+      subtitle="Set a strong password you haven't used before"
+      footer={
+        <a
+          href="/login"
+          className="underline hover:text-gray-700 dark:hover:text-gray-300"
+        >
+          Return to login
+        </a>
+      }
+    >
       <form onSubmit={onSubmit} className="space-y-5">
         <div className="space-y-1">
-          <label className="block text-xs font-medium uppercase tracking-wide text-gray-600 dark:text-gray-400">New password</label>
+          <label className="block text-xs font-medium uppercase tracking-wide text-gray-600 dark:text-gray-400">
+            New password
+          </label>
           <input
             type="password"
             value={password}

@@ -4,6 +4,14 @@ import { ultimateSearchGames } from './ultimateSearch'
 import { searchGamesWithExactBoost } from './enhancedSearch'
 import { fuzzySearchGames, isGameMatch } from './fuzzySearch'
 
+// Honor objects can come from enhanced data merges; model only accessed fields
+interface HonorLike {
+  category?: string | null
+  result_category?: string | null
+  result_raw?: string | null
+  derived_result?: string | null
+}
+
 export type SortKey =
   | 'name'
   | 'year_published'
@@ -87,7 +95,7 @@ export function useGameFilters(
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem('gamesSortBy') as SortKey
       // Migration: convert old 'rating' to new 'rank'
-      if (stored === 'rating' as any) {
+      if (stored === ('rating' as any)) {
         localStorage.setItem('gamesSortBy', 'rank')
         return 'rank'
       }
@@ -212,12 +220,17 @@ export function useGameFilters(
         return String(game.id) === filterValue
       }
       if (filterType === 'award') {
-        const honors: any[] = Array.isArray((game as any).honors)
-          ? (game as any).honors
+        const honorsRaw = (game as unknown as { honors?: unknown }).honors
+        // Dynamic honors array from upstream enrichment; runtime narrowing applied.
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- TODO(meeplego#types): Replace with typed enrichment shape
+        const honors: HonorLike[] = Array.isArray(honorsRaw)
+          ? (honorsRaw.filter(
+              (h): h is HonorLike => typeof h === 'object' && h !== null
+            ) as HonorLike[])
           : []
         return honors.some((h) => {
-          const cat = (h.category || h.result_category || '').toLowerCase()
-          const res = (h.result_raw || h.derived_result || '').toLowerCase()
+          const cat = (h.category || h.result_category || '')?.toLowerCase()
+          const res = (h.result_raw || h.derived_result || '')?.toLowerCase()
           return cat.includes('winner') || res.includes('winner')
         })
       }
@@ -454,8 +467,8 @@ export function useGameFilters(
   return {
     // State
     hasMounted,
-  viewMode,
-  setViewMode,
+    viewMode,
+    setViewMode,
     searchTerm,
     setSearchTerm,
     sortBy,

@@ -15,7 +15,8 @@ export default function ResetPasswordPage() {
     setError(null)
     setMessage(null)
     setLoading(true)
-    const redirectBase = process.env.NEXT_PUBLIC_AUTH_REDIRECT_BASE || window.location.origin
+    const redirectBase =
+      process.env.NEXT_PUBLIC_AUTH_REDIRECT_BASE || window.location.origin
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${redirectBase}/update-password`,
     })
@@ -25,10 +26,23 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <AuthLayout title="Reset password" subtitle="We'll email you a secure link" footer={<a href="/login" className="underline hover:text-gray-700 dark:hover:text-gray-300">Back to login</a>}>
+    <AuthLayout
+      title="Reset password"
+      subtitle="We'll email you a secure link"
+      footer={
+        <a
+          href="/login"
+          className="underline hover:text-gray-700 dark:hover:text-gray-300"
+        >
+          Back to login
+        </a>
+      }
+    >
       <form onSubmit={onSubmit} className="space-y-5">
         <div className="space-y-1">
-          <label className="block text-xs font-medium uppercase tracking-wide text-gray-600 dark:text-gray-400">Email</label>
+          <label className="block text-xs font-medium uppercase tracking-wide text-gray-600 dark:text-gray-400">
+            Email
+          </label>
           <input
             type="email"
             value={email}

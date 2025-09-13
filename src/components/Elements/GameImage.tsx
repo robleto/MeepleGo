@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import Image from 'next/image'
 
 interface GameImageProps {
   src?: string | null
@@ -10,16 +11,18 @@ interface GameImageProps {
   onLoad?: () => void
 }
 
-export function GameImage({ 
-  src, 
-  alt, 
+export function GameImage({
+  src,
+  alt,
   name,
   variant = 'square',
   className = '',
   onError,
-  onLoad
+  onLoad,
 }: GameImageProps) {
-  const [imageState, setImageState] = useState<'loading' | 'loaded' | 'error'>('loading')
+  const [imageState, setImageState] = useState<'loading' | 'loaded' | 'error'>(
+    'loading'
+  )
   const [showFallback, setShowFallback] = useState(!src)
 
   const handleImageLoad = () => {
@@ -34,12 +37,13 @@ export function GameImage({
   }
 
   // Generate fallback content
-  const initials = name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((w) => w[0]?.toUpperCase())
-    .join('') || 'BG'
+  const initials =
+    name
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((w) => w[0]?.toUpperCase())
+      .join('') || 'BG'
   const fontSize = initials.length === 1 ? 42 : 34
 
   // Render fallback when no image or error
@@ -86,14 +90,16 @@ export function GameImage({
       {imageState === 'loading' && (
         <div className="absolute inset-0 bg-gray-200 dark:bg-gray-700 animate-pulse rounded" />
       )}
-      <img
+      <Image
         src={src}
         alt={alt}
         className={`w-full h-full object-cover rounded ${
           imageState === 'loading' ? 'opacity-0' : 'opacity-100'
         } transition-opacity duration-200`}
-        onLoad={handleImageLoad}
-        onError={handleImageError}
+        width={400}
+        height={400}
+        onLoadingComplete={handleImageLoad}
+        onError={handleImageError as any}
       />
     </div>
   )

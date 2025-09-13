@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import PlayLogEditor from './PlayLogEditor';
+import type { Meta, StoryObj } from '@storybook/nextjs-vite'
+import PlayLogEditor from './PlayLogEditor'
 
 const meta: Meta<typeof PlayLogEditor> = {
   title: 'Components/PlayLogEditor',
@@ -9,9 +9,10 @@ const meta: Meta<typeof PlayLogEditor> = {
     layout: 'centered',
     docs: {
       description: {
-        component: 'Form component for creating and editing game play logs with date, players, and notes.'
-      }
-    }
+        component:
+          'Form component for creating and editing game play logs with date, players, and notes.',
+      },
+    },
   },
   argTypes: {
     gameId: { control: 'text' },
@@ -21,10 +22,10 @@ const meta: Meta<typeof PlayLogEditor> = {
     onCreated: { action: 'onCreated' },
     onUpdated: { action: 'onUpdated' },
   },
-};
-export default meta;
+}
+export default meta
 
-type Story = StoryObj<typeof PlayLogEditor>;
+type Story = StoryObj<typeof PlayLogEditor>
 
 export const Default: Story = {
   args: {
@@ -33,4 +34,4 @@ export const Default: Story = {
     autoFocus: false,
     openForm: true,
   },
-};
+}

@@ -1,34 +1,38 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import GameFilters from './GameFilters';
-import React, { useState } from 'react';
+import type { Meta, StoryObj } from '@storybook/nextjs-vite'
+import GameFilters from './GameFilters' // Deprecated shim
+import SearchandFilters from './SearchandFilters'
+import React, { useState } from 'react'
 
-const meta: Meta<typeof GameFilters> = {
-  title: 'Components/GameFilters',
-  component: GameFilters,
+const meta: Meta<typeof SearchandFilters> = {
+  title: 'Components/Deprecated/GameFilters',
+  component: SearchandFilters,
   tags: ['autodocs'],
-  parameters: { 
+  parameters: {
     layout: 'padded',
     docs: {
       description: {
-        component: 'Main game filters component with search, view mode controls, and filter modal.'
-      }
-    }
-  }
-};
+        component:
+          'Main game filters component with search, view mode controls, and filter modal.',
+      },
+    },
+  },
+}
 
-export default meta;
-type Story = StoryObj<typeof GameFilters>;
+export default meta
+type Story = StoryObj<typeof SearchandFilters>
 
 export const Default: Story = {
   render: () => {
-    const [viewMode, setViewMode] = useState<'grid'|'list'>('grid');
-  const [sortBy, setSortBy] = useState<any>('name');
-  const [sortOrder, setSortOrder] = useState<'asc'|'desc'>('asc');
-  const [groupBy, setGroupBy] = useState<any>('year_published');
+    const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+    const [sortBy, setSortBy] = useState<any>('name')
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
+    const [groupBy, setGroupBy] = useState<any>('year_published')
 
     return (
       <div className="max-w-4xl mx-auto">
-        <GameFilters
+        <SearchandFilters
+          value={''}
+          onChange={() => {}}
           viewMode={viewMode}
           setViewMode={setViewMode}
           sortBy={sortBy}
@@ -40,20 +44,22 @@ export const Default: Story = {
           total={150}
         />
       </div>
-    );
-  }
-};
+    )
+  },
+}
 
 export const WithActiveFilters: Story = {
   render: () => {
-    const [viewMode, setViewMode] = useState<'grid'|'list'>('list');
-  const [sortBy, setSortBy] = useState<any>('year_published');
-  const [sortOrder, setSortOrder] = useState<'asc'|'desc'>('desc');
-  const [groupBy, setGroupBy] = useState<any>('publisher');
+    const [viewMode, setViewMode] = useState<'grid' | 'list'>('list')
+    const [sortBy, setSortBy] = useState<any>('year_published')
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
+    const [groupBy, setGroupBy] = useState<any>('publisher')
 
     return (
       <div className="max-w-4xl mx-auto">
-        <GameFilters
+        <SearchandFilters
+          value={'sample'}
+          onChange={() => {}}
           viewMode={viewMode}
           setViewMode={setViewMode}
           sortBy={sortBy}
@@ -65,6 +71,6 @@ export const WithActiveFilters: Story = {
           total={42}
         />
       </div>
-    );
-  }
-};
+    )
+  },
+}

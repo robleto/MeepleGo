@@ -20,7 +20,10 @@ if (!userId || !newPassword) {
 
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 // Support either SUPABASE_URL (preferred for scripts) or NEXT_PUBLIC_SUPABASE_URL (frontend var)
-const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || 'http://localhost:54321'
+const url =
+  process.env.SUPABASE_URL ||
+  process.env.NEXT_PUBLIC_SUPABASE_URL ||
+  'http://localhost:54321'
 
 if (!serviceRoleKey) {
   console.error('Missing SUPABASE_SERVICE_ROLE_KEY in env')
@@ -35,13 +38,17 @@ async function run() {
     headers: {
       apikey: serviceRoleKey,
       Authorization: `Bearer ${serviceRoleKey}`,
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ password: newPassword })
+    body: JSON.stringify({ password: newPassword }),
   })
   if (!res.ok) {
     let text
-    try { text = await res.text() } catch { text = '<no body>' }
+    try {
+      text = await res.text()
+    } catch {
+      text = '<no body>'
+    }
     console.error('Failed', res.status, text)
     process.exit(1)
   }
@@ -49,4 +56,7 @@ async function run() {
   console.log('Password updated for user:', json.id || userId)
 }
 
-run().catch(err => { console.error(err); process.exit(1) })
+run().catch((err) => {
+  console.error(err)
+  process.exit(1)
+})

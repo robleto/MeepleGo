@@ -151,13 +151,11 @@ async function importHonors() {
         }
       } else {
         // Game doesn't exist, create new record (already name-sanitized)
-        const { error } = await supabase
-          .from('games')
-          .insert({
-            bgg_id: bggId,
-            name: gameData.name,
-            honors: gameData.honors,
-          })
+        const { error } = await supabase.from('games').insert({
+          bgg_id: bggId,
+          name: gameData.name,
+          honors: gameData.honors,
+        })
 
         if (error) {
           console.error(`❌ Error creating ${gameData.name}:`, error.message)

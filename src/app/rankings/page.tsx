@@ -56,7 +56,11 @@ export default function RankingsPage() {
       max_players: 'playtime', // fallback
     }
     const legacyKey = legacySortKeyMap[sortBy] || 'ranking'
-    return legacySortGames(searchFiltered as any, legacyKey as any, sortOrder as any)
+    return legacySortGames(
+      searchFiltered as any,
+      legacyKey as any,
+      sortOrder as any
+    )
   }, [searchFiltered, sortBy, sortOrder])
   const grouped = useMemo(() => {
     const legacyGroupKeyMap: Record<string, any> = {
@@ -111,9 +115,11 @@ export default function RankingsPage() {
           total={searchFiltered.length}
         />
         <div className="flex items-end justify-between mb-5">
-          <Heading as="h2" variant="section" className="mb-1">My Rankings</Heading>
+          <Heading as="h2" variant="section" className="mb-1">
+            My Rankings
+          </Heading>
         </div>
-  {grouped.map((section: any) => (
+        {grouped.map((section: any) => (
           <div key={section.group ?? 'all'} className="mb-10">
             {section.group && (
               <h2 className="text-xl font-semibold text-gray-800 mb-3">

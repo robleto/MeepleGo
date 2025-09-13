@@ -53,7 +53,8 @@ const AWARD_CATEGORIES = {
   'deutscher-spiele-preis': {
     id: 'deutscher-spiele-preis',
     name: 'Deutscher Spiele Preis',
-    description: "Prominent German gamers' award emphasizing gamer opinion and depth.",
+    description:
+      "Prominent German gamers' award emphasizing gamer opinion and depth.",
     icon: TrophyIcon,
     color: 'rose',
     website: 'https://www.dspielt.de/',
@@ -61,7 +62,8 @@ const AWARD_CATEGORIES = {
   'origins-awards': {
     id: 'origins-awards',
     name: 'Origins Awards',
-    description: 'Historical industry awards from the Game Manufacturers Association (GAMA).',
+    description:
+      'Historical industry awards from the Game Manufacturers Association (GAMA).',
     icon: TrophyIcon,
     color: 'violet',
     website: 'https://www.originsgamefair.com/',
@@ -69,7 +71,8 @@ const AWARD_CATEGORIES = {
   'dice-tower-awards': {
     id: 'dice-tower-awards',
     name: 'The Dice Tower Gaming Awards',
-    description: 'Annual Dice Tower network selections across multiple categories.',
+    description:
+      'Annual Dice Tower network selections across multiple categories.',
     icon: TrophyIcon,
     color: 'fuchsia',
     website: 'https://www.dicetower.com/awards',
@@ -85,7 +88,8 @@ const AWARD_CATEGORIES = {
   'international-gamers-award': {
     id: 'international-gamers-award',
     name: 'International Gamers Award',
-    description: 'Global strategy game recognition spanning multiplayer and two-player titles.',
+    description:
+      'Global strategy game recognition spanning multiplayer and two-player titles.',
     icon: TrophyIcon,
     color: 'cyan',
     website: 'https://www.internationalgamersaward.net/',
@@ -93,7 +97,8 @@ const AWARD_CATEGORIES = {
   'ion-award': {
     id: 'ion-award',
     name: 'Ion Award',
-    description: 'Game design competition highlighting prototypes and emerging designers.',
+    description:
+      'Game design competition highlighting prototypes and emerging designers.',
     icon: TrophyIcon,
     color: 'emerald',
     website: 'https://saltcon.com/ion-award/',
@@ -109,15 +114,17 @@ const AWARD_CATEGORIES = {
   'charles-s-roberts': {
     id: 'charles-s-roberts',
     name: 'Charles S. Roberts Award',
-    description: 'Historic recognition for excellence in wargame design & publication.',
+    description:
+      'Historic recognition for excellence in wargame design & publication.',
     icon: TrophyIcon,
     color: 'slate',
     website: 'https://charlieawards.com/',
   },
-  'sxsw': {
+  sxsw: {
     id: 'sxsw',
     name: 'SXSW',
-    description: 'South by Southwest tabletop game of the year & related honors.',
+    description:
+      'South by Southwest tabletop game of the year & related honors.',
     icon: TrophyIcon,
     color: 'pink',
     website: 'https://www.sxsw.com/',
@@ -133,7 +140,8 @@ const AWARD_CATEGORIES = {
   'juego-del-ano': {
     id: 'juego-del-ano',
     name: 'Juego del Año',
-    description: 'Spanish-language (Mexico / Tico) Game of the Year recognitions.',
+    description:
+      'Spanish-language (Mexico / Tico) Game of the Year recognitions.',
     icon: TrophyIcon,
     color: 'amber',
     website: 'https://juegodelano.mx/',
@@ -146,7 +154,7 @@ const AWARD_CATEGORIES = {
     color: 'lime',
     website: 'https://www.parentschoice.org/',
   },
-  'guldbrikken': {
+  guldbrikken: {
     id: 'guldbrikken',
     name: 'Guldbrikken',
     description: 'Danish awards (children, family, adult & special jury).',
@@ -205,8 +213,10 @@ async function getAwardData(awardType: string): Promise<AwardYearGroup[]> {
   while (true) {
     const { data: games, error } = await supabase
       .from('games')
-  // Select current schema columns (playtime_minutes in canonical schema)
-	.select('bgg_id, name, year_published, image_url, thumbnail_url, honors, min_players, max_players, playtime_minutes')
+      // Select current schema columns (playtime_minutes in canonical schema)
+      .select(
+        'bgg_id, name, year_published, image_url, thumbnail_url, honors, min_players, max_players, playtime_minutes'
+      )
       .not('honors', 'eq', '[]')
       .range(page * pageSize, (page + 1) * pageSize - 1)
 
@@ -216,8 +226,8 @@ async function getAwardData(awardType: string): Promise<AwardYearGroup[]> {
     }
 
     if (!games || games.length === 0) break
-  const normalized = (games as any[]).map(g => g)
-  allGames = allGames.concat(normalized as Game[])
+    const normalized = (games as any[]).map((g) => g)
+    allGames = allGames.concat(normalized as Game[])
     if (games.length < pageSize) break // Last page
     page++
   }
@@ -563,109 +573,140 @@ function YearSection({
           )}
         </div>
 
-        {normalizedCategories && normalizedCategories.map((category, idx) => {
-          const hasRightContent =
-            category.nominees.length > 0 || category.special.length > 0
-          const combinedNominees = Array.from(
-            new Map(
-              [...category.nominees, ...category.special].map((g) => [
-                g.bgg_id,
-                g,
-              ])
-            ).values()
-          ).sort((a, b) => a.name.localeCompare(b.name))
-          const nomineeOnly = !category.winner && combinedNominees.length > 0 && category.name === 'Nominees'
-          
-          
-           {/* Awards Winner/Nom Card */}
-          return (
-            <div key={category.name} className="panel">
-              <Heading as="h3" size="lg" className="mb-6 flex items-center font-semibold gap-2">
-                <TrophyIcon className="w-5 h-5 text-yellow-500" />
-                <span>{category.name}</span>
-              </Heading>
-              <div className={`md:grid md:grid-cols-12 md:gap-8 items-start ${nomineeOnly ? 'md:block' : ''}`}>
-                {!nomineeOnly && (
-                  <div className="md:col-span-4 mb-6 md:mb-0">
-                    <div className="flex items-center gap-2 mb-3 font-display">
-                      <TrophyIcon className="w-4 h-4 text-amber-500" />
-                      <h4 className="text-sm font-semibold text-gray-700">Winner</h4>
-                    </div>
-                    {category.winner ? (
-                      <div className="relative group">
-                        <GameCard
-                          game={toGameWithRanking(category.winner)}
-                          viewMode="grid"
-                          className=""
-                          hideWinnerBadge
-                          showSummary
-                          emphasizeMeta
-                          showMeta={false}
-                          titleClassName="text-base font-semibold"
-                        />
+        {normalizedCategories &&
+          normalizedCategories.map((category, idx) => {
+            const hasRightContent =
+              category.nominees.length > 0 || category.special.length > 0
+            const combinedNominees = Array.from(
+              new Map(
+                [...category.nominees, ...category.special].map((g) => [
+                  g.bgg_id,
+                  g,
+                ])
+              ).values()
+            ).sort((a, b) => a.name.localeCompare(b.name))
+            const nomineeOnly =
+              !category.winner &&
+              combinedNominees.length > 0 &&
+              category.name === 'Nominees'
+
+            {
+              /* Awards Winner/Nom Card */
+            }
+            return (
+              <div key={category.name} className="panel">
+                <Heading
+                  as="h3"
+                  size="lg"
+                  className="mb-6 flex items-center font-semibold gap-2"
+                >
+                  <TrophyIcon className="w-5 h-5 text-yellow-500" />
+                  <span>{category.name}</span>
+                </Heading>
+                <div
+                  className={`md:grid md:grid-cols-12 md:gap-8 items-start ${nomineeOnly ? 'md:block' : ''}`}
+                >
+                  {!nomineeOnly && (
+                    <div className="md:col-span-4 mb-6 md:mb-0">
+                      <div className="flex items-center gap-2 mb-3 font-display">
+                        <TrophyIcon className="w-4 h-4 text-amber-500" />
+                        <h4 className="text-sm font-semibold text-gray-700">
+                          Winner
+                        </h4>
                       </div>
-                    ) : (
-                      <div className="text-sm text-gray-500 italic">No winner recorded</div>
-                    )}
-                  </div>
-                )}
-                {hasRightContent && combinedNominees.length > 0 && (
-                  <div className={`${nomineeOnly ? '' : 'md:col-span-8'}`}>
-                    <div className="flex items-center gap-2 mb-3 font-display">
-                      <UserGroupIcon className="w-4 h-4 text-gray-500" />
-                      <h4 className="text-sm font-semibold text-gray-700">
-                        {category.name === 'Nominees' ? 'Nominees' : 'Other Nominees'}
-                      </h4>
-                      <span className="text-xs text-gray-400">
-                        ({combinedNominees.length})
-                      </span>
-                    </div>
-                    {(!nomineeOnly) ? (
-                      <ul className="space-y-2 text-sm leading-tight">
-                        {combinedNominees.map(game => (
-                          <li key={`${game.bgg_id}-nominee-name`} className="flex items-center gap-3">
-                            {game.thumbnail_url ? (
-                              // eslint-disable-next-line @next/next/no-img-element
-                              <img 
-                                src={game.thumbnail_url} 
-                                alt={game.name}
-                                className="w-8 h-8 object-cover rounded border border-gray-200 flex-shrink-0"
-                              />
-                            ) : (
-                              <div className="w-8 h-8 bg-gray-100 border border-gray-200 rounded flex items-center justify-center flex-shrink-0">
-                                <span className="text-gray-400 text-xs">?</span>
-                              </div>
-                            )}
-                            <span className="text-gray-700 hover:text-gray-900 transition-colors truncate" title={game.name}>{game.name}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                        {combinedNominees.map((game) => (
+                      {category.winner ? (
+                        <div className="relative group">
                           <GameCard
-                            key={`${game.bgg_id}-nominee-unified`}
-                            game={toGameWithRanking(game)}
+                            game={toGameWithRanking(category.winner)}
                             viewMode="grid"
-                            className="bg-white/70"
+                            className=""
                             hideWinnerBadge
-                            variant="compact"
+                            showSummary
+                            emphasizeMeta
+                            showMeta={false}
+                            titleClassName="text-base font-semibold"
                           />
-                        ))}
+                        </div>
+                      ) : (
+                        <div className="text-sm text-gray-500 italic">
+                          No winner recorded
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  {hasRightContent && combinedNominees.length > 0 && (
+                    <div className={`${nomineeOnly ? '' : 'md:col-span-8'}`}>
+                      <div className="flex items-center gap-2 mb-3 font-display">
+                        <UserGroupIcon className="w-4 h-4 text-gray-500" />
+                        <h4 className="text-sm font-semibold text-gray-700">
+                          {category.name === 'Nominees'
+                            ? 'Nominees'
+                            : 'Other Nominees'}
+                        </h4>
+                        <span className="text-xs text-gray-400">
+                          ({combinedNominees.length})
+                        </span>
                       </div>
-                    )}
-                  </div>
-                )}
+                      {!nomineeOnly ? (
+                        <ul className="space-y-2 text-sm leading-tight">
+                          {combinedNominees.map((game) => (
+                            <li
+                              key={`${game.bgg_id}-nominee-name`}
+                              className="flex items-center gap-3"
+                            >
+                              {game.thumbnail_url ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img
+                                  src={game.thumbnail_url}
+                                  alt={game.name}
+                                  className="w-8 h-8 object-cover rounded border border-gray-200 flex-shrink-0"
+                                />
+                              ) : (
+                                <div className="w-8 h-8 bg-gray-100 border border-gray-200 rounded flex items-center justify-center flex-shrink-0">
+                                  <span className="text-gray-400 text-xs">
+                                    ?
+                                  </span>
+                                </div>
+                              )}
+                              <span
+                                className="text-gray-700 hover:text-gray-900 transition-colors truncate"
+                                title={game.name}
+                              >
+                                {game.name}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                          {combinedNominees.map((game) => (
+                            <GameCard
+                              key={`${game.bgg_id}-nominee-unified`}
+                              game={toGameWithRanking(game)}
+                              viewMode="grid"
+                              className="bg-white/70"
+                              hideWinnerBadge
+                              variant="compact"
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          )
-        })}
+            )
+          })}
       </div>
     </div>
   )
 }
 
-export default async function AwardPage({ params }: { params: Promise<{ award: string }> }) {
+export default async function AwardPage({
+  params,
+}: {
+  params: Promise<{ award: string }>
+}) {
   const { award } = await params
   const awardConfig = AWARD_CATEGORIES[award as keyof typeof AWARD_CATEGORIES]
 
@@ -688,19 +729,19 @@ export default async function AwardPage({ params }: { params: Promise<{ award: s
     'spiel-des-jahres': 'Spiel des Jahres',
     'kinderspiel-des-jahres': 'Kinderspiel des Jahres',
     'kennerspiel-des-jahres': 'Kennerspiel des Jahres',
-  'deutscher-spiele-preis': 'Deutscher Spiele Preis',
-  'origins-awards': 'Origins Awards',
-  'dice-tower-awards': 'The Dice Tower Gaming Awards',
-  'as-dor': "As d'Or - Jeu de l'Année",
-  'international-gamers-award': 'International Gamers Award',
-  'ion-award': 'Ion Award',
-  'zenobia-award': 'Zenobia Award',
-  'charles-s-roberts': 'Charles S. Roberts',
-  'sxsw': 'SXSW',
-  'board-game-quest': 'Board Game Quest Awards',
-  'juego-del-ano': 'Juego del Año',
-  'parents-choice': 'Parents Choice',
-  'guldbrikken': 'Guldbrikken',
+    'deutscher-spiele-preis': 'Deutscher Spiele Preis',
+    'origins-awards': 'Origins Awards',
+    'dice-tower-awards': 'The Dice Tower Gaming Awards',
+    'as-dor': "As d'Or - Jeu de l'Année",
+    'international-gamers-award': 'International Gamers Award',
+    'ion-award': 'Ion Award',
+    'zenobia-award': 'Zenobia Award',
+    'charles-s-roberts': 'Charles S. Roberts',
+    sxsw: 'SXSW',
+    'board-game-quest': 'Board Game Quest Awards',
+    'juego-del-ano': 'Juego del Año',
+    'parents-choice': 'Parents Choice',
+    guldbrikken: 'Guldbrikken',
   }
 
   const awardType = awardTypeMap[award]
@@ -740,7 +781,15 @@ export default async function AwardPage({ params }: { params: Promise<{ award: s
               />
             </div>
           </div>
-          <Heading as="h1" size="display" gradient weightScale align="center" displayFont className="mb-4">
+          <Heading
+            as="h1"
+            size="display"
+            gradient
+            weightScale
+            align="center"
+            displayFont
+            className="mb-4"
+          >
             {awardConfig.name}
           </Heading>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-6">
@@ -782,12 +831,12 @@ export default async function AwardPage({ params }: { params: Promise<{ award: s
               </p>
             </div>
           ) : (
-      awardData.map((yearData, idx) => (
+            awardData.map((yearData, idx) => (
               <YearSection
                 key={yearData.year}
                 yearData={yearData}
                 awardType={awardType}
-        isLast={idx === awardData.length - 1}
+                isLast={idx === awardData.length - 1}
               />
             ))
           )}

@@ -1,7 +1,7 @@
-import React from 'react';
-import type { Meta, StoryObj } from '@storybook/react';
-import NavItem from './NavItem';
-import { TrophyIcon, CubeIcon } from '@heroicons/react/24/outline';
+import React from 'react'
+import type { Meta, StoryObj } from '@storybook/nextjs-vite'
+import NavItem from './NavItem'
+import { TrophyIcon, CubeIcon } from '@heroicons/react/24/outline'
 
 const meta: Meta<typeof NavItem> = {
   title: 'Elements/NavItem',
@@ -11,8 +11,9 @@ const meta: Meta<typeof NavItem> = {
     layout: 'centered',
     docs: {
       description: {
-        component: 'Atomic navigation item component extracted from Navigation with proper state management.'
-      }
+        component:
+          'Atomic navigation item component extracted from Navigation with proper state management.',
+      },
     },
     backgrounds: {
       default: 'site',
@@ -42,10 +43,10 @@ const meta: Meta<typeof NavItem> = {
       description: 'The URL the nav item links to',
     },
   },
-};
+}
 
-export default meta;
-type Story = StoryObj<typeof NavItem>;
+export default meta
+type Story = StoryObj<typeof NavItem>
 
 export const Default: Story = {
   args: {
@@ -54,7 +55,7 @@ export const Default: Story = {
     icon: CubeIcon,
     isActive: false,
   },
-};
+}
 
 export const Active: Story = {
   args: {
@@ -63,7 +64,7 @@ export const Active: Story = {
     icon: TrophyIcon,
     isActive: true,
   },
-};
+}
 
 export const Hover: Story = {
   args: {
@@ -77,27 +78,48 @@ export const Hover: Story = {
       hover: true,
     },
   },
-};
+}
 
 // Story showcasing all states in a grid
 export const AllStates = () => (
   <div className="flex gap-4 p-8 bg-gray-50 dark:bg-gray-900 min-h-screen">
     <div className="space-y-4">
-      <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400">Default State</h3>
+      <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400">
+        Default State
+      </h3>
       <NavItem name="Games" href="/games" icon={CubeIcon} isActive={false} />
-      <NavItem name="Awards" href="/awards" icon={TrophyIcon} isActive={false} />
+      <NavItem
+        name="Awards"
+        href="/awards"
+        icon={TrophyIcon}
+        isActive={false}
+      />
     </div>
 
     <div className="space-y-4">
-      <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400">Active State</h3>
+      <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400">
+        Active State
+      </h3>
       <NavItem name="Games" href="/games" icon={CubeIcon} isActive={true} />
-      <NavItem name="Awards" href="/awards" icon={TrophyIcon} isActive={false} />
+      <NavItem
+        name="Awards"
+        href="/awards"
+        icon={TrophyIcon}
+        isActive={false}
+      />
     </div>
 
     <div className="space-y-4">
-      <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400">Hover State (hover over items)</h3>
+      <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400">
+        Hover State (hover over items)
+      </h3>
       <NavItem name="Games" href="/games" icon={CubeIcon} isActive={false} />
-      <NavItem name="Awards" href="/awards" icon={TrophyIcon} isActive={false} />
+      <NavItem
+        name="Awards"
+        href="/awards"
+        icon={TrophyIcon}
+        isActive={false}
+      />
     </div>
   </div>
-);
+)

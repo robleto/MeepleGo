@@ -1,4 +1,4 @@
-"use client"
+'use client'
 import { useEffect, useState } from 'react'
 import PageLayout from '@/components/Components/PageLayout'
 import ListExplorer from '@/components/Components/ListExplorer'
@@ -12,21 +12,36 @@ export default function LibraryPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [refreshing, setRefreshing] = useState(false)
-  const [membershipSets, setMembershipSets] = useState<{ library: Set<string>; wishlist: Set<string> } | null>(null)
+  const [membershipSets, setMembershipSets] = useState<{
+    library: Set<string>
+    wishlist: Set<string>
+  } | null>(null)
 
   const fetchLibrary = async () => {
-    setRefreshing(true); setError(null)
+    setRefreshing(true)
+    setError(null)
     try {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) { setGames([]); return }
-      const lists = await getOrCreateDefaultLists(); const libraryId = lists?.library
-      if (!libraryId) { setGames([]); return }
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+      if (!session) {
+        setGames([])
+        return
+      }
+      const lists = await getOrCreateDefaultLists()
+      const libraryId = lists?.library
+      if (!libraryId) {
+        setGames([])
+        return
+      }
       const { data: itemRows, error: itemsErr } = await supabase
         .from('game_list_items')
         .select(`game:games(*), played_it`)
         .eq('list_id', libraryId)
       if (itemsErr) throw itemsErr
-      const gameIds = (itemRows||[]).map((r:any)=>r.game?.id).filter(Boolean)
+      const gameIds = (itemRows || [])
+        .map((r: any) => r.game?.id)
+        .filter(Boolean)
       let rankingsMap: Record<string, any> = {}
       if (gameIds.length) {
         const { data: rankingRows } = await supabase
@@ -34,38 +49,69 @@ export default function LibraryPage() {
           .select('game_id, ranking, played_it')
           .eq('user_id', session.user.id)
           .in('game_id', gameIds)
-        rankingRows?.forEach(r=> { rankingsMap[r.game_id]=r })
+        rankingRows?.forEach((r) => {
+          rankingsMap[r.game_id] = r
+        })
       }
-      const mapped: GameWithRanking[] = (itemRows||[]).map((row:any)=> ({
+      const mapped: GameWithRanking[] = (itemRows || []).map((row: any) => ({
         ...row.game,
-        ranking: rankingsMap[row.game?.id] ? { ...rankingsMap[row.game.id] } : null,
-        list_membership: { library: true, wishlist: false }
+        ranking: rankingsMap[row.game?.id]
+          ? { ...rankingsMap[row.game.id] }
+          : null,
+        list_membership: { library: true, wishlist: false },
       }))
       setGames(mapped)
-      const sets = await getMembershipSets(); if (sets) setMembershipSets(sets)
-    } catch(e:any){ console.error('Library fetch error', e); setError('Failed to load library.') }
-    finally { setLoading(false); setRefreshing(false) }
+      const sets = await getMembershipSets()
+      if (sets) setMembershipSets(sets)
+    } catch (e: any) {
+      console.error('Library fetch error', e)
+      setError('Failed to load library.')
+    } finally {
+      setLoading(false)
+      setRefreshing(false)
+    }
   }
 
-  useEffect(()=> { fetchLibrary() },[])
+  useEffect(() => {
+    fetchLibrary()
+  }, [])
 
-  const header = <div><h1 className="text-3xl font-bold text-gray-900 dark:text-white">My Library</h1><p className="text-gray-600 dark:text-gray-400">Games you own or track</p></div>
+  const header = (
+    <div>
+      <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+        My Library
+      </h1>
+      <p className="text-gray-600 dark:text-gray-400">Games you own or track</p>
+    </div>
+  )
   const headerActions = (
-    <button onClick={fetchLibrary} disabled={refreshing} className="inline-flex items-center gap-2 text-sm px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50">
-      <ArrowPathIcon className={`h-4 w-4 ${refreshing?'animate-spin':''}`} /> Refresh
+    <button
+      onClick={fetchLibrary}
+      disabled={refreshing}
+      className="inline-flex items-center gap-2 text-sm px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50"
+    >
+      <ArrowPathIcon
+        className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`}
+      />{' '}
+      Refresh
     </button>
   )
 
-  return <PageLayout>
-    <ListExplorer
-      games={games}
-      loading={loading}
-      error={error}
-      header={header}
-      headerActions={headerActions}
-      contextualMembership={membershipSets}
-      emptyMessage={{ title:'Your library is empty', body:'Add games by bookmarking them.' }}
-  disableListRanking
-    />
-  </PageLayout>
+  return (
+    <PageLayout>
+      <ListExplorer
+        games={games}
+        loading={loading}
+        error={error}
+        header={header}
+        headerActions={headerActions}
+        contextualMembership={membershipSets}
+        emptyMessage={{
+          title: 'Your library is empty',
+          body: 'Add games by bookmarking them.',
+        }}
+        disableListRanking
+      />
+    </PageLayout>
+  )
 }

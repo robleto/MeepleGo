@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import { FunnelIcon, CalendarIcon } from '@heroicons/react/24/outline'
 import Select from './Select'
 
@@ -9,9 +9,10 @@ const meta: Meta<typeof Select> = {
     layout: 'centered',
     docs: {
       description: {
-        component: 'A styled select dropdown component with support for different sizes, states, and icons. Includes a custom chevron indicator.'
-      }
-    }
+        component:
+          'A styled select dropdown component with support for different sizes, states, and icons. Includes a custom chevron indicator.',
+      },
+    },
   },
   argTypes: {
     size: {
@@ -19,7 +20,7 @@ const meta: Meta<typeof Select> = {
       options: ['sm', 'md', 'lg'],
     },
     state: {
-      control: 'select', 
+      control: 'select',
       options: ['default', 'error', 'success'],
     },
     disabled: {
@@ -60,7 +61,9 @@ export const Sizes: Story = {
         </Select>
       </div>
       <div>
-        <label className="block text-sm font-medium mb-1">Medium (Default)</label>
+        <label className="block text-sm font-medium mb-1">
+          Medium (Default)
+        </label>
         <Select size="md">
           <option value="">Choose size...</option>
           <option value="xs">Extra Small</option>
@@ -95,7 +98,9 @@ export const States: Story = {
         </Select>
       </div>
       <div>
-        <label className="block text-sm font-medium mb-1 text-red-700">Error</label>
+        <label className="block text-sm font-medium mb-1 text-red-700">
+          Error
+        </label>
         <Select state="error" value="">
           <option value="">Please select an option</option>
           <option value="option1">Option 1</option>
@@ -103,7 +108,9 @@ export const States: Story = {
         </Select>
       </div>
       <div>
-        <label className="block text-sm font-medium mb-1 text-green-700">Success</label>
+        <label className="block text-sm font-medium mb-1 text-green-700">
+          Success
+        </label>
         <Select state="success" value="selected">
           <option value="">Select an option...</option>
           <option value="selected">Selected Option ✓</option>
@@ -111,7 +118,9 @@ export const States: Story = {
         </Select>
       </div>
       <div>
-        <label className="block text-sm font-medium mb-1 text-gray-400">Disabled</label>
+        <label className="block text-sm font-medium mb-1 text-gray-400">
+          Disabled
+        </label>
         <Select disabled>
           <option value="">Disabled select</option>
           <option value="option1">Option 1</option>

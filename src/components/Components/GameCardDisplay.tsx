@@ -26,11 +26,12 @@ export const GameCardDisplay: React.FC<GameCardDisplayProps> = ({
   inWishlist = false,
   tagline,
 }) => {
-  const ratingBadge = rating != null ? (
-    <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-sky-600 text-white text-sm font-semibold shadow">
-      {rating}
-    </span>
-  ) : null
+  const ratingBadge =
+    rating != null ? (
+      <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-sky-600 text-white text-sm font-semibold shadow">
+        {rating}
+      </span>
+    ) : null
 
   if (viewMode === 'list') {
     return (
@@ -52,14 +53,26 @@ export const GameCardDisplay: React.FC<GameCardDisplayProps> = ({
           )}
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="text-base font-semibold text-gray-900 truncate">{name}</h3>
-          {tagline && <p className="text-xs text-gray-600 truncate mb-1">{tagline}</p>}
+          <h3 className="text-base font-semibold text-gray-900 truncate">
+            {name}
+          </h3>
+          {tagline && (
+            <p className="text-xs text-gray-600 truncate mb-1">{tagline}</p>
+          )}
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-gray-500">
             {year && <span>{year}</span>}
             <span>{players}</span>
             <span>{time}</span>
-            {inLibrary && <span className="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-600">Own</span>}
-            {inWishlist && <span className="px-1.5 py-0.5 rounded bg-pink-50 text-pink-600">Wishlist</span>}
+            {inLibrary && (
+              <span className="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-600">
+                Own
+              </span>
+            )}
+            {inWishlist && (
+              <span className="px-1.5 py-0.5 rounded bg-pink-50 text-pink-600">
+                Wishlist
+              </span>
+            )}
           </div>
         </div>
         {ratingBadge}
@@ -101,7 +114,9 @@ export const GameCardDisplay: React.FC<GameCardDisplayProps> = ({
         </div>
       </div>
       <div className="p-3">
-        <h3 className="font-semibold text-gray-900 text-sm truncate mb-1">{name}</h3>
+        <h3 className="font-semibold text-gray-900 text-sm truncate mb-1">
+          {name}
+        </h3>
         {tagline && (
           <p className="text-[11px] text-gray-600 leading-snug line-clamp-2 mb-2">
             {tagline}

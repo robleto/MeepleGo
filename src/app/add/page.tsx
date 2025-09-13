@@ -124,8 +124,7 @@ export default function AddPage() {
                   ) : null}
                   {success.rank_families?.length ? (
                     <p>
-                      Families:{' '}
-                      {success.rank_families.slice(0, 4).join(', ')}
+                      Families: {success.rank_families.slice(0, 4).join(', ')}
                       {success.rank_families.length > 4 && '…'}
                     </p>
                   ) : null}

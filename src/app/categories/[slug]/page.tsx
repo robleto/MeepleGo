@@ -63,7 +63,9 @@ export default async function CategoryDetailPage({ params }: Props) {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <Heading as="h1" size="xl" soft className="text-gray-900">{cat.name}</Heading>
+            <Heading as="h1" size="xl" soft className="text-gray-900">
+              {cat.name}
+            </Heading>
             <p className="text-gray-600">Games tagged with this category</p>
           </div>
           <Link

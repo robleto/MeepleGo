@@ -1,6 +1,6 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import AwardShowcase from './AwardShowcase';
-import type { GameWithRanking } from '@/types';
+import type { Meta, StoryObj } from '@storybook/nextjs-vite'
+import AwardShowcase from './AwardShowcase'
+import type { GameWithRanking } from '@/types'
 
 const meta: Meta<typeof AwardShowcase> = {
   title: 'Components/AwardShowcase',
@@ -9,15 +9,16 @@ const meta: Meta<typeof AwardShowcase> = {
     layout: 'padded',
     docs: {
       description: {
-        component: 'Complete award category display showing winner and nominees in a clean, organized layout.',
+        component:
+          'Complete award category display showing winner and nominees in a clean, organized layout.',
       },
     },
   },
   tags: ['autodocs'],
-} satisfies Meta<typeof AwardShowcase>;
+} satisfies Meta<typeof AwardShowcase>
 
-export default meta;
-type Story = StoryObj<typeof meta>;
+export default meta
+type Story = StoryObj<typeof meta>
 
 // Mock complete award data
 const mockAwardGames: GameWithRanking[] = [
@@ -32,7 +33,8 @@ const mockAwardGames: GameWithRanking[] = [
     max_players: 5,
     playtime_minutes: 70,
     publisher: 'Stonemaier Games',
-    description: 'Build bird habitats and collect birds in this beautiful engine-building game.',
+    description:
+      'Build bird habitats and collect birds in this beautiful engine-building game.',
     categories: ['Animals', 'Card Game'],
     mechanics: ['Engine Building', 'Card Drafting'],
     rank: 1,
@@ -68,7 +70,8 @@ const mockAwardGames: GameWithRanking[] = [
     max_players: 4,
     playtime_minutes: 45,
     publisher: 'Plan B Games',
-    description: 'Create beautiful tile patterns inspired by Portuguese azulejos.',
+    description:
+      'Create beautiful tile patterns inspired by Portuguese azulejos.',
     categories: ['Abstract Strategy'],
     mechanics: ['Pattern Building', 'Tile Placement'],
     rank: 2,
@@ -103,7 +106,8 @@ const mockAwardGames: GameWithRanking[] = [
     max_players: 5,
     playtime_minutes: 115,
     publisher: 'Stonemaier Games',
-    description: 'Lead your faction to victory in this asymmetric strategy game.',
+    description:
+      'Lead your faction to victory in this asymmetric strategy game.',
     categories: ['Science Fiction', 'Territory Building'],
     mechanics: ['Area Control', 'Variable Player Powers'],
     rank: 3,
@@ -128,16 +132,17 @@ const mockAwardGames: GameWithRanking[] = [
       updated_at: '2023-01-01',
     },
   },
-];
+]
 
 export const Default: Story = {
   args: {
     id: 'best-strategy',
     title: 'Best Strategy Game',
-    description: 'Games that provide deep strategic thinking and decision-making.',
+    description:
+      'Games that provide deep strategic thinking and decision-making.',
     games: mockAwardGames,
   },
-};
+}
 
 export const WinnerOnly: Story = {
   args: {
@@ -146,7 +151,7 @@ export const WinnerOnly: Story = {
     description: 'The standout game that defined this year.',
     games: [mockAwardGames[0]], // Only winner, no nominees
   },
-};
+}
 
 export const ManyNominees: Story = {
   args: {
@@ -343,13 +348,14 @@ export const ManyNominees: Story = {
       },
     ],
   },
-};
+}
 
 export const DesktopOptimal: Story = {
   args: {
     id: 'best-strategy-desktop',
     title: 'Best Strategy Game - Desktop View',
-    description: 'Optimized layout showing winner prominence with efficient nominee display.',
+    description:
+      'Optimized layout showing winner prominence with efficient nominee display.',
     games: [
       mockAwardGames[0], // Winner
       ...mockAwardGames.slice(1), // 2 original nominees
@@ -517,4 +523,4 @@ export const DesktopOptimal: Story = {
       },
     ],
   },
-};
+}

@@ -151,7 +151,14 @@ export interface Database {
           is_public: boolean | null
           created_at: string | null
           updated_at: string | null
-          list_type: 'library' | 'wishlist' | 'custom' | 'bgg_bestsellers' | 'bgg_hotness' | 'bgg_trendingplays' | 'bgg_mostplayed'
+          list_type:
+            | 'library'
+            | 'wishlist'
+            | 'custom'
+            | 'bgg_bestsellers'
+            | 'bgg_hotness'
+            | 'bgg_trendingplays'
+            | 'bgg_mostplayed'
         }
         Insert: {
           id?: string
@@ -161,7 +168,14 @@ export interface Database {
           is_public?: boolean | null
           created_at?: string | null
           updated_at?: string | null
-          list_type?: 'library' | 'wishlist' | 'custom' | 'bgg_bestsellers' | 'bgg_hotness' | 'bgg_trendingplays' | 'bgg_mostplayed'
+          list_type?:
+            | 'library'
+            | 'wishlist'
+            | 'custom'
+            | 'bgg_bestsellers'
+            | 'bgg_hotness'
+            | 'bgg_trendingplays'
+            | 'bgg_mostplayed'
         }
         Update: {
           id?: string
@@ -171,7 +185,14 @@ export interface Database {
           is_public?: boolean | null
           created_at?: string | null
           updated_at?: string | null
-          list_type?: 'library' | 'wishlist' | 'custom' | 'bgg_bestsellers' | 'bgg_hotness' | 'bgg_trendingplays' | 'bgg_mostplayed'
+          list_type?:
+            | 'library'
+            | 'wishlist'
+            | 'custom'
+            | 'bgg_bestsellers'
+            | 'bgg_hotness'
+            | 'bgg_trendingplays'
+            | 'bgg_mostplayed'
         }
       }
       game_list_items: {
@@ -271,7 +292,7 @@ export interface Database {
           user_id: string
           game_id: string
           played_at?: string
-            // rating snapshot at time of play
+          // rating snapshot at time of play
           rating?: number | null
           player_count?: number | null
           duration_minutes?: number | null

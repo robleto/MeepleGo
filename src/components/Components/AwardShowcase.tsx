@@ -1,4 +1,4 @@
-"use client"
+'use client'
 import Heading from '@/components/Components/Heading'
 import WinnerCard from './WinnerCard'
 import NomineeGrid from './NomineeGrid'
@@ -12,21 +12,21 @@ interface AwardShowcaseProps {
   className?: string
 }
 
-export default function AwardShowcase({ 
-  id, 
-  title, 
-  description, 
-  games, 
-  className = "" 
+export default function AwardShowcase({
+  id,
+  title,
+  description,
+  games,
+  className = '',
 }: AwardShowcaseProps) {
   if (!games.length) return null
-  
+
   const winner = games[0]
   const nominees = games.slice(1)
 
   return (
-    <section 
-      id={`award-${id}`} 
+    <section
+      id={`award-${id}`}
       className={`bg-white dark:bg-gray-900/60 border border-gray-200 dark:border-gray-800 rounded-lg p-5 shadow-sm ${className}`}
     >
       {/* Header */}
@@ -34,10 +34,14 @@ export default function AwardShowcase({
         <div>
           <Heading as="h3" size="md" className="mb-2 flex items-center gap-2">
             <span>{title}</span>
-            <span className="text-xs font-normal text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-full">Top {games.length}</span>
+            <span className="text-xs font-normal text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-full">
+              Top {games.length}
+            </span>
           </Heading>
           {description && (
-            <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed max-w-lg">{description}</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed max-w-lg">
+              {description}
+            </p>
           )}
         </div>
       </div>
@@ -52,7 +56,7 @@ export default function AwardShowcase({
               <WinnerCard game={winner} />
             </div>
           </div>
-          
+
           {/* Nominees Section - Horizontal Scroll */}
           {nominees.length > 0 && (
             <div>
@@ -68,7 +72,7 @@ export default function AwardShowcase({
             <div className="col-span-4">
               <WinnerCard game={winner} />
             </div>
-            
+
             {/* Nominees - Takes 8 columns with dense grid */}
             <div className="col-span-8">
               {nominees.length > 0 && (

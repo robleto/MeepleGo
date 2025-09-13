@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs-vite'
 import Checkbox from './Checkbox'
 
 const meta: Meta<typeof Checkbox> = {
@@ -8,9 +8,10 @@ const meta: Meta<typeof Checkbox> = {
     layout: 'centered',
     docs: {
       description: {
-        component: 'A flexible checkbox component with support for different sizes, states, labels, and descriptions. Includes indeterminate state support.'
-      }
-    }
+        component:
+          'A flexible checkbox component with support for different sizes, states, labels, and descriptions. Includes indeterminate state support.',
+      },
+    },
   },
   argTypes: {
     size: {
@@ -18,7 +19,7 @@ const meta: Meta<typeof Checkbox> = {
       options: ['sm', 'md', 'lg'],
     },
     state: {
-      control: 'select', 
+      control: 'select',
       options: ['default', 'error', 'success'],
     },
     disabled: {
@@ -59,30 +60,30 @@ export const Sizes: Story = {
 export const States: Story = {
   render: () => (
     <div className="space-y-4">
-      <Checkbox 
-        label="Default state" 
-        description="This is the default appearance" 
+      <Checkbox
+        label="Default state"
+        description="This is the default appearance"
       />
-      <Checkbox 
-        state="error" 
-        label="Error state" 
+      <Checkbox
+        state="error"
+        label="Error state"
         description="Something is wrong with this selection"
       />
-      <Checkbox 
-        state="success" 
-        label="Success state" 
+      <Checkbox
+        state="success"
+        label="Success state"
         description="This selection is valid"
         defaultChecked
       />
-      <Checkbox 
-        disabled 
-        label="Disabled state" 
+      <Checkbox
+        disabled
+        label="Disabled state"
         description="This option is not available"
       />
-      <Checkbox 
-        disabled 
-        defaultChecked 
-        label="Disabled and checked" 
+      <Checkbox
+        disabled
+        defaultChecked
+        label="Disabled and checked"
         description="This option is locked in"
       />
     </div>
@@ -92,17 +93,17 @@ export const States: Story = {
 export const WithDescriptions: Story = {
   render: () => (
     <div className="space-y-6 max-w-md">
-      <Checkbox 
-        label="Email notifications" 
+      <Checkbox
+        label="Email notifications"
         description="Receive email updates about your games and lists"
       />
-      <Checkbox 
-        label="Public profile" 
+      <Checkbox
+        label="Public profile"
         description="Allow other users to see your game collection and reviews"
         defaultChecked
       />
-      <Checkbox 
-        label="Marketing communications" 
+      <Checkbox
+        label="Marketing communications"
         description="Get notified about new features, board game recommendations, and special offers"
       />
     </div>
@@ -132,9 +133,9 @@ export const IndeterminateState: Story = {
   name: 'Indeterminate State',
   render: () => (
     <div className="space-y-4 max-w-md">
-      <Checkbox 
-        indeterminate 
-        label="Select all items" 
+      <Checkbox
+        indeterminate
+        label="Select all items"
         description="Some items are currently selected"
       />
       <div className="ml-6 space-y-2 text-sm text-gray-600">
@@ -160,26 +161,28 @@ export const FormExample: Story = {
   render: () => (
     <div className="space-y-6 max-w-md">
       <div>
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Game Preferences</h3>
-        
+        <h3 className="text-lg font-medium text-gray-900 mb-4">
+          Game Preferences
+        </h3>
+
         <div className="space-y-4">
-          <Checkbox 
+          <Checkbox
             label="Show owned games only"
             description="Filter your collection to only display games you own"
           />
-          
-          <Checkbox 
+
+          <Checkbox
             label="Include expansions"
             description="Show expansion packs alongside base games"
             defaultChecked
           />
-          
-          <Checkbox 
+
+          <Checkbox
             label="Hide played games"
             description="Don't show games you've already logged plays for"
           />
-          
-          <Checkbox 
+
+          <Checkbox
             label="Notifications"
             description="Get alerts when friends add games or create lists"
             state="success"
@@ -187,7 +190,7 @@ export const FormExample: Story = {
           />
         </div>
       </div>
-      
+
       <div className="border-t pt-4">
         <h4 className="font-medium text-gray-900 mb-3">Quick Filters</h4>
         <div className="grid grid-cols-2 gap-3">

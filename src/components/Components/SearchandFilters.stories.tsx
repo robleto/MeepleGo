@@ -1,76 +1,113 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import GameFilters from './GameFilters';
-import { SearchInput, FilterButton, ToggleGroup } from '../Controls';
-import { 
-  Squares2X2Icon, 
-  ListBulletIcon, 
-  Bars3Icon, 
-  Bars2Icon, 
+import type { Meta, StoryObj } from '@storybook/nextjs-vite'
+import SearchandFilters from './SearchandFilters'
+import { SearchInput, FilterButton, ToggleGroup } from '../Controls'
+import {
+  Squares2X2Icon,
+  ListBulletIcon,
+  Bars3Icon,
+  Bars2Icon,
   MinusIcon,
-} from '@heroicons/react/24/outline';
-import React, { useState } from 'react';
+} from '@heroicons/react/24/outline'
+import React, { useState } from 'react'
 
-const meta: Meta<typeof GameFilters> = {
+const meta: Meta<typeof SearchandFilters> = {
   title: 'Components/SearchandFilters',
-  component: GameFilters,
+  component: SearchandFilters,
   tags: ['autodocs'],
-  parameters: { 
+  parameters: {
     layout: 'padded',
     docs: {
       description: {
-        component: 'Combined search and filtering component built from atomic Controls components. Shows both the complete interface and its atomic breakdown for design system consistency.'
-      }
-    }
-  }
-};
+        component:
+          'Combined search and filtering component built from atomic Controls components. Shows both the complete interface and its atomic breakdown for design system consistency.',
+      },
+    },
+  },
+}
 
-export default meta;
-type Story = StoryObj<typeof GameFilters>;
+export default meta
+type Story = StoryObj<typeof SearchandFilters>
 
 export const Default: Story = {
   render: () => {
-    const [viewMode, setViewMode] = useState<'grid'|'list'>('grid');
-  const [sortBy, setSortBy] = useState<any>('name');
-  const [sortOrder, setSortOrder] = useState<'asc'|'desc'>('asc');
-  const [groupBy, setGroupBy] = useState<any>('year_published');
+    const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+    const [sortBy, setSortBy] = useState<any>('name')
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
+    const [groupBy, setGroupBy] = useState<any>('year_published')
 
     return (
       <div className="max-w-4xl mx-auto">
-  <GameFilters viewMode={viewMode} setViewMode={setViewMode} sortBy={sortBy} setSortBy={setSortBy} sortOrder={sortOrder} setSortOrder={setSortOrder} groupBy={groupBy} setGroupBy={setGroupBy} total={150} />
+        <SearchandFilters
+          value={''}
+          onChange={() => {}}
+          viewMode={viewMode}
+          setViewMode={setViewMode}
+          sortBy={sortBy}
+          setSortBy={setSortBy}
+          sortOrder={sortOrder}
+          setSortOrder={setSortOrder}
+          groupBy={groupBy}
+          setGroupBy={setGroupBy}
+          total={150}
+        />
       </div>
-    );
-  }
-};
+    )
+  },
+}
 
 export const WithActiveSearch: Story = {
   render: () => {
-    const [viewMode, setViewMode] = useState<'grid'|'list'>('list');
-  const [sortBy, setSortBy] = useState<any>('year_published');
-  const [sortOrder, setSortOrder] = useState<'asc'|'desc'>('desc');
-  const [groupBy, setGroupBy] = useState<any>('publisher');
+    const [viewMode, setViewMode] = useState<'grid' | 'list'>('list')
+    const [sortBy, setSortBy] = useState<any>('year_published')
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
+    const [groupBy, setGroupBy] = useState<any>('publisher')
 
     return (
       <div className="max-w-4xl mx-auto">
-  <GameFilters viewMode={viewMode} setViewMode={setViewMode} sortBy={sortBy} setSortBy={setSortBy} sortOrder={sortOrder} setSortOrder={setSortOrder} groupBy={groupBy} setGroupBy={setGroupBy} total={42} />
+        <SearchandFilters
+          value={'terraform'}
+          onChange={() => {}}
+          viewMode={viewMode}
+          setViewMode={setViewMode}
+          sortBy={sortBy}
+          setSortBy={setSortBy}
+          sortOrder={sortOrder}
+          setSortOrder={setSortOrder}
+          groupBy={groupBy}
+          setGroupBy={setGroupBy}
+          total={42}
+        />
       </div>
-    );
-  }
-};
+    )
+  },
+}
 
 export const GridViewMode: Story = {
   render: () => {
-    const [viewMode, setViewMode] = useState<'grid'|'list'>('grid');
-  const [sortBy, setSortBy] = useState<any>('rank');
-  const [sortOrder, setSortOrder] = useState<'asc'|'desc'>('asc');
-  const [groupBy, setGroupBy] = useState<any>('none');
+    const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+    const [sortBy, setSortBy] = useState<any>('rank')
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
+    const [groupBy, setGroupBy] = useState<any>('none')
 
     return (
       <div className="max-w-4xl mx-auto">
-  <GameFilters viewMode={viewMode} setViewMode={setViewMode} sortBy={sortBy} setSortBy={setSortBy} sortOrder={sortOrder} setSortOrder={setSortOrder} groupBy={groupBy} setGroupBy={setGroupBy} total={89} />
+        <SearchandFilters
+          value={''}
+          onChange={() => {}}
+          viewMode={viewMode}
+          setViewMode={setViewMode}
+          sortBy={sortBy}
+          setSortBy={setSortBy}
+          sortOrder={sortOrder}
+          setSortOrder={setSortOrder}
+          groupBy={groupBy}
+          setGroupBy={setGroupBy}
+          total={89}
+        />
       </div>
-    );
-  }
-};
+    )
+  },
+}
 
 // ========================================
 // ATOMIC BREAKDOWN SECTION
@@ -78,38 +115,42 @@ export const GridViewMode: Story = {
 
 const viewModeOptions = [
   { value: 'grid', label: 'Grid', icon: Squares2X2Icon, tooltip: 'Grid view' },
-  { value: 'list', label: 'List', icon: ListBulletIcon, tooltip: 'List view' }
-];
+  { value: 'list', label: 'List', icon: ListBulletIcon, tooltip: 'List view' },
+]
 
 const densityOptions = [
   { value: 'detailed', label: 'Detailed', icon: Bars3Icon },
   { value: 'balanced', label: 'Balanced', icon: Bars2Icon },
-  { value: 'compact', label: 'Compact', icon: MinusIcon }
-];
+  { value: 'compact', label: 'Compact', icon: MinusIcon },
+]
 
 export const AtomicBreakdown: Story = {
   render: () => {
-    const [searchValue, setSearchValue] = useState('');
-    const [viewMode, setViewMode] = useState('grid');
-    const [density, setDensity] = useState('balanced');
+    const [searchValue, setSearchValue] = useState('')
+    const [viewMode, setViewMode] = useState('grid')
+    const [density, setDensity] = useState('balanced')
 
     return (
       <div className="space-y-8 max-w-4xl">
         <div>
-          <h2 className="text-xl font-semibold mb-4">Atomic Component Breakdown</h2>
+          <h2 className="text-xl font-semibold mb-4">
+            Atomic Component Breakdown
+          </h2>
           <p className="text-gray-600 mb-6">
-            SearchandFilters is built from these reusable atomic components from our Controls library:
+            SearchandFilters is built from these reusable atomic components from
+            our Controls library:
           </p>
         </div>
 
         {/* Individual Components */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          
           {/* SearchInput */}
           <div className="space-y-4">
             <div>
               <h3 className="font-medium text-lg">SearchInput</h3>
-              <p className="text-sm text-gray-500">Rounded search with integrated button</p>
+              <p className="text-sm text-gray-500">
+                Rounded search with integrated button
+              </p>
             </div>
             <SearchInput
               value={searchValue}
@@ -127,7 +168,9 @@ export const AtomicBreakdown: Story = {
           <div className="space-y-4">
             <div>
               <h3 className="font-medium text-lg">FilterButton</h3>
-              <p className="text-sm text-gray-500">Button with optional active badge</p>
+              <p className="text-sm text-gray-500">
+                Button with optional active badge
+              </p>
             </div>
             <FilterButton
               onClick={() => console.log('Filters clicked')}
@@ -143,7 +186,9 @@ export const AtomicBreakdown: Story = {
           <div className="space-y-4">
             <div>
               <h3 className="font-medium text-lg">ToggleGroup</h3>
-              <p className="text-sm text-gray-500">Icon toggle for view modes</p>
+              <p className="text-sm text-gray-500">
+                Icon toggle for view modes
+              </p>
             </div>
             <ToggleGroup
               value={viewMode}
@@ -177,7 +222,7 @@ export const AtomicBreakdown: Story = {
                 showClearButton={true}
                 onSearchClick={() => {
                   if (searchValue) {
-                    setSearchValue('');
+                    setSearchValue('')
                   }
                 }}
               />
@@ -195,16 +240,20 @@ export const AtomicBreakdown: Story = {
             <h4 className="font-medium mb-4">Modal Controls (ToggleGroups)</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium mb-2">View Mode</label>
+                <label className="block text-sm font-medium mb-2">
+                  View Mode
+                </label>
                 <ToggleGroup
                   value={viewMode}
                   onChange={setViewMode}
                   options={viewModeOptions}
                 />
               </div>
-              
+
               <div>
-                <label className="block text-sm font-medium mb-2">Card Density</label>
+                <label className="block text-sm font-medium mb-2">
+                  Card Density
+                </label>
                 <ToggleGroup
                   value={density}
                   onChange={setDensity}
@@ -215,9 +264,9 @@ export const AtomicBreakdown: Story = {
           </div>
         </div>
       </div>
-    );
-  }
-};
+    )
+  },
+}
 
 export const DesignSystemBenefits: Story = {
   render: () => {
@@ -226,13 +275,16 @@ export const DesignSystemBenefits: Story = {
         <div>
           <h2 className="text-xl font-semibold mb-2">Design System Benefits</h2>
           <p className="text-gray-600">
-            Building SearchandFilters from atomic components ensures consistency:
+            Building SearchandFilters from atomic components ensures
+            consistency:
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="space-y-4">
-            <h3 className="font-medium text-green-700">✅ Consistent Styling</h3>
+            <h3 className="font-medium text-green-700">
+              ✅ Consistent Styling
+            </h3>
             <ul className="text-sm text-gray-600 space-y-2">
               <li>• Same rounded corners (rounded-full)</li>
               <li>• Consistent border colors</li>
@@ -242,7 +294,9 @@ export const DesignSystemBenefits: Story = {
           </div>
 
           <div className="space-y-4">
-            <h3 className="font-medium text-blue-700">🔄 Reusable Everywhere</h3>
+            <h3 className="font-medium text-blue-700">
+              🔄 Reusable Everywhere
+            </h3>
             <ul className="text-sm text-gray-600 space-y-2">
               <li>• SearchInput in nav, modals, pages</li>
               <li>• FilterButton in lists, tables</li>
@@ -252,7 +306,9 @@ export const DesignSystemBenefits: Story = {
           </div>
 
           <div className="space-y-4">
-            <h3 className="font-medium text-purple-700">⚡ Development Speed</h3>
+            <h3 className="font-medium text-purple-700">
+              ⚡ Development Speed
+            </h3>
             <ul className="text-sm text-gray-600 space-y-2">
               <li>• Pre-built accessibility features</li>
               <li>• Tested interaction patterns</li>
@@ -262,7 +318,9 @@ export const DesignSystemBenefits: Story = {
           </div>
 
           <div className="space-y-4">
-            <h3 className="font-medium text-orange-700">🎨 Design Flexibility</h3>
+            <h3 className="font-medium text-orange-700">
+              🎨 Design Flexibility
+            </h3>
             <ul className="text-sm text-gray-600 space-y-2">
               <li>• Multiple size variants</li>
               <li>• Icon customization</li>
@@ -273,14 +331,17 @@ export const DesignSystemBenefits: Story = {
         </div>
 
         <div className="mt-8 p-6 bg-blue-50 rounded-lg">
-          <h4 className="font-medium text-blue-900 mb-2">Atomic Design Principle</h4>
+          <h4 className="font-medium text-blue-900 mb-2">
+            Atomic Design Principle
+          </h4>
           <p className="text-blue-700 text-sm">
-            SearchandFilters demonstrates how complex interfaces are built from simple, 
-            reusable components. Each atomic component (SearchInput, FilterButton, ToggleGroup) 
-            can be composed into larger molecules and organisms while maintaining consistency.
+            SearchandFilters demonstrates how complex interfaces are built from
+            simple, reusable components. Each atomic component (SearchInput,
+            FilterButton, ToggleGroup) can be composed into larger molecules and
+            organisms while maintaining consistency.
           </p>
         </div>
       </div>
-    );
-  }
-};
+    )
+  },
+}

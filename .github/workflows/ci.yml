@@ -1,9 +1,9 @@
 name: CI
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main]
   push:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   build-and-verify:
@@ -24,3 +24,5 @@ jobs:
         run: npm run lint -- --max-warnings=0 || (echo 'Lint errors found' && exit 1)
       - name: Archived Import Guard
         run: npm run lint:archived
+      - name: Storybook Story Guard
+        run: npm run lint:stories

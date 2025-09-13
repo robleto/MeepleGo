@@ -10,7 +10,7 @@ MeepleGo/
 ├── tailwind.config.js          # Tailwind configuration
 ├── tsconfig.json               # TypeScript configuration
 ├── .env.example                # Environment variables template
-├── 
+├──
 ├── docs/                       # All documentation
 │   ├── setup/                  # Setup and installation guides
 │   ├── development/            # Development workflows
@@ -44,21 +44,25 @@ MeepleGo/
 ## 🎯 **Organization Principles**
 
 ### **1. Component Organization**
+
 - **design-system/**: Atomic elements, design tokens, basic UI components
 - **components/shared/**: Reusable business components (GameCard, Navigation, etc.)
 - **components/features/**: Feature-specific components (awards/, lists/, filters/)
 
 ### **2. Documentation Strategy**
+
 - **Root docs**: Only README.md and essential config files
 - **docs/**: All other documentation, organized by topic
 - **Inline docs**: JSDoc for functions, Storybook for components
 
 ### **3. File Naming Conventions**
+
 - **Components**: PascalCase (GameCard.tsx)
 - **Files**: kebab-case (game-card.utils.ts)
 - **Directories**: kebab-case (design-system/, game-filters/)
 
 ### **4. Storybook Strategy**
+
 - **Every reusable component gets a story**
 - **Page components**: Optional stories for complex pages
 - **Utilities/hooks**: No stories needed
@@ -66,7 +70,7 @@ MeepleGo/
 ## 🚀 **Implementation Plan**
 
 1. **Phase 1**: Clean root directory and organize docs
-2. **Phase 2**: Reorganize src/ structure  
+2. **Phase 2**: Reorganize src/ structure
 3. **Phase 3**: Consolidate and organize scripts/
 4. **Phase 4**: Ensure consistent Storybook coverage
 5. **Phase 5**: Update all import paths and references

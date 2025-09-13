@@ -1,13 +1,13 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import { SearchInput, FilterButton, ToggleGroup } from '../Controls';
-import { 
-  Squares2X2Icon, 
-  ListBulletIcon, 
-  Bars3Icon, 
-  Bars2Icon, 
+import type { Meta, StoryObj } from '@storybook/nextjs-vite'
+import { SearchInput, FilterButton, ToggleGroup } from '../Controls'
+import {
+  Squares2X2Icon,
+  ListBulletIcon,
+  Bars3Icon,
+  Bars2Icon,
   MinusIcon,
-} from '@heroicons/react/24/outline';
-import { useState } from 'react';
+} from '@heroicons/react/24/outline'
+import { useState } from 'react'
 
 const meta: Meta = {
   title: 'Components/SearchandFilters Breakdown',
@@ -15,49 +15,54 @@ const meta: Meta = {
     layout: 'padded',
     docs: {
       description: {
-        component: 'Atomic breakdown of the SearchandFilters component showing how it\'s built from individual Controls components for consistency across the design system.'
-      }
-    }
-  }
-};
+        component:
+          "Atomic breakdown of the SearchandFilters component showing how it's built from individual Controls components for consistency across the design system.",
+      },
+    },
+  },
+}
 
-export default meta;
-type Story = StoryObj;
+export default meta
+type Story = StoryObj
 
 const viewModeOptions = [
   { value: 'grid', label: 'Grid', icon: Squares2X2Icon, tooltip: 'Grid view' },
-  { value: 'list', label: 'List', icon: ListBulletIcon, tooltip: 'List view' }
-];
+  { value: 'list', label: 'List', icon: ListBulletIcon, tooltip: 'List view' },
+]
 
 const densityOptions = [
   { value: 'detailed', label: 'Detailed', icon: Bars3Icon },
   { value: 'balanced', label: 'Balanced', icon: Bars2Icon },
-  { value: 'compact', label: 'Compact', icon: MinusIcon }
-];
+  { value: 'compact', label: 'Compact', icon: MinusIcon },
+]
 
 export const AtomicComponents: Story = {
   render: () => {
-    const [searchValue, setSearchValue] = useState('');
-    const [viewMode, setViewMode] = useState('grid');
-    const [density, setDensity] = useState('balanced');
+    const [searchValue, setSearchValue] = useState('')
+    const [viewMode, setViewMode] = useState('grid')
+    const [density, setDensity] = useState('balanced')
 
     return (
       <div className="space-y-8 max-w-4xl">
         <div>
-          <h2 className="text-xl font-semibold mb-4">Atomic Component Breakdown</h2>
+          <h2 className="text-xl font-semibold mb-4">
+            Atomic Component Breakdown
+          </h2>
           <p className="text-gray-600 mb-6">
-            SearchandFilters is built from these reusable atomic components from our Controls library:
+            SearchandFilters is built from these reusable atomic components from
+            our Controls library:
           </p>
         </div>
 
         {/* Individual Components */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          
           {/* SearchInput */}
           <div className="space-y-4">
             <div>
               <h3 className="font-medium text-lg">SearchInput</h3>
-              <p className="text-sm text-gray-500">Rounded search with integrated button</p>
+              <p className="text-sm text-gray-500">
+                Rounded search with integrated button
+              </p>
             </div>
             <SearchInput
               value={searchValue}
@@ -75,7 +80,9 @@ export const AtomicComponents: Story = {
           <div className="space-y-4">
             <div>
               <h3 className="font-medium text-lg">FilterButton</h3>
-              <p className="text-sm text-gray-500">Button with optional active badge</p>
+              <p className="text-sm text-gray-500">
+                Button with optional active badge
+              </p>
             </div>
             <FilterButton
               onClick={() => console.log('Filters clicked')}
@@ -91,7 +98,9 @@ export const AtomicComponents: Story = {
           <div className="space-y-4">
             <div>
               <h3 className="font-medium text-lg">ToggleGroup</h3>
-              <p className="text-sm text-gray-500">Icon toggle for view modes</p>
+              <p className="text-sm text-gray-500">
+                Icon toggle for view modes
+              </p>
             </div>
             <ToggleGroup
               value={viewMode}
@@ -125,7 +134,7 @@ export const AtomicComponents: Story = {
                 showClearButton={true}
                 onSearchClick={() => {
                   if (searchValue) {
-                    setSearchValue('');
+                    setSearchValue('')
                   }
                 }}
               />
@@ -143,16 +152,20 @@ export const AtomicComponents: Story = {
             <h4 className="font-medium mb-4">Modal Controls (ToggleGroups)</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium mb-2">View Mode</label>
+                <label className="block text-sm font-medium mb-2">
+                  View Mode
+                </label>
                 <ToggleGroup
                   value={viewMode}
                   onChange={setViewMode}
                   options={viewModeOptions}
                 />
               </div>
-              
+
               <div>
-                <label className="block text-sm font-medium mb-2">Card Density</label>
+                <label className="block text-sm font-medium mb-2">
+                  Card Density
+                </label>
                 <ToggleGroup
                   value={density}
                   onChange={setDensity}
@@ -163,9 +176,9 @@ export const AtomicComponents: Story = {
           </div>
         </div>
       </div>
-    );
-  }
-};
+    )
+  },
+}
 
 export const StyleVariations: Story = {
   render: () => {
@@ -236,9 +249,9 @@ export const StyleVariations: Story = {
           </div>
         </div>
       </div>
-    );
-  }
-};
+    )
+  },
+}
 
 export const ConsistencyBenefits: Story = {
   render: () => {
@@ -247,13 +260,16 @@ export const ConsistencyBenefits: Story = {
         <div>
           <h2 className="text-xl font-semibold mb-2">Design System Benefits</h2>
           <p className="text-gray-600">
-            Building SearchandFilters from atomic components ensures consistency:
+            Building SearchandFilters from atomic components ensures
+            consistency:
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="space-y-4">
-            <h3 className="font-medium text-green-700">✅ Consistent Styling</h3>
+            <h3 className="font-medium text-green-700">
+              ✅ Consistent Styling
+            </h3>
             <ul className="text-sm text-gray-600 space-y-2">
               <li>• Same rounded corners (rounded-full)</li>
               <li>• Consistent border colors</li>
@@ -263,7 +279,9 @@ export const ConsistencyBenefits: Story = {
           </div>
 
           <div className="space-y-4">
-            <h3 className="font-medium text-blue-700">🔄 Reusable Everywhere</h3>
+            <h3 className="font-medium text-blue-700">
+              🔄 Reusable Everywhere
+            </h3>
             <ul className="text-sm text-gray-600 space-y-2">
               <li>• SearchInput in nav, modals, pages</li>
               <li>• FilterButton in lists, tables</li>
@@ -273,7 +291,9 @@ export const ConsistencyBenefits: Story = {
           </div>
 
           <div className="space-y-4">
-            <h3 className="font-medium text-purple-700">⚡ Development Speed</h3>
+            <h3 className="font-medium text-purple-700">
+              ⚡ Development Speed
+            </h3>
             <ul className="text-sm text-gray-600 space-y-2">
               <li>• Pre-built accessibility features</li>
               <li>• Tested interaction patterns</li>
@@ -283,7 +303,9 @@ export const ConsistencyBenefits: Story = {
           </div>
 
           <div className="space-y-4">
-            <h3 className="font-medium text-orange-700">🎨 Design Flexibility</h3>
+            <h3 className="font-medium text-orange-700">
+              🎨 Design Flexibility
+            </h3>
             <ul className="text-sm text-gray-600 space-y-2">
               <li>• Multiple size variants</li>
               <li>• Icon customization</li>
@@ -294,14 +316,17 @@ export const ConsistencyBenefits: Story = {
         </div>
 
         <div className="mt-8 p-6 bg-blue-50 rounded-lg">
-          <h4 className="font-medium text-blue-900 mb-2">Atomic Design Principle</h4>
+          <h4 className="font-medium text-blue-900 mb-2">
+            Atomic Design Principle
+          </h4>
           <p className="text-blue-700 text-sm">
-            SearchandFilters demonstrates how complex interfaces are built from simple, 
-            reusable components. Each atomic component (SearchInput, FilterButton, ToggleGroup) 
-            can be composed into larger molecules and organisms while maintaining consistency.
+            SearchandFilters demonstrates how complex interfaces are built from
+            simple, reusable components. Each atomic component (SearchInput,
+            FilterButton, ToggleGroup) can be composed into larger molecules and
+            organisms while maintaining consistency.
           </p>
         </div>
       </div>
-    );
-  }
-};
+    )
+  },
+}

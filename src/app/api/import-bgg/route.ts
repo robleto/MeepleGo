@@ -34,7 +34,10 @@ export async function POST(req: NextRequest) {
     const url = `https://boardgamegeek.com/xmlapi2/thing?id=${bggId}&stats=1`
     const resp = await fetch(url, { next: { revalidate: 0 } })
     if (!resp.ok) {
-      return NextResponse.json({ error: 'BGG fetch failed', status: resp.status }, { status: 502 })
+      return NextResponse.json(
+        { error: 'BGG fetch failed', status: resp.status },
+        { status: 502 }
+      )
     }
     const xml = await resp.text()
 
@@ -48,8 +51,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'BGG item not found' }, { status: 404 })
     }
 
-  // BGG item type (boardgame, boardgameexpansion, etc.)
-  const bgg_type: string | null = item['@_type'] || null
+    // BGG item type (boardgame, boardgameexpansion, etc.)
+    const bgg_type: string | null = item['@_type'] || null
 
     // Name: choose primary name and decode HTML entities
     let name: string | null = null
@@ -149,7 +152,11 @@ export async function POST(req: NextRequest) {
 
     // Rank families (strategy / wargames etc.) from statistics.ratings.ranks.rank entries type="family"
     const ranksNode = item.statistics?.ratings?.ranks?.rank
-    const rankArray = ranksNode ? (Array.isArray(ranksNode) ? ranksNode : [ranksNode]) : []
+    const rankArray = ranksNode
+      ? Array.isArray(ranksNode)
+        ? ranksNode
+        : [ranksNode]
+      : []
     const rank_families: string[] = rankArray
       .filter((r: any) => r['@_type'] === 'family' && r['@_name'])
       .map((r: any) => String(r['@_name']).toLowerCase())
@@ -206,7 +213,9 @@ export async function POST(req: NextRequest) {
           artists: artists.length ? artists : null,
           bgg_type,
           rank_families: rank_families.length ? rank_families : null,
-          integrates_with_ids: integrates_with_ids.length ? integrates_with_ids : null,
+          integrates_with_ids: integrates_with_ids.length
+            ? integrates_with_ids
+            : null,
           expansion_ids: expansion_ids.length ? expansion_ids : null,
           parent_bgg_id: parent_bgg_id || null,
           weight,
@@ -248,13 +257,24 @@ export async function POST(req: NextRequest) {
       if ((!existing.artists || !existing.artists.length) && artists.length)
         patch.artists = artists
       if (!existing.bgg_type && bgg_type) patch.bgg_type = bgg_type
-      if ((!existing.rank_families || !existing.rank_families.length) && rank_families.length)
+      if (
+        (!existing.rank_families || !existing.rank_families.length) &&
+        rank_families.length
+      )
         patch.rank_families = rank_families
-      if ((!existing.integrates_with_ids || !existing.integrates_with_ids.length) && integrates_with_ids.length)
+      if (
+        (!existing.integrates_with_ids ||
+          !existing.integrates_with_ids.length) &&
+        integrates_with_ids.length
+      )
         patch.integrates_with_ids = integrates_with_ids
-      if ((!existing.expansion_ids || !existing.expansion_ids.length) && expansion_ids.length)
+      if (
+        (!existing.expansion_ids || !existing.expansion_ids.length) &&
+        expansion_ids.length
+      )
         patch.expansion_ids = expansion_ids
-      if (!existing.parent_bgg_id && parent_bgg_id) patch.parent_bgg_id = parent_bgg_id
+      if (!existing.parent_bgg_id && parent_bgg_id)
+        patch.parent_bgg_id = parent_bgg_id
       if (!existing.weight && weight) patch.weight = weight
       if (Object.keys(patch).length) {
         const { error: updErr } = await client
