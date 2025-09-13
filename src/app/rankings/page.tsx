@@ -1,98 +1,93 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, Suspense } from 'react'
 import PageLayout from '@/components/Components/PageLayout'
 import {
   useGameDataWithGuest,
-  useViewMode,
-  sortGames as legacySortGames,
-  groupGames as legacyGroupGames,
 } from '@/utils/sharedGameUtils'
-import { SortKey, SortOrder, GroupKey } from '@/utils/gameFilters'
-// TODO: Reintroduce RankingsEmptyStateGames component in Components directory; using lightweight fallback.
-// import RankingsEmptyStateGames from '@/components/Components/RankingsEmptyStateGames'
+import { useRankingsFilters } from '@/utils/gameFilters'
 import GameRowCard from '@/components/Components/GameRowCard'
-import GamePosterCard from '@/components/Components/GamePosterCard'
-import RankingsFilters from '@/components/Components/RankingsFilters'
+import GameCard from '@/components/Components/GameCard'
+import SearchandFilters from '@/components/Components/SearchandFilters'
+import FilterModal from '@/components/Components/FilterModal'
 import Heading from '@/components/Components/Heading'
 
-export default function RankingsPage() {
+function RankingsPageContent() {
   const { games, loading, isGuest, updateGameRanking } = useGameDataWithGuest()
-  const { viewMode, setViewMode } = useViewMode('rankingsViewMode', 'list')
-  // Map legacy default keys to new enum values
-  const [sortBy, setSortBy] = useState<SortKey>('rank')
-  const [sortOrder, setSortOrder] = useState<SortOrder>('desc')
-  const [groupBy, setGroupBy] = useState<GroupKey>('none')
-  const [searchTerm, setSearchTerm] = useState('')
+  const [showFilters, setShowFilters] = useState(false)
 
-  const rankedGames = useMemo(
-    () => games.filter((g) => typeof g.ranking?.ranking === 'number'),
-    [games]
-  )
+  // Filter only games that have rankings
+  const rankedGames = games.filter((g) => typeof g.ranking?.ranking === 'number')
 
-  // Filter by search term
-  const searchFiltered = useMemo(() => {
-    if (!searchTerm.trim()) return rankedGames
-    const term = searchTerm.toLowerCase().trim()
-    return rankedGames.filter(
-      (game) =>
-        game.name.toLowerCase().includes(term) ||
-        game.publisher?.toLowerCase().includes(term) ||
-        game.categories?.some((cat) => cat.toLowerCase().includes(term)) ||
-        game.mechanics?.some((mech) => mech.toLowerCase().includes(term))
-    )
-  }, [rankedGames, searchTerm])
+  const {
+    hasMounted,
+    viewMode,
+    setViewMode,
+    searchTerm,
+    setSearchTerm,
+    sortBy,
+    setSortBy,
+    sortOrder,
+    setSortOrder,
+    groupBy,
+    setGroupBy,
+    groupSortOrder,
+    setGroupSortOrder,
+    filterType,
+    setFilterType,
+    filterValue,
+    setFilterValue,
+    filteredGames,
+    groupedGames,
+    uniqueYears,
+    uniquePublishers,
+    uniquePlayerCounts,
+    uniqueCategories,
+    uniqueMechanics,
+  } = useRankingsFilters(rankedGames)
 
-  // Adapter: use legacy sorting/grouping logic while migrating to new key names
-  const sorted = useMemo(() => {
-    // Translate new sort keys back to legacy keys for now
-    const legacySortKeyMap: Record<string, any> = {
-      rank: 'ranking',
-      ranking: 'ranking',
-      year_published: 'year',
-      name: 'name',
-      playtime_minutes: 'playtime',
-      min_players: 'playtime', // fallback
-      max_players: 'playtime', // fallback
-    }
-    const legacyKey = legacySortKeyMap[sortBy] || 'ranking'
-    return legacySortGames(
-      searchFiltered as any,
-      legacyKey as any,
-      sortOrder as any
-    )
-  }, [searchFiltered, sortBy, sortOrder])
-  const grouped = useMemo(() => {
-    const legacyGroupKeyMap: Record<string, any> = {
-      none: 'none',
-      year_published: 'year',
-      year: 'year',
-      publisher: 'none',
-      min_players: 'none',
-      categories: 'none',
-      mechanics: 'none',
-      ratingBand: 'ratingBand',
-    }
-    const legacyGroupKey = legacyGroupKeyMap[groupBy] || 'none'
-    return legacyGroupGames(sorted as any, legacyGroupKey as any)
-  }, [sorted, groupBy])
+  // Active filter counting mirrors logic used on games page (without cardVariant)
+  const getActiveFilterCount = () => {
+    let count = 0
+    // Defaults: groupBy=ranking_value, sortBy=rank asc, viewMode=list
+    if (groupBy !== 'ranking_value') count++
+    if (sortBy !== 'rank' || sortOrder !== 'asc') count++
+    if (viewMode !== 'list') count++
+    if (filterType !== 'none' && filterValue !== 'all') count++
+    return count
+  }
+  const activeFilterCount = getActiveFilterCount()
 
   if (loading) {
     return (
       <PageLayout>
-        <div className="py-20 text-center text-gray-500 text-sm">
-          Loading rankings…
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+          <span className="ml-2 text-gray-600">Loading rankings…</span>
         </div>
       </PageLayout>
     )
   }
 
-  // Temporary fallback empty state
-  if (games.length === 0) {
+  // Base empty state when no ranked games yet
+  if (rankedGames.length === 0) {
     return (
       <PageLayout>
-        <div className="py-20 text-center text-gray-500 text-sm">
-          {isGuest ? 'Sign in to start ranking games.' : 'No ranked games yet.'}
+        <div className="text-center py-12">
+          <h3 className="text-lg font-medium text-gray-900 mb-2">No ranked games yet</h3>
+          <p className="text-gray-600 mb-4">
+            {isGuest ? 'Sign in to start ranking your collection.' : 'Start by adding rankings to your games.'}
+          </p>
+        </div>
+      </PageLayout>
+    )
+  }
+
+  if (!hasMounted) {
+    return (
+      <PageLayout>
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
         </div>
       </PageLayout>
     )
@@ -101,34 +96,45 @@ export default function RankingsPage() {
   return (
     <PageLayout>
       <div className="max-w-screen-xl mx-auto">
-        <RankingsFilters
-          viewMode={viewMode}
-          setViewMode={setViewMode}
-          sortBy={sortBy}
-          setSortBy={setSortBy}
-          sortOrder={sortOrder}
-          setSortOrder={setSortOrder}
-          groupBy={groupBy}
-          setGroupBy={setGroupBy}
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          total={searchFiltered.length}
-        />
+        <div className="mb-6">
+          <SearchandFilters
+            value={searchTerm}
+            onChange={setSearchTerm}
+            placeholder="Search your ranked games…"
+            filtersCount={activeFilterCount}
+            onOpenFilters={() => setShowFilters(true)}
+          />
+        </div>
+
         <div className="flex items-end justify-between mb-5">
           <Heading as="h2" variant="section" className="mb-1">
             My Rankings
           </Heading>
         </div>
-        {grouped.map((section: any) => (
-          <div key={section.group ?? 'all'} className="mb-10">
-            {section.group && (
-              <h2 className="text-xl font-semibold text-gray-800 mb-3">
-                {section.group}
-              </h2>
+
+        {/* No results for current filters/search */}
+        {rankedGames.length > 0 && filteredGames.length === 0 && (
+          <div className="text-center py-12">
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No rankings match your filters</h3>
+            <p className="text-gray-600 mb-4">Try adjusting your search or clearing some filters.</p>
+          </div>
+        )}
+
+        {groupedGames.map((section) => (
+          <div key={section.key} className="mb-10">
+            {groupedGames.length > 1 && (
+              <div className="mb-4">
+                <h2 className="text-xl font-semibold text-gray-900">
+                  {section.key}
+                </h2>
+                <div className="text-sm text-gray-500">
+                  {section.games.length} {section.games.length === 1 ? 'game' : 'games'}
+                </div>
+              </div>
             )}
             {viewMode === 'list' ? (
               <div className="bg-white rounded-lg border divide-y">
-                {section.games.map((g: any, i: number) => (
+                {section.games.map((g, i) => (
                   <GameRowCard
                     key={g.id}
                     game={g}
@@ -138,19 +144,66 @@ export default function RankingsPage() {
                 ))}
               </div>
             ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                {section.games.map((g: any) => (
-                  <GamePosterCard
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+                {section.games.map((g) => (
+                  <GameCard
                     key={g.id}
                     game={g}
-                    onUpdate={updateGameRanking}
+                    viewMode="grid"
+                    variant="balanced"
+                    // Rankings page simplified membership placeholder
+                    onMembershipChange={() => {}}
+                    // Provide ranking update: GameCard may not expose direct ranking UI; rating edits happen via list mode for now
                   />
                 ))}
               </div>
             )}
           </div>
         ))}
+
+        {/* FilterModal */}
+        <FilterModal
+          open={showFilters}
+          onClose={() => setShowFilters(false)}
+          sortBy={sortBy}
+          setSortBy={setSortBy}
+          sortOrder={sortOrder}
+          setSortOrder={setSortOrder}
+          groupBy={groupBy}
+          setGroupBy={setGroupBy}
+          groupSortOrder={groupSortOrder}
+          setGroupSortOrder={setGroupSortOrder}
+          viewMode={viewMode}
+          setViewMode={setViewMode}
+          filterType={filterType}
+          setFilterType={(t) => setFilterType(t as any)}
+          filterValue={filterValue}
+          setFilterValue={setFilterValue}
+          uniqueYears={uniqueYears}
+          uniquePublishers={uniquePublishers}
+          uniquePlayerCounts={uniquePlayerCounts}
+          uniqueCategories={uniqueCategories}
+          uniqueMechanics={uniqueMechanics}
+          defaultSortBy="rank"
+          defaultSortOrder="asc"
+          defaultGroupBy="ranking_value"
+          defaultGroupSortOrder="desc"
+          defaultViewMode="list"
+        />
       </div>
     </PageLayout>
   )
 }
+
+export default function RankingsPage() {
+  return (
+    <Suspense fallback={<PageLayout><div className="flex items-center justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div></div></PageLayout>}>
+      <RankingsPageContent />
+    </Suspense>
+  )
+}
+
+// TODO: Add ranking distribution visualization (histogram of 1-10 usage)
+// TODO: Add comparative panel: Average ranking vs BGG global rank delta
+// TODO: Add quick edit inline ranking adjuster for list view (hover slider)
+// TODO: Consider sticky sidebar summary (count per band) when wide screens

@@ -149,13 +149,14 @@ export async function searchGamesFallback(
         rankings(*)
       `)
 
-    // Build OR query for all search patterns
+    // Build OR query for all search patterns - prioritize more precise matches
     const orConditions = uniquePatterns
       .flatMap((pattern) => [
         `name.ilike.%${pattern}%`,
         `publisher.ilike.%${pattern}%`,
-        `summary.ilike.%${pattern}%`,
+        // Remove summary search as it's often too broad and irrelevant
       ])
+      .filter(Boolean)
       .join(',')
 
     dbQuery = dbQuery.or(orConditions)
@@ -165,9 +166,7 @@ export async function searchGamesFallback(
       dbQuery = dbQuery.eq('rankings.user_id', userId)
     }
 
-    // Order by relevance (exact matches first)
-    dbQuery = dbQuery.order('name', { ascending: true })
-
+    // Remove initial database ordering - we'll do custom sorting after
     // Add pagination
     dbQuery = dbQuery.range(offset, offset + limit - 1)
 
@@ -191,7 +190,7 @@ export async function searchGamesFallback(
       } as GameWithRanking
     })
 
-    // Sort results to prioritize exact matches
+    // Sort results to prioritize exact matches and popular games
     const sortedGames = games.sort((a, b) => {
       const queryLower = term.toLowerCase()
       const aNameLower = a.name.toLowerCase()
@@ -202,18 +201,29 @@ export async function searchGamesFallback(
       if (bNameLower === queryLower && aNameLower !== queryLower) return 1
 
       // Starts with query second
-      if (
-        aNameLower.startsWith(queryLower) &&
-        !bNameLower.startsWith(queryLower)
-      )
-        return -1
-      if (
-        bNameLower.startsWith(queryLower) &&
-        !aNameLower.startsWith(queryLower)
-      )
-        return 1
+      const aStartsWith = aNameLower.startsWith(queryLower)
+      const bStartsWith = bNameLower.startsWith(queryLower)
+      if (aStartsWith && !bStartsWith) return -1
+      if (bStartsWith && !aStartsWith) return 1
 
-      // Default alphabetical
+      // If both are exact matches or both start with query, sort by popularity (rank)
+      if ((aNameLower === queryLower && bNameLower === queryLower) || 
+          (aStartsWith && bStartsWith)) {
+        const aRank = a.rank || 99999
+        const bRank = b.rank || 99999
+        return aRank - bRank
+      }
+
+      // For partial matches, prioritize those with better ranks
+      const aRank = a.rank || 99999
+      const bRank = b.rank || 99999
+      
+      // If rank difference is significant, use that
+      if (Math.abs(aRank - bRank) > 1000) {
+        return aRank - bRank
+      }
+
+      // Otherwise alphabetical
       return a.name.localeCompare(b.name)
     })
 

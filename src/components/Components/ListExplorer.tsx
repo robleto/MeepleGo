@@ -1,11 +1,11 @@
 'use client'
 import { useGameFilters, useViewMode } from '@/utils/gameFilters'
 import SearchandFilters from '@/components/Components/SearchandFilters'
+import FilterModal from '@/components/Components/FilterModal'
 import GameCard from '@/components/Components/GameCard'
-import GameRowCard from '@/components/Components/GameRowCard'
 import supabase from '@/lib/supabase'
 import { GameWithRanking } from '@/types'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 
 interface ListExplorerProps {
   games: GameWithRanking[]
@@ -45,6 +45,9 @@ export default function ListExplorer({
   disableListRanking,
 }: ListExplorerProps) {
   const hasExplicitListOrder = false
+  const [showFilters, setShowFilters] = useState(false)
+  const [cardVariant, setCardVariant] = useState<'detailed' | 'balanced' | 'compact'>('balanced')
+  
   const {
     hasMounted,
     viewMode,
@@ -55,6 +58,8 @@ export default function ListExplorer({
     setSortOrder,
     groupBy,
     setGroupBy,
+    groupSortOrder,
+    setGroupSortOrder,
     filteredGames,
     groupedGames,
     filterType,
@@ -69,6 +74,40 @@ export default function ListExplorer({
     searchTerm,
     setSearchTerm,
   } = useGameFilters(games, { disableClientSorting: hasExplicitListOrder })
+
+  // Calculate active filter count (same logic as Games page)
+  const getActiveFilterCount = () => {
+    let count = 0
+    
+    // Sort filter (if not default)
+    if (sortBy !== 'rank' || sortOrder !== 'asc') {
+      count++
+    }
+    
+    // Group filter (if not default)
+    if (groupBy !== 'none') {
+      count++
+    }
+    
+    // View mode (if not default)
+    if (viewMode !== 'grid') {
+      count++
+    }
+    
+    // Card density (if not default)
+    if (cardVariant !== 'balanced') {
+      count++
+    }
+    
+    // Content filters (if active)
+    if (filterType !== 'none' && filterValue !== 'all') {
+      count++
+    }
+    
+    return count
+  }
+
+  const activeFilterCount = getActiveFilterCount()
 
   const membershipMap = useMemo(() => {
     if (!contextualMembership) return {}
@@ -96,15 +135,8 @@ export default function ListExplorer({
         value={searchTerm}
         onChange={setSearchTerm}
         onSearch={setSearchTerm}
-        viewMode={viewMode}
-        setViewMode={setViewMode}
-        sortBy={sortBy as any}
-        setSortBy={setSortBy as any}
-        sortOrder={sortOrder as any}
-        setSortOrder={setSortOrder as any}
-        groupBy={groupBy as any}
-        setGroupBy={setGroupBy as any}
-        total={games.length}
+        filtersCount={activeFilterCount}
+        onOpenFilters={() => setShowFilters(true)}
       />
       {header && (
         <div className="flex items-start justify-between gap-4 flex-wrap">
@@ -145,27 +177,19 @@ export default function ListExplorer({
                         ? idx + 1
                         : null
                   return (
-                    <div key={game.id} className="relative">
-                      {showListRanking &&
-                        rank != null &&
-                        viewMode === 'grid' && (
-                          <div className="absolute -top-2 -left-2 z-10 w-7 h-7 rounded-md bg-gray-800/90 text-white text-[11px] font-semibold flex items-center justify-center shadow ring-1 ring-black/20 backdrop-blur-sm">
-                            {rank}
-                          </div>
-                        )}
-                      <GameCard
-                        game={{ ...game, list_membership: membership }}
-                        viewMode={viewMode}
-                        onMembershipChange={onMembershipChange}
-                        allowWinnerBadgeInListView={awardsContext}
-                        listRank={showListRanking ? rank : null}
-                      />
-                    </div>
+                    <GameCard
+                      key={game.id}
+                      game={{ ...game, list_membership: membership }}
+                      viewMode={viewMode}
+                      variant={cardVariant}
+                      onMembershipChange={onMembershipChange}
+                      listRank={showListRanking ? rank : null}
+                    />
                   )
                 })}
               </div>
             ) : (
-              <div className="bg-white rounded-lg border divide-y">
+              <div className="divide-y divide-gray-100 dark:divide-gray-800 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
                 {group.map((game, idx) => {
                   const membership =
                     (membershipMap as any)[game.id] || game.list_membership
@@ -178,13 +202,13 @@ export default function ListExplorer({
                         ? idx + 1
                         : null
                   return (
-                    <GameRowCard
+                    <GameCard
                       key={game.id}
-                      game={{ ...game, list_membership: membership } as any}
-                      index={idx}
-                      listRank={rank ?? null}
-                      showTagline
-                      onUpdate={onRankingUpdate}
+                      game={{ ...game, list_membership: membership }}
+                      viewMode="list"
+                      variant={cardVariant}
+                      onMembershipChange={onMembershipChange}
+                      listRank={showListRanking ? rank : idx + 1}
                     />
                   )
                 })}
@@ -205,6 +229,33 @@ export default function ListExplorer({
           )}
         </div>
       )}
+      
+      {/* FilterModal */}
+      <FilterModal
+        open={showFilters}
+        onClose={() => setShowFilters(false)}
+        sortBy={sortBy}
+        setSortBy={setSortBy}
+        sortOrder={sortOrder}
+        setSortOrder={setSortOrder}
+        groupBy={groupBy}
+        setGroupBy={setGroupBy}
+        groupSortOrder={groupSortOrder}
+        setGroupSortOrder={setGroupSortOrder}
+        viewMode={viewMode}
+        setViewMode={setViewMode}
+        cardVariant={cardVariant}
+        setCardVariant={setCardVariant}
+        filterType={filterType}
+        setFilterType={(t) => setFilterType(t as any)}
+        filterValue={filterValue}
+        setFilterValue={setFilterValue}
+        uniqueYears={uniqueYears}
+        uniquePublishers={uniquePublishers}
+        uniquePlayerCounts={uniquePlayerCounts}
+        uniqueCategories={uniqueCategories}
+        uniqueMechanics={uniqueMechanics}
+      />
     </div>
   )
 }

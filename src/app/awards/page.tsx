@@ -471,8 +471,6 @@ export default async function AwardsPage({
   return (
     <PageLayout>
       <div className="max-w-6xl mx-auto px-4 py-8">
-        {!serverLoggedIn && <Hero variant="awards" />}
-
         {/* Industry Awards (direct AwardCard grid) */}
         <section>
           <div className="flex items-end justify-between mb-5">
@@ -504,7 +502,7 @@ export default async function AwardsPage({
           </div>
         </section>
 
-        {/* Personal Awards (server-rendered if session known; else client fallback) */}
+        {/* Personal Awards (server-rendered if session known; else client fallback with Hero) */}
         {serverLoggedIn ? (
           <div className="mt-16">
             <div className="mb-5">
@@ -539,6 +537,7 @@ export default async function AwardsPage({
           </div>
         ) : (
           <div className="mt-16">
+            {/* Client-side component will show Hero if needed, Personal Awards if logged in */}
             <PersonalAwardsAuto />
           </div>
         )}

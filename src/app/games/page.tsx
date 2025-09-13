@@ -6,6 +6,7 @@ import PageLayout from '@/components/Components/PageLayout'
 import Heading from '@/components/Components/Heading'
 import GameCard from '@/components/Components/GameCard'
 import SearchandFilters from '@/components/Components/SearchandFilters'
+import FilterModal from '@/components/Components/FilterModal'
 import { GameWithRanking } from '@/types'
 import { useGameFilters, useViewMode } from '@/utils/gameFilters'
 import { searchGamesFallback } from '@/utils/databaseSearch'
@@ -20,6 +21,7 @@ function GamesPageContent() {
   const [error, setError] = useState<string | null>(null)
   const [hasMore, setHasMore] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
+  const [showFilters, setShowFilters] = useState(false)
 
   const [viewMode, setViewMode] = useViewMode('grid')
   const [cardVariant, setCardVariant] = useState<
@@ -47,6 +49,8 @@ function GamesPageContent() {
     setSortOrder,
     groupBy,
     setGroupBy,
+    groupSortOrder,
+    setGroupSortOrder,
     filterType,
     setFilterType,
     filterValue,
@@ -71,6 +75,7 @@ function GamesPageContent() {
     sortBy,
     sortOrder,
     groupBy,
+    groupSortOrder,
     filterType,
     filterValue,
     searchParams?.get('gameId') || null,
@@ -493,7 +498,7 @@ function GamesPageContent() {
     }
 
     initialLoad()
-  }, [searchTerm, sortBy, sortOrder, groupBy, filterType, filterValue])
+  }, [searchTerm, sortBy, sortOrder, groupBy, groupSortOrder, filterType, filterValue])
 
   const [membershipSets, setMembershipSets] = useState<{
     library: Set<string>
@@ -552,6 +557,40 @@ function GamesPageContent() {
       .trim()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-+|-+$/g, '')
+
+  // Calculate active filter count (matches FilterModal logic)
+  const getActiveFilterCount = () => {
+    let count = 0
+    
+    // Sort filter (if not default)
+    if (sortBy !== 'rank' || sortOrder !== 'asc') {
+      count++
+    }
+    
+    // Group filter (if not default)
+    if (groupBy !== 'none') {
+      count++
+    }
+    
+    // View mode (if not default)
+    if (viewMode !== 'grid') {
+      count++
+    }
+    
+    // Card density (if not default)
+    if (cardVariant !== 'balanced') {
+      count++
+    }
+    
+    // Content filters (if active)
+    if (filterType !== 'none' && filterValue !== 'all') {
+      count++
+    }
+    
+    return count
+  }
+
+  const activeFilterCount = getActiveFilterCount()
 
   const taxonomyLinkForGroup = (groupKey: string) => {
     if (groupBy === 'categories') {
@@ -641,15 +680,8 @@ function GamesPageContent() {
             else params.delete('search')
             router.replace(`${pathname}?${params.toString()}`)
           }}
-          viewMode={viewMode}
-          setViewMode={setViewMode}
-          sortBy={sortBy as any}
-          setSortBy={setSortBy as any}
-          sortOrder={sortOrder as any}
-          setSortOrder={setSortOrder as any}
-          groupBy={groupBy as any}
-          setGroupBy={setGroupBy as any}
-          total={games.length}
+          filtersCount={activeFilterCount}
+          onOpenFilters={() => setShowFilters(true)}
         />
 
         {/* Loading State */}
@@ -667,60 +699,77 @@ function GamesPageContent() {
           </div>
         )}
 
-        {/* Games Display - Use raw games for proper BGG rank sorting */}
+        {/* Games Display - Use grouped/filtered games */}
         {!loading && !error && (
-          <div className="mb-10">
-            {viewMode === 'grid' ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-                {games.map((game) => (
-                  <GameCard
-                    key={game.id}
-                    game={{
-                      ...game,
-                      list_membership: membershipMap[game.id] || {
-                        library: membershipSets
-                          ? membershipSets.library.has(game.id)
-                          : false,
-                        wishlist: membershipSets
-                          ? membershipSets.wishlist.has(game.id)
-                          : false,
-                      },
-                    }}
-                    viewMode={viewMode}
-                    variant={cardVariant}
-                    onMembershipChange={handleMembershipChange}
-                  />
-                ))}
+          <div className="mb-10 space-y-8">
+            {groupedGames.map((group) => (
+              <div key={group.key}>
+                {/* Group header - only show if we have multiple groups */}
+                {groupedGames.length > 1 && (
+                  <div className="mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                      {group.key}
+                    </h3>
+                    <div className="text-sm text-gray-500 dark:text-gray-400">
+                      {group.games.length} {group.games.length === 1 ? 'game' : 'games'}
+                    </div>
+                  </div>
+                )}
+                
+                {/* Games for this group */}
+                {viewMode === 'grid' ? (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+                    {group.games.map((game) => (
+                      <GameCard
+                        key={game.id}
+                        game={{
+                          ...game,
+                          list_membership: membershipMap[game.id] || {
+                            library: membershipSets
+                              ? membershipSets.library.has(game.id)
+                              : false,
+                            wishlist: membershipSets
+                              ? membershipSets.wishlist.has(game.id)
+                              : false,
+                          },
+                        }}
+                        viewMode={viewMode}
+                        variant={cardVariant}
+                        onMembershipChange={handleMembershipChange}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="divide-y divide-gray-100 dark:divide-gray-800 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
+                    {group.games.map((game, idx) => (
+                      <GameCard
+                        key={game.id}
+                        game={{
+                          ...game,
+                          list_membership: membershipMap[game.id] || {
+                            library: membershipSets
+                              ? membershipSets.library.has(game.id)
+                              : false,
+                            wishlist: membershipSets
+                              ? membershipSets.wishlist.has(game.id)
+                              : false,
+                          },
+                        }}
+                        viewMode="list"
+                        variant={cardVariant}
+                        listRank={idx + 1}
+                        onMembershipChange={handleMembershipChange}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
-            ) : (
-              <div className="divide-y divide-gray-100 dark:divide-gray-800 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
-                {games.map((game, idx) => (
-                  <GameCard
-                    key={game.id}
-                    game={{
-                      ...game,
-                      list_membership: membershipMap[game.id] || {
-                        library: membershipSets
-                          ? membershipSets.library.has(game.id)
-                          : false,
-                        wishlist: membershipSets
-                          ? membershipSets.wishlist.has(game.id)
-                          : false,
-                      },
-                    }}
-                    viewMode="list"
-                    variant={cardVariant}
-                    listRank={idx + 1}
-                    onMembershipChange={handleMembershipChange}
-                  />
-                ))}
-              </div>
-            )}
+            ))}
           </div>
         )}
 
-        {/* Load More Button */}
-        {!loading && !error && hasMore && (
+        {/* Load More Button - only show if we have server-side pagination */}
+        {!loading && !error && hasMore && groupedGames.some(group => group.games.length > 0) && (
           <div className="flex justify-center py-8">
             <button
               onClick={loadMoreGames}
@@ -739,10 +788,9 @@ function GamesPageContent() {
           </div>
         )}
 
-        {/* Empty State */}
+        {/* Empty State - no games loaded at all */}
         {!loading &&
           !error &&
-          filteredGames.length === 0 &&
           games.length === 0 && (
             <div className="text-center py-12">
               <div className="text-gray-400 mb-4">
@@ -764,11 +812,11 @@ function GamesPageContent() {
             </div>
           )}
 
-        {/* No Results for Filter */}
+        {/* No Results for Filter - games exist but none match current filters */}
         {!loading &&
           !error &&
-          filteredGames.length === 0 &&
-          games.length > 0 && (
+          games.length > 0 &&
+          groupedGames.every(group => group.games.length === 0) && (
             <div className="text-center py-12">
               <div className="text-gray-400 mb-4">
                 <Squares2X2Icon className="h-12 w-12 mx-auto" />
@@ -782,6 +830,39 @@ function GamesPageContent() {
             </div>
           )}
       </div>
+
+      {/* FilterModal */}
+      <FilterModal
+        open={showFilters}
+        onClose={() => setShowFilters(false)}
+        sortBy={sortBy}
+        setSortBy={setSortBy}
+        sortOrder={sortOrder}
+        setSortOrder={setSortOrder}
+        groupBy={groupBy}
+        setGroupBy={setGroupBy}
+        groupSortOrder={groupSortOrder}
+        setGroupSortOrder={setGroupSortOrder}
+        viewMode={viewMode}
+        setViewMode={setViewMode}
+        cardVariant={cardVariant}
+        setCardVariant={setCardVariant}
+        filterType={filterType}
+        setFilterType={(t) => setFilterType(t as any)}
+        filterValue={filterValue}
+        setFilterValue={setFilterValue}
+        uniqueYears={uniqueYears}
+        uniquePublishers={uniquePublishers}
+        uniquePlayerCounts={uniquePlayerCounts}
+        uniqueCategories={uniqueCategories}
+        uniqueMechanics={uniqueMechanics}
+  defaultSortBy="rank"
+  defaultSortOrder="asc"
+  defaultGroupBy="none"
+  defaultGroupSortOrder="asc"
+  defaultViewMode="grid"
+  defaultCardVariant="balanced"
+      />
     </PageLayout>
   )
 }

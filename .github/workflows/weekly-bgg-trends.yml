@@ -47,16 +47,22 @@ jobs:
           BGG_LIST_OWNER_ID: ${{ secrets.BGG_LIST_OWNER_ID }}
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          TIMEOUT_MS: ${{ github.event.inputs.timeoutMs || 8000 }}
+          CONCURRENCY: ${{ github.event.inputs.concurrency || 4 }}
+          DRY_RUN: ${{ github.event.inputs.dryRun }}
         run: |
-          CMD="node scripts/sync_bgg_trends_playwright.js --timeout-ms=${{ github.event.inputs.timeoutMs || 8000 }} --concurrency=${{ github.event.inputs.concurrency || 4 }}"
-          if [ "${{ github.event.inputs.dryRun }}" = 'true' ]; then CMD="$CMD --dry-run"; fi
+          CMD="node scripts/sync_bgg_trends_playwright.js --timeout-ms=$TIMEOUT_MS --concurrency=$CONCURRENCY"
+          if [ "$DRY_RUN" = 'true' ]; then CMD="$CMD --dry-run"; fi
           echo "Running: $CMD"
           eval $CMD
       - name: Summary artifact
         if: always()
+        env:
+          DRY_RUN: ${{ github.event.inputs.dryRun }}
+          TIMEOUT_MS: ${{ github.event.inputs.timeoutMs }}
         run: |
           echo "Run completed at $(date -u)" > trend_run_summary.txt
-          echo "Options: dryRun=${{ github.event.inputs.dryRun }} timeoutMs=${{ github.event.inputs.timeoutMs }}" >> trend_run_summary.txt
+          echo "Options: dryRun=$DRY_RUN timeoutMs=$TIMEOUT_MS" >> trend_run_summary.txt
       - name: Upload summary artifact
         if: always()
         uses: actions/upload-artifact@v4

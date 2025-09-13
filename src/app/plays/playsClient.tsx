@@ -10,6 +10,7 @@ import type { PlayLog } from '@/types/supabase'
 import GameSearchSelect from '@/components/Components/GameSearchSelect'
 import type { SuggestionGame } from '@/components/Components/GameSearchSelect'
 import Heading from '@/components/Components/Heading'
+import { JournalTimelineMarker } from '@/components/Elements'
 import {
   getMembershipSets,
   addGameToDefaultList,
@@ -431,17 +432,6 @@ export default function PlaysClientPage({
       .sort((a, b) => (a > b ? -1 : 1))
       .map((date) => ({ date, items: by[date] }))
   }, [groups, virtualizationEnabled, visible])
-
-  const formatDateParts = (dateStr: string) => {
-    const d = new Date(dateStr)
-    return {
-      monthDay: d.toLocaleDateString(undefined, {
-        month: 'short',
-        day: 'numeric',
-      }),
-      year: d.getFullYear(),
-    }
-  }
   const ratingColor = (r?: number | null) =>
     getRatingSolidClass(r ?? null).replace(
       'bg-white/70 backdrop-blur',
@@ -1146,10 +1136,6 @@ export default function PlaysClientPage({
             {logs.length > 0 && (
               <div className="relative">
                 <div
-                  className="absolute left-20 top-0 bottom-0 w-px bg-gradient-to-b from-sky-300 via-sky-200 to-transparent dark:from-sky-700 dark:via-sky-800/40"
-                  aria-hidden="true"
-                />
-                <div
                   ref={containerRef}
                   className={
                     virtualizationEnabled
@@ -1165,18 +1151,15 @@ export default function PlaysClientPage({
                       </div>
                     </>
                   )}
-                  {(virtualizationEnabled ? virtualGroups : groups).map((g) => {
-                    const { monthDay, year } = formatDateParts(g.date)
+                  {(virtualizationEnabled ? virtualGroups : groups).map((g, groupIndex) => {
+                    const isLastGroup = groupIndex === (virtualizationEnabled ? virtualGroups : groups).length - 1
                     return (
-                      <li key={g.date} className="relative flex gap-10">
-                        <div className="w-20 text-right pr-4 sticky top-24 self-start">
-                          <div className="text-xs font-semibold tracking-wide text-gray-500 dark:text-gray-400">
-                            {monthDay}
-                          </div>
-                          <div className="text-[10px] text-gray-400 dark:text-gray-500">
-                            {year}
-                          </div>
-                        </div>
+                      <li key={g.date} className="relative flex gap-0">
+                        <JournalTimelineMarker 
+                          date={g.date} 
+                          isLast={isLastGroup}
+                          variant="date"
+                        />
                         <div className="flex-1 space-y-4">
                           {g.items.map((l) => {
                             const flatIndex = virtualizationEnabled
@@ -1203,10 +1186,6 @@ export default function PlaysClientPage({
                                 }
                                 className={`group relative border rounded-xl bg-white dark:bg-gray-900 px-5 py-4 shadow-sm transition hover:shadow-md hover:-translate-y-0.5 border-gray-200 dark:border-gray-800 flex gap-5 ${highlightId === l.id ? 'ring-2 ring-sky-400 animate-fade-slide' : ''}`}
                               >
-                                <span
-                                  className="absolute -left-6 top-6 w-3.5 h-3.5 rounded-full bg-white border-2 border-sky-500 dark:bg-gray-900 shadow"
-                                  aria-hidden="true"
-                                />
                                 <div className="flex-shrink-0 mt-1">
                                   {meta && meta.thumb ? (
                                     <img

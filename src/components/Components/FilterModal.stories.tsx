@@ -26,6 +26,7 @@ export const Default: Story = {
     const [sortBy, setSortBy] = useState<any>('name')
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
     const [groupBy, setGroupBy] = useState<any>('year_published')
+    const [groupSortOrder, setGroupSortOrder] = useState<'asc' | 'desc'>('asc')
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
     const [cardVariant, setCardVariant] = useState<
       'detailed' | 'balanced' | 'compact'
@@ -42,6 +43,8 @@ export const Default: Story = {
         setSortOrder={setSortOrder}
         groupBy={groupBy}
         setGroupBy={setGroupBy}
+        groupSortOrder={groupSortOrder}
+        setGroupSortOrder={setGroupSortOrder}
         viewMode={viewMode}
         setViewMode={setViewMode}
         cardVariant={cardVariant}

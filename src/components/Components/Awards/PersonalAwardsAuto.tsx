@@ -3,6 +3,7 @@ import { useEffect, useState, useMemo } from 'react'
 import { supabase } from '@/lib/supabase'
 import AwardShowcase from '@/components/Components/AwardShowcase'
 import Heading from '@/components/Components/Heading'
+import Hero from '@/components/Components/Hero'
 
 interface RankingRow {
   game_id: string
@@ -276,7 +277,23 @@ export default function PersonalAwardsAuto() {
       </div>
     )
   }
-  if (!sessionUserId) return null
+  if (!sessionUserId) {
+    return (
+      <div>
+        <Hero variant="awards" />
+        <div className="mb-16">
+          <div className="flex items-end justify-between mb-5">
+            <Heading as="h2" variant="section" className="mb-1">
+              Your Personal Awards
+            </Heading>
+          </div>
+          <p className="text-xs text-gray-500 text-center">
+            Sign in to see your personalized awards based on your game ratings.
+          </p>
+        </div>
+      </div>
+    )
+  }
   return (
     <div className="mb-16">
       <div className="flex items-end justify-between mb-5">
