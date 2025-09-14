@@ -25,6 +25,7 @@ import {
   StarIcon,
 } from '@heroicons/react/24/outline'
 import { Button } from '../Elements/Button'
+import { Chip } from '../Elements/Chip'
 import { supabase } from '@/lib/supabase'
 // Lazy-load heavy modal components so Storybook (without Next App Router context) doesn't mount them unless needed
 const GameDetailModal = dynamic(() => import('./GameDetailModal'), {
@@ -230,7 +231,7 @@ export default function GameCard({
     return (
       <div
         className={`bg-white rounded-lg shadow hover:shadow-md transition-shadow cursor-pointer relative ${
-          variant === 'compact' ? 'p-3' : 'p-4'
+          variant === 'compact' ? 'p-2 sm:p-3' : 'p-3 sm:p-4'
         }`}
         onClick={() => setShowModal(true)}
       >
@@ -246,27 +247,27 @@ export default function GameCard({
           </div>
         )}
         <div
-          className={`flex items-center ${variant === 'compact' ? 'space-x-3' : 'space-x-4'}`}
+          className={`flex items-center ${variant === 'compact' ? 'space-x-2 sm:space-x-3' : 'space-x-3 sm:space-x-4'}`}
         >
           {listRank != null && (
-            <div className="flex-shrink-0 w-8 text-center">
-              <div className="inline-flex items-center justify-center w-7 h-7 rounded-md bg-gray-100 text-gray-700 font-semibold text-xs ring-1 ring-gray-200">
+            <div className="flex-shrink-0 w-6 sm:w-8 text-center">
+              <div className="inline-flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 rounded-md bg-gray-100 text-gray-700 font-semibold text-xs ring-1 ring-gray-200">
                 {listRank}
               </div>
             </div>
           )}
           <div
             className={`flex-shrink-0 rounded-md overflow-hidden flex items-center justify-center border border-gray-200 bg-gray-100 dark:bg-gray-700 ${
-              variant === 'compact' ? 'w-16 h-16' : 'w-20 h-20'
+              variant === 'compact' ? 'w-12 h-12 sm:w-16 sm:h-16' : 'w-16 h-16 sm:w-20 sm:h-20'
             }`}
           >
             {game.thumbnail_url ? (
               <Image
                 src={game.thumbnail_url}
                 alt={game.name}
-                width={variant === 'compact' ? 64 : 80}
-                height={variant === 'compact' ? 64 : 80}
-                className="object-contain"
+                width={variant === 'compact' ? 48 : 64}
+                height={variant === 'compact' ? 48 : 64}
+                className="object-contain sm:w-auto sm:h-auto"
               />
             ) : (
               <GameImage
@@ -280,7 +281,7 @@ export default function GameCard({
           <div className="flex-1 min-w-0">
             <h3
               className={`font-medium text-gray-900 truncate flex items-center gap-1 ${
-                variant === 'compact' ? 'text-base' : 'text-lg'
+                variant === 'compact' ? 'text-sm sm:text-base' : 'text-base sm:text-lg'
               }`}
             >
               {game.name}
@@ -303,12 +304,12 @@ export default function GameCard({
 
             {/* Metadata - show for balanced and detailed variants */}
             {(variant === 'balanced' || variant === 'detailed') && showMeta && (
-              <div className="flex items-center space-x-4 text-sm text-gray-500">
+              <div className="flex items-center space-x-2 sm:space-x-4 text-xs sm:text-sm text-gray-500">
                 <span>{formatYear(game.year_published)}</span>
-                <span>
+                <span className="hidden sm:inline">
                   {formatPlayerCount(game.min_players, game.max_players)}
                 </span>
-                <span>{formatPlayingTime(game.playtime_minutes)}</span>
+                <span className="hidden sm:inline">{formatPlayingTime(game.playtime_minutes)}</span>
               </div>
             )}
 
@@ -322,63 +323,52 @@ export default function GameCard({
 
           {/* Right side actions - standardized layout */}
           <div
-            className={`flex items-center ${variant === 'compact' ? 'space-x-1' : 'space-x-2'}`}
+            className={`flex items-center ${variant === 'compact' ? 'space-x-0.5 sm:space-x-1' : 'space-x-1 sm:space-x-2'}`}
           >
-            {/* Played It Button */}
-            <Button
-              size={variant === 'compact' ? 'xs' : 'sm'}
-              variant={localRanking?.played_it ? 'primary' : 'ghost'}
-              leftIcon={
-                <PlayIcon
-                  className={variant === 'compact' ? 'h-3 w-3' : 'h-4 w-4'}
-                />
-              }
+            {/* Played It Chip */}
+            <Chip
+              size="sm"
+              color={localRanking?.played_it ? 'green' : 'gray'}
+              variant={localRanking?.played_it ? 'subtle' : 'outline'}
+              interactive
               onClick={(e) => {
                 e.stopPropagation()
                 handlePlayedToggle()
               }}
-              title={localRanking?.played_it ? 'Played' : 'Mark as played'}
             >
-              <span
-                className={`${variant === 'compact' ? 'text-xs' : 'text-sm'} hidden sm:inline`}
-              >
-                Played It
-              </span>
-            </Button>
+              <div className="flex items-center gap-1.5">
+                <PlayIcon className="w-4 h-4" />
+                <span className="hidden sm:inline">
+                  Played
+                </span>
+              </div>
+            </Chip>
 
-            {/* Own It Button */}
-            <Button
-              size={variant === 'compact' ? 'xs' : 'sm'}
-              variant={membership.library ? 'primary' : 'ghost'}
-              leftIcon={
-                <BookmarkIcon
-                  className={variant === 'compact' ? 'h-3 w-3' : 'h-4 w-4'}
-                />
-              }
+            {/* Own It Chip */}
+            <Chip
+              size="sm"
+              color="blue"
+              variant={membership.library ? 'subtle' : 'outline'}
+              interactive
               onClick={(e) => {
                 e.stopPropagation()
                 if (onMembershipChange) {
                   onMembershipChange(game.id, { library: !membership.library })
                 }
               }}
-              title={membership.library ? 'In library' : 'Add to library'}
             >
-              <span
-                className={`${variant === 'compact' ? 'text-xs' : 'text-sm'} hidden sm:inline`}
-              >
-                Own It
-              </span>
-            </Button>
+              <div className="flex items-center gap-1.5">
+                <BookmarkIcon className="w-4 h-4" />
+                <span className="hidden sm:inline">Own It</span>
+              </div>
+            </Chip>
 
-            {/* Wishlist Button */}
-            <Button
-              size={variant === 'compact' ? 'xs' : 'sm'}
-              variant={membership.wishlist ? 'secondary' : 'ghost'}
-              leftIcon={
-                <HeartIcon
-                  className={variant === 'compact' ? 'h-3 w-3' : 'h-4 w-4'}
-                />
-              }
+            {/* Wishlist Chip */}
+            <Chip
+              size="sm"
+              color="pink"
+              variant={membership.wishlist ? 'subtle' : 'outline'}
+              interactive
               onClick={(e) => {
                 e.stopPropagation()
                 if (onMembershipChange) {
@@ -387,14 +377,12 @@ export default function GameCard({
                   })
                 }
               }}
-              title={membership.wishlist ? 'On wishlist' : 'Add to wishlist'}
             >
-              <span
-                className={`${variant === 'compact' ? 'text-xs' : 'text-sm'} hidden sm:inline`}
-              >
-                Wishlist
-              </span>
-            </Button>
+              <div className="flex items-center gap-1.5">
+                <HeartIcon className="w-4 h-4" />
+                <span className="hidden sm:inline">Wishlist</span>
+              </div>
+            </Chip>
 
             {/* Rating Chip or Rate Button */}
             {ratingValue ? (
@@ -573,7 +561,7 @@ export default function GameCard({
                 title={localRanking?.played_it ? 'Played' : 'Mark as played'}
               >
                 <PlayIcon className="h-3 w-3 inline mr-1" />
-                Played It
+                Played
               </button>
 
               {/* Rating Button/Chip */}

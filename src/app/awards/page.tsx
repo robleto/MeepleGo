@@ -9,7 +9,7 @@ import PersonalAwardCategorySection from '@/components/Components/AwardShowcase'
 // Updated awards component import paths
 import PersonalAwardsAuto from '@/components/Components/Awards/PersonalAwardsAuto'
 // Removed IndustryAwards component in favor of direct AwardCard composition (subset of AwardCard story patterns)
-import AwardCard from '@/components/Components/Awards/AwardCard'
+import AwardCard from '@/components/Components/AwardCard'
 // Removed AwardsLoggedOutHero in favor of inline Hero variant here
 import Hero from '@/components/Components/Hero'
 

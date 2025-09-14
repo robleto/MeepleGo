@@ -35,7 +35,7 @@ interface ChipProps {
   /**
    * Color theme for non-rating chips
    */
-  color?: 'gray' | 'blue' | 'green' | 'yellow' | 'red' | 'purple' | 'rating'
+  color?: 'gray' | 'blue' | 'green' | 'yellow' | 'red' | 'purple' | 'pink' | 'orange' | 'rating'
 
   /**
    * Whether the chip is interactive/clickable
@@ -65,7 +65,7 @@ const colorVariants = {
       'bg-gray-50/90 text-gray-700 border border-gray-200/60 dark:bg-gray-700/40 dark:text-gray-300 dark:border-gray-600/50',
     solid: 'bg-gray-600 text-white border border-gray-600 dark:bg-gray-500',
     outline:
-      'bg-transparent text-gray-700 border border-gray-300 dark:text-gray-300 dark:border-gray-600',
+      'bg-white text-gray-400 border border-gray-300 dark:bg-gray-800 dark:text-gray-500 dark:border-gray-600',
     overlay: 'bg-gray-900/70 text-white backdrop-blur-sm',
   },
   blue: {
@@ -73,7 +73,7 @@ const colorVariants = {
       'bg-blue-50/90 text-blue-700 border border-blue-200/60 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-700/50',
     solid: 'bg-blue-600 text-white border border-blue-600 dark:bg-blue-500',
     outline:
-      'bg-transparent text-blue-700 border border-blue-300 dark:text-blue-300 dark:border-blue-600',
+      'bg-white text-gray-400 border border-gray-300 dark:bg-gray-800 dark:text-gray-500 dark:border-gray-600',
     overlay: 'bg-blue-900/70 text-white backdrop-blur-sm',
   },
   green: {
@@ -81,7 +81,7 @@ const colorVariants = {
       'bg-green-50/90 text-green-700 border border-green-200/60 dark:bg-green-900/30 dark:text-green-300 dark:border-green-700/50',
     solid: 'bg-green-600 text-white border border-green-600 dark:bg-green-500',
     outline:
-      'bg-transparent text-green-700 border border-green-300 dark:text-green-300 dark:border-green-600',
+      'bg-white text-gray-400 border border-gray-300 dark:bg-gray-800 dark:text-gray-500 dark:border-gray-600',
     overlay: 'bg-green-900/70 text-white backdrop-blur-sm',
   },
   yellow: {
@@ -90,7 +90,7 @@ const colorVariants = {
     solid:
       'bg-yellow-600 text-white border border-yellow-600 dark:bg-yellow-500',
     outline:
-      'bg-transparent text-yellow-700 border border-yellow-300 dark:text-yellow-300 dark:border-yellow-600',
+      'bg-white text-gray-400 border border-gray-300 dark:bg-gray-800 dark:text-gray-500 dark:border-gray-600',
     overlay: 'bg-yellow-900/70 text-white backdrop-blur-sm',
   },
   red: {
@@ -98,7 +98,7 @@ const colorVariants = {
       'bg-red-50/90 text-red-700 border border-red-200/60 dark:bg-red-900/30 dark:text-red-300 dark:border-red-700/50',
     solid: 'bg-red-600 text-white border border-red-600 dark:bg-red-500',
     outline:
-      'bg-transparent text-red-700 border border-red-300 dark:text-red-300 dark:border-red-600',
+      'bg-white text-gray-400 border border-gray-300 dark:bg-gray-800 dark:text-gray-500 dark:border-gray-600',
     overlay: 'bg-red-900/70 text-white backdrop-blur-sm',
   },
   purple: {
@@ -107,8 +107,25 @@ const colorVariants = {
     solid:
       'bg-purple-600 text-white border border-purple-600 dark:bg-purple-500',
     outline:
-      'bg-transparent text-purple-700 border border-purple-300 dark:text-purple-300 dark:border-purple-600',
+      'bg-white text-gray-400 border border-gray-300 dark:bg-gray-800 dark:text-gray-500 dark:border-gray-600',
     overlay: 'bg-purple-900/70 text-white backdrop-blur-sm',
+  },
+  pink: {
+    subtle:
+      'bg-pink-50/90 text-pink-700 border border-pink-200/60 dark:bg-pink-900/30 dark:text-pink-300 dark:border-pink-700/50',
+    solid: 'bg-pink-600 text-white border border-pink-600 dark:bg-pink-500',
+    outline:
+      'bg-white text-gray-400 border border-gray-300 dark:bg-gray-800 dark:text-gray-500 dark:border-gray-600',
+    overlay: 'bg-pink-900/70 text-white backdrop-blur-sm',
+  },
+  orange: {
+    subtle:
+      'bg-orange-50/90 text-orange-700 border border-orange-200/60 dark:bg-orange-900/30 dark:text-orange-300 dark:border-orange-700/50',
+    solid:
+      'bg-orange-600 text-white border border-orange-600 dark:bg-orange-500',
+    outline:
+      'bg-white text-gray-400 border border-gray-300 dark:bg-gray-800 dark:text-gray-500 dark:border-gray-600',
+    overlay: 'bg-orange-900/70 text-white backdrop-blur-sm',
   },
 }
 
@@ -135,20 +152,20 @@ function getRatingColorClasses(
 
 const sizeStyles = {
   xs: {
-    base: 'h-5 px-1.5 text-[11px] font-semibold',
-    square: 'w-6 h-6 text-[11px] font-semibold',
+    base: 'h-5 px-1.5 text-[11px] font-medium',
+    square: 'w-6 h-6 text-[11px] font-medium',
   },
   sm: {
-    base: 'h-6 px-2 text-xs font-semibold',
-    square: 'w-8 h-8 text-sm font-semibold',
+    base: 'h-6 px-3 text-xs font-medium',
+    square: 'w-8 h-8 text-sm font-medium',
   },
   md: {
-    base: 'h-7 px-2.5 text-sm font-semibold',
-    square: 'w-9 h-9 text-sm font-semibold',
+    base: 'h-7 px-2.5 text-sm font-medium',
+    square: 'w-9 h-9 text-sm font-medium',
   },
   lg: {
-    base: 'h-9 px-3 text-sm font-semibold',
-    square: 'w-10 h-10 text-base font-semibold',
+    base: 'h-9 px-3 text-sm font-medium',
+    square: 'w-10 h-10 text-base font-medium',
   },
 } as const
 

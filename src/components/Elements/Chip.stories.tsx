@@ -273,13 +273,13 @@ export const StatusChips: Story = {
       <div>
         <h3 className="text-sm font-medium mb-3">Game Status</h3>
         <div className="flex flex-wrap gap-2">
-          <Chip color="green" variant="subtle">
-            Owned
-          </Chip>
           <Chip color="blue" variant="subtle">
+            Own It
+          </Chip>
+          <Chip color="pink" variant="subtle">
             Wishlist
           </Chip>
-          <Chip color="yellow" variant="subtle">
+          <Chip color="orange" variant="subtle">
             Borrowed
           </Chip>
           <Chip color="red" variant="subtle">
@@ -295,14 +295,159 @@ export const StatusChips: Story = {
         <h3 className="text-sm font-medium mb-3">Play Status</h3>
         <div className="flex flex-wrap gap-2">
           <Chip color="green" variant="solid">
-            <CheckIcon className="w-3 h-3" />
+            <div className="flex items-center gap-1">
+              <CheckIcon className="w-3 h-3" />
+              Played It
+            </div>
           </Chip>
           <Chip color="gray" variant="outline">
             Not Played
           </Chip>
-          <Chip color="blue" variant="subtle">
+          <Chip color="yellow" variant="subtle">
             In Progress
           </Chip>
+        </div>
+      </div>
+    </div>
+  ),
+}
+
+export const MediumStatusChips: Story = {
+  name: 'Medium Status Chips (Recommended)',
+  render: () => (
+    <div className="space-y-6">
+      <div>
+        <h3 className="text-lg font-medium mb-4">Game Status (Medium Size)</h3>
+        <div className="flex flex-wrap gap-3">
+          <Chip color="blue" variant="subtle" size="md">
+            Own It
+          </Chip>
+          <Chip color="pink" variant="subtle" size="md">
+            Wishlist
+          </Chip>
+          <Chip color="orange" variant="subtle" size="md">
+            Borrowed
+          </Chip>
+          <Chip color="red" variant="subtle" size="md">
+            Sold
+          </Chip>
+          <Chip color="purple" variant="subtle" size="md">
+            Pre-order
+          </Chip>
+        </div>
+      </div>
+
+      <div>
+        <h3 className="text-lg font-medium mb-4">Play Status (Medium Size)</h3>
+        <div className="flex flex-wrap gap-3">
+          <Chip color="green" variant="solid" size="md">
+            <div className="flex items-center gap-1.5">
+              <CheckIcon className="w-4 h-4" />
+              Played It
+            </div>
+          </Chip>
+          <Chip color="gray" variant="outline" size="md">
+            Not Played
+          </Chip>
+          <Chip color="yellow" variant="subtle" size="md">
+            In Progress
+          </Chip>
+        </div>
+      </div>
+
+      <div className="mt-8 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+        <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">
+          Color Strategy
+        </h4>
+        <div className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
+          <div><strong>Play Status:</strong> Green (played), Gray (unplayed), Yellow (in progress)</div>
+          <div><strong>Game Status:</strong> Blue (own it), Pink (wishlist), Orange (borrowed), Red (sold), Purple (pre-order)</div>
+        </div>
+      </div>
+    </div>
+  ),
+}
+
+export const SmallStatusChips: Story = {
+  name: 'Small Status Chips (ListView)',
+  render: () => (
+    <div className="space-y-6">
+      <div>
+        <h3 className="text-lg font-medium mb-4">Game Status (Small Size - ListView)</h3>
+        <div className="space-y-3">
+          <div>
+            <p className="text-sm text-gray-600 mb-2">Inactive State (White BG, Gray Text):</p>
+            <div className="flex flex-wrap gap-2">
+              <Chip color="blue" variant="outline" size="sm">
+                Own It
+              </Chip>
+              <Chip color="pink" variant="outline" size="sm">
+                <div className="flex items-center gap-1">
+                  <HeartIcon className="w-4 h-4" />
+                  <span>Wishlist</span>
+                </div>
+              </Chip>
+              <Chip color="orange" variant="outline" size="sm">
+                Borrowed
+              </Chip>
+            </div>
+          </div>
+          <div>
+            <p className="text-sm text-gray-600 mb-2">Active State (Light Pastel BG, Colored Text):</p>
+            <div className="flex flex-wrap gap-2">
+              <Chip color="blue" variant="subtle" size="sm">
+                Own It
+              </Chip>
+              <Chip color="pink" variant="subtle" size="sm">
+                <div className="flex items-center gap-1">
+                  <HeartIcon className="w-4 h-4" />
+                  <span>Wishlist</span>
+                </div>
+              </Chip>
+              <Chip color="orange" variant="subtle" size="sm">
+                Borrowed
+              </Chip>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h3 className="text-lg font-medium mb-4">Play Status (Small Size - ListView)</h3>
+        <div className="space-y-3">
+          <div>
+            <p className="text-sm text-gray-600 mb-2">Inactive State:</p>
+            <div className="flex flex-wrap gap-2">
+              <Chip color="gray" variant="outline" size="sm">
+                Not Played
+              </Chip>
+            </div>
+          </div>
+          <div>
+            <p className="text-sm text-gray-600 mb-2">Active State:</p>
+            <div className="flex flex-wrap gap-2">
+              <Chip color="green" variant="subtle" size="sm">
+                <div className="flex items-center gap-1">
+                  <CheckIcon className="w-4 h-4" />
+                  <span>Played It</span>
+                </div>
+              </Chip>
+              <Chip color="yellow" variant="subtle" size="sm">
+                In Progress
+              </Chip>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-8 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+        <h4 className="font-semibold text-green-900 dark:text-green-100 mb-2">
+          Updated Design Treatment
+        </h4>
+        <div className="text-sm text-green-800 dark:text-green-200 space-y-1">
+          <div><strong>Inactive:</strong> White background with gray text/icons</div>
+          <div><strong>Active:</strong> Light pastel background with colored text/icons (no bold/solid colors)</div>
+          <div><strong>Size:</strong> Small (sm) for ListView components</div>
         </div>
       </div>
     </div>

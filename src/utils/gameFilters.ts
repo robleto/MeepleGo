@@ -73,24 +73,28 @@ export function useViewMode(defaultMode: 'grid' | 'list' = 'grid') {
 
 export function useGameFilters(
   games: GameWithRanking[],
-  options?: { disableClientSorting?: boolean }
+  options?: { 
+    disableClientSorting?: boolean; 
+    defaultViewMode?: 'grid' | 'list';
+    storageKey?: string;
+  }
 ) {
-  const { disableClientSorting = false } = options || {}
+  const { disableClientSorting = false, defaultViewMode = 'grid', storageKey = 'gamesViewMode' } = options || {}
   const [hasMounted, setHasMounted] = useState(false)
 
   // Local view mode state (duplicated here so consumers can rely on single hook)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>(() => {
     if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('gamesViewMode') as 'grid' | 'list'
-      return stored || 'grid'
+      const stored = localStorage.getItem(storageKey) as 'grid' | 'list'
+      return stored || defaultViewMode
     }
-    return 'grid'
+    return defaultViewMode
   })
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      localStorage.setItem('gamesViewMode', viewMode)
+      localStorage.setItem(storageKey, viewMode)
     }
-  }, [viewMode])
+  }, [viewMode, storageKey])
 
   // Search state
   const [searchTerm, setSearchTerm] = useState('')
@@ -143,6 +147,8 @@ export function useGameFilters(
     | 'mechanic'
     | 'game'
     | 'award'
+    | 'playtime'
+    | 'weight'
   >('none')
   const [filterValue, setFilterValue] = useState<string>('all')
 
@@ -247,6 +253,20 @@ export function useGameFilters(
           const res = (h.result_raw || h.derived_result || '')?.toLowerCase()
           return cat.includes('winner') || res.includes('winner')
         })
+      }
+      if (filterType === 'playtime') {
+        const playtime = Number(filterValue)
+        if (filterValue === 'all') return true
+        if (!game.playtime_minutes) return false
+        // Match games that can be played in the specified time (allow some tolerance)
+        return game.playtime_minutes <= playtime * 1.2 // 20% tolerance
+      }
+      if (filterType === 'weight') {
+        const weight = Number(filterValue)
+        if (filterValue === 'all') return true
+        if (!(game as any).weight) return false
+        // Match games with similar weight (within 0.5 range)
+        return Math.abs((game as any).weight - weight) <= 0.5
       }
       return true
     })
@@ -606,6 +626,8 @@ export function useRankingsFilters(
     | 'mechanic'
     | 'game'
     | 'award'
+    | 'playtime'
+    | 'weight'
   >('none')
   const [filterValue, setFilterValue] = useState<string>('all')
 
@@ -711,6 +733,20 @@ export function useRankingsFilters(
           const res = (h.result_raw || h.derived_result || '')?.toLowerCase()
           return cat.includes('winner') || res.includes('winner')
         })
+      }
+      if (filterType === 'playtime') {
+        const playtime = Number(filterValue)
+        if (filterValue === 'all') return true
+        if (!game.playtime_minutes) return false
+        // Match games that can be played in the specified time (allow some tolerance)
+        return game.playtime_minutes <= playtime * 1.2 // 20% tolerance
+      }
+      if (filterType === 'weight') {
+        const weight = Number(filterValue)
+        if (filterValue === 'all') return true
+        if (!(game as any).weight) return false
+        // Match games with similar weight (within 0.5 range)
+        return Math.abs((game as any).weight - weight) <= 0.5
       }
       return true
     })

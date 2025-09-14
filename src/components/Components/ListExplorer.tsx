@@ -27,6 +27,7 @@ interface ListExplorerProps {
     patch: { ranking?: number | null; played_it?: boolean }
   ) => void
   disableListRanking?: boolean
+  hasExplicitOrder?: boolean
 }
 
 export default function ListExplorer({
@@ -43,8 +44,9 @@ export default function ListExplorer({
   showListRanking,
   onRankingUpdate,
   disableListRanking,
+  hasExplicitOrder = false,
 }: ListExplorerProps) {
-  const hasExplicitListOrder = false
+  const hasExplicitListOrder = hasExplicitOrder
   const [showFilters, setShowFilters] = useState(false)
   const [cardVariant, setCardVariant] = useState<'detailed' | 'balanced' | 'compact'>('balanced')
   
@@ -73,7 +75,11 @@ export default function ListExplorer({
     uniqueMechanics,
     searchTerm,
     setSearchTerm,
-  } = useGameFilters(games, { disableClientSorting: hasExplicitListOrder })
+  } = useGameFilters(games, { 
+    disableClientSorting: hasExplicitListOrder,
+    defaultViewMode: 'list',
+    storageKey: 'listViewMode'
+  })
 
   // Calculate active filter count (same logic as Games page)
   const getActiveFilterCount = () => {
@@ -189,7 +195,7 @@ export default function ListExplorer({
                 })}
               </div>
             ) : (
-              <div className="divide-y divide-gray-100 dark:divide-gray-800 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
+              <div className="divide-y divide-gray-100 dark:divide-gray-800 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 overflow-hidden">
                 {group.map((game, idx) => {
                   const membership =
                     (membershipMap as any)[game.id] || game.list_membership

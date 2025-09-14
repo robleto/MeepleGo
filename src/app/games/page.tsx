@@ -66,6 +66,34 @@ function GamesPageContent() {
     disableClientSorting: true, // Server handles sorting
   })
 
+  // Read filter parameters from URL and set filter state
+  useEffect(() => {
+    if (!hasMounted) return
+
+    const yearParam = searchParams.get('year')
+    const playersParam = searchParams.get('players')
+    const playtimeParam = searchParams.get('playtime')
+    const weightParam = searchParams.get('weight')
+
+    if (yearParam) {
+      setFilterType('year')
+      setFilterValue(yearParam)
+    } else if (playersParam) {
+      setFilterType('players')
+      setFilterValue(playersParam)
+    } else if (playtimeParam) {
+      setFilterType('playtime')
+      setFilterValue(playtimeParam)
+    } else if (weightParam) {
+      setFilterType('weight')
+      setFilterValue(weightParam)
+    } else {
+      // No recognized filter params, reset to default
+      setFilterType('none')
+      setFilterValue('all')
+    }
+  }, [searchParams, hasMounted, setFilterType, setFilterValue])
+
   // Reset games when search, sort, or URL-selected game changes
   useEffect(() => {
     setGames([])
@@ -161,6 +189,18 @@ function GamesPageContent() {
       const players = Number(filterValue)
       if (!Number.isNaN(players)) {
         query = query.lte('min_players', players).gte('max_players', players)
+      }
+    }
+    if (filterType === 'playtime' && filterValue !== 'all') {
+      const playtime = Number(filterValue)
+      if (!Number.isNaN(playtime)) {
+        // Use a small tolerance since exact matching may be too restrictive
+        // Most games are rounded to 15-minute intervals (60, 75, 90, 105, 120)
+        const tolerance = 5 // Small 5-minute tolerance for rounding differences
+        console.log('🕐 Filtering for playtime:', playtime, '±', tolerance, 'minutes')
+        query = query
+          .gte('playtime_minutes', playtime - tolerance)
+          .lte('playtime_minutes', playtime + tolerance)
       }
     }
     if (filterType === 'category' && filterValue !== 'all') {
@@ -550,6 +590,56 @@ function GamesPageContent() {
     }))
   }
 
+  // Helper to get filter title based on current URL params
+  const getFilterTitle = () => {
+    const yearParam = searchParams.get('year')
+    const playersParam = searchParams.get('players')
+    const playtimeParam = searchParams.get('playtime')
+    const weightParam = searchParams.get('weight')
+
+    if (yearParam) {
+      return `Games from ${yearParam}`
+    }
+    if (playersParam) {
+      const count = Number(playersParam)
+      return `Games for ${count} player${count === 1 ? '' : 's'}`
+    }
+    if (playtimeParam) {
+      const minutes = Number(playtimeParam)
+      const hours = Math.floor(minutes / 60)
+      const remainingMinutes = minutes % 60
+      let timeStr = ''
+      if (hours > 0) {
+        if (remainingMinutes > 0) {
+          // e.g., "1 hour 30 minutes"
+          timeStr = `${hours} hour${hours === 1 ? '' : 's'} ${remainingMinutes} minute${remainingMinutes === 1 ? '' : 's'}`
+        } else {
+          // e.g., "2 hours"
+          timeStr = `${hours} hour${hours === 1 ? '' : 's'}`
+        }
+      } else {
+        // e.g., "30 minutes"
+        timeStr = `${minutes} minute${minutes === 1 ? '' : 's'}`
+      }
+      return `Games that take ${timeStr}`
+    }
+    if (weightParam) {
+      const weight = Number(weightParam)
+      const weightLabels = {
+        1: 'Light',
+        2: 'Medium-Light', 
+        3: 'Medium',
+        4: 'Medium-Heavy',
+        5: 'Heavy'
+      }
+      const label = weightLabels[weight as keyof typeof weightLabels] || weight
+      return `${label} complexity games`
+    }
+    return null
+  }
+
+  const filterTitle = getFilterTitle()
+
   // Local slugify mirroring server mg_slugify (must stay in sync)
   const slugify = (input: string) =>
     input
@@ -683,6 +773,18 @@ function GamesPageContent() {
           filtersCount={activeFilterCount}
           onOpenFilters={() => setShowFilters(true)}
         />
+
+        {/* Filter Title - shown when filtering via URL params */}
+        {filterTitle && (
+          <div className="border-b border-gray-200 dark:border-gray-700 pb-4">
+            <Heading as="h2" size="lg" className="text-gray-900 dark:text-gray-100">
+              {filterTitle}
+            </Heading>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+              {games.length} {games.length === 1 ? 'game' : 'games'} found
+            </p>
+          </div>
+        )}
 
         {/* Loading State */}
         {loading && (

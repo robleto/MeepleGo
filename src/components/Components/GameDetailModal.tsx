@@ -620,42 +620,55 @@ export default function GameDetailModal({
             <div className="flex-1 min-w-0 flex flex-col gap-4">
               <div className="flex flex-col gap-4">
                 <div className="flex flex-col gap-3">
-                  <h1
-                    id="game-detail-title"
-                    className="text-2xl font-bold text-gray-900 leading-tight flex items-center gap-2"
-                  >
-                    <span>{EG.name}</span>
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault()
-                        e.stopPropagation()
-                        const rect = e.currentTarget.getBoundingClientRect()
-                        setRatingAnchor({
-                          x: rect.left + rect.width / 2,
-                          y: rect.top,
-                        })
-                        setRatingOpen((o) => !o)
-                      }}
-                      className="focus:outline-none translate-y-[2px]"
-                      title={ratingValue ? 'Change rating' : 'Rate this game'}
-                      aria-label={
-                        ratingValue ? `Rating ${ratingValue}` : 'Rate this game'
-                      }
-                    >
-                      {ratingValue ? (
-                        <RatingChip
-                          value={ratingValue}
-                          size="lg"
-                          variant="subtle"
-                          className={`ring-0 shadow-none text-[0.9rem] ${saving ? 'opacity-70' : ''}`}
-                        />
-                      ) : (
-                        <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 text-gray-400 ring-1 ring-inset ring-gray-200">
-                          {/* Using a decorative star via unicode */}★
-                        </span>
-                      )}
-                    </button>
-                  </h1>
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-2 flex-wrap mr-20">
+                      <h1
+                        id="game-detail-title"
+                        className="text-2xl font-bold text-gray-900 leading-tight"
+                      >
+                        <span>{EG.name}</span>
+                      </h1>
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault()
+                          e.stopPropagation()
+                          const rect = e.currentTarget.getBoundingClientRect()
+                          setRatingAnchor({
+                            x: rect.left + rect.width / 2,
+                            y: rect.top,
+                          })
+                          setRatingOpen((o) => !o)
+                        }}
+                        className="focus:outline-none translate-y-[1px] flex-shrink-0"
+                        title={ratingValue ? 'Change rating' : 'Rate this game'}
+                        aria-label={
+                          ratingValue ? `Rating ${ratingValue}` : 'Rate this game'
+                        }
+                      >
+                        {ratingValue ? (
+                          <RatingChip
+                            value={ratingValue}
+                            size="lg"
+                            variant="subtle"
+                            className={`ring-0 shadow-none text-[0.9rem] ${saving ? 'opacity-70' : ''}`}
+                          />
+                        ) : (
+                          <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 text-gray-400">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                            </svg>
+                          </span>
+                        )}
+                      </button>
+                      <button
+                        onClick={handlePlayedToggle}
+                        className={`inline-flex items-center gap-1 px-4 py-1.5 rounded-full text-xs font-medium border transition shadow-sm flex-shrink-0 ${localRanking?.played_it ? 'bg-green-600 text-white border-green-600 hover:bg-green-500' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'}`}
+                      >
+                        <PlayIcon className="h-4 w-4" />
+                        {localRanking?.played_it ? 'Played' : 'I Played This'}
+                      </button>
+                    </div>
+                  </div>
 
                   {/* Key metadata chips row */}
                   {(EG.year_published ||
@@ -664,10 +677,17 @@ export default function GameDetailModal({
                     EG.playtime_minutes) && (
                     <div className="flex items-center gap-2 flex-wrap">
                       {EG.year_published && (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-50 text-gray-600 text-xs font-medium ring-1 ring-gray-200">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            router.push(`/games?year=${EG.year_published}`)
+                            if (variant === 'modal') onClose?.()
+                          }}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-50 hover:bg-gray-100 text-gray-600 hover:text-gray-700 text-xs font-medium ring-1 ring-gray-200 transition-colors"
+                        >
                           <CalendarIcon className="w-3 h-3" />
                           {EG.year_published}
-                        </span>
+                        </button>
                       )}
                       {EG.weight &&
                         (() => {
@@ -676,23 +696,44 @@ export default function GameDetailModal({
                           if (w < 1) w = 1
                           if (w > 5) w = 5
                           return (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-50 text-gray-600 text-xs font-medium ring-1 ring-gray-200">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                router.push(`/games?weight=${w.toFixed(2)}`)
+                                if (variant === 'modal') onClose?.()
+                              }}
+                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-50 hover:bg-gray-100 text-gray-600 hover:text-gray-700 text-xs font-medium ring-1 ring-gray-200 transition-colors"
+                            >
                               <ChartBarIcon className="w-3 h-3" />
                               {w.toFixed(2)}
-                            </span>
+                            </button>
                           )
                         })()}
                       {EG.min_players && EG.max_players && (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-50 text-gray-600 text-xs font-medium ring-1 ring-gray-200">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            router.push(`/games?players=${EG.max_players}`)
+                            if (variant === 'modal') onClose?.()
+                          }}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-50 hover:bg-gray-100 text-gray-600 hover:text-gray-700 text-xs font-medium ring-1 ring-gray-200 transition-colors"
+                        >
                           <UsersIcon className="w-3 h-3" />
                           {formatPlayerCount(EG.min_players, EG.max_players)}
-                        </span>
+                        </button>
                       )}
                       {EG.playtime_minutes && (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-50 text-gray-600 text-xs font-medium ring-1 ring-gray-200">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            router.push(`/games?playtime=${EG.playtime_minutes}`)
+                            if (variant === 'modal') onClose?.()
+                          }}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-50 hover:bg-gray-100 text-gray-600 hover:text-gray-700 text-xs font-medium ring-1 ring-gray-200 transition-colors"
+                        >
                           <TimeIcon className="w-3 h-3" />
                           {formatPlayingTime(EG.playtime_minutes)}
-                        </span>
+                        </button>
                       )}
                     </div>
                   )}
@@ -707,39 +748,6 @@ export default function GameDetailModal({
                           : '')}
                     </p>
                   )}
-                  {familyCodes && familyCodes.length > 0 && (
-                    <div className="flex flex-wrap gap-1">
-                      {familyCodes.slice(0, 6).map((code) => {
-                        const label = code
-                          .replace(/games$/, '')
-                          .replace(/_/g, ' ')
-                          .replace(/\b\w/g, (c) => c.toUpperCase())
-                        return (
-                          <button
-                            key={code}
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              router.push(
-                                `/games?family=${encodeURIComponent(code)}`
-                              )
-                            }}
-                            className="px-2 py-0.5 rounded-full bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 text-[10px] font-medium tracking-wide"
-                          >
-                            {label}
-                          </button>
-                        )
-                      })}
-                    </div>
-                  )}
-                </div>
-                <div className="flex items-center justify-end flex-wrap gap-3">
-                  <button
-                    onClick={handlePlayedToggle}
-                    className={`flex items-center gap-1 px-4 py-1.5 rounded-full text-xs font-medium border transition shadow-sm ${localRanking?.played_it ? 'bg-green-600 text-white border-green-600 hover:bg-green-500' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'}`}
-                  >
-                    <PlayIcon className="h-4 w-4" />{' '}
-                    {localRanking?.played_it ? 'Played' : 'I Played This'}
-                  </button>
                 </div>
               </div>
             </div>
@@ -1377,7 +1385,6 @@ export default function GameDetailModal({
                           })
                           setRatingOpen(true)
                         }}
-                        className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-gray-700 transition text-xs font-medium ${ratingValue ? 'bg-transparent border-0 shadow-none hover:bg-transparent' : 'border border-gray-300 bg-white hover:bg-gray-50 shadow-sm'}`}
                         title={ratingValue ? 'Change rating' : 'Rate this game'}
                       >
                         <RatingChip
@@ -1385,7 +1392,7 @@ export default function GameDetailModal({
                           size="sm"
                           variant="subtle"
                           showEmptyAsStar={true}
-                          className={`ring-0 shadow-none ${saving ? 'opacity-70' : ''}`}
+                          className="ring-0 shadow-none"
                         />
                       </button>
                       {ratingValue && (

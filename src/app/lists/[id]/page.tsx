@@ -322,6 +322,7 @@ export default function ListDetailPage() {
           header={header}
           emptyMessage={{ title: 'No games in this list yet.' }}
           showListRanking
+          hasExplicitOrder={isBgg}
           onRankingUpdate={handleRankingUpdate}
         />
       </div>

@@ -2,7 +2,7 @@
 import Link from 'next/link'
 import GameCard from '@/components/Components/GameCard'
 import Heading from '@/components/Components/Heading'
-import { AwardCard } from '@/components/Components/Awards/AwardCard'
+import { AwardCard } from '@/components/Components/AwardCard'
 import ListCard from '@/components/Components/ListCard'
 import {
   TrophyIcon,
@@ -42,6 +42,15 @@ export interface HomepageViewProps {
     games_count?: number
     updated_at?: string
   }>
+  bggMostPlayed?: Game[]
+  bggHotness?: Game[]
+  bggBestsellers?: Game[]
+  bggListIds?: {
+    trendingplays?: string
+    hotness?: string
+    mostplayed?: string
+    bestsellers?: string
+  }
 }
 
 const features = [
@@ -79,7 +88,7 @@ const features = [
   },
 ]
 
-export function HomepageView({ user, loading, featuredGames, userStats, industryAwards = [], publicLists = [] }: HomepageViewProps) {
+export function HomepageView({ user, loading, featuredGames, userStats, industryAwards = [], publicLists = [], bggMostPlayed = [], bggHotness = [], bggBestsellers = [], bggListIds = {} }: HomepageViewProps) {
   // Guest experience
   if (!user) {
     return (
@@ -90,18 +99,25 @@ export function HomepageView({ user, loading, featuredGames, userStats, industry
               <Heading as="h2" size="lg" className="text-gray-900 dark:text-white">Trending Games</Heading>
               <p className="mt-2 text-lg text-gray-600 dark:text-gray-300">Discover what's popular in the board game community</p>
             </div>
-            <Link href="/games" className="text-primary-600 hover:text-primary-500 font-medium">View all games →</Link>
+            <Link href={bggListIds.trendingplays ? `/lists/${bggListIds.trendingplays}` : "/games"} className="text-primary-600 hover:text-primary-500 font-medium">View all games →</Link>
           </div>
           {loading ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="bg-gray-200 dark:bg-gray-700 animate-pulse rounded-lg aspect-[3/4]" />
+            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className="flex-shrink-0 w-48 h-64 bg-gray-200 dark:bg-gray-700 animate-pulse rounded-lg" />
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 -mx-4 px-4">
               {featuredGames.map((game) => (
-                <GameCard key={game.id} game={game as any} viewMode="grid" variant="compact" />
+                <div key={game.id} className="flex-shrink-0 w-48">
+                  <GameCard 
+                    game={game as any} 
+                    viewMode="grid" 
+                    variant="balanced"
+                    className="h-full flex flex-col"
+                  />
+                </div>
               ))}
             </div>
           )}
@@ -149,22 +165,104 @@ export function HomepageView({ user, loading, featuredGames, userStats, industry
             <Heading as="h2" size="lg" className="text-gray-900 dark:text-white">Trending Games</Heading>
             <p className="mt-2 text-lg text-gray-600 dark:text-gray-300">Discover what's popular in the board game community</p>
           </div>
-          <Link href="/games" className="text-primary-600 hover:text-primary-500 font-medium">View all games →</Link>
+          <Link href={bggListIds.trendingplays ? `/lists/${bggListIds.trendingplays}` : "/games"} className="text-primary-600 hover:text-primary-500 font-medium">View all games →</Link>
         </div>
         {loading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="bg-gray-200 dark:bg-gray-700 animate-pulse rounded-lg aspect-[3/4]" />
+          <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="flex-shrink-0 w-48 h-64 bg-gray-200 dark:bg-gray-700 animate-pulse rounded-lg" />
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+          <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 -mx-4 px-4">
             {featuredGames.map((game) => (
-              <GameCard key={game.id} game={game as any} viewMode="grid" variant="compact" />
+              <div key={game.id} className="flex-shrink-0 w-48">
+                <GameCard 
+                  game={game as any} 
+                  viewMode="grid" 
+                  variant="balanced"
+                  className="h-full flex flex-col"
+                />
+              </div>
             ))}
           </div>
         )}
       </section>
+
+      {/* BGG Hotness */}
+      {bggHotness.length > 0 && (
+        <section className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <Heading as="h2" size="lg" className="text-gray-900 dark:text-white">BGG Hotness</Heading>
+              <p className="mt-2 text-lg text-gray-600 dark:text-gray-300">What's trending hot on BoardGameGeek right now</p>
+            </div>
+            <Link href={bggListIds.hotness ? `/lists/${bggListIds.hotness}` : "/lists"} className="text-primary-600 hover:text-primary-500 font-medium">View all →</Link>
+          </div>
+          <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 -mx-4 px-4">
+            {bggHotness.map((game) => (
+              <div key={game.id} className="flex-shrink-0 w-48">
+                <GameCard 
+                  game={game as any} 
+                  viewMode="grid" 
+                  variant="balanced"
+                  className="h-full flex flex-col"
+                />
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* BGG Most Played */}
+      {bggMostPlayed.length > 0 && (
+        <section className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <Heading as="h2" size="lg" className="text-gray-900 dark:text-white">BGG Most Played</Heading>
+              <p className="mt-2 text-lg text-gray-600 dark:text-gray-300">Games getting the most plays right now</p>
+            </div>
+            <Link href={bggListIds.mostplayed ? `/lists/${bggListIds.mostplayed}` : "/lists"} className="text-primary-600 hover:text-primary-500 font-medium">View all →</Link>
+          </div>
+          <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 -mx-4 px-4">
+            {bggMostPlayed.map((game) => (
+              <div key={game.id} className="flex-shrink-0 w-48">
+                <GameCard 
+                  game={game as any} 
+                  viewMode="grid" 
+                  variant="balanced"
+                  className="h-full flex flex-col"
+                />
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* BGG Bestsellers */}
+      {bggBestsellers.length > 0 && (
+        <section className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <Heading as="h2" size="lg" className="text-gray-900 dark:text-white">BGG Bestsellers</Heading>
+              <p className="mt-2 text-lg text-gray-600 dark:text-gray-300">Top-selling games on BoardGameGeek</p>
+            </div>
+            <Link href={bggListIds.bestsellers ? `/lists/${bggListIds.bestsellers}` : "/lists"} className="text-primary-600 hover:text-primary-500 font-medium">View all →</Link>
+          </div>
+          <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 -mx-4 px-4">
+            {bggBestsellers.map((game) => (
+              <div key={game.id} className="flex-shrink-0 w-48">
+                <GameCard 
+                  game={game as any} 
+                  viewMode="grid" 
+                  variant="balanced"
+                  className="h-full flex flex-col"
+                />
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section className="space-y-6">
         <div className="text-center">
@@ -215,16 +313,16 @@ export function HomepageView({ user, loading, featuredGames, userStats, industry
         </section>
       )}
 
-      {/* Public Lists Preview */}
-      {publicLists.length > 0 && (
-        <section className="space-y-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <Heading as="h2" size="lg" className="text-gray-900 dark:text-white">Public Lists</Heading>
-              <p className="mt-2 text-lg text-gray-600 dark:text-gray-300">Community-curated game collections</p>
-            </div>
-            <Link href="/lists" className="text-primary-600 hover:text-primary-500 font-medium">Browse lists →</Link>
+      {/* Public Lists Preview - Always show section for debugging */}
+      <section className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <Heading as="h2" size="lg" className="text-gray-900 dark:text-white">Public Lists</Heading>
+            <p className="mt-2 text-lg text-gray-600 dark:text-gray-300">Community-curated game collections ({publicLists.length} found)</p>
           </div>
+          <Link href="/lists" className="text-primary-600 hover:text-primary-500 font-medium">Browse lists →</Link>
+        </div>
+        {publicLists.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {publicLists.slice(0, 3).map((list) => (
               <ListCard
@@ -234,8 +332,12 @@ export function HomepageView({ user, loading, featuredGames, userStats, industry
               />
             ))}
           </div>
-        </section>
-      )}
+        ) : (
+          <div className="text-center py-8 text-gray-500">
+            Loading lists or no public lists found...
+          </div>
+        )}
+      </section>
       <section className="space-y-6">
         <div className="text-center">
           <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Your Gaming Toolkit</h2>

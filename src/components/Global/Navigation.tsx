@@ -8,6 +8,7 @@ import NavItem from '../Elements/NavItem'
 import { cn } from '@/utils/helpers'
 import { Button } from '../Elements/Button'
 import Logo from '../Foundations/Logo'
+import dynamic from 'next/dynamic'
 import {
   TrophyIcon,
   ChartBarIcon,
@@ -24,6 +25,16 @@ import {
   HeartIcon,
   PlusIcon,
 } from '@heroicons/react/24/outline'
+
+// Dynamic imports for modals
+const PlayLogEditor = dynamic(
+  () => import('@/components/Components/PlayLogEditor'),
+  { ssr: false }
+)
+const CreateListModal = dynamic(
+  () => import('@/components/Components/CreateListModal'),
+  { ssr: false }
+)
 
 interface NavLinkItem {
   name: string
@@ -70,11 +81,11 @@ function MissingGameQuickAdd({ onDone }: { onDone: () => void }) {
       </button>
       {open && (
         <div
-          className="fixed inset-0 z-[250] flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm p-0 sm:p-4"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
           onClick={() => setOpen(false)}
         >
           <div
-            className="bg-white dark:bg-gray-900 w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl shadow-xl p-6 relative"
+            className="bg-white dark:bg-gray-900 w-full max-w-md rounded-2xl shadow-xl p-6 relative"
             onClick={(e) => e.stopPropagation()}
           >
             <button
@@ -292,6 +303,14 @@ function Navigation() {
   const addButtonRef = useRef<HTMLButtonElement | null>(null)
   const userMenuRef = useRef<HTMLDivElement | null>(null)
   const userButtonRef = useRef<HTMLButtonElement | null>(null)
+
+  // Modal states
+  const [showPlayLogModal, setShowPlayLogModal] = useState(false)
+  const [showCreateListModal, setShowCreateListModal] = useState(false)
+  const [selectedGameForPlayLog, setSelectedGameForPlayLog] = useState<{
+    id: string
+    name: string
+  } | null>(null)
 
   // Scroll hide/show
   const [visible, setVisible] = useState(true)
@@ -699,7 +718,7 @@ function Navigation() {
                 <button
                   onClick={() => {
                     setShowAddMenu(false)
-                    router.push('/plays/new')
+                    setShowPlayLogModal(true)
                   }}
                   className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition"
                 >
@@ -708,7 +727,7 @@ function Navigation() {
                 <button
                   onClick={() => {
                     setShowAddMenu(false)
-                    router.push('/lists')
+                    setShowCreateListModal(true)
                   }}
                   className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition"
                 >
@@ -851,6 +870,62 @@ function Navigation() {
           </div>
         </div>
       </div>
+
+      {/* Play Log Modal */}
+      {showPlayLogModal && (
+        <div
+          className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm p-0 sm:p-4"
+          onClick={() => setShowPlayLogModal(false)}
+        >
+          <div
+            className="bg-white dark:bg-gray-900 w-full sm:max-w-xl rounded-t-2xl sm:rounded-2xl shadow-xl p-6 relative flex flex-col max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setShowPlayLogModal(false)}
+              className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 text-sm"
+              aria-label="Close play log modal"
+            >
+              ×
+            </button>
+            <h3 className="text-base font-semibold mb-4">
+              Log Your Play
+            </h3>
+            {selectedGameForPlayLog ? (
+              <PlayLogEditor
+                gameId={selectedGameForPlayLog.id}
+                gameName={selectedGameForPlayLog.name}
+                openForm
+                autoFocus
+                onCreated={() => {
+                  setShowPlayLogModal(false)
+                  setSelectedGameForPlayLog(null)
+                }}
+              />
+            ) : (
+              <div className="text-center text-gray-500 py-8">
+                <p className="mb-4">Select a game to log a play for:</p>
+                <div className="text-sm text-gray-400">
+                  Game selection coming soon - for now, log plays from individual game cards.
+                </div>
+                <button
+                  onClick={() => setShowPlayLogModal(false)}
+                  className="mt-4 px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
+                >
+                  Close
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Create List Modal */}
+      <CreateListModal
+        isOpen={showCreateListModal}
+        onClose={() => setShowCreateListModal(false)}
+        onSuccess={() => setShowCreateListModal(false)}
+      />
     </nav>
   )
 }
