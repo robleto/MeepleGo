@@ -11,13 +11,17 @@ import GameSearchSelect from '@/components/Components/GameSearchSelect'
 import type { SuggestionGame } from '@/components/Components/GameSearchSelect'
 import Heading from '@/components/Components/Heading'
 import { JournalTimelineMarker } from '@/components/Elements'
+import Portal from '@/components/Elements/Portal'
+import SearchDropdown from '@/components/Elements/SearchDropdown'
 import {
   getMembershipSets,
   addGameToDefaultList,
   removeGameFromDefaultList,
 } from '@/lib/lists'
-import { BookmarkIcon, HeartIcon } from '@heroicons/react/24/outline'
+import { BookmarkIcon, HeartIcon, XMarkIcon, CubeIcon, StarIcon, HashtagIcon, DocumentTextIcon } from '@heroicons/react/24/outline'
+import { PlayIcon } from '@heroicons/react/24/solid'
 import { getRatingSolidClass } from '@/components/Foundations/ratingColors'
+import StatCard from '@/components/Elements/StatCard'
 import PlayLogEditor from '@/components/Components/PlayLogEditor'
 import ZeroState from '@/components/Components/ZeroState'
 
@@ -25,6 +29,7 @@ interface Stats {
   totalPlays: number
   uniqueGames: number
   avgRating: number | null
+  gamesWithNotes: number
   ratingsTimeline: { date: string; avgRating: number; count: number }[]
   recentTags: { tag: string; count: number }[]
 }
@@ -89,7 +94,8 @@ export default function PlaysClientPage({
     plays: number
     unique: number
     avg: number | null
-  }>({ plays: 0, unique: 0, avg: null })
+    gamesWithNotes: number
+  }>({ plays: 0, unique: 0, avg: null, gamesWithNotes: 0 })
   const [membershipSets, setMembershipSets] = useState<{
     library: Set<string>
     wishlist: Set<string>
@@ -100,6 +106,24 @@ export default function PlaysClientPage({
   const [editingLog, setEditingLog] = useState<PlayLog | null>(null)
   const [showEditModal, setShowEditModal] = useState(false)
   const [toast, setToast] = useState<UndoToast | null>(null)
+  
+  // Log Play Modal states (matching Navigation pattern)
+  const [showPlayLogModal, setShowPlayLogModal] = useState(false)
+  const [selectedGameForPlayLog, setSelectedGameForPlayLog] = useState<{
+    id: string
+    name: string
+  } | null>(null)
+
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    if (showPlayLogModal) {
+      const originalOverflow = document.body.style.overflow
+      document.body.style.overflow = 'hidden'
+      return () => {
+        document.body.style.overflow = originalOverflow
+      }
+    }
+  }, [showPlayLogModal])
 
   // SWR-like revalidation helpers
   async function revalidateStats(uid: string) {
@@ -249,17 +273,20 @@ export default function PlaysClientPage({
       plays: animatedStats.plays,
       unique: animatedStats.unique,
       avg: animatedStats.avg,
+      gamesWithNotes: animatedStats.gamesWithNotes,
     }
     const to = {
       plays: stats.totalPlays,
       unique: stats.uniqueGames,
       avg: stats.avgRating,
+      gamesWithNotes: stats.gamesWithNotes,
     }
     function frame(ts: number) {
       const t = Math.min(1, (ts - start) / duration)
       setAnimatedStats({
         plays: Math.round(from.plays + (to.plays - from.plays) * t),
         unique: Math.round(from.unique + (to.unique - from.unique) * t),
+        gamesWithNotes: Math.round(from.gamesWithNotes + (to.gamesWithNotes - from.gamesWithNotes) * t),
         avg:
           to.avg == null
             ? null
@@ -274,7 +301,7 @@ export default function PlaysClientPage({
     }
     requestAnimationFrame(frame)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [stats?.totalPlays, stats?.uniqueGames, stats?.avgRating])
+  }, [stats?.totalPlays, stats?.uniqueGames, stats?.avgRating, stats?.gamesWithNotes])
 
   const now = useMemo(() => new Date(), [])
   const withinDays = (iso: string, days: number) =>
@@ -585,229 +612,14 @@ export default function PlaysClientPage({
               Game Log
             </Heading>
             <div className="ml-auto pt-2">
-              {!showAdd && (
-                <button
-                  onClick={() => {
-                    setShowAdd(true)
-                    setSelectedGame(null)
-                  }}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full btn-brand text-sm font-medium"
-                >
-                  Add New
-                </button>
-              )}
-              {showAdd && (
-                <button
-                  onClick={() => {
-                    setShowAdd(false)
-                    setSelectedGame(null)
-                  }}
-                  className="text-xs text-gray-500 hover:text-gray-700 underline"
-                >
-                  Cancel
-                </button>
-              )}
-            </div>
-          </div>
-        )}
-        {showAdd && selectedGame && !zeroStateActive && isOwner && (
-          <div className="border border-dashed border-gray-300 dark:border-gray-700 rounded-xl p-5 bg-white/70 dark:bg-gray-900/70">
-            <div className="flex items-center gap-3 mb-4">
-              <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
-                {selectedGame.name}
-              </h2>
               <button
-                onClick={() => setSelectedGame(null)}
-                className="ml-auto text-[11px] text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 underline"
+                onClick={() => setShowPlayLogModal(true)}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-full btn-brand text-sm font-medium"
               >
-                Change Game
+                Add New
               </button>
             </div>
-            <PlayLogEditor
-              gameId={selectedGame.id}
-              gameName={selectedGame.name}
-              autoFocus
-              onCreated={(log) => {
-                setLogs((prev) => [log, ...prev])
-                setShowAdd(false)
-                setSelectedGame(null)
-                setHighlightId(log.id)
-                setTimeout(() => setHighlightId(null), 3500)
-              }}
-            />
           </div>
-        )}
-        {showAdd && !selectedGame && !zeroStateActive && isOwner && (
-          <div className="flex justify-center">
-            <div className="w-full max-w-lg">
-              <GameSearchSelect
-                autoFocus
-                onSelect={(g: SuggestionGame) => {
-                  setSelectedGame({
-                    id: g.id,
-                    name: g.name,
-                    year_published: g.year_published,
-                    thumbnail_url: g.thumbnail_url,
-                  })
-                }}
-              />
-              <div className="mt-3 text-[12px] text-center text-gray-400">
-                Search for a game to log a play
-              </div>
-            </div>
-          </div>
-        )}
-        {stats && !zeroStateActive && (
-          <section className="grid md:grid-cols-6 gap-4">
-            <div className="p-4 border border-gray-200 dark:border-gray-800 rounded-xl bg-white dark:bg-gray-900 shadow-sm">
-              <div className="text-xs uppercase text-gray-500 tracking-wide">
-                Plays
-              </div>
-              <div className="text-2xl font-bold tabular-nums">
-                {animatedStats.plays}
-              </div>
-            </div>
-            <div className="p-4 border border-gray-200 dark:border-gray-800 rounded-xl bg-white dark:bg-gray-900 shadow-sm">
-              <div className="text-xs uppercase text-gray-500 tracking-wide">
-                Unique Games
-              </div>
-              <div className="text-2xl font-bold tabular-nums">
-                {animatedStats.unique}
-              </div>
-            </div>
-            <div className="p-4 border border-gray-200 dark:border-gray-800 rounded-xl bg-white dark:bg-gray-900 shadow-sm">
-              <div className="text-xs uppercase text-gray-500 tracking-wide">
-                Avg Rating
-              </div>
-              <div className="text-2xl font-bold tabular-nums">
-                {animatedStats.avg ?? '—'}
-              </div>
-            </div>
-            <div className="p-4 border border-gray-200 dark:border-gray-800 rounded-xl bg-white dark:bg-gray-900 shadow-sm">
-              <div className="text-xs uppercase text-gray-500 tracking-wide">
-                Top Tags
-              </div>
-              <div className="flex flex-wrap gap-1 mt-1">
-                {stats.recentTags.slice(0, 6).map((t) => (
-                  <button
-                    key={t.tag}
-                    onClick={() =>
-                      setTagFilter((prev) => (prev === t.tag ? null : t.tag))
-                    }
-                    className={`px-2 py-0.5 rounded text-xs border transition focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 ${tagFilter === t.tag ? 'bg-sky-600 text-white border-sky-600 dark:bg-sky-500 dark:border-sky-500' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-transparent hover:bg-gray-200 dark:hover:bg-gray-700'}`}
-                  >
-                    {t.tag}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className="p-4 border border-gray-200 dark:border-gray-800 rounded-xl bg-white dark:bg-gray-900 shadow-sm flex flex-col justify-between">
-              <div className="flex items-center justify-between text-xs uppercase text-gray-500 tracking-wide">
-                <span>Streak</span>
-                {summary && (
-                  <span className="text-[10px] normal-case font-medium text-gray-400">
-                    Longest {summary.streak.longest}
-                  </span>
-                )}
-              </div>
-              <div className="mt-1 flex items-end gap-2">
-                <div className="text-2xl font-bold tabular-nums">
-                  {summary?.streak.current ?? '—'}
-                </div>
-                <span className="text-[11px] text-gray-500 mb-1">days</span>
-              </div>
-              <div className="mt-3 h-8 flex items-end gap-0.5">
-                {summary?.last30.slice(-30).map((d) => {
-                  const h = d.count === 0 ? 2 : d.count >= 6 ? 24 : d.count * 4
-                  return (
-                    <div
-                      key={d.date}
-                      title={`${d.date}: ${d.count} plays`}
-                      className="w-1 rounded-sm bg-sky-500/60 dark:bg-sky-400/60"
-                      style={{ height: h }}
-                    />
-                  )
-                })}
-                {!summary && <div className="text-[10px] text-gray-400">—</div>}
-              </div>
-            </div>
-            <div className="p-4 border border-gray-200 dark:border-gray-800 rounded-xl bg-white dark:bg-gray-900 shadow-sm flex flex-col">
-              <div className="flex items-center justify-between text-xs uppercase text-gray-500 tracking-wide">
-                <span>Rating Trend</span>
-                {summary && (
-                  <span className="text-[10px] normal-case font-medium text-gray-400">
-                    7d avg
-                  </span>
-                )}
-              </div>
-              <div className="mt-2 flex-1 flex items-end">
-                <svg
-                  viewBox="0 0 120 40"
-                  className="w-full h-16 overflow-visible"
-                >
-                  {summary &&
-                    summary.ratingTrend.length > 1 &&
-                    (() => {
-                      const pts = summary.ratingTrend.slice(-30)
-                      const ratings = pts.map((p) => p.avg)
-                      const min = Math.min(...ratings, 1)
-                      const max = Math.max(...ratings, 10)
-                      const norm = (v: number) => (v - min) / (max - min || 1)
-                      let d = ''
-                      pts.forEach((p, i) => {
-                        const x = (i / (pts.length - 1)) * 120
-                        const y = 36 - norm(p.avg) * 32
-                        d +=
-                          (i === 0 ? 'M' : 'L') +
-                          x.toFixed(2) +
-                          ' ' +
-                          y.toFixed(2) +
-                          ' '
-                      })
-                      return (
-                        <path
-                          d={d}
-                          fill="none"
-                          strokeWidth={2}
-                          className="stroke-sky-500 dark:stroke-sky-400"
-                          strokeLinecap="round"
-                        />
-                      )
-                    })()}
-                  {summary &&
-                    summary.ratingTrend.length > 1 &&
-                    (() => {
-                      const pts = summary.ratingTrend.slice(-30)
-                      const ratings = pts.map((p) => p.avg)
-                      const min = Math.min(...ratings, 1)
-                      const max = Math.max(...ratings, 10)
-                      const norm = (v: number) => (v - min) / (max - min || 1)
-                      const area = pts
-                        .map((p, i) => {
-                          const x = (i / (pts.length - 1)) * 120
-                          const y = 36 - norm(p.avg) * 32
-                          return `${x.toFixed(2)},${y.toFixed(2)}`
-                        })
-                        .join(' ')
-                      return (
-                        <polyline
-                          points={area}
-                          className="fill-sky-500/10 dark:fill-sky-400/10 stroke-none"
-                        />
-                      )
-                    })()}
-                </svg>
-              </div>
-              {summary && summary.ratingTrend.length > 0 && (
-                <div className="mt-1 text-[10px] text-gray-400 flex items-center justify-between">
-                  <span>{summary.ratingTrend.slice(-1)[0].avg.toFixed(1)}</span>
-                  <span className="italic">
-                    last {Math.min(30, summary.ratingTrend.length)} days
-                  </span>
-                </div>
-              )}
-            </div>
-          </section>
         )}
         {!zeroStateActive && (
           <div className="flex flex-wrap items-center gap-2 mt-2 text-[11px]">
@@ -882,6 +694,72 @@ export default function PlaysClientPage({
             )}
           </div>
         )}
+        
+        {/* Filtered Stats */}
+        {!zeroStateActive && filteredLogs.length > 0 && (
+          <section className="grid md:grid-cols-5 gap-4">
+            <StatCard 
+              iconBg="bg-blue-500" 
+              Icon={PlayIcon} 
+              iconColor="text-white" 
+              value={filteredLogs.length} 
+              label="Plays" 
+            />
+            <StatCard 
+              iconBg="bg-green-500" 
+              Icon={CubeIcon} 
+              iconColor="text-white" 
+              value={new Set(filteredLogs.map(l => l.game_id)).size} 
+              label="Unique Games" 
+            />
+            <StatCard 
+              iconBg="bg-purple-500" 
+              Icon={DocumentTextIcon} 
+              iconColor="text-white" 
+              value={new Set(filteredLogs.filter(l => (l.notes || '').trim().length > 0).map(l => l.game_id)).size} 
+              label="Games with Notes" 
+            />
+            <div className="p-4 border border-gray-200 dark:border-gray-800 rounded-xl bg-white dark:bg-gray-900 shadow-sm flex flex-col justify-between">
+              <div className="flex items-center justify-between text-xs uppercase text-gray-500 tracking-wide">
+                <span>Streak</span>
+                {summary && (
+                  <span className="text-[10px] normal-case font-medium text-gray-400">
+                    Longest {summary.streak.longest}
+                  </span>
+                )}
+              </div>
+              <div className="mt-1 flex items-end gap-2">
+                <div className="text-2xl font-bold tabular-nums">
+                  {summary?.streak.current ?? '—'}
+                </div>
+                <span className="text-[11px] text-gray-500 mb-1">days</span>
+              </div>
+              <div className="mt-3 h-8 flex items-end gap-0.5">
+                {summary?.last30.slice(-30).map((d) => {
+                  const h = d.count === 0 ? 2 : d.count >= 6 ? 24 : d.count * 4
+                  return (
+                    <div
+                      key={d.date}
+                      title={`${d.date}: ${d.count} plays`}
+                      className="w-1 rounded-sm bg-sky-500/60 dark:bg-sky-400/60"
+                      style={{ height: h }}
+                    />
+                  )
+                })}
+                {!summary && <div className="text-[10px] text-gray-400">—</div>}
+              </div>
+            </div>
+            <div className="col-span-1 p-4 border border-gray-200 dark:border-gray-800 rounded-xl bg-white dark:bg-gray-900 shadow-sm">
+              <div className="text-xs uppercase text-gray-500 tracking-wide mb-3">
+                Activity
+              </div>
+              <div className="text-sm text-gray-600 dark:text-gray-300">
+                Filtered period stats
+              </div>
+            </div>
+          </section>
+        )}
+        
         {/* Zero state for own journal */}
         {zeroStateActive && isOwner && (
           <div className="panel mb-8 flex flex-col md:flex-row md:items-start gap-10 md:gap-20">
@@ -921,14 +799,7 @@ export default function PlaysClientPage({
               </p>
               {!showAdd && (
                 <button
-                  onClick={() => {
-                    setShowAdd(true)
-                    setSelectedGame(null)
-                    setTimeout(
-                      () => window.scrollTo({ top: 0, behavior: 'smooth' }),
-                      0
-                    )
-                  }}
+                  onClick={() => setShowPlayLogModal(true)}
                   className="inline-flex items-center gap-2 px-6 py-3 rounded-full btn-brand text-sm font-medium shadow-sm hover:shadow-md transition-shadow"
                 >
                   <svg
@@ -946,63 +817,6 @@ export default function PlaysClientPage({
                   </svg>
                   Log Your First Play
                 </button>
-              )}
-              {showAdd && (
-                <div className="w-full max-w-md">
-                  {!selectedGame && (
-                    <>
-                      <GameSearchSelect
-                        variant="hero"
-                        autoFocus
-                        onSelect={(g: SuggestionGame) => {
-                          setSelectedGame({
-                            id: g.id,
-                            name: g.name,
-                            year_published: g.year_published,
-                            thumbnail_url: g.thumbnail_url,
-                          })
-                        }}
-                      />
-                      <div className="mt-2 text-[11px] text-gray-400">
-                        Search for a game to log a play
-                      </div>
-                      <button
-                        onClick={() => setShowAdd(false)}
-                        type="button"
-                        className="mt-3 text-[11px] text-gray-500 hover:text-gray-700 underline"
-                      >
-                        Cancel
-                      </button>
-                    </>
-                  )}
-                  {selectedGame && (
-                    <div className="border border-dashed border-gray-300 dark:border-gray-700 rounded-xl p-5 bg-white/70 dark:bg-gray-900/70">
-                      <div className="flex items-center gap-3 mb-4">
-                        <h2 className="text-base font-semibold text-gray-800 dark:text-gray-100 truncate">
-                          {selectedGame.name}
-                        </h2>
-                        <button
-                          onClick={() => setSelectedGame(null)}
-                          className="ml-auto text-[11px] text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 underline"
-                        >
-                          Change Game
-                        </button>
-                      </div>
-                      <PlayLogEditor
-                        gameId={selectedGame.id}
-                        gameName={selectedGame.name}
-                        autoFocus
-                        onCreated={(log) => {
-                          setLogs((prev) => [log, ...prev])
-                          setShowAdd(false)
-                          setSelectedGame(null)
-                          setHighlightId(log.id)
-                          setTimeout(() => setHighlightId(null), 3500)
-                        }}
-                      />
-                    </div>
-                  )}
-                </div>
               )}
             </div>
             <ol className="flex-1 space-y-10 md:space-y-12 relative">
@@ -1394,23 +1208,28 @@ export default function PlaysClientPage({
                     }}
                   >
                     <div
-                      className="bg-white dark:bg-gray-900 w-full sm:max-w-xl rounded-t-2xl sm:rounded-2xl shadow-xl p-6 relative flex flex-col max-h-[90vh] overflow-y-auto"
+                      className="bg-white dark:bg-gray-900 w-full sm:max-w-xl rounded-t-2xl sm:rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[90vh]"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      <button
-                        onClick={() => {
-                          setShowEditModal(false)
-                          setEditingLog(null)
-                        }}
-                        className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 text-sm"
-                        aria-label="Close edit modal"
-                      >
-                        ×
-                      </button>
-                      <h3 className="text-base font-semibold mb-4">
-                        Edit Play Log
-                      </h3>
-                      <PlayLogEditor
+                      {/* Header */}
+                      <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+                        <h3 className="text-lg font-semibold">
+                          Edit Play Log
+                        </h3>
+                        <button
+                          onClick={() => {
+                            setShowEditModal(false)
+                            setEditingLog(null)
+                          }}
+                          className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
+                          aria-label="Close"
+                        >
+                          <XMarkIcon className="w-6 h-6 text-gray-500" />
+                        </button>
+                      </div>
+                      {/* Body */}
+                      <div className="p-6 flex-1 overflow-y-auto">
+                        <PlayLogEditor
                         gameId={editingLog.game_id}
                         gameName={gameMeta[editingLog.game_id]?.name || 'Game'}
                         editLog={editingLog}
@@ -1427,6 +1246,7 @@ export default function PlaysClientPage({
                         autoFocus
                         openForm
                       />
+                      </div>
                     </div>
                   </div>
                 )}
@@ -1455,6 +1275,75 @@ export default function PlaysClientPage({
           </section>
         )}
       </div>
+
+      {/* Log Play Modal */}
+      {showPlayLogModal && (
+        <Portal>
+          <div
+            className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm p-0 sm:p-4"
+            onClick={() => setShowPlayLogModal(false)}
+          >
+            <div
+              className="bg-white dark:bg-gray-900 w-full sm:max-w-2xl rounded-t-2xl sm:rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[80vh]"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+                <h3 className="text-lg font-semibold">
+                  Log Your Play
+                </h3>
+                <button
+                  onClick={() => setShowPlayLogModal(false)}
+                  className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
+                  aria-label="Close"
+                >
+                  <XMarkIcon className="w-6 h-6 text-gray-500" />
+                </button>
+              </div>
+              {/* Body */}
+              <div className="p-6 flex-1 overflow-y-auto">
+              {selectedGameForPlayLog ? (
+                <PlayLogEditor
+                  gameId={selectedGameForPlayLog.id}
+                  gameName={selectedGameForPlayLog.name}
+                  openForm
+                  autoFocus
+                  onCreated={(log) => {
+                    setLogs((prev) => [log, ...prev])
+                    setShowPlayLogModal(false)
+                    setSelectedGameForPlayLog(null)
+                    setHighlightId(log.id)
+                    setTimeout(() => setHighlightId(null), 3500)
+                  }}
+                />
+              ) : (
+                <div className="space-y-4">
+                  <p className="text-gray-600 text-sm mb-4">Search for a game to log a play:</p>
+                  <SearchDropdown
+                    onSelect={(game) => {
+                      setSelectedGameForPlayLog({
+                        id: game.id,
+                        name: game.name,
+                      })
+                    }}
+                    placeholder="Search for a game..."
+                    autoFocus
+                  />
+                  <div className="flex justify-end pt-4">
+                    <button
+                      onClick={() => setShowPlayLogModal(false)}
+                      className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
+              </div>
+            </div>
+          </div>
+        </Portal>
+      )}
     </div>
   )
 }

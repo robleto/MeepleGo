@@ -41,6 +41,8 @@ interface GameDetailModalProps {
   onClose?: () => void
   variant?: 'modal' | 'page'
   onMembershipChange?: (gameId: string, patch: any) => void
+  /** Position modal considering navigation height */
+  fromNav?: boolean
 }
 
 export default function GameDetailModal({
@@ -49,6 +51,7 @@ export default function GameDetailModal({
   onClose,
   variant = 'modal',
   onMembershipChange,
+  fromNav = false,
 }: GameDetailModalProps) {
   let router: any
   let searchParamsNav: any
@@ -530,12 +533,17 @@ export default function GameDetailModal({
 
   if (variant === 'modal' && !open) return null
 
+  // Determine modal positioning based on trigger source
+  const modalClasses = fromNav 
+    ? "items-start pt-20" // More top padding when from nav
+    : "items-center"
+
   const Container: any = variant === 'modal' ? 'div' : 'section'
   const outerProps =
     variant === 'modal'
       ? {
           className:
-            'fixed inset-0 z-[200] transition-opacity duration-150 pointer-events-auto opacity-100 flex items-center justify-center p-4 sm:p-8',
+            `fixed inset-0 z-[200] transition-opacity duration-150 pointer-events-auto opacity-100 flex ${modalClasses} justify-center p-4 sm:p-8`,
           onMouseDown: (e: any) => {
             if (e.target === e.currentTarget) onClose?.()
           },
@@ -543,7 +551,7 @@ export default function GameDetailModal({
       : { className: 'w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 max-w-6xl' }
   const panelClasses =
     variant === 'modal'
-      ? 'relative w-full max-w-3xl h-[calc(100vh-4rem)] rounded-2xl shadow-xl ring-1 ring-black/5 border border-gray-100 bg-white/95 backdrop-blur-sm text-gray-900 focus:outline-none overflow-hidden flex flex-col z-10'
+      ? 'relative w-full max-w-3xl h-[calc(100vh-6rem)] rounded-2xl shadow-xl ring-1 ring-black/5 border border-gray-100 bg-white/95 backdrop-blur-sm text-gray-900 focus:outline-none overflow-hidden flex flex-col z-10'
       : 'relative w-full rounded-2xl bg-white text-gray-900 flex flex-col shadow-sm border border-gray-100'
 
   return (

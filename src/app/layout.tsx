@@ -150,7 +150,7 @@ export default function RootLayout({
       </head>
       <body
         className={
-          'font-sans min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-white'
+          'font-sans min-h-screen text-gray-900 dark:text-white bg-white'
         }
       >
         <Navigation />

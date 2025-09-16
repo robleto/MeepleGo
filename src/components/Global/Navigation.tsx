@@ -1,6 +1,8 @@
 'use client'
 
 import React, { useEffect, useRef, useState } from 'react'
+import Portal from '@/components/Elements/Portal'
+import Overlay from '@/components/Elements/Overlay'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
@@ -23,147 +25,27 @@ import {
   CubeIcon,
   BookmarkIcon,
   HeartIcon,
+  XMarkIcon,
   PlusIcon,
 } from '@heroicons/react/24/outline'
 
-// Dynamic imports for modals
+// Dynamic imports for heavy components
 const PlayLogEditor = dynamic(
   () => import('@/components/Components/PlayLogEditor'),
-  { ssr: false }
-)
-const CreateListModal = dynamic(
-  () => import('@/components/Components/CreateListModal'),
-  { ssr: false }
+  {
+    loading: () => (
+      <div className="animate-pulse">
+        <div className="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
+        <div className="h-32 bg-gray-200 rounded"></div>
+      </div>
+    ),
+  }
 )
 
 interface NavLinkItem {
   name: string
   href: string
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>
-}
-// Inline quick-add modal for missing game requests
-function MissingGameQuickAdd({ onDone }: { onDone: () => void }) {
-  const [open, setOpen] = useState(false)
-  const [name, setName] = useState('')
-  const [year, setYear] = useState('')
-  const [publisher, setPublisher] = useState('')
-  const [saving, setSaving] = useState(false)
-  const [submitted, setSubmitted] = useState(false)
-  async function submit() {
-    if (!name.trim()) return
-    setSaving(true)
-    try {
-      await fetch('/api/missing-game-request', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: name.trim(),
-          year: year ? Number(year) : null,
-          publisher: publisher.trim() || null,
-        }),
-      }).catch(() => {})
-      setSubmitted(true)
-      setTimeout(() => {
-        setOpen(false)
-        onDone()
-      }, 1100)
-    } finally {
-      setSaving(false)
-    }
-  }
-  return (
-    <>
-      <button
-        onClick={() => setOpen(true)}
-        className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition"
-      >
-        <CubeIcon className="w-4 h-4 text-gray-400" /> Missing Game
-      </button>
-      {open && (
-        <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
-          onClick={() => setOpen(false)}
-        >
-          <div
-            className="bg-white dark:bg-gray-900 w-full max-w-md rounded-2xl shadow-xl p-6 relative"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              onClick={() => setOpen(false)}
-              className="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
-              aria-label="Close"
-            >
-              ×
-            </button>
-            <h3 className="text-base font-semibold mb-4">Add Missing Game</h3>
-            {!submitted && (
-              <div className="space-y-4">
-                <label className="flex flex-col gap-1 text-sm">
-                  <span className="text-[11px] uppercase tracking-wide text-gray-500">
-                    Name
-                  </span>
-                  <input
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500 bg-white/80"
-                    placeholder="Game title"
-                  />
-                </label>
-                <div className="grid grid-cols-2 gap-4">
-                  <label className="flex flex-col gap-1 text-sm">
-                    <span className="text-[11px] uppercase tracking-wide text-gray-500">
-                      Year
-                    </span>
-                    <input
-                      value={year}
-                      onChange={(e) => setYear(e.target.value)}
-                      type="number"
-                      className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500 bg-white/80"
-                      placeholder="2024"
-                    />
-                  </label>
-                  <label className="flex flex-col gap-1 text-sm">
-                    <span className="text-[11px] uppercase tracking-wide text-gray-500">
-                      Publisher
-                    </span>
-                    <input
-                      value={publisher}
-                      onChange={(e) => setPublisher(e.target.value)}
-                      className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500 bg-white/80"
-                      placeholder="Publisher"
-                    />
-                  </label>
-                </div>
-                <div className="flex gap-2 pt-1">
-                  <Button
-                    disabled={saving || !name.trim()}
-                    onClick={submit}
-                    variant="primary"
-                    size="sm"
-                    loading={saving}
-                  >
-                    Submit
-                  </Button>
-                  <Button
-                    onClick={() => setOpen(false)}
-                    variant="ghost"
-                    size="sm"
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              </div>
-            )}
-            {submitted && (
-              <div className="p-4 border border-green-200 rounded-lg bg-green-50 text-sm text-green-700">
-                Thanks! We'll review and import it soon.
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-    </>
-  )
 }
 const NAV_ITEMS: NavLinkItem[] = [
   { name: 'Awards', href: '/awards', icon: TrophyIcon },
@@ -307,10 +189,79 @@ function Navigation() {
   // Modal states
   const [showPlayLogModal, setShowPlayLogModal] = useState(false)
   const [showCreateListModal, setShowCreateListModal] = useState(false)
+  const [showAddGameModal, setShowAddGameModal] = useState(false)
   const [selectedGameForPlayLog, setSelectedGameForPlayLog] = useState<{
     id: string
     name: string
   } | null>(null)
+
+  // Create list form state
+  const [listName, setListName] = useState('')
+  const [isCreatingList, setIsCreatingList] = useState(false)
+
+  // Add game form state
+  const [gameName, setGameName] = useState('')
+  const [gameYear, setGameYear] = useState('')
+  const [gamePublisher, setGamePublisher] = useState('')
+  const [isSubmittingGame, setIsSubmittingGame] = useState(false)
+  const [gameSubmitted, setGameSubmitted] = useState(false)
+
+  // Create list function
+  const handleCreateList = async () => {
+    if (!listName.trim() || isCreatingList) return
+    
+    setIsCreatingList(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      
+      const { error } = await supabase
+        .from('lists')
+        .insert({
+          name: listName.trim(),
+          user_id: user.id,
+          is_public: false
+        })
+      
+      if (!error) {
+        setListName('')
+        setShowCreateListModal(false)
+        router.refresh()
+      }
+    } catch (error) {
+      console.error('Error creating list:', error)
+    } finally {
+      setIsCreatingList(false)
+    }
+  }
+
+  // Add game function
+  const handleAddGame = async () => {
+    if (!gameName.trim() || isSubmittingGame) return
+    
+    setIsSubmittingGame(true)
+    try {
+      await fetch('/api/missing-game-request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: gameName.trim(),
+          year: gameYear ? Number(gameYear) : null,
+          publisher: gamePublisher.trim() || null,
+        }),
+      }).catch(() => {})
+      setGameSubmitted(true)
+      setTimeout(() => {
+        setShowAddGameModal(false)
+        setGameName('')
+        setGameYear('')
+        setGamePublisher('')
+        setGameSubmitted(false)
+      }, 1100)
+    } finally {
+      setIsSubmittingGame(false)
+    }
+  }
 
   // Scroll hide/show
   const [visible, setVisible] = useState(true)
@@ -733,7 +684,15 @@ function Navigation() {
                 >
                   <ListBulletIcon className="w-4 h-4 text-gray-400" /> New List
                 </button>
-                <MissingGameQuickAdd onDone={() => setShowAddMenu(false)} />
+                <button
+                  onClick={() => {
+                    setShowAddGameModal(true)
+                    setShowAddMenu(false)
+                  }}
+                  className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition"
+                >
+                  <CubeIcon className="w-4 h-4 text-gray-400" /> Missing Game
+                </button>
               </div>
             )}
             <div className="relative">
@@ -872,60 +831,280 @@ function Navigation() {
       </div>
 
       {/* Play Log Modal */}
-      {showPlayLogModal && (
-        <div
-          className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm p-0 sm:p-4"
-          onClick={() => setShowPlayLogModal(false)}
+      <Portal>
+        <Overlay
+          visible={showPlayLogModal}
+          variant="blur"
+          clickToClose={false}
+          zIndex={200}
+          className="p-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowPlayLogModal(false)
+            }
+          }}
         >
-          <div
-            className="bg-white dark:bg-gray-900 w-full sm:max-w-xl rounded-t-2xl sm:rounded-2xl shadow-xl p-6 relative flex flex-col max-h-[90vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              onClick={() => setShowPlayLogModal(false)}
-              className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 text-sm"
-              aria-label="Close play log modal"
-            >
-              ×
-            </button>
-            <h3 className="text-base font-semibold mb-4">
+        <div 
+          className="bg-white dark:bg-gray-900 w-full sm:max-w-2xl rounded-t-2xl sm:rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[80vh]"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+            <h3 className="text-lg font-semibold">
               Log Your Play
             </h3>
-            {selectedGameForPlayLog ? (
-              <PlayLogEditor
-                gameId={selectedGameForPlayLog.id}
-                gameName={selectedGameForPlayLog.name}
-                openForm
-                autoFocus
-                onCreated={() => {
-                  setShowPlayLogModal(false)
-                  setSelectedGameForPlayLog(null)
-                }}
-              />
-            ) : (
-              <div className="text-center text-gray-500 py-8">
-                <p className="mb-4">Select a game to log a play for:</p>
-                <div className="text-sm text-gray-400">
-                  Game selection coming soon - for now, log plays from individual game cards.
+            <button
+              onClick={() => setShowPlayLogModal(false)}
+              className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
+              aria-label="Close"
+            >
+              <XMarkIcon className="w-6 h-6 text-gray-500" />
+            </button>
+          </div>
+          {/* Body */}
+          <div className="p-6 flex-1 overflow-y-auto">
+              {selectedGameForPlayLog ? (
+                <PlayLogEditor
+                  gameId={selectedGameForPlayLog.id}
+                  gameName={selectedGameForPlayLog.name}
+                  openForm
+                  autoFocus
+                  onCreated={() => {
+                    setShowPlayLogModal(false)
+                    setSelectedGameForPlayLog(null)
+                  }}
+                />
+              ) : (
+                <div className="space-y-4">
+                  <p className="text-gray-600 text-sm mb-4">Search for a game to log a play:</p>
+                  <input
+                    type="text"
+                    placeholder="Search for a game..."
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    autoFocus
+                  />
+                  <div className="flex justify-end pt-4">
+                    <button
+                      onClick={() => setShowPlayLogModal(false)}
+                      className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </div>
                 </div>
+              )}
+          </div>
+        </div>
+      </Overlay>
+      </Portal>
+
+      {/* Create List Modal */}
+      <Portal>
+        <Overlay
+          visible={showCreateListModal}
+          variant="blur"
+          clickToClose={false}
+          zIndex={400}
+          className="p-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowCreateListModal(false)
+              setListName('')
+            }
+          }}
+        >
+        <div 
+          className="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-2xl shadow-xl"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="p-6">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                Create New List
+              </h3>
+              <button
+                onClick={() => setShowCreateListModal(false)}
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              >
+                <XMarkIcon className="w-6 h-6" />
+              </button>
+            </div>
+            
+            {/* Quick Create Form */}
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="listName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  List Name
+                </label>
+                <input
+                  id="listName"
+                  type="text"
+                  value={listName}
+                  onChange={(e) => setListName(e.target.value)}
+                  placeholder="My Awesome Games"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleCreateList()
+                    }
+                  }}
+                  autoFocus
+                />
+              </div>
+              
+              <div className="flex justify-end space-x-3">
                 <button
-                  onClick={() => setShowPlayLogModal(false)}
-                  className="mt-4 px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
+                  onClick={() => {
+                    setShowCreateListModal(false)
+                    setListName('')
+                  }}
+                  className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                  disabled={isCreatingList}
                 >
-                  Close
+                  Cancel
                 </button>
+                <button
+                  onClick={handleCreateList}
+                  disabled={!listName.trim() || isCreatingList}
+                  className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 focus:ring-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isCreatingList ? 'Creating...' : 'Create List'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Overlay>
+      </Portal>
+
+      {/* Add Game Modal */}
+      <Portal>
+        <Overlay
+          visible={showAddGameModal}
+          variant="blur"
+          clickToClose={false}
+          zIndex={500}
+          className="p-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowAddGameModal(false)
+              setGameName('')
+              setGameYear('')
+              setGamePublisher('')
+              setGameSubmitted(false)
+            }
+          }}
+        >
+        <div 
+          className="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-2xl shadow-xl"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="p-6">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                Add Missing Game
+              </h3>
+              <button
+                onClick={() => {
+                  setShowAddGameModal(false)
+                  setGameName('')
+                  setGameYear('')
+                  setGamePublisher('')
+                  setGameSubmitted(false)
+                }}
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              >
+                <XMarkIcon className="w-6 h-6" />
+              </button>
+            </div>
+            
+            {/* Form Content */}
+            {!gameSubmitted ? (
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="gameName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Game Name
+                  </label>
+                  <input
+                    id="gameName"
+                    type="text"
+                    value={gameName}
+                    onChange={(e) => setGameName(e.target.value)}
+                    placeholder="Game title"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        handleAddGame()
+                      }
+                    }}
+                    autoFocus
+                  />
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="gameYear" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Year
+                    </label>
+                    <input
+                      id="gameYear"
+                      type="number"
+                      value={gameYear}
+                      onChange={(e) => setGameYear(e.target.value)}
+                      placeholder="2024"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label htmlFor="gamePublisher" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Publisher
+                    </label>
+                    <input
+                      id="gamePublisher"
+                      type="text"
+                      value={gamePublisher}
+                      onChange={(e) => setGamePublisher(e.target.value)}
+                      placeholder="Publisher"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    />
+                  </div>
+                </div>
+                
+                <div className="flex justify-end space-x-3">
+                  <button
+                    onClick={() => {
+                      setShowAddGameModal(false)
+                      setGameName('')
+                      setGameYear('')
+                      setGamePublisher('')
+                      setGameSubmitted(false)
+                    }}
+                    className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                    disabled={isSubmittingGame}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleAddGame}
+                    disabled={!gameName.trim() || isSubmittingGame}
+                    className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 focus:ring-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isSubmittingGame ? 'Submitting...' : 'Submit'}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="p-4 border border-green-200 rounded-lg bg-green-50 text-sm text-green-700">
+                Thanks! We'll review and import it soon.
               </div>
             )}
           </div>
         </div>
-      )}
-
-      {/* Create List Modal */}
-      <CreateListModal
-        isOpen={showCreateListModal}
-        onClose={() => setShowCreateListModal(false)}
-        onSuccess={() => setShowCreateListModal(false)}
-      />
+      </Overlay>
+      </Portal>
     </nav>
   )
 }

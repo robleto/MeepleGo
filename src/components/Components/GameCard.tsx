@@ -23,6 +23,7 @@ import {
   BookOpenIcon,
   TrophyIcon,
   StarIcon,
+  XMarkIcon,
 } from '@heroicons/react/24/outline'
 import { Button } from '../Elements/Button'
 import { Chip } from '../Elements/Chip'
@@ -262,12 +263,11 @@ export default function GameCard({
             }`}
           >
             {game.thumbnail_url ? (
-              <Image
+              <GameImage
                 src={game.thumbnail_url}
                 alt={game.name}
-                width={variant === 'compact' ? 48 : 64}
-                height={variant === 'compact' ? 48 : 64}
-                className="object-contain sm:w-auto sm:h-auto"
+                name={game.name}
+                variant="thumb"
               />
             ) : (
               <GameImage
@@ -789,26 +789,32 @@ export default function GameCard({
           onClick={() => setShowPlayLog(false)}
         >
           <div
-            className="bg-white dark:bg-gray-900 w-full sm:max-w-xl rounded-t-2xl sm:rounded-2xl shadow-xl p-6 relative flex flex-col max-h-[90vh] overflow-y-auto"
+            className="bg-white dark:bg-gray-900 w-full sm:max-w-xl rounded-t-2xl sm:rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[90vh]"
             onClick={(e) => e.stopPropagation()}
           >
-            <button
-              onClick={() => setShowPlayLog(false)}
-              className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 text-sm"
-              aria-label="Close play log editor"
-            >
-              ×
-            </button>
-            <h3 className="text-base font-semibold mb-4">
-              Log Your Play – {game.name}
-            </h3>
-            <PlayLogEditor
+            {/* Header */}
+            <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-semibold">
+                Log Your Play – {game.name}
+              </h3>
+              <button
+                onClick={() => setShowPlayLog(false)}
+                className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
+                aria-label="Close"
+              >
+                <XMarkIcon className="w-6 h-6 text-gray-500" />
+              </button>
+            </div>
+            {/* Body */}
+            <div className="p-6 flex-1 overflow-y-auto">
+              <PlayLogEditor
               gameId={game.id}
               gameName={game.name}
               openForm
               autoFocus
               onCreated={() => setShowPlayLog(false)}
             />
+            </div>
           </div>
         </div>
       )}

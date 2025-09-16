@@ -4,6 +4,8 @@ import GameCard from '@/components/Components/GameCard'
 import Heading from '@/components/Components/Heading'
 import { AwardCard } from '@/components/Components/AwardCard'
 import ListCard from '@/components/Components/ListCard'
+import StatCard from '@/components/Elements/StatCard'
+import NetflixScrollSection from '@/components/Elements/NetflixScrollSection'
 import {
   TrophyIcon,
   ChartBarIcon,
@@ -12,15 +14,21 @@ import {
   CalendarIcon,
   StarIcon,
   PlayIcon,
+  BookmarkIcon,
+  ClockIcon,
+  FlagIcon,
 } from '@heroicons/react/24/outline'
 import type { Game } from '@/types/supabase'
 
 export interface UserStats {
   totalPlays: number
   uniqueGames: number
+  gamesOwned: number
   avgRating: number | null
   ratingsTimeline: Array<{ date: string; avgRating: number; count: number }>
   recentTags: Array<{ tag: string; count: number }>
+  listsCreated: number
+  awardsCreated: number
 }
 
 export interface HomepageViewProps {
@@ -265,22 +273,25 @@ export function HomepageView({ user, loading, featuredGames, userStats, industry
       )}
 
       <section className="space-y-6">
-        <div className="text-center">
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Your Gaming at a Glance</h2>
-          <p className="mt-2 text-lg text-gray-600 dark:text-gray-300">Track your progress and discover insights about your gaming habits</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <Heading as="h2" size="lg" className="text-gray-900 dark:text-white">Your Gaming at a Glance</Heading>
+            <p className="mt-2 text-lg text-gray-600 dark:text-gray-300">Track your progress and discover insights about your gaming habits</p>
+          </div>
         </div>
         {loading ? (
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="bg-gray-200 dark:bg-gray-700 animate-pulse rounded-lg h-24" />
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 animate-pulse rounded-2xl h-[120px]" />
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-            <StatCard iconBg="bg-blue-100" Icon={PlayIcon} iconColor="text-blue-600" value={userStats?.totalPlays || 0} label="Total Plays" />
-            <StatCard iconBg="bg-green-100" Icon={CubeIcon} iconColor="text-green-600" value={userStats?.uniqueGames || 0} label="Games Played" />
-            <StatCard iconBg="bg-yellow-100" Icon={StarIcon} iconColor="text-yellow-600" value={userStats?.avgRating?.toFixed(1) || '—'} label="Avg Rating" />
-            <StatCard iconBg="bg-purple-100" Icon={CalendarIcon} iconColor="text-purple-600" value={userStats?.ratingsTimeline?.length || 0} label="Gaming Days" />
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
+            <StatCard iconBg="bg-blue-500" Icon={BookmarkIcon} iconColor="text-white" value={userStats?.gamesOwned || 0} label="Games Owned" />
+            <StatCard iconBg="bg-green-500" Icon={CubeIcon} iconColor="text-white" value={userStats?.uniqueGames || 0} label="Games Played" />
+            <StatCard iconBg="bg-yellow-500" Icon={StarIcon} iconColor="text-white" value={userStats?.avgRating?.toFixed(1) || '—'} label="Avg Rating" />
+            <StatCard iconBg="bg-purple-500" Icon={ListBulletIcon} iconColor="text-white" value={userStats?.listsCreated || 0} label="Lists Created" />
+            <StatCard iconBg="bg-amber-500" Icon={TrophyIcon} iconColor="text-white" value={userStats?.awardsCreated || 0} label="Awards Created" />
           </div>
         )}
       </section>
@@ -295,21 +306,27 @@ export function HomepageView({ user, loading, featuredGames, userStats, industry
             </div>
             <Link href="/awards" className="text-primary-600 hover:text-primary-500 font-medium">Explore all →</Link>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {industryAwards.slice(0, 3).map((award: any) => (
+          
+          {/* Netflix-style horizontal scrolling */}
+          <NetflixScrollSection itemWidth="w-72" showCount={4}>
+            {industryAwards.map((award: any) => (
               <AwardCard
                 key={award.id}
+                href={`/awards#${award.id}`}
                 title={award.name}
                 description={award.description || "Prestigious board game recognition"}
-                icon={<TrophyIcon className="h-6 w-6" />}
+                yearSpan={undefined}
+                winners={undefined as any}
+                nominees={undefined as any}
+                total={undefined}
                 circleBorderClass={award.borderColor || "border-amber-200"}
                 circleBgClass={award.backgroundColor || "bg-amber-50"}
                 iconColorClass={award.iconColor || "text-amber-600"}
-                href={`/awards#${award.id}`}
+                showStats={false}
                 cta="View Details"
               />
             ))}
-          </div>
+          </NetflixScrollSection>
         </section>
       )}
 
@@ -367,25 +384,6 @@ export function HomepageView({ user, loading, featuredGames, userStats, industry
           <Link href="/awards" className="flex items-center justify-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">Create Awards</Link>
         </div>
       </section>
-    </div>
-  )
-}
-
-interface StatCardProps {
-  iconBg: string
-  Icon: any
-  iconColor: string
-  value: string | number
-  label: string
-}
-function StatCard({ iconBg, Icon, iconColor, value, label }: StatCardProps) {
-  return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 text-center">
-      <div className={`flex items-center justify-center w-8 h-8 ${iconBg} rounded-lg mx-auto mb-2`}>
-        <Icon className={`w-5 h-5 ${iconColor}`} />
-      </div>
-      <div className="text-2xl font-bold text-gray-900 dark:text-white">{value}</div>
-      <div className="text-sm text-gray-600 dark:text-gray-300">{label}</div>
     </div>
   )
 }

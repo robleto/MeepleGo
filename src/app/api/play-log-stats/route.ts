@@ -3,7 +3,7 @@ import { getSupabaseServerClient } from '@/lib/supabaseServer'
 
 // Provides aggregate stats for a user optionally scoped to a game
 // GET /api/play-log-stats?userId=...&gameId=...
-// Returns: totalPlays, uniqueGames, avgRating, ratingsTimeline [{date, avgRating,count}], recentTags
+// Returns: totalPlays, uniqueGames, gamesWithNotes, avgRating, ratingsTimeline [{date, avgRating,count}], recentTags
 export async function GET(req: NextRequest) {
   try {
     const url = new URL(req.url)
@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
     // Base visibility: if not self, only public logs
     let base = supabase
       .from('play_logs')
-      .select('game_id, rating, played_at, tags', { count: 'exact' })
+      .select('game_id, rating, played_at, tags, notes', { count: 'exact' })
       .eq('user_id', userId)
     if (gameId) base = base.eq('game_id', gameId)
     if (!isSelf) base = base.eq('is_public', true)
@@ -32,6 +32,9 @@ export async function GET(req: NextRequest) {
 
     const totalPlays = rows?.length || 0
     const uniqueGames = new Set(rows?.map((r: any) => r.game_id)).size
+    const gamesWithNotes = new Set(
+      rows?.filter((r: any) => r.notes && r.notes.trim()).map((r: any) => r.game_id)
+    ).size
     const rated = rows?.filter((r: any) => typeof r.rating === 'number') || []
     const avgRating =
       rated.length === 0
@@ -78,6 +81,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       totalPlays,
       uniqueGames,
+      gamesWithNotes,
       avgRating,
       ratingsTimeline,
       recentTags,

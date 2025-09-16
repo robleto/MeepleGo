@@ -1,5 +1,5 @@
 export const revalidate = 0 // ensure fresh data while debugging honor enrichment
-import { supabase } from '@/lib/supabase'
+import { getSupabaseServerClient } from '@/lib/supabaseServer'
 import { inferHonorCategory } from '@/utils/honors'
 import {
   TrophyIcon,
@@ -205,235 +205,256 @@ interface AwardYearGroup {
 }
 
 async function getAwardData(awardType: string): Promise<AwardYearGroup[]> {
-  // Get all games with pagination to avoid 1000 record limit
-  let allGames: Game[] = []
-  let page = 0
-  const pageSize = 1000
+  const supabase = await getSupabaseServerClient()
+  
+  try {
+    // Create a pattern to match the award_set values
+    let searchPattern = awardType
+    
+    // Handle special cases for pattern matching
+    if (awardType === 'Golden Geek Awards') {
+      searchPattern = '%Golden Geek%'
+    } else if (awardType === 'Charles S. Roberts') {
+      searchPattern = '%Charles S. Roberts%'
+    } else if (awardType === 'Spiel des Jahres') {
+      searchPattern = '%Spiel des Jahres%'
+    } else if (awardType === 'Kinderspiel des Jahres') {
+      searchPattern = '%Kinderspiel des Jahres%'
+    } else if (awardType === 'Kennerspiel des Jahres') {
+      searchPattern = '%Kennerspiel des Jahres%'
+    } else if (awardType === 'Deutscher Spiele Preis') {
+      searchPattern = '%Deutscher Spiele Preis%'
+    } else if (awardType === 'Origins Awards') {
+      searchPattern = '%Origins%'
+    } else if (awardType === 'The Dice Tower Gaming Awards') {
+      searchPattern = '%Dice Tower%'
+    } else if (awardType === "As d'Or - Jeu de l'Année") {
+      searchPattern = "%As d'Or%"
+    } else {
+      // For other awards, try to match the first part of the name
+      const mainName = awardType.split(' ')[0]
+      searchPattern = `%${mainName}%`
+    }
 
-  while (true) {
-    const { data: games, error } = await supabase
-      .from('games')
-      // Select current schema columns (playtime_minutes in canonical schema)
-      .select(
-        'bgg_id, name, year_published, image_url, thumbnail_url, honors, min_players, max_players, playtime_minutes'
-      )
-      .not('honors', 'eq', '[]')
-      .range(page * pageSize, (page + 1) * pageSize - 1)
+    // Get awards with boardgames JSONB data from industry_awards table
+    const { data: awards, error } = await supabase
+      .from('industry_awards')
+      .select(`
+        id,
+        year,
+        award_set,
+        category,
+        status,
+        position,
+        boardgames
+      `)
+      .ilike('award_set', searchPattern)
+      .order('year', { ascending: false })
 
     if (error) {
       console.error('Error fetching award data:', error)
-      break
+      return []
     }
 
-    if (!games || games.length === 0) break
-    const normalized = (games as any[]).map((g) => g)
-    allGames = allGames.concat(normalized as Game[])
-    if (games.length < pageSize) break // Last page
-    page++
-  }
+    if (!awards || awards.length === 0) {
+      return []
+    }
 
-  // Check if this award type has categories by looking for position-based awards
-  const relevantHonors = allGames.flatMap((game) =>
-    (game.honors || []).filter((h) => h.award_type === awardType)
-  )
-
-  const hasCategories = relevantHonors.some(
-    (h) =>
-      h.position &&
-      h.position !== h.award_type &&
-      (h.position.includes('Best ') || h.position.includes('Game of the'))
-  )
-
-  console.log(`Award type "${awardType}" has categories:`, hasCategories)
-
-  /*
-   * De-duplicate multiple honor entries for same (game, year, awardType) with precedence:
-   * Winner > Nominee > Special. Keeps only the highest category per game per year.
-   * Also filter out fake "games" that are actually award category names.
-   */
-  const yearMap = new Map<number, AwardYearGroup>()
-
-  allGames
-    .filter((game) => {
-      // Filter out award category names that were incorrectly imported as "games"
-      const name = game.name.toLowerCase()
-      // heuristics strengthened for Golden Geek placeholder rows like:
-      // "Golden Geek Best Print and Play Board Game" (no real game image/year)
-      const looksGoldenGeekCategory =
-        /^golden geek best /.test(name) &&
-        (name.endsWith(' board game') ||
-          name.endsWith(' game') ||
-          name.includes('print and play'))
-      const truncatedSuffix = /( no$| wi$)/.test(name) // from slug truncation (No / Wi)
-      const matchesHonorPosition = (game.honors || []).some(
-        (h) =>
-          h.position && h.position.toLowerCase() === game.name.toLowerCase()
-      )
-      const missingRealGameSignals =
-        !game.year_published && !game.image_url && !game.thumbnail_url
-
-      const isAwardName =
-        name.includes('recommended') ||
-        name.includes('award') ||
-        name.includes('nominee') ||
-        name.includes('winner') ||
-        name.startsWith('charles s roberts best ') ||
-        // truncated forms
-        name.endsWith('winn') ||
-        name.endsWith('winne') ||
-        name.includes('winn ') ||
-        name.includes('nomin') ||
-        name.endsWith('nom') ||
-        name.endsWith('nomi') ||
-        name.includes('spiel des jahres') ||
-        name.includes('dragon awards') ||
-        name.includes('hit fur') ||
-        name.includes('hit für') ||
-        looksGoldenGeekCategory ||
-        (looksGoldenGeekCategory && truncatedSuffix) ||
-        (matchesHonorPosition && missingRealGameSignals) ||
-        (!game.year_published &&
-          (name.includes('spiel') ||
-            name.includes('award') ||
-            name.includes('prize')))
-      return !isAwardName
-    })
-    .forEach((game: Game) => {
-      ;(game.honors || [])
-        .filter((h) => h.award_type === awardType && typeof h.year === 'number')
-        .forEach((h) => {
-          // Normalize / repair category in-memory without mutating stored data permanently
-          // For Golden Geek, pass game count context to help with truncated winner detection
-          const gameCountInCategory = allGames.filter((g) =>
-            (g.honors || []).some(
-              (gh) =>
-                gh.honor_id === h.honor_id &&
-                gh.position === h.position &&
-                gh.year === h.year
-            )
-          ).length
-
-          const effectiveCategory = inferHonorCategory(h, {
-            gameCount: gameCountInCategory,
-          })
-          // If the stored category was downgraded to Special due to truncation, use inferred
-          if (h.category !== effectiveCategory) {
-            // Create a shallow mutation for runtime only
-            ;(h as any)._originalCategory = h.category
-            h.category = effectiveCategory
-          }
-          if (!yearMap.has(h.year)) {
-            yearMap.set(h.year, {
-              year: h.year,
-              primary: null,
-              categoryWinners: [],
-              nominees: [],
-              special: [],
-            })
-          }
-          const bucket = yearMap.get(h.year)!
-
-          if (hasCategories) {
-            // For categorized awards (like Golden Geek), group by position/category
-            const categoryName =
-              h.position?.replace(
-                new RegExp(`^${awardType.replace('Awards', '').trim()} ?`),
-                ''
-              ) || 'Unknown Category'
-
-            // Initialize categories map if needed
-            if (!bucket.categories) {
-              bucket.categories = []
-            }
-
-            // Find or create category
-            let category = bucket.categories.find(
-              (c) => c.name === categoryName
-            )
-            if (!category) {
-              category = {
-                name: categoryName,
-                winner: null,
-                nominees: [],
-                special: [],
-              }
-              bucket.categories.push(category)
-            }
-
-            // Add game to appropriate section within the category
-            if (h.category === 'Winner') {
-              category.winner = game
-            } else if (h.category === 'Nominee') {
-              if (!category.nominees.find((g) => g.bgg_id === game.bgg_id)) {
-                category.nominees.push(game)
-              }
-            } else if (h.category === 'Special') {
-              if (!category.special.find((g) => g.bgg_id === game.bgg_id)) {
-                category.special.push(game)
-              }
-            }
-          } else {
-            // For simple awards (like Spiel des Jahres), use traditional structure
-            if (h.category === 'Winner') {
-              // Check if this is the main winner (no subcategory) or a category winner
-              if (
-                !h.subcategory ||
-                h.subcategory === 'Overall' ||
-                h.subcategory === 'Game of the Year'
-              ) {
-                if (!bucket.primary) bucket.primary = { game, honor: h }
-                else
-                  bucket.categoryWinners.push({
-                    subcategory: h.subcategory || 'Overall',
-                    game,
-                    honor: h,
-                  })
-              } else {
-                bucket.categoryWinners.push({
-                  subcategory: h.subcategory,
-                  game,
-                  honor: h,
-                })
-              }
-            } else if (h.category === 'Nominee') {
-              if (!bucket.nominees.find((g) => g.bgg_id === game.bgg_id)) {
-                bucket.nominees.push(game)
-              }
-            } else if (h.category === 'Special') {
-              if (!bucket.special.find((g) => g.bgg_id === game.bgg_id)) {
-                bucket.special.push(game)
-              }
-            }
-          }
-        })
+    // Extract all unique BGG IDs from all awards to fetch game data in one query
+    const allBggIds = new Set<number>()
+    awards.forEach((award: any) => {
+      const boardgames = award.boardgames || []
+      boardgames.forEach((boardgame: any) => {
+        if (boardgame.bggId) {
+          allBggIds.add(boardgame.bggId)
+        }
+      })
     })
 
-  const years: AwardYearGroup[] = Array.from(yearMap.values()).sort(
-    (a, b) => b.year - a.year
-  )
-  // De-duplicate nominees & specials (a game may appear multiple honors same year)
-  years.forEach((y) => {
-    const dedupe = (arr: Game[]) =>
-      Array.from(new Map(arr.map((g) => [g.bgg_id, g])).values())
-    y.nominees = dedupe(y.nominees).sort((a, b) => a.name.localeCompare(b.name))
-    y.special = dedupe(y.special).sort((a, b) => a.name.localeCompare(b.name))
-    // Sort category winners by subcategory then name
-    y.categoryWinners.sort(
-      (a, b) =>
-        a.subcategory.localeCompare(b.subcategory) ||
-        a.game.name.localeCompare(b.game.name)
-    )
+    // Fetch all game metadata in one query
+    const { data: gamesData, error: gamesError } = await supabase
+      .from('games')
+      .select(`
+        bgg_id,
+        name,
+        year_published,
+        image_url,
+        thumbnail_url,
+        min_players,
+        max_players,
+        playtime_minutes
+      `)
+      .in('bgg_id', Array.from(allBggIds))
 
-    // Sort categories if present
-    if (y.categories) {
-      y.categories.sort((a, b) => a.name.localeCompare(b.name))
-      y.categories.forEach((cat) => {
-        cat.nominees.sort((a, b) => a.name.localeCompare(b.name))
-        cat.special.sort((a, b) => a.name.localeCompare(b.name))
+    if (gamesError) {
+      console.error('Error fetching games data:', gamesError)
+    }
+
+    // Create a map for quick game lookups by BGG ID
+    const gamesMap = new Map<number, any>()
+    if (gamesData) {
+      gamesData.forEach((game) => {
+        gamesMap.set(game.bgg_id, game)
       })
     }
-  })
-  return years
+
+    // Check if this award type has categories by looking for position-based awards
+    const hasCategories = awards.some(
+      (award: any) =>
+        award.position &&
+        award.position !== awardType &&
+        (award.position.includes('Best ') || award.position.includes('Game of the'))
+    )
+
+    console.log(`Award type "${awardType}" has categories:`, hasCategories)
+
+    const yearMap = new Map<number, AwardYearGroup>()
+
+    awards.forEach((award: any) => {
+      // Extract games from the boardgames JSONB array
+      const boardgames = award.boardgames || []
+      
+      boardgames.forEach((boardgame: any) => {
+        // Convert database award to Honor interface format
+        const honor: Honor = {
+          name: award.award_set,
+          year: award.year,
+          category: award.status === 'Winner' ? 'Winner' : (award.status === 'Nominee' ? 'Nominee' : 'Special'),
+          award_type: award.award_set,
+          position: award.position,
+          subcategory: award.category,
+        }
+
+        // Get full game data from our games table, fallback to basic boardgames data
+        const fullGameData = gamesMap.get(boardgame.bggId)
+        const gameData: Game = {
+          bgg_id: boardgame.bggId,
+          name: fullGameData?.name || boardgame.name,
+          year_published: fullGameData?.year_published || 0,
+          image_url: fullGameData?.image_url,
+          thumbnail_url: fullGameData?.thumbnail_url,
+          honors: [honor], // Single honor for this context
+        }
+
+        if (!yearMap.has(award.year)) {
+          yearMap.set(award.year, {
+            year: award.year,
+            primary: null,
+            categoryWinners: [],
+            nominees: [],
+            special: [],
+          })
+        }
+
+        const bucket = yearMap.get(award.year)!
+
+        if (hasCategories) {
+          // For categorized awards (like Golden Geek), group by position/category
+          const categoryName =
+            award.position?.replace(
+              new RegExp(`^${awardType.replace('Awards', '').trim()} ?`),
+              ''
+            ) || 'Unknown Category'
+
+          // Initialize categories map if needed
+          if (!bucket.categories) {
+            bucket.categories = []
+          }
+
+          // Find or create category
+          let category = bucket.categories.find(
+            (c) => c.name === categoryName
+          )
+          if (!category) {
+            category = {
+              name: categoryName,
+              winner: null,
+              nominees: [],
+              special: [],
+            }
+            bucket.categories.push(category)
+          }
+
+          // Add game to appropriate section within the category
+          if (award.status === 'Winner') {
+            category.winner = gameData
+          } else if (award.status === 'Nominee') {
+            if (!category.nominees.find((g) => g.bgg_id === gameData.bgg_id)) {
+              category.nominees.push(gameData)
+            }
+          } else {
+            if (!category.special.find((g) => g.bgg_id === gameData.bgg_id)) {
+              category.special.push(gameData)
+            }
+          }
+        } else {
+          // For simple awards (like Spiel des Jahres), use traditional structure
+          if (award.status === 'Winner') {
+            // Check if this is the main winner (no subcategory) or a category winner
+            if (
+              !award.category ||
+              award.category === 'Overall' ||
+              award.category === 'Game of the Year'
+            ) {
+              if (!bucket.primary) bucket.primary = { game: gameData, honor }
+              else
+                bucket.categoryWinners.push({
+                  subcategory: award.category || 'Overall',
+                  game: gameData,
+                  honor,
+                })
+            } else {
+              bucket.categoryWinners.push({
+                subcategory: award.category,
+                game: gameData,
+                honor,
+              })
+            }
+          } else if (award.status === 'Nominee') {
+            if (!bucket.nominees.find((g) => g.bgg_id === gameData.bgg_id)) {
+              bucket.nominees.push(gameData)
+            }
+          } else {
+            if (!bucket.special.find((g) => g.bgg_id === gameData.bgg_id)) {
+              bucket.special.push(gameData)
+            }
+          }
+        }
+      })
+    })
+
+    const years: AwardYearGroup[] = Array.from(yearMap.values()).sort(
+      (a, b) => b.year - a.year
+    )
+
+    // De-duplicate nominees & specials (a game may appear multiple honors same year)
+    years.forEach((y) => {
+      const dedupe = (arr: Game[]) =>
+        Array.from(new Map(arr.map((g) => [g.bgg_id, g])).values())
+      y.nominees = dedupe(y.nominees).sort((a, b) => a.name.localeCompare(b.name))
+      y.special = dedupe(y.special).sort((a, b) => a.name.localeCompare(b.name))
+      // Sort category winners by subcategory then name
+      y.categoryWinners.sort(
+        (a, b) =>
+          a.subcategory.localeCompare(b.subcategory) ||
+          a.game.name.localeCompare(b.game.name)
+      )
+
+      // Sort categories if present
+      if (y.categories) {
+        y.categories.sort((a, b) => a.name.localeCompare(b.name))
+        y.categories.forEach((cat) => {
+          cat.nominees.sort((a, b) => a.name.localeCompare(b.name))
+          cat.special.sort((a, b) => a.name.localeCompare(b.name))
+        })
+      }
+    })
+
+    return years
+  } catch (error) {
+    console.error('Error in getAwardData:', error)
+    return []
+  }
 }
 
 // Helper to adapt awards Game type to GameCard expected shape
@@ -604,7 +625,7 @@ function YearSection({
                   <span>{category.name}</span>
                 </Heading>
                 <div
-                  className={`md:grid md:grid-cols-12 md:gap-8 items-start ${nomineeOnly ? 'md:block' : ''}`}
+                  className={`${nomineeOnly ? '' : 'md:grid md:grid-cols-12 md:gap-8'} items-start`}
                 >
                   {!nomineeOnly && (
                     <div className="md:col-span-4 mb-6 md:mb-0">
@@ -638,56 +659,74 @@ function YearSection({
                     <div className={`${nomineeOnly ? '' : 'md:col-span-8'}`}>
                       <div className="flex items-center gap-2 mb-3 font-display">
                         <UserGroupIcon className="w-4 h-4 text-gray-500" />
-                        <h4 className="text-sm font-semibold text-gray-700">
-                          {category.name === 'Nominees'
-                            ? 'Nominees'
-                            : 'Other Nominees'}
+                        <h4 className="text-sm font-semibold text-gray-700">Nominees
                         </h4>
                         <span className="text-xs text-gray-400">
                           ({combinedNominees.length})
                         </span>
                       </div>
                       {!nomineeOnly ? (
-                        <ul className="space-y-2 text-sm leading-tight">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                           {combinedNominees.map((game) => (
-                            <li
+                            <div
                               key={`${game.bgg_id}-nominee-name`}
-                              className="flex items-center gap-3"
+                              className="flex items-center gap-3 p-2 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
                             >
                               {game.thumbnail_url ? (
                                 // eslint-disable-next-line @next/next/no-img-element
                                 <img
                                   src={game.thumbnail_url}
                                   alt={game.name}
-                                  className="w-8 h-8 object-cover rounded border border-gray-200 flex-shrink-0"
+                                  className="w-12 h-12 object-cover rounded border border-gray-200 flex-shrink-0"
                                 />
                               ) : (
-                                <div className="w-8 h-8 bg-gray-100 border border-gray-200 rounded flex items-center justify-center flex-shrink-0">
+                                <div className="w-10 h-10 bg-gray-100 border border-gray-200 rounded flex items-center justify-center flex-shrink-0">
                                   <span className="text-gray-400 text-xs">
                                     ?
                                   </span>
                                 </div>
                               )}
-                              <span
-                                className="text-gray-700 hover:text-gray-900 transition-colors truncate"
-                                title={game.name}
-                              >
-                                {game.name}
-                              </span>
-                            </li>
+                              <div className="flex-1 min-w-0">
+                                <div
+                                  className="text-gray-800 font-medium hover:text-gray-900 transition-colors truncate text-sm"
+                                  title={game.name}
+                                >
+                                  {game.name}
+                                </div>
+                              </div>
+                            </div>
                           ))}
-                        </ul>
+                        </div>
                       ) : (
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                           {combinedNominees.map((game) => (
-                            <GameCard
+                            <div
                               key={`${game.bgg_id}-nominee-unified`}
-                              game={toGameWithRanking(game)}
-                              viewMode="grid"
-                              className="bg-white/70"
-                              hideWinnerBadge
-                              variant="compact"
-                            />
+                              className="flex items-center gap-3 p-2 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
+                            >
+                              {game.thumbnail_url ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img
+                                  src={game.thumbnail_url}
+                                  alt={game.name}
+                                  className="w-12 h-12 object-cover rounded border border-gray-200 flex-shrink-0"
+                                />
+                              ) : (
+                                <div className="w-10 h-10 bg-gray-100 border border-gray-200 rounded flex items-center justify-center flex-shrink-0">
+                                  <span className="text-gray-400 text-xs">
+                                    ?
+                                  </span>
+                                </div>
+                              )}
+                              <div className="flex-1 min-w-0">
+                                <div
+                                  className="text-gray-800 font-medium hover:text-gray-900 transition-colors truncate text-sm"
+                                  title={game.name}
+                                >
+                                  {game.name}
+                                </div>
+                              </div>
+                            </div>
                           ))}
                         </div>
                       )}

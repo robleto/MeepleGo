@@ -6,8 +6,8 @@ import {
   formatPlayingTime,
   formatPlayerCount,
 } from '@/utils/helpers'
-import { StarIcon, BookmarkIcon, HeartIcon } from '@heroicons/react/24/outline'
-import GameDetailModal from '@/components/Components/Modals/GameDetailModal'
+import { StarIcon, BookmarkIcon, HeartIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import GameDetailModal from '@/components/Components/GameDetailModal'
 import dynamic from 'next/dynamic'
 const PlayLogEditor = dynamic(
   () => import('@/components/Components/PlayLogEditor'),
@@ -313,10 +313,10 @@ export default function GameRowCard({
               <h2 className="text-lg font-semibold">Log a Play</h2>
               <button
                 onClick={() => setShowPlayLog(false)}
-                className="text-gray-400 hover:text-gray-600"
-                aria-label="Close play log modal"
+                className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
+                aria-label="Close"
               >
-                ×
+                <XMarkIcon className="w-6 h-6 text-gray-500" />
               </button>
             </div>
             <PlayLogEditor

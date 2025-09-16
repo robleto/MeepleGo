@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, Suspense } from 'react'
+import { useState, Suspense, useMemo } from 'react'
 import PageLayout from '@/components/Components/PageLayout'
 import {
   useGameDataWithGuest,
@@ -11,6 +11,8 @@ import GameCard from '@/components/Components/GameCard'
 import SearchandFilters from '@/components/Components/SearchandFilters'
 import FilterModal from '@/components/Components/FilterModal'
 import Heading from '@/components/Components/Heading'
+import StatCard from '@/components/Elements/StatCard'
+import { StarIcon, ArrowTrendingUpIcon } from '@heroicons/react/24/outline'
 
 function RankingsPageContent() {
   const { games, loading, isGuest, updateGameRanking } = useGameDataWithGuest()
@@ -57,6 +59,20 @@ function RankingsPageContent() {
     return count
   }
   const activeFilterCount = getActiveFilterCount()
+
+  // Calculate rating statistics
+  const ratingStats = useMemo(() => {
+    const ratingsArray = rankedGames
+      .map(g => g.ranking?.ranking)
+      .filter((rating): rating is number => typeof rating === 'number')
+    
+    if (ratingsArray.length === 0) {
+      return { avgRating: null, totalRated: 0 }
+    }
+
+    const avgRating = ratingsArray.reduce((sum, rating) => sum + rating, 0) / ratingsArray.length
+    return { avgRating: Number(avgRating.toFixed(1)), totalRated: ratingsArray.length }
+  }, [rankedGames])
 
   if (loading) {
     return (
@@ -105,6 +121,26 @@ function RankingsPageContent() {
             onOpenFilters={() => setShowFilters(true)}
           />
         </div>
+
+        {/* Rating Statistics */}
+        {rankedGames.length > 0 && (
+          <section className="grid md:grid-cols-2 gap-4 mb-6">
+            <StatCard 
+              iconBg="bg-yellow-500" 
+              Icon={StarIcon} 
+              iconColor="text-white" 
+              value={ratingStats.avgRating ?? '—'} 
+              label="Average Rating" 
+            />
+            <StatCard 
+              iconBg="bg-blue-500" 
+              Icon={ArrowTrendingUpIcon} 
+              iconColor="text-white" 
+              value={ratingStats.totalRated} 
+              label="Total Rated Games" 
+            />
+          </section>
+        )}
 
         <div className="flex items-end justify-between mb-5">
           <Heading as="h2" variant="section" className="mb-1">

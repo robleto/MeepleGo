@@ -2,6 +2,7 @@
 
 import { Fragment, useState, useEffect } from 'react'
 import { XMarkIcon } from '@heroicons/react/24/outline'
+import Portal from '@/components/Elements/Portal'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 
@@ -9,12 +10,15 @@ interface CreateListModalProps {
   isOpen: boolean
   onClose: () => void
   onSuccess?: () => void
+  /** Position modal considering navigation height */
+  fromNav?: boolean
 }
 
 export default function CreateListModal({
   isOpen,
   onClose,
   onSuccess,
+  fromNav = false,
 }: CreateListModalProps) {
   const [formData, setFormData] = useState({
     name: '',
@@ -126,6 +130,11 @@ export default function CreateListModal({
 
   if (!isOpen) return null
 
+  // Determine modal positioning based on trigger source
+  const modalClasses = fromNav 
+    ? "items-start pt-20" // More top padding when from nav
+    : "items-center"
+
   return (
     <>
       {/* Toast */}
@@ -144,15 +153,15 @@ export default function CreateListModal({
       )}
 
       {/* Modal Backdrop */}
-      <div className="fixed inset-0 z-50 flex items-center justify-center">
-        {/* Backdrop */}
-        <div
-          className="absolute inset-0 bg-black bg-opacity-50 dark:bg-opacity-70"
-          onClick={handleClose}
-        />
-
+      <div 
+        className={`fixed inset-0 z-[400] flex ${modalClasses} justify-center bg-black/40 backdrop-blur-sm p-4`}
+        onClick={handleClose}
+      >
         {/* Modal Content */}
-        <div className="relative w-full max-w-md mx-4 bg-white dark:bg-gray-800 rounded-2xl shadow-xl transform transition-all">
+        <div 
+          className="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-2xl shadow-xl transform transition-all"
+          onClick={(e) => e.stopPropagation()}
+        >
           <div className="p-6">
             {/* Header */}
             <div className="flex items-center justify-between mb-4">

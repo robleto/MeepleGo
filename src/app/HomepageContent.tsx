@@ -18,7 +18,7 @@ let cachedBggHotness: Game[] | null = null
 let cachedBggBestsellers: Game[] | null = null
 
 // Initialize awards immediately
-const INDUSTRY_AWARDS = (awardsData as any).categories.slice(0, 3).map((c: any) => ({
+const INDUSTRY_AWARDS = (awardsData as any).categories.map((c: any) => ({
   ...c,
   icon: 'TrophyIcon',
 }))
@@ -301,6 +301,126 @@ export default function HomepageContent() {
           if (!cancelled) {
             cachedPublicLists = MOCK_PUBLIC_LISTS
             setPublicLists(MOCK_PUBLIC_LISTS)
+          }
+        }
+
+        // Load user stats if authenticated
+        if (session?.user) {
+          try {
+            console.log('Loading user stats for user:', session.user.id)
+            
+            // Get user's rankings for stats
+            const { data: rankings, error: rankingsError } = await supabase
+              .from('rankings')
+              .select('ranking, played_it, created_at')
+              .eq('user_id', session.user.id)
+
+            // Get user's game ownership (library membership)
+            const { data: libraryItems, error: libraryError } = await supabase
+              .from('game_list_items')
+              .select('game_id, game_lists!inner(name)')
+              .eq('game_lists.user_id', session.user.id)
+              .eq('game_lists.name', 'Library')
+
+            // Get user's total lists count (including default Library and Wishlist)
+            const { data: userLists, error: listsError } = await supabase
+              .from('game_lists')
+              .select('id')
+              .eq('user_id', session.user.id)
+
+            // Get user's awards count - try awards table first
+            const { data: userAwards, error: awardsError } = await supabase
+              .from('awards')
+              .select('id')
+              .eq('user_id', session.user.id)
+            
+            if (!rankingsError && rankings) {
+              const totalPlays = rankings.filter(r => r.played_it).length
+              const uniqueGames = rankings.length
+              const gamesOwned = libraryItems?.length || 0
+              const listsCreated = userLists?.length || 0
+              const awardsCreated = userAwards?.length || 0
+              
+              // Debug logging
+              console.log('User stats debug:', {
+                rankings: rankings.length,
+                libraryItems: libraryItems?.length || 0,
+                libraryError,
+                userLists: userLists?.length || 0,
+                listsError,
+                userAwards: userAwards?.length || 0,
+                awardsError
+              })
+              
+              const ratingsWithValues = rankings.filter(r => r.ranking !== null && r.ranking > 0)
+              const avgRating = ratingsWithValues.length > 0 
+                ? ratingsWithValues.reduce((sum, r) => sum + (r.ranking || 0), 0) / ratingsWithValues.length
+                : null
+              
+              // Group by date for timeline
+              const ratingsTimeline = rankings
+                .filter(r => r.ranking !== null && r.created_at)
+                .reduce((acc, r) => {
+                  const date = new Date(r.created_at!).toISOString().split('T')[0]
+                  if (!acc[date]) {
+                    acc[date] = { date, ratings: [], count: 0 }
+                  }
+                  acc[date].ratings.push(r.ranking!)
+                  acc[date].count++
+                  return acc
+                }, {} as Record<string, { date: string, ratings: number[], count: number }>)
+              
+              const timelineArray = Object.values(ratingsTimeline).map(day => ({
+                date: day.date,
+                avgRating: day.ratings.reduce((sum, r) => sum + r, 0) / day.ratings.length,
+                count: day.count
+              }))
+              
+              const stats: UserStats = {
+                totalPlays,
+                uniqueGames,
+                gamesOwned,
+                avgRating,
+                ratingsTimeline: timelineArray,
+                recentTags: [], // Could add tags logic later
+                listsCreated,
+                awardsCreated
+              }
+              
+              console.log('User stats loaded:', stats)
+              if (!cancelled) {
+                setUserStats(stats)
+              }
+            } else {
+              console.log('No rankings found or error:', rankingsError)
+              // Set empty stats for authenticated users with no data
+              if (!cancelled) {
+                setUserStats({
+                  totalPlays: 0,
+                  uniqueGames: 0,
+                  gamesOwned: 0,
+                  avgRating: null,
+                  ratingsTimeline: [],
+                  recentTags: [],
+                  listsCreated: 0,
+                  awardsCreated: 0
+                })
+              }
+            }
+          } catch (error) {
+            console.error('Error loading user stats:', error)
+            if (!cancelled) {
+              setUserStats({
+                totalPlays: 0,
+                uniqueGames: 0,
+                gamesOwned: 0,
+                avgRating: null,
+                ratingsTimeline: [],
+                recentTags: [],
+                listsCreated: 0,
+                awardsCreated: 0
+              })
+            }
           }
         }
 

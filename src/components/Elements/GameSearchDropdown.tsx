@@ -8,6 +8,7 @@ import {
   CubeIcon,
 } from '@heroicons/react/24/outline'
 import { cn } from '@/utils/helpers'
+import GameSearchInput from '../Elements/GameSearchInput'
 
 interface SuggestionGame {
   id: string
@@ -16,6 +17,7 @@ interface SuggestionGame {
   thumbnail_url: string | null
   rating?: number | null
 }
+
 interface GroupedSuggestions {
   exactMatches: SuggestionGame[]
   popular: SuggestionGame[]
@@ -24,21 +26,21 @@ interface GroupedSuggestions {
 
 export type { SuggestionGame }
 
-export interface GameSearchSelectProps {
+export interface GameSearchDropdownProps {
   onSelect: (game: SuggestionGame) => void
   placeholder?: string
   autoFocus?: boolean
   className?: string
-  variant?: 'default' | 'hero'
+  variant?: 'default' | 'modal'
 }
 
-export default function GameSearchSelect({
+export default function GameSearchDropdown({
   onSelect,
   placeholder = 'Search games…',
   autoFocus,
   className,
   variant = 'default',
-}: GameSearchSelectProps) {
+}: GameSearchDropdownProps) {
   const [query, setQuery] = useState('')
   const [grouped, setGrouped] = useState<GroupedSuggestions>({
     exactMatches: [],
@@ -49,14 +51,9 @@ export default function GameSearchSelect({
   const [show, setShow] = useState(false)
   const [loading, setLoading] = useState(false)
   const [activeIndex, setActiveIndex] = useState(-1)
-  const inputRef = useRef<HTMLInputElement | null>(null)
   const dropdownRef = useRef<HTMLDivElement | null>(null)
   const cacheRef = useRef<Record<string, SuggestionGame[]>>({})
   const abortRef = useRef<AbortController | null>(null)
-
-  useEffect(() => {
-    if (autoFocus) inputRef.current?.focus()
-  }, [autoFocus])
 
   useEffect(() => {
     const raw = query.trim()
@@ -127,9 +124,7 @@ export default function GameSearchSelect({
     const onDown = (e: MouseEvent) => {
       if (
         dropdownRef.current &&
-        !dropdownRef.current.contains(e.target as Node) &&
-        inputRef.current &&
-        !inputRef.current.contains(e.target as Node)
+        !dropdownRef.current.contains(e.target as Node)
       )
         setShow(false)
     }
@@ -171,7 +166,7 @@ export default function GameSearchSelect({
     return <>{parts}</>
   }
 
-  const onKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
     if (!show || !flat.length) return
     if (e.key === 'ArrowDown') {
       e.preventDefault()
@@ -193,69 +188,29 @@ export default function GameSearchSelect({
     reset()
   }
 
-  const hero = variant === 'hero'
+  const handleSearchInputChange = (value: string) => {
+    setQuery(value)
+    if (value) setShow(true)
+  }
+
   return (
-    <div className={cn('relative', className, hero && 'group')}>
-      <div
-        className={cn(
-          'flex w-full items-center gap-3 rounded-full border bg-white/90 dark:bg-gray-900/70 backdrop-blur-sm transition shadow-sm hover:shadow-md focus-within:ring-2 focus-within:ring-sky-500',
-          hero
-            ? 'px-8 py-5 text-lg border-gray-200 dark:border-gray-700'
-            : 'px-4 py-1.5 border-gray-200 dark:border-gray-700'
-        )}
-      >
-        <input
-          ref={inputRef}
-          type="text"
+    <div className={cn('relative', className)} ref={dropdownRef}>
+      <div onKeyDown={handleKeyDown}>
+        <GameSearchInput
           value={query}
-          onChange={(e) => {
-            setQuery(e.target.value)
-            if (e.target.value) setShow(true)
-          }}
-          onKeyDown={onKey}
-          onFocus={() => {
-            if (flat.length) setShow(true)
-          }}
+          onChange={handleSearchInputChange}
           placeholder={placeholder}
-          className={cn(
-            'flex-1 bg-transparent placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none',
-            hero ? 'text-base leading-tight' : 'text-sm leading-tight'
-          )}
-          role="combobox"
-          aria-autocomplete="list"
-          aria-expanded={show}
-          aria-controls="game-suggestions"
-          aria-activedescendant={
-            activeIndex >= 0 && show ? `game-sugg-${activeIndex}` : undefined
-          }
+          variant={variant}
+          autoFocus={autoFocus}
+          showSearchButton={false}
         />
-        <button
-          type="button"
-          onClick={() => {
-            if (query && flat.length && activeIndex >= 0) {
-              handleSelect(flat[activeIndex])
-            } else {
-              inputRef.current?.focus()
-              setShow(true)
-            }
-          }}
-          aria-label="Search"
-          className={cn(
-            'shrink-0 rounded-full text-white flex items-center justify-center shadow-sm transition bg-sky-600 hover:bg-sky-600/90 active:bg-sky-700',
-            hero ? 'h-14 w-14 text-xl' : 'h-8 w-8'
-          )}
-        >
-          <MagnifyingGlassIcon
-            className={cn(hero ? 'h-7 w-7' : 'h-4.5 w-4.5')}
-          />
-        </button>
       </div>
+      
       {show && (
         <div
-          ref={dropdownRef}
           id="game-suggestions"
           role="listbox"
-          className="absolute left-0 right-0 top-full mt-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-xl overflow-hidden max-h-[400px] overflow-y-auto z-[260] text-sm"
+          className="absolute left-0 right-0 top-full mt-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-xl overflow-hidden max-h-[400px] overflow-y-auto z-50 text-sm"
         >
           {loading && (
             <div className="px-6 py-4 text-gray-500 dark:text-gray-400">
@@ -298,20 +253,20 @@ export default function GameSearchSelect({
               )}
               {grouped.popular.length > 0 && (
                 <div className="border-b border-gray-100 dark:border-gray-800">
-                  <div className="px-6 py-2 bg-gray-50 dark:bg-gray-800/50 text-[11px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 flex items-center gap-2">
-                    <TrophyIcon className="w-3.5 h-3.5" /> Popular
+                  <div className="px-6 py-2 bg-gray-50 dark:bg-gray-800/50 text-[11px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                    Popular Games
                   </div>
                   {grouped.popular.map((g, i) => {
-                    const idx = grouped.exactMatches.length + i
+                    const globalIndex = grouped.exactMatches.length + i
                     return (
                       <SuggestionRow
                         key={`p-${g.id}`}
                         game={g}
-                        active={activeIndex === idx}
-                        index={idx}
+                        active={activeIndex === globalIndex}
+                        index={globalIndex}
                         query={query}
                         onSelect={handleSelect}
-                        onHover={() => setActiveIndex(idx)}
+                        onHover={() => setActiveIndex(globalIndex)}
                         highlight={highlight}
                       />
                     )
@@ -320,21 +275,20 @@ export default function GameSearchSelect({
               )}
               {grouped.other.length > 0 && (
                 <div>
-                  <div className="px-6 py-2 bg-gray-50 dark:bg-gray-800/50 text-[11px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 flex items-center gap-2">
-                    <CubeIcon className="w-3.5 h-3.5" /> Other
+                  <div className="px-6 py-2 bg-gray-50 dark:bg-gray-800/50 text-[11px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                    Other Results
                   </div>
                   {grouped.other.map((g, i) => {
-                    const idx =
-                      grouped.exactMatches.length + grouped.popular.length + i
+                    const globalIndex = grouped.exactMatches.length + grouped.popular.length + i
                     return (
                       <SuggestionRow
                         key={`o-${g.id}`}
                         game={g}
-                        active={activeIndex === idx}
-                        index={idx}
+                        active={activeIndex === globalIndex}
+                        index={globalIndex}
                         query={query}
                         onSelect={handleSelect}
-                        onHover={() => setActiveIndex(idx)}
+                        onHover={() => setActiveIndex(globalIndex)}
                         highlight={highlight}
                       />
                     )
@@ -343,72 +297,71 @@ export default function GameSearchSelect({
               )}
             </>
           )}
-          <div className="border-t border-gray-100 dark:border-gray-800 px-6 py-2 text-[11px] text-gray-400 dark:text-gray-500">
-            Enter to select • ↑↓ navigate • Esc close
-          </div>
         </div>
       )}
     </div>
   )
 }
 
-function SuggestionRow({
-  game,
-  active,
-  index,
-  query,
-  onSelect,
-  onHover,
-  highlight,
-}: {
+// SuggestionRow component
+interface SuggestionRowProps {
   game: SuggestionGame
   active: boolean
   index: number
   query: string
-  onSelect: (g: SuggestionGame) => void
+  onSelect: (game: SuggestionGame) => void
   onHover: () => void
-  highlight: (n: string) => React.ReactNode
-}) {
+  highlight: (name: string) => React.ReactNode
+}
+
+function SuggestionRow({ game, active, onSelect, onHover, highlight }: SuggestionRowProps) {
   return (
-    <div id={`game-sugg-${index}`} role="option" aria-selected={active}>
-      <button
-        type="button"
-        onMouseEnter={onHover}
-        onMouseDown={(e) => e.preventDefault()}
-        onClick={() => onSelect(game)}
-        className={cn(
-          'w-full flex items-center gap-4 px-6 py-3 text-left transition-colors',
-          active
-            ? 'bg-primary-50 dark:bg-primary-900/30'
-            : 'hover:bg-gray-50 dark:hover:bg-gray-800/60'
-        )}
-      >
+    <button
+      type="button"
+      className={cn(
+        'w-full px-6 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-800 focus:bg-gray-50 dark:focus:bg-gray-800 focus:outline-none transition-colors flex items-center gap-4',
+        active && 'bg-gray-50 dark:bg-gray-800'
+      )}
+      onClick={() => onSelect(game)}
+      onMouseEnter={onHover}
+      role="option"
+      aria-selected={active}
+    >
+      {/* Game thumbnail */}
+      <div className="w-10 h-10 rounded border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 flex-shrink-0 overflow-hidden">
         {game.thumbnail_url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={game.thumbnail_url}
-            alt=""
-            className="w-10 h-10 rounded-lg object-cover ring-1 ring-gray-200 dark:ring-gray-700"
+            alt={game.name}
+            className="w-full h-full object-cover"
           />
         ) : (
-          <div className="w-10 h-10 rounded-lg bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-[10px] font-semibold text-gray-600 dark:text-gray-300">
-            {game.name.slice(0, 2).toUpperCase()}
+          <div className="w-full h-full flex items-center justify-center">
+            <CubeIcon className="w-5 h-5 text-gray-400" />
           </div>
         )}
-        <div className="min-w-0 flex-1">
-          <div className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
-            {highlight(game.name)}
-          </div>
-          <div className="text-[11px] text-gray-500 dark:text-gray-400 flex items-center gap-2">
-            {game.year_published && <span>{game.year_published}</span>}
-            {game.rating != null && (
-              <span className="font-mono text-gray-400">
-                {Number(game.rating).toFixed(1)}
-              </span>
-            )}
-          </div>
+      </div>
+
+      {/* Game details */}
+      <div className="flex-1 min-w-0">
+        <div className="font-medium text-gray-900 dark:text-white truncate">
+          {highlight(game.name)}
         </div>
-      </button>
-    </div>
+        {game.year_published && (
+          <div className="text-xs text-gray-500 dark:text-gray-400">
+            {game.year_published}
+          </div>
+        )}
+      </div>
+
+      {/* Rating/popularity indicator */}
+      {game.rating && game.rating >= 7.5 && (
+        <div className="flex items-center gap-1 text-amber-500">
+          <TrophyIcon className="w-4 h-4" />
+          <span className="text-xs font-medium">{game.rating.toFixed(1)}</span>
+        </div>
+      )}
+    </button>
   )
 }

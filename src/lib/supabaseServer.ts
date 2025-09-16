@@ -21,7 +21,7 @@ function getCookieStore(): MinimalCookieStore {
   return nextCookies() as unknown as MinimalCookieStore
 }
 
-export function getSupabaseServerClient(): SupabaseServerClient {
+export async function getSupabaseServerClient(): Promise<SupabaseServerClient> {
   const cookieStore = getCookieStore()
   return createServerClient<Database>(supabaseUrl, supabaseKey, {
     cookies: {
@@ -49,9 +49,9 @@ export function getSupabaseServerClient(): SupabaseServerClient {
 }
 
 // Variant that injects an Authorization bearer token so PostgREST & RLS have auth.uid()
-export function getSupabaseServerClientWithAccessToken(
+export async function getSupabaseServerClientWithAccessToken(
   accessToken: string
-): SupabaseServerClient {
+): Promise<SupabaseServerClient> {
   const cookieStore = getCookieStore()
   return createServerClient<Database>(supabaseUrl, supabaseKey, {
     cookies: {

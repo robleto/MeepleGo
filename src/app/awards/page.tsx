@@ -10,6 +10,7 @@ import PersonalAwardCategorySection from '@/components/Components/AwardShowcase'
 import PersonalAwardsAuto from '@/components/Components/Awards/PersonalAwardsAuto'
 // Removed IndustryAwards component in favor of direct AwardCard composition (subset of AwardCard story patterns)
 import AwardCard from '@/components/Components/AwardCard'
+import NetflixScrollSection from '@/components/Elements/NetflixScrollSection'
 // Removed AwardsLoggedOutHero in favor of inline Hero variant here
 import Hero from '@/components/Components/Hero'
 
@@ -32,64 +33,96 @@ const AWARD_CATEGORIES = (awardsData as any).categories.map((c: any) => ({
 // Debug helper: build per-year breakdown for an award type
 async function getAwardYearBreakdown(awardType: string) {
   const supabase = await getSupabaseServerClient()
-  let allGames: any[] = []
-  let page = 0
-  const pageSize = 1000
-  while (true) {
-    try {
-      const { data: games, error } = await supabase
-        .from('games')
-        .select('name, honors')
-        .not('honors', 'eq', '[]')
-        .range(page * pageSize, (page + 1) * pageSize - 1)
-      if (error) {
-        console.error('Error fetching year breakdown (page ' + page + '):', {
-          message: (error as any)?.message,
-          details: (error as any)?.details,
-          hint: (error as any)?.hint,
-          code: (error as any)?.code,
-        })
-        break
-      }
-      if (!games || games.length === 0) break
-      allGames = allGames.concat(games)
-      if (games.length < pageSize) break
-      page++
-    } catch (e: any) {
-      console.error('Unhandled exception in getAwardYearBreakdown', {
-        page,
-        error: e?.message,
-        stack: e?.stack,
-      })
-      break
+  
+  try {
+    // Create a pattern to match the award_set values
+    let searchPattern = awardType
+    
+    // Handle special cases for pattern matching
+    if (awardType === 'Golden Geek Awards') {
+      searchPattern = '%Golden Geek%'
+    } else if (awardType === 'Charles S. Roberts') {
+      searchPattern = '%Charles S. Roberts%'
+    } else if (awardType === 'Spiel des Jahres') {
+      searchPattern = '%Spiel des Jahres%'
+    } else if (awardType === 'Kinderspiel des Jahres') {
+      searchPattern = '%Kinderspiel des Jahres%'
+    } else if (awardType === 'Kennerspiel des Jahres') {
+      searchPattern = '%Kennerspiel des Jahres%'
+    } else if (awardType === 'Deutscher Spiele Preis') {
+      searchPattern = '%Deutscher Spiele Preis%'
+    } else if (awardType === 'Origins Awards') {
+      searchPattern = '%Origins%'
+    } else if (awardType === 'The Dice Tower Gaming Awards') {
+      searchPattern = '%Dice Tower%'
+    } else if (awardType === "As d'Or - Jeu de l'Année") {
+      searchPattern = "%As d'Or%"
+    } else {
+      // For other awards, try to match the first part of the name
+      const mainName = awardType.split(' ')[0]
+      searchPattern = `%${mainName}%`
     }
-  }
 
-  const yearMap = new Map<
-    number,
-    { winners: string[]; nominees: string[]; special: string[] }
-  >()
-  allGames.forEach((g) => {
-    const honorsArr = Array.isArray(g.honors) ? g.honors : []
-    honorsArr
-      .filter((h: any) => h.award_type === awardType)
-      .forEach((h: any) => {
-        if (typeof h.year !== 'number') return
-        if (!yearMap.has(h.year))
-          yearMap.set(h.year, { winners: [], nominees: [], special: [] })
-        const bucket = yearMap.get(h.year)!
-        if (h.category === 'Winner') {
-          if (!bucket.winners.includes(g.name)) bucket.winners.push(g.name)
-        } else if (h.category === 'Nominee') {
-          if (!bucket.nominees.includes(g.name)) bucket.nominees.push(g.name)
-        } else if (h.category === 'Special') {
-          if (!bucket.special.includes(g.name)) bucket.special.push(g.name)
+    // Get awards with boardgames JSONB data from industry_awards table
+    const { data: awards, error } = await supabase
+      .from('industry_awards')
+      .select(`
+        id,
+        year,
+        award_set,
+        category,
+        status,
+        boardgames
+      `)
+      .ilike('award_set', searchPattern)
+      .order('year', { ascending: false })
+
+    if (error) {
+      console.error('Error fetching award year breakdown:', error)
+      return []
+    }
+
+    if (!awards || awards.length === 0) {
+      return []
+    }
+
+    // Group awards by year - simplified for debug output
+    const yearMap = new Map<
+      number,
+      { winners: string[]; nominees: string[]; special: string[] }
+    >()
+
+    awards.forEach((award: any) => {
+      const boardgames = award.boardgames || []
+      
+      boardgames.forEach((boardgame: any) => {
+        if (!yearMap.has(award.year)) {
+          yearMap.set(award.year, { winners: [], nominees: [], special: [] })
+        }
+
+        const bucket = yearMap.get(award.year)!
+        
+        if (award.status === 'Winner') {
+          if (!bucket.winners.includes(boardgame.name)) bucket.winners.push(boardgame.name)
+        } else if (award.status === 'Nominee') {
+          if (!bucket.nominees.includes(boardgame.name)) bucket.nominees.push(boardgame.name)
+        } else {
+          if (!bucket.special.includes(boardgame.name)) bucket.special.push(boardgame.name)
         }
       })
-  })
-  return Array.from(yearMap.entries())
-    .map(([year, v]) => ({ year, ...v }))
-    .sort((a, b) => b.year - a.year)
+    })
+
+    return Array.from(yearMap.entries())
+      .map(([year, v]) => ({ year, ...v }))
+      .sort((a, b) => b.year - a.year)
+  } catch (e: any) {
+    console.error('Unhandled exception in getAwardYearBreakdown', {
+      awardType,
+      error: e?.message,
+      stack: e?.stack,
+    })
+    return []
+  }
 }
 
 interface AwardStats {
@@ -100,77 +133,98 @@ interface AwardStats {
 }
 
 async function getAwardStats(awardType: string): Promise<AwardStats> {
-  const supabase = await getSupabaseServerClient()
-  let allGames: any[] = []
-  let page = 0
-  const pageSize = 1000
-  while (true) {
-    try {
-      const { data: games, error } = await supabase
-        .from('games')
-        .select('honors')
-        .not('honors', 'eq', '[]')
-        .range(page * pageSize, (page + 1) * pageSize - 1)
-      if (error) {
-        console.error('Error fetching award stats (page ' + page + '):', {
-          awardType,
-          message: (error as any)?.message,
-          details: (error as any)?.details,
-          hint: (error as any)?.hint,
-          code: (error as any)?.code,
-        })
-        break
-      }
-      if (!games || games.length === 0) break
-      allGames = allGames.concat(games)
-      if (games.length < pageSize) break
-      page++
-    } catch (e: any) {
-      console.error('Unhandled exception in getAwardStats', {
-        awardType,
-        page,
-        error: e?.message,
-        stack: e?.stack,
-      })
-      break
+  try {
+    const supabase = await getSupabaseServerClient()
+    
+    // Create a pattern to match the award_set values
+    // For example: "Golden Geek Awards" should match award_sets containing "Golden Geek"
+    let searchPattern = awardType
+    
+    // Handle special cases for pattern matching
+    if (awardType === 'Golden Geek Awards') {
+      searchPattern = '%Golden Geek%'
+    } else if (awardType === 'Charles S. Roberts') {
+      searchPattern = '%Charles S. Roberts%'
+    } else if (awardType === 'Spiel des Jahres') {
+      searchPattern = '%Spiel des Jahres%'
+    } else if (awardType === 'Kinderspiel des Jahres') {
+      searchPattern = '%Kinderspiel des Jahres%'
+    } else if (awardType === 'Kennerspiel des Jahres') {
+      searchPattern = '%Kennerspiel des Jahres%'
+    } else if (awardType === 'Deutscher Spiele Preis') {
+      searchPattern = '%Deutscher Spiele Preis%'
+    } else if (awardType === 'Origins Awards') {
+      searchPattern = '%Origins%'
+    } else if (awardType === 'The Dice Tower Gaming Awards') {
+      searchPattern = '%Dice Tower%'
+    } else if (awardType === "As d'Or - Jeu de l'Année") {
+      searchPattern = "%As d'Or%"
+    } else {
+      // For other awards, try to match the first part of the name
+      const mainName = awardType.split(' ')[0]
+      searchPattern = `%${mainName}%`
     }
-  }
+    
+    // Get award statistics from industry_awards table using pattern matching
+    const { data: awards, error } = await supabase
+      .from('industry_awards')
+      .select('year, status')
+      .ilike('award_set', searchPattern)
 
-  const years = new Set<number>()
-  let winners = 0
-  let nominees = 0
+    if (error) {
+      console.error('Error fetching award stats:', error)
+      return {
+        totalGames: 0,
+        totalWinners: 0,
+        totalNominees: 0,
+        yearSpan: '',
+      }
+    }
 
-  allGames.forEach((game: any) => {
-    const honorsArr = Array.isArray(game.honors) ? game.honors : []
-    const relevantHonors = honorsArr.filter(
-      (honor: any) => honor.award_type === awardType
-    )
+    if (!awards || awards.length === 0) {
+      return {
+        totalGames: 0,
+        totalWinners: 0,
+        totalNominees: 0,
+        yearSpan: '',
+      }
+    }
 
-    relevantHonors.forEach((honor: any) => {
-      years.add(honor.year)
-      if (honor.category === 'Winner') winners++
-      else if (honor.category === 'Nominee') nominees++
+    const years = new Set<number>()
+    let winners = 0
+    let nominees = 0
+
+    awards.forEach((award: { year: number; status: string }) => {
+      years.add(award.year)
+      if (award.status === 'Winner') {
+        winners++
+      } else if (award.status === 'Nominee' || award.status === 'Recommended' || award.status === 'Special') {
+        nominees++
+      }
     })
-  })
 
-  const yearArray = Array.from(years).sort((a, b) => a - b)
-  const yearSpan =
-    yearArray.length > 0
+    const yearArray = Array.from(years).sort((a, b) => a - b)
+    const yearSpan = yearArray.length
       ? `${yearArray[0]} - ${yearArray[yearArray.length - 1]}`
       : ''
 
-  // Distinct games with at least one relevant honor (avoid double counting)
-  const distinctGameIds = new Set<string>()
-  allGames.forEach((g: any) => {
-    const honorsArr = Array.isArray(g.honors) ? g.honors : []
-    if (honorsArr.some((h: any) => h.award_type === awardType))
-      distinctGameIds.add(g.id || JSON.stringify(g))
-  })
-  return {
-    totalGames: distinctGameIds.size,
-    totalWinners: winners,
-    totalNominees: nominees,
-    yearSpan,
+    return {
+      totalGames: winners + nominees,
+      totalWinners: winners,
+      totalNominees: nominees,
+      yearSpan,
+    }
+  } catch (error) {
+    console.error('Unhandled exception in getAwardStats', {
+      awardType,
+      error,
+    })
+    return {
+      totalGames: 0,
+      totalWinners: 0,
+      totalNominees: 0,
+      yearSpan: '',
+    }
   }
 }
 
@@ -471,15 +525,16 @@ export default async function AwardsPage({
   return (
     <PageLayout>
       <div className="max-w-6xl mx-auto px-4 py-8">
-        {/* Industry Awards (direct AwardCard grid) */}
+        {/* Industry Awards (Netflix-style horizontal scrolling) */}
         <section>
           <div className="flex items-end justify-between mb-5">
             <Heading as="h2" variant="section" className="mb-1">
               Industry Awards
             </Heading>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {AWARD_CATEGORIES.slice(0, 3).map((category, idx) => {
+          
+          <NetflixScrollSection itemWidth="w-72" showCount={4}>
+            {AWARD_CATEGORIES.map((category, idx) => {
               const stat = allStats[idx]
               if (!stat) return null
               return (
@@ -499,7 +554,7 @@ export default async function AwardsPage({
                 />
               )
             })}
-          </div>
+          </NetflixScrollSection>
         </section>
 
         {/* Personal Awards (server-rendered if session known; else client fallback with Hero) */}
