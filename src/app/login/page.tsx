@@ -3,15 +3,21 @@
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+import { useAuthErrorMessage } from '@/hooks/useAuthErrorMessage'
 import AuthLayout from '@/components/Components/AuthLayout'
+import Alert from '@/components/Components/Alert'
 
 function LoginForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [info, setInfo] = useState<string | null>(null)
+  const nextPath = searchParams.get('next') || '/'
+  const queryError = searchParams.get('error') || undefined
+  const friendlyError = useAuthErrorMessage(error || queryError)
   const [showPassword, setShowPassword] = useState(false)
   const [magicSending, setMagicSending] = useState(false)
   const [magicSent, setMagicSent] = useState(false)
@@ -24,8 +30,6 @@ function LoginForm() {
   >('idle')
 
   // If already authenticated, skip login form
-  const searchParams = useSearchParams()
-  const nextPath = searchParams.get('next') || '/'
   useEffect(() => {
     let mounted = true
     setStatus('auth-check')
@@ -42,6 +46,19 @@ function LoginForm() {
       mounted = false
     }
   }, [router, nextPath])
+
+  // Auto-dismiss query error after a short delay by removing it from the URL
+  useEffect(() => {
+    if (!queryError) return
+    const t = setTimeout(() => {
+      const params = new URLSearchParams(window.location.search)
+      params.delete('error')
+      const next = params.toString()
+      const url = window.location.pathname + (next ? `?${next}` : '')
+      window.history.replaceState({}, '', url)
+    }, 5000)
+    return () => clearTimeout(t)
+  }, [queryError])
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -238,10 +255,10 @@ function LoginForm() {
           </div>
         </div>
         <div aria-live="polite" className="space-y-2">
-          {error && (
-            <p id="auth-error" className="text-sm text-red-600">
-              {error}
-            </p>
+          {friendlyError && (
+            <Alert variant="error" role="alert">
+              {friendlyError}
+            </Alert>
           )}
           {info && (
             <p
@@ -302,11 +319,16 @@ function LoginForm() {
           <span className="text-[10px] text-gray-500">
             {!email
               ? 'Enter email to enable'
-              : magicSent
-                ? 'Check your inbox'
+              : magicSending
+                ? 'Sending magic link…'
                 : 'Password-less option'}
           </span>
         </div>
+        {magicSent && !error && (
+          <Alert variant="success" className="mt-2">
+            Magic link sent. Check your inbox/spam. If no email arrives, the user may not exist in this project or SMTP settings may be off.
+          </Alert>
+        )}
         <div className="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400 pt-1">
           <a
             href="/signup"

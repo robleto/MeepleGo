@@ -2,27 +2,47 @@
 
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useAuthErrorMessage } from '@/hooks/useAuthErrorMessage'
 import AuthLayout from '@/components/Components/AuthLayout'
+import Alert from '@/components/Components/Alert'
 
 export default function ResetPasswordPage() {
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
+  const friendlyError = useAuthErrorMessage(error)
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
     setMessage(null)
     setLoading(true)
+    
+    // Use auth callback with recovery parameter (prefer env override for prod)
     const redirectBase =
       process.env.NEXT_PUBLIC_AUTH_REDIRECT_BASE || window.location.origin
+    // Use plain callback path (no query) to ease allowlist matching
+    const redirectUrl = `${redirectBase}/auth/callback`
+    
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Password reset redirect URL:', redirectUrl)
+    }
+    
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${redirectBase}/update-password`,
+      redirectTo: redirectUrl,
     })
+    
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Reset password request completed, error:', error)
+    }
+    
     setLoading(false)
-    if (error) return setError(error.message)
-    setMessage('If an account exists, you will receive an email shortly.')
+    if (error) {
+      if (process.env.NODE_ENV === 'development') console.error('Reset password error:', error)
+      return setError(error.message)
+    }
+    setMessage(`If an account exists, you will receive an email shortly. Check that the redirect URL (${redirectUrl}) is configured in your Supabase project settings.`)
   }
 
   return (
@@ -38,7 +58,7 @@ export default function ResetPasswordPage() {
         </a>
       }
     >
-      <form onSubmit={onSubmit} className="space-y-5">
+  <form onSubmit={onSubmit} className="space-y-5">
         <div className="space-y-1">
           <label className="block text-xs font-medium uppercase tracking-wide text-gray-600 dark:text-gray-400">
             Email
@@ -52,11 +72,13 @@ export default function ResetPasswordPage() {
             className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
           />
         </div>
-        {error && <p className="text-sm text-red-600">{error}</p>}
-        {message && <p className="text-sm text-green-600">{message}</p>}
+        {friendlyError && (
+          <Alert variant="error" role="alert">{friendlyError}</Alert>
+        )}
+        {message && <Alert variant="success" role="status">{message}</Alert>}
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || !!message}
           className="w-full inline-flex justify-center items-center px-4 py-2 rounded-md bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors"
         >
           {loading ? 'Sending…' : 'Send reset link'}
