@@ -6,6 +6,7 @@ import { AwardCard } from '@/components/Components/AwardCard'
 import ListCard from '@/components/Components/ListCard'
 import StatCard from '@/components/Elements/StatCard'
 import NetflixScrollSection from '@/components/Elements/NetflixScrollSection'
+import ZeroState from '@/components/Components/ZeroState'
 import {
   TrophyIcon,
   ChartBarIcon,
@@ -101,13 +102,23 @@ export function HomepageView({ user, loading, featuredGames, userStats, industry
   if (!user) {
     return (
       <div className="space-y-12" id="games-section">
+        {/* Zero-state hero for guests */}
+        <section className="space-y-2">
+          <ZeroState
+            title="Track your board game life"
+            description="Organize your collection, rate what you play, and celebrate your favorites. Join to unlock your personal stats."
+            action={{ label: 'Sign up to get started', href: '/signup' }}
+          />
+        </section>
+
+        {/* BGG Trending (Trending Plays) */}
         <section className="space-y-6">
           <div className="flex items-center justify-between">
             <div>
               <Heading as="h2" size="lg" className="text-gray-900 dark:text-white">Trending Games</Heading>
               <p className="mt-2 text-lg text-gray-600 dark:text-gray-300">Discover what's popular in the board game community</p>
             </div>
-            <Link href={bggListIds.trendingplays ? `/lists/${bggListIds.trendingplays}` : "/games"} className="text-primary-600 hover:text-primary-500 font-medium">View all games →</Link>
+            <Link href={bggListIds.trendingplays ? `/lists/${bggListIds.trendingplays}` : "/games"} className="text-primary-600 hover:text-primary-500 font-medium">View all →</Link>
           </div>
           {loading ? (
             <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4">
@@ -130,34 +141,138 @@ export function HomepageView({ user, loading, featuredGames, userStats, industry
             </div>
           )}
         </section>
-        <section className="space-y-6">
-          <div className="text-center">
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Everything You Need</h2>
-            <p className="mt-2 text-lg text-gray-600 dark:text-gray-300">Powerful tools to organize, rate, and celebrate your board game collection</p>
-          </div>
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            {features.map((feature) => (
-              <Link key={feature.name} href={feature.href} className="group relative bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow p-6">
-                <div className="flex items-center space-x-4">
-                  <div className={`flex-shrink-0 p-3 rounded-lg ${feature.color}`}>
-                    <feature.icon className="h-6 w-6 text-white" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-lg font-medium text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400">{feature.name}</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">{feature.description}</p>
-                  </div>
+
+        {/* BGG Hotness */}
+        {bggHotness.length > 0 && (
+          <section className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <Heading as="h2" size="lg" className="text-gray-900 dark:text-white">BGG Hotness</Heading>
+                <p className="mt-2 text-lg text-gray-600 dark:text-gray-300">What's trending hot on BoardGameGeek right now</p>
+              </div>
+              <Link href={bggListIds.hotness ? `/lists/${bggListIds.hotness}` : "/lists"} className="text-primary-600 hover:text-primary-500 font-medium">View all →</Link>
+            </div>
+            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 -mx-4 px-4">
+              {bggHotness.map((game) => (
+                <div key={game.id} className="flex-shrink-0 w-48">
+                  <GameCard 
+                    game={game as any} 
+                    viewMode="grid" 
+                    variant="balanced"
+                    className="h-full flex flex-col"
+                  />
                 </div>
-              </Link>
-            ))}
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* BGG Most Played */}
+        {bggMostPlayed.length > 0 && (
+          <section className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <Heading as="h2" size="lg" className="text-gray-900 dark:text-white">BGG Most Played</Heading>
+                <p className="mt-2 text-lg text-gray-600 dark:text-gray-300">Games getting the most plays right now</p>
+              </div>
+              <Link href={bggListIds.mostplayed ? `/lists/${bggListIds.mostplayed}` : "/lists"} className="text-primary-600 hover:text-primary-500 font-medium">View all →</Link>
+            </div>
+            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 -mx-4 px-4">
+              {bggMostPlayed.map((game) => (
+                <div key={game.id} className="flex-shrink-0 w-48">
+                  <GameCard 
+                    game={game as any} 
+                    viewMode="grid" 
+                    variant="balanced"
+                    className="h-full flex flex-col"
+                  />
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* BGG Bestsellers */}
+        {bggBestsellers.length > 0 && (
+          <section className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <Heading as="h2" size="lg" className="text-gray-900 dark:text-white">BGG Bestsellers</Heading>
+                <p className="mt-2 text-lg text-gray-600 dark:text-gray-300">Top-selling games on BoardGameGeek</p>
+              </div>
+              <Link href={bggListIds.bestsellers ? `/lists/${bggListIds.bestsellers}` : "/lists"} className="text-primary-600 hover:text-primary-500 font-medium">View all →</Link>
+            </div>
+            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 -mx-4 px-4">
+              {bggBestsellers.map((game) => (
+                <div key={game.id} className="flex-shrink-0 w-48">
+                  <GameCard 
+                    game={game as any} 
+                    viewMode="grid" 
+                    variant="balanced"
+                    className="h-full flex flex-col"
+                  />
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Industry Awards */}
+        {industryAwards.length > 0 && (
+          <section className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <Heading as="h2" size="lg" className="text-gray-900 dark:text-white">Industry Awards</Heading>
+                <p className="mt-2 text-lg text-gray-600 dark:text-gray-300">Prestigious board game honors and recognition</p>
+              </div>
+              <Link href="/awards" className="text-primary-600 hover:text-primary-500 font-medium">Explore all →</Link>
+            </div>
+            <NetflixScrollSection itemWidth="w-72" showCount={4}>
+              {industryAwards.map((award: any) => (
+                <AwardCard
+                  key={award.id}
+                  href={`/awards#${award.id}`}
+                  title={award.name}
+                  description={award.description || "Prestigious board game recognition"}
+                  yearSpan={undefined}
+                  winners={undefined as any}
+                  nominees={undefined as any}
+                  total={undefined}
+                  circleBorderClass={award.borderColor || "border-amber-200"}
+                  circleBgClass={award.backgroundColor || "bg-amber-50"}
+                  iconColorClass={award.iconColor || "text-amber-600"}
+                  showStats={false}
+                  cta="View Details"
+                />
+              ))}
+            </NetflixScrollSection>
+          </section>
+        )}
+
+        {/* Public Lists */}
+        <section className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <Heading as="h2" size="lg" className="text-gray-900 dark:text-white">Public Lists</Heading>
+              <p className="mt-2 text-lg text-gray-600 dark:text-gray-300">Community-curated game collections ({publicLists.length} found)</p>
+            </div>
+            <Link href="/lists" className="text-primary-600 hover:text-primary-500 font-medium">Browse lists →</Link>
           </div>
-        </section>
-        <section className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-          <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Get Started</h2>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <Link href="/add" className="flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 transition-colors">Add Games</Link>
-            <Link href="/games" className="flex items-center justify-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">Browse Collection</Link>
-            <Link href="/rankings" className="flex items-center justify-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">Start Rating</Link>
-          </div>
+          {publicLists.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {publicLists.slice(0, 3).map((list) => (
+                <ListCard
+                  key={list.id}
+                  list={list as any}
+                  isPublic={true}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-gray-500">
+              Loading lists or no public lists found...
+            </div>
+          )}
         </section>
       </div>
     )
@@ -330,7 +445,7 @@ export function HomepageView({ user, loading, featuredGames, userStats, industry
         </section>
       )}
 
-      {/* Public Lists Preview - Always show section for debugging */}
+      {/* Public Lists */}
       <section className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
@@ -354,35 +469,6 @@ export function HomepageView({ user, loading, featuredGames, userStats, industry
             Loading lists or no public lists found...
           </div>
         )}
-      </section>
-      <section className="space-y-6">
-        <div className="text-center">
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Your Gaming Toolkit</h2>
-          <p className="mt-2 text-lg text-gray-600 dark:text-gray-300">Everything you need to manage and celebrate your board game collection</p>
-        </div>
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          {features.map((feature) => (
-            <Link key={feature.name} href={feature.href} className="group relative bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow p-6">
-              <div className="flex items-center space-x-4">
-                <div className={`flex-shrink-0 p-3 rounded-lg ${feature.color}`}>
-                  <feature.icon className="h-6 w-6 text-white" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-lg font-medium text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400">{feature.name}</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">{feature.description}</p>
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
-      <section className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-        <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Quick Actions</h2>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <Link href="/add" className="flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 transition-colors">Add New Game</Link>
-          <Link href="/rankings" className="flex items-center justify-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">Rate Games</Link>
-          <Link href="/awards" className="flex items-center justify-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">Create Awards</Link>
-        </div>
       </section>
     </div>
   )
