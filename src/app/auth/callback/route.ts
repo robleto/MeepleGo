@@ -6,7 +6,7 @@
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
-	const html = `<!doctype html>
+  const html = `<!doctype html>
 		<html>
 			<head>
 				<meta charset="utf-8" />
@@ -31,7 +31,7 @@ export async function GET() {
 				Redirecting…
 			</body>
 		</html>`
-	return new Response(html, {
-		headers: { 'content-type': 'text/html; charset=utf-8' },
-	})
+  return new Response(html, {
+    headers: { 'content-type': 'text/html; charset=utf-8' },
+  })
 }

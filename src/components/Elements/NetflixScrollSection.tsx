@@ -13,11 +13,11 @@ interface NetflixScrollSectionProps {
 /**
  * Netflix-style horizontal scrolling section with navigation arrows
  */
-export default function NetflixScrollSection({ 
-  children, 
+export default function NetflixScrollSection({
+  children,
   className = '',
   itemWidth = 'w-72',
-  showCount = 4
+  showCount = 4,
 }: NetflixScrollSectionProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
@@ -25,7 +25,7 @@ export default function NetflixScrollSection({
 
   const checkScrollability = () => {
     if (!scrollContainerRef.current) return
-    
+
     const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current
     setCanScrollLeft(scrollLeft > 0)
     setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 1)
@@ -33,18 +33,19 @@ export default function NetflixScrollSection({
 
   const scroll = (direction: 'left' | 'right') => {
     if (!scrollContainerRef.current) return
-    
+
     const container = scrollContainerRef.current
     const itemWidth = 288 // 72 * 4 = 288px (w-72)
     const scrollAmount = itemWidth * showCount // Scroll by showCount items
-    
-    const newScrollLeft = direction === 'left' 
-      ? container.scrollLeft - scrollAmount
-      : container.scrollLeft + scrollAmount
-    
+
+    const newScrollLeft =
+      direction === 'left'
+        ? container.scrollLeft - scrollAmount
+        : container.scrollLeft + scrollAmount
+
     container.scrollTo({
       left: newScrollLeft,
-      behavior: 'smooth'
+      behavior: 'smooth',
     })
   }
 
@@ -53,16 +54,16 @@ export default function NetflixScrollSection({
     if (!container) return
 
     checkScrollability()
-    
+
     const handleScroll = () => checkScrollability()
     container.addEventListener('scroll', handleScroll)
-    
+
     // Check on resize
     const handleResize = () => {
       setTimeout(checkScrollability, 100)
     }
     window.addEventListener('resize', handleResize)
-    
+
     return () => {
       container.removeEventListener('scroll', handleScroll)
       window.removeEventListener('resize', handleResize)
@@ -72,20 +73,18 @@ export default function NetflixScrollSection({
   return (
     <div className={`relative group ${className}`}>
       {/* Scroll Container */}
-      <div 
+      <div
         ref={scrollContainerRef}
         className="overflow-x-auto scrollbar-hide"
         onScroll={checkScrollability}
       >
         <div className="flex gap-4 pb-4" style={{ width: 'max-content' }}>
           {React.Children.map(children, (child) => (
-            <div className={`flex-none ${itemWidth}`}>
-              {child}
-            </div>
+            <div className={`flex-none ${itemWidth}`}>{child}</div>
           ))}
         </div>
       </div>
-      
+
       {/* Left Arrow */}
       {canScrollLeft && (
         <button
@@ -96,7 +95,7 @@ export default function NetflixScrollSection({
           <ChevronLeftIcon className="w-5 h-5" />
         </button>
       )}
-      
+
       {/* Right Arrow */}
       {canScrollRight && (
         <button
@@ -107,7 +106,7 @@ export default function NetflixScrollSection({
           <ChevronRightIcon className="w-5 h-5" />
         </button>
       )}
-      
+
       {/* Gradient overlays for visual scroll indication */}
       {canScrollLeft && (
         <div className="absolute left-0 top-0 bottom-4 w-8 bg-gradient-to-r from-white dark:from-gray-900 to-transparent pointer-events-none z-[5] hidden lg:block" />

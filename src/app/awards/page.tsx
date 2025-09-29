@@ -33,11 +33,11 @@ const AWARD_CATEGORIES = (awardsData as any).categories.map((c: any) => ({
 // Debug helper: build per-year breakdown for an award type
 async function getAwardYearBreakdown(awardType: string) {
   const supabase = await getSupabaseServerClient()
-  
+
   try {
     // Create a pattern to match the award_set values
     let searchPattern = awardType
-    
+
     // Handle special cases for pattern matching
     if (awardType === 'Golden Geek Awards') {
       searchPattern = '%Golden Geek%'
@@ -66,14 +66,16 @@ async function getAwardYearBreakdown(awardType: string) {
     // Get awards with boardgames JSONB data from industry_awards table
     const { data: awards, error } = await supabase
       .from('industry_awards')
-      .select(`
+      .select(
+        `
         id,
         year,
         award_set,
         category,
         status,
         boardgames
-      `)
+      `
+      )
       .ilike('award_set', searchPattern)
       .order('year', { ascending: false })
 
@@ -94,20 +96,23 @@ async function getAwardYearBreakdown(awardType: string) {
 
     awards.forEach((award: any) => {
       const boardgames = award.boardgames || []
-      
+
       boardgames.forEach((boardgame: any) => {
         if (!yearMap.has(award.year)) {
           yearMap.set(award.year, { winners: [], nominees: [], special: [] })
         }
 
         const bucket = yearMap.get(award.year)!
-        
+
         if (award.status === 'Winner') {
-          if (!bucket.winners.includes(boardgame.name)) bucket.winners.push(boardgame.name)
+          if (!bucket.winners.includes(boardgame.name))
+            bucket.winners.push(boardgame.name)
         } else if (award.status === 'Nominee') {
-          if (!bucket.nominees.includes(boardgame.name)) bucket.nominees.push(boardgame.name)
+          if (!bucket.nominees.includes(boardgame.name))
+            bucket.nominees.push(boardgame.name)
         } else {
-          if (!bucket.special.includes(boardgame.name)) bucket.special.push(boardgame.name)
+          if (!bucket.special.includes(boardgame.name))
+            bucket.special.push(boardgame.name)
         }
       })
     })
@@ -135,11 +140,11 @@ interface AwardStats {
 async function getAwardStats(awardType: string): Promise<AwardStats> {
   try {
     const supabase = await getSupabaseServerClient()
-    
+
     // Create a pattern to match the award_set values
     // For example: "Golden Geek Awards" should match award_sets containing "Golden Geek"
     let searchPattern = awardType
-    
+
     // Handle special cases for pattern matching
     if (awardType === 'Golden Geek Awards') {
       searchPattern = '%Golden Geek%'
@@ -164,7 +169,7 @@ async function getAwardStats(awardType: string): Promise<AwardStats> {
       const mainName = awardType.split(' ')[0]
       searchPattern = `%${mainName}%`
     }
-    
+
     // Get award statistics from industry_awards table using pattern matching
     const { data: awards, error } = await supabase
       .from('industry_awards')
@@ -198,7 +203,11 @@ async function getAwardStats(awardType: string): Promise<AwardStats> {
       years.add(award.year)
       if (award.status === 'Winner') {
         winners++
-      } else if (award.status === 'Nominee' || award.status === 'Recommended' || award.status === 'Special') {
+      } else if (
+        award.status === 'Nominee' ||
+        award.status === 'Recommended' ||
+        award.status === 'Special'
+      ) {
         nominees++
       }
     })
@@ -532,7 +541,7 @@ export default async function AwardsPage({
               Industry Awards
             </Heading>
           </div>
-          
+
           <NetflixScrollSection itemWidth="w-72" showCount={4}>
             {AWARD_CATEGORIES.map((category, idx) => {
               const stat = allStats[idx]

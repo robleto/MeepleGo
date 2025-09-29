@@ -209,20 +209,20 @@ function Navigation() {
   // Create list function
   const handleCreateList = async () => {
     if (!listName.trim() || isCreatingList) return
-    
+
     setIsCreatingList(true)
     try {
-      const { data: { user } } = await supabase.auth.getUser()
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
       if (!user) return
-      
-      const { error } = await supabase
-        .from('lists')
-        .insert({
-          name: listName.trim(),
-          user_id: user.id,
-          is_public: false
-        })
-      
+
+      const { error } = await supabase.from('lists').insert({
+        name: listName.trim(),
+        user_id: user.id,
+        is_public: false,
+      })
+
       if (!error) {
         setListName('')
         setShowCreateListModal(false)
@@ -238,7 +238,7 @@ function Navigation() {
   // Add game function
   const handleAddGame = async () => {
     if (!gameName.trim() || isSubmittingGame) return
-    
+
     setIsSubmittingGame(true)
     try {
       await fetch('/api/missing-game-request', {
@@ -844,25 +844,23 @@ function Navigation() {
             }
           }}
         >
-        <div 
-          className="bg-white dark:bg-gray-900 w-full sm:max-w-2xl rounded-t-2xl sm:rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[80vh]"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-            <h3 className="text-lg font-semibold">
-              Log Your Play
-            </h3>
-            <button
-              onClick={() => setShowPlayLogModal(false)}
-              className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
-              aria-label="Close"
-            >
-              <XMarkIcon className="w-6 h-6 text-gray-500" />
-            </button>
-          </div>
-          {/* Body */}
-          <div className="p-6 flex-1 overflow-y-auto">
+          <div
+            className="bg-white dark:bg-gray-900 w-full sm:max-w-2xl rounded-t-2xl sm:rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[80vh]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-semibold">Log Your Play</h3>
+              <button
+                onClick={() => setShowPlayLogModal(false)}
+                className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
+                aria-label="Close"
+              >
+                <XMarkIcon className="w-6 h-6 text-gray-500" />
+              </button>
+            </div>
+            {/* Body */}
+            <div className="p-6 flex-1 overflow-y-auto">
               {selectedGameForPlayLog ? (
                 <PlayLogEditor
                   gameId={selectedGameForPlayLog.id}
@@ -876,7 +874,9 @@ function Navigation() {
                 />
               ) : (
                 <div className="space-y-4">
-                  <p className="text-gray-600 text-sm mb-4">Search for a game to log a play:</p>
+                  <p className="text-gray-600 text-sm mb-4">
+                    Search for a game to log a play:
+                  </p>
                   <input
                     type="text"
                     placeholder="Search for a game..."
@@ -893,9 +893,9 @@ function Navigation() {
                   </div>
                 </div>
               )}
+            </div>
           </div>
-        </div>
-      </Overlay>
+        </Overlay>
       </Portal>
 
       {/* Create List Modal */}
@@ -913,69 +913,72 @@ function Navigation() {
             }
           }}
         >
-        <div 
-          className="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-2xl shadow-xl"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="p-6">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                Create New List
-              </h3>
-              <button
-                onClick={() => setShowCreateListModal(false)}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-              >
-                <XMarkIcon className="w-6 h-6" />
-              </button>
-            </div>
-            
-            {/* Quick Create Form */}
-            <div className="space-y-4">
-              <div>
-                <label htmlFor="listName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  List Name
-                </label>
-                <input
-                  id="listName"
-                  type="text"
-                  value={listName}
-                  onChange={(e) => setListName(e.target.value)}
-                  placeholder="My Awesome Games"
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      handleCreateList()
-                    }
-                  }}
-                  autoFocus
-                />
+          <div
+            className="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-2xl shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-6">
+              {/* Header */}
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                  Create New List
+                </h3>
+                <button
+                  onClick={() => setShowCreateListModal(false)}
+                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                >
+                  <XMarkIcon className="w-6 h-6" />
+                </button>
               </div>
-              
-              <div className="flex justify-end space-x-3">
-                <button
-                  onClick={() => {
-                    setShowCreateListModal(false)
-                    setListName('')
-                  }}
-                  className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-                  disabled={isCreatingList}
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleCreateList}
-                  disabled={!listName.trim() || isCreatingList}
-                  className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 focus:ring-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isCreatingList ? 'Creating...' : 'Create List'}
-                </button>
+
+              {/* Quick Create Form */}
+              <div className="space-y-4">
+                <div>
+                  <label
+                    htmlFor="listName"
+                    className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                  >
+                    List Name
+                  </label>
+                  <input
+                    id="listName"
+                    type="text"
+                    value={listName}
+                    onChange={(e) => setListName(e.target.value)}
+                    placeholder="My Awesome Games"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        handleCreateList()
+                      }
+                    }}
+                    autoFocus
+                  />
+                </div>
+
+                <div className="flex justify-end space-x-3">
+                  <button
+                    onClick={() => {
+                      setShowCreateListModal(false)
+                      setListName('')
+                    }}
+                    className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                    disabled={isCreatingList}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleCreateList}
+                    disabled={!listName.trim() || isCreatingList}
+                    className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 focus:ring-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isCreatingList ? 'Creating...' : 'Create List'}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </Overlay>
+        </Overlay>
       </Portal>
 
       {/* Add Game Modal */}
@@ -996,114 +999,123 @@ function Navigation() {
             }
           }}
         >
-        <div 
-          className="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-2xl shadow-xl"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="p-6">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                Add Missing Game
-              </h3>
-              <button
-                onClick={() => {
-                  setShowAddGameModal(false)
-                  setGameName('')
-                  setGameYear('')
-                  setGamePublisher('')
-                  setGameSubmitted(false)
-                }}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-              >
-                <XMarkIcon className="w-6 h-6" />
-              </button>
-            </div>
-            
-            {/* Form Content */}
-            {!gameSubmitted ? (
-              <div className="space-y-4">
-                <div>
-                  <label htmlFor="gameName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Game Name
-                  </label>
-                  <input
-                    id="gameName"
-                    type="text"
-                    value={gameName}
-                    onChange={(e) => setGameName(e.target.value)}
-                    placeholder="Game title"
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        handleAddGame()
-                      }
-                    }}
-                    autoFocus
-                  />
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4">
+          <div
+            className="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-2xl shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-6">
+              {/* Header */}
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                  Add Missing Game
+                </h3>
+                <button
+                  onClick={() => {
+                    setShowAddGameModal(false)
+                    setGameName('')
+                    setGameYear('')
+                    setGamePublisher('')
+                    setGameSubmitted(false)
+                  }}
+                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                >
+                  <XMarkIcon className="w-6 h-6" />
+                </button>
+              </div>
+
+              {/* Form Content */}
+              {!gameSubmitted ? (
+                <div className="space-y-4">
                   <div>
-                    <label htmlFor="gameYear" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Year
+                    <label
+                      htmlFor="gameName"
+                      className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                    >
+                      Game Name
                     </label>
                     <input
-                      id="gameYear"
-                      type="number"
-                      value={gameYear}
-                      onChange={(e) => setGameYear(e.target.value)}
-                      placeholder="2024"
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="gamePublisher" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Publisher
-                    </label>
-                    <input
-                      id="gamePublisher"
+                      id="gameName"
                       type="text"
-                      value={gamePublisher}
-                      onChange={(e) => setGamePublisher(e.target.value)}
-                      placeholder="Publisher"
+                      value={gameName}
+                      onChange={(e) => setGameName(e.target.value)}
+                      placeholder="Game title"
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          handleAddGame()
+                        }
+                      }}
+                      autoFocus
                     />
                   </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label
+                        htmlFor="gameYear"
+                        className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                      >
+                        Year
+                      </label>
+                      <input
+                        id="gameYear"
+                        type="number"
+                        value={gameYear}
+                        onChange={(e) => setGameYear(e.target.value)}
+                        placeholder="2024"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      />
+                    </div>
+
+                    <div>
+                      <label
+                        htmlFor="gamePublisher"
+                        className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                      >
+                        Publisher
+                      </label>
+                      <input
+                        id="gamePublisher"
+                        type="text"
+                        value={gamePublisher}
+                        onChange={(e) => setGamePublisher(e.target.value)}
+                        placeholder="Publisher"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end space-x-3">
+                    <button
+                      onClick={() => {
+                        setShowAddGameModal(false)
+                        setGameName('')
+                        setGameYear('')
+                        setGamePublisher('')
+                        setGameSubmitted(false)
+                      }}
+                      className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                      disabled={isSubmittingGame}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleAddGame}
+                      disabled={!gameName.trim() || isSubmittingGame}
+                      className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 focus:ring-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isSubmittingGame ? 'Submitting...' : 'Submit'}
+                    </button>
+                  </div>
                 </div>
-                
-                <div className="flex justify-end space-x-3">
-                  <button
-                    onClick={() => {
-                      setShowAddGameModal(false)
-                      setGameName('')
-                      setGameYear('')
-                      setGamePublisher('')
-                      setGameSubmitted(false)
-                    }}
-                    className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-                    disabled={isSubmittingGame}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleAddGame}
-                    disabled={!gameName.trim() || isSubmittingGame}
-                    className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 focus:ring-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isSubmittingGame ? 'Submitting...' : 'Submit'}
-                  </button>
+              ) : (
+                <div className="p-4 border border-green-200 rounded-lg bg-green-50 text-sm text-green-700">
+                  Thanks! We'll review and import it soon.
                 </div>
-              </div>
-            ) : (
-              <div className="p-4 border border-green-200 rounded-lg bg-green-50 text-sm text-green-700">
-                Thanks! We'll review and import it soon.
-              </div>
-            )}
+              )}
+            </div>
           </div>
-        </div>
-      </Overlay>
+        </Overlay>
       </Portal>
     </nav>
   )

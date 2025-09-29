@@ -360,8 +360,14 @@ export const MediumStatusChips: Story = {
           Color Strategy
         </h4>
         <div className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
-          <div><strong>Play Status:</strong> Green (played), Gray (unplayed), Yellow (in progress)</div>
-          <div><strong>Game Status:</strong> Blue (own it), Pink (wishlist), Orange (borrowed), Red (sold), Purple (pre-order)</div>
+          <div>
+            <strong>Play Status:</strong> Green (played), Gray (unplayed),
+            Yellow (in progress)
+          </div>
+          <div>
+            <strong>Game Status:</strong> Blue (own it), Pink (wishlist), Orange
+            (borrowed), Red (sold), Purple (pre-order)
+          </div>
         </div>
       </div>
     </div>
@@ -373,10 +379,14 @@ export const SmallStatusChips: Story = {
   render: () => (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-medium mb-4">Game Status (Small Size - ListView)</h3>
+        <h3 className="text-lg font-medium mb-4">
+          Game Status (Small Size - ListView)
+        </h3>
         <div className="space-y-3">
           <div>
-            <p className="text-sm text-gray-600 mb-2">Inactive State (White BG, Gray Text):</p>
+            <p className="text-sm text-gray-600 mb-2">
+              Inactive State (White BG, Gray Text):
+            </p>
             <div className="flex flex-wrap gap-2">
               <Chip color="blue" variant="outline" size="sm">
                 Own It
@@ -393,7 +403,9 @@ export const SmallStatusChips: Story = {
             </div>
           </div>
           <div>
-            <p className="text-sm text-gray-600 mb-2">Active State (Light Pastel BG, Colored Text):</p>
+            <p className="text-sm text-gray-600 mb-2">
+              Active State (Light Pastel BG, Colored Text):
+            </p>
             <div className="flex flex-wrap gap-2">
               <Chip color="blue" variant="subtle" size="sm">
                 Own It
@@ -413,7 +425,9 @@ export const SmallStatusChips: Story = {
       </div>
 
       <div>
-        <h3 className="text-lg font-medium mb-4">Play Status (Small Size - ListView)</h3>
+        <h3 className="text-lg font-medium mb-4">
+          Play Status (Small Size - ListView)
+        </h3>
         <div className="space-y-3">
           <div>
             <p className="text-sm text-gray-600 mb-2">Inactive State:</p>
@@ -445,9 +459,16 @@ export const SmallStatusChips: Story = {
           Updated Design Treatment
         </h4>
         <div className="text-sm text-green-800 dark:text-green-200 space-y-1">
-          <div><strong>Inactive:</strong> White background with gray text/icons</div>
-          <div><strong>Active:</strong> Light pastel background with colored text/icons (no bold/solid colors)</div>
-          <div><strong>Size:</strong> Small (sm) for ListView components</div>
+          <div>
+            <strong>Inactive:</strong> White background with gray text/icons
+          </div>
+          <div>
+            <strong>Active:</strong> Light pastel background with colored
+            text/icons (no bold/solid colors)
+          </div>
+          <div>
+            <strong>Size:</strong> Small (sm) for ListView components
+          </div>
         </div>
       </div>
     </div>

@@ -87,6 +87,7 @@ Add these in your Netlify site settings:
 ### Other Hosting Providers
 
 Follow your hosting provider's documentation for setting environment variables. Common locations:
+
 - **Railway**: Project Settings → Variables
 - **Render**: Environment Variables tab
 - **Heroku**: Settings → Config Vars
@@ -95,16 +96,19 @@ Follow your hosting provider's documentation for setting environment variables. 
 ## Security Best Practices
 
 ### Environment Separation
+
 - **Use separate Supabase projects** for production, staging, and development
 - **Never share service role keys** between environments
 - **Rotate keys regularly** (quarterly recommended)
 
 ### Key Management
+
 - **Service role keys** should only be accessible to server-side code
 - **Never commit** `.env.local` or production keys to version control
 - **Use your hosting provider's secrets management** when available
 
 ### Access Control
+
 - **Limit service role key permissions** in Supabase (if possible)
 - **Monitor usage** in Supabase dashboard
 - **Set up alerts** for unusual activity
@@ -112,6 +116,7 @@ Follow your hosting provider's documentation for setting environment variables. 
 ## Validation Checklist
 
 ### Before Deployment
+
 - [ ] All required environment variables are set
 - [ ] Supabase URLs are correct for the environment
 - [ ] Site URLs match the actual deployment URLs
@@ -119,6 +124,7 @@ Follow your hosting provider's documentation for setting environment variables. 
 - [ ] Auth redirect base matches site URL
 
 ### After Deployment
+
 - [ ] Test authentication flows
 - [ ] Verify email deliverability
 - [ ] Check error logging (Sentry)
@@ -130,18 +136,22 @@ Follow your hosting provider's documentation for setting environment variables. 
 ### Common Issues
 
 **"Invalid API key" errors:**
+
 - Verify `NEXT_PUBLIC_SUPABASE_ANON_KEY` is correct
 - Check that the key matches the Supabase project
 
 **"Not authorized" errors:**
+
 - Verify `SUPABASE_SERVICE_ROLE_KEY` is set correctly
 - Ensure the key is not exposed to client-side code
 
 **Redirect URL mismatches:**
+
 - Verify `NEXT_PUBLIC_AUTH_REDIRECT_BASE` matches your domain
 - Check that all redirect URLs are allowlisted in Supabase
 
 **Environment variable not found:**
+
 - Ensure variables are set in your hosting provider
 - Check that you're using the correct variable names
 - Verify variables are available in the correct environment (server vs client)
@@ -149,6 +159,7 @@ Follow your hosting provider's documentation for setting environment variables. 
 ### Debugging Tools
 
 **Check environment variables in your app:**
+
 ```javascript
 // Client-side (browser console)
 console.log('Site URL:', process.env.NEXT_PUBLIC_SITE_URL)
@@ -159,6 +170,7 @@ console.log('Service Role Key exists:', !!process.env.SUPABASE_SERVICE_ROLE_KEY)
 ```
 
 **Test Supabase connection:**
+
 ```bash
 # Run the email deliverability test
 npm run test:email
@@ -166,14 +178,14 @@ npm run test:email
 
 ## Environment Variable Reference
 
-| Variable | Environment | Required | Description |
-|----------|-------------|----------|-------------|
-| `NEXT_PUBLIC_SUPABASE_URL` | All | Yes | Supabase project URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | All | Yes | Supabase anonymous key |
-| `SUPABASE_SERVICE_ROLE_KEY` | All | Yes | Supabase service role key (server-only) |
-| `NEXT_PUBLIC_SITE_URL` | All | Yes | Full URL of your deployed app |
-| `NODE_ENV` | All | Yes | Environment type (`development`, `production`) |
-| `NEXT_PUBLIC_AUTH_REDIRECT_BASE` | All | No | Base URL for auth redirects (defaults to SITE_URL) |
-| `NEXT_PUBLIC_E2E_MODE` | Dev/Test | No | Enable E2E testing mode |
-| `NEXT_PUBLIC_ANALYTICS_ID` | Prod/Staging | No | Analytics tracking ID |
-| `SENTRY_DSN` | Prod/Staging | No | Error tracking DSN |
+| Variable                         | Environment  | Required | Description                                        |
+| -------------------------------- | ------------ | -------- | -------------------------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`       | All          | Yes      | Supabase project URL                               |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY`  | All          | Yes      | Supabase anonymous key                             |
+| `SUPABASE_SERVICE_ROLE_KEY`      | All          | Yes      | Supabase service role key (server-only)            |
+| `NEXT_PUBLIC_SITE_URL`           | All          | Yes      | Full URL of your deployed app                      |
+| `NODE_ENV`                       | All          | Yes      | Environment type (`development`, `production`)     |
+| `NEXT_PUBLIC_AUTH_REDIRECT_BASE` | All          | No       | Base URL for auth redirects (defaults to SITE_URL) |
+| `NEXT_PUBLIC_E2E_MODE`           | Dev/Test     | No       | Enable E2E testing mode                            |
+| `NEXT_PUBLIC_ANALYTICS_ID`       | Prod/Staging | No       | Analytics tracking ID                              |
+| `SENTRY_DSN`                     | Prod/Staging | No       | Error tracking DSN                                 |

@@ -10,7 +10,7 @@ export async function GET() {
       .limit(20)
 
     console.log('All lists:', allLists)
-    
+
     // Get specifically public lists
     const { data: publicLists, error: publicError } = await supabase
       .from('game_lists')
@@ -27,10 +27,13 @@ export async function GET() {
       summary: {
         totalLists: allLists?.length || 0,
         publicLists: publicLists?.length || 0,
-      }
+      },
     })
   } catch (error) {
     console.error('Debug lists error:', error)
-    return NextResponse.json({ error: 'Failed to fetch lists' }, { status: 500 })
+    return NextResponse.json(
+      { error: 'Failed to fetch lists' },
+      { status: 500 }
+    )
   }
 }

@@ -18,31 +18,34 @@ export default function ResetPasswordPage() {
     setError(null)
     setMessage(null)
     setLoading(true)
-    
+
     // Use auth callback with recovery parameter (prefer env override for prod)
     const redirectBase =
       process.env.NEXT_PUBLIC_AUTH_REDIRECT_BASE || window.location.origin
     // Use plain callback path (no query) to ease allowlist matching
     const redirectUrl = `${redirectBase}/auth/callback`
-    
+
     if (process.env.NODE_ENV === 'development') {
       console.log('Password reset redirect URL:', redirectUrl)
     }
-    
+
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: redirectUrl,
     })
-    
+
     if (process.env.NODE_ENV === 'development') {
       console.log('Reset password request completed, error:', error)
     }
-    
+
     setLoading(false)
     if (error) {
-      if (process.env.NODE_ENV === 'development') console.error('Reset password error:', error)
+      if (process.env.NODE_ENV === 'development')
+        console.error('Reset password error:', error)
       return setError(error.message)
     }
-    setMessage(`If an account exists, you will receive an email shortly. Check that the redirect URL (${redirectUrl}) is configured in your Supabase project settings.`)
+    setMessage(
+      `If an account exists, you will receive an email shortly. Check that the redirect URL (${redirectUrl}) is configured in your Supabase project settings.`
+    )
   }
 
   return (
@@ -58,7 +61,7 @@ export default function ResetPasswordPage() {
         </a>
       }
     >
-  <form onSubmit={onSubmit} className="space-y-5">
+      <form onSubmit={onSubmit} className="space-y-5">
         <div className="space-y-1">
           <label className="block text-xs font-medium uppercase tracking-wide text-gray-600 dark:text-gray-400">
             Email
@@ -73,9 +76,15 @@ export default function ResetPasswordPage() {
           />
         </div>
         {friendlyError && (
-          <Alert variant="error" role="alert">{friendlyError}</Alert>
+          <Alert variant="error" role="alert">
+            {friendlyError}
+          </Alert>
         )}
-        {message && <Alert variant="success" role="status">{message}</Alert>}
+        {message && (
+          <Alert variant="success" role="status">
+            {message}
+          </Alert>
+        )}
         <button
           type="submit"
           disabled={loading || !!message}

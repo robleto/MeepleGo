@@ -1,9 +1,7 @@
 'use client'
 
 import React from 'react'
-import {
-  FunnelIcon,
-} from '@heroicons/react/24/outline'
+import { FunnelIcon } from '@heroicons/react/24/outline'
 import clsx from 'clsx'
 import SearchPill from '../Elements/SearchPill'
 

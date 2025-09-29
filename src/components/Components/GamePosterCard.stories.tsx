@@ -5,7 +5,8 @@ const meta: Meta = {
   parameters: {
     docs: {
       description: {
-        component: 'GamePosterCard deprecated in favor of GameCard. File kept temporarily as stub.',
+        component:
+          'GamePosterCard deprecated in favor of GameCard. File kept temporarily as stub.',
       },
     },
   },

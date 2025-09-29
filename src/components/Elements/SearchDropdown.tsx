@@ -70,7 +70,7 @@ export default function SearchDropdown({
       while (element) {
         const style = window.getComputedStyle(element)
         const classList = element.classList.toString()
-        
+
         // Check for modal indicators
         if (
           style.position === 'fixed' ||
@@ -86,17 +86,17 @@ export default function SearchDropdown({
       }
       setUsePortal(false)
     }
-    
+
     checkIfInModal()
   }, [])
 
   // Position calculation for portal rendering
   useEffect(() => {
     if (!show || !usePortal || !containerRef.current) return
-    
+
     const updatePosition = () => {
       if (!containerRef.current) return
-      
+
       const rect = containerRef.current.getBoundingClientRect()
       setDropdownPosition({
         top: rect.bottom + 8, // 8px gap - relative to viewport, not document
@@ -104,15 +104,15 @@ export default function SearchDropdown({
         width: rect.width,
       })
     }
-    
+
     updatePosition()
-    
+
     // Update on scroll/resize - use passive listeners for better performance
     const handleUpdate = () => {
       // Use requestAnimationFrame to throttle updates during scroll
       requestAnimationFrame(updatePosition)
     }
-    
+
     // Listen to scroll events on window and all parent containers
     const addScrollListeners = (element: Element | null) => {
       while (element) {
@@ -120,11 +120,11 @@ export default function SearchDropdown({
         element = element.parentElement
       }
     }
-    
+
     window.addEventListener('scroll', handleUpdate, { passive: true })
     window.addEventListener('resize', handleUpdate, { passive: true })
     addScrollListeners(containerRef.current.parentElement)
-    
+
     return () => {
       window.removeEventListener('scroll', handleUpdate)
       window.removeEventListener('resize', handleUpdate)
@@ -216,10 +216,7 @@ export default function SearchDropdown({
           setShow(false)
         }
       } else {
-        if (
-          dropdownRef.current &&
-          !dropdownRef.current.contains(target)
-        ) {
+        if (dropdownRef.current && !dropdownRef.current.contains(target)) {
           setShow(false)
         }
       }
@@ -302,7 +299,7 @@ export default function SearchDropdown({
           autoFocus={autoFocus}
         />
       </div>
-      
+
       {show && renderDropdown()}
     </div>
   )
@@ -315,7 +312,7 @@ export default function SearchDropdown({
         role="listbox"
         className={cn(
           'bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-xl overflow-hidden max-h-[400px] overflow-y-auto text-sm',
-          usePortal 
+          usePortal
             ? 'fixed z-[250]' // Higher than modal z-index
             : 'absolute left-0 right-0 top-full mt-2 z-50'
         )}
@@ -396,7 +393,8 @@ export default function SearchDropdown({
                   Other Results
                 </div>
                 {grouped.other.map((g, i) => {
-                  const globalIndex = grouped.exactMatches.length + grouped.popular.length + i
+                  const globalIndex =
+                    grouped.exactMatches.length + grouped.popular.length + i
                   return (
                     <SuggestionRow
                       key={`o-${g.id}`}
@@ -433,7 +431,13 @@ interface SuggestionRowProps {
   highlight: (name: string) => React.ReactNode
 }
 
-function SuggestionRow({ game, active, onSelect, onHover, highlight }: SuggestionRowProps) {
+function SuggestionRow({
+  game,
+  active,
+  onSelect,
+  onHover,
+  highlight,
+}: SuggestionRowProps) {
   return (
     <button
       type="button"

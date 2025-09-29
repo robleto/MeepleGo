@@ -22,7 +22,9 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: process.env.E2E_WEB_COMMAND || 'PORT=3001 NEXT_PUBLIC_E2E_MODE=1 npm run dev',
+    command:
+      process.env.E2E_WEB_COMMAND ||
+      'PORT=3001 NEXT_PUBLIC_E2E_MODE=1 npm run dev',
     url: process.env.E2E_BASE_URL || 'http://localhost:3001',
     reuseExistingServer: true,
     timeout: 120_000,

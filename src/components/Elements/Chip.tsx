@@ -35,7 +35,16 @@ interface ChipProps {
   /**
    * Color theme for non-rating chips
    */
-  color?: 'gray' | 'blue' | 'green' | 'yellow' | 'red' | 'purple' | 'pink' | 'orange' | 'rating'
+  color?:
+    | 'gray'
+    | 'blue'
+    | 'green'
+    | 'yellow'
+    | 'red'
+    | 'purple'
+    | 'pink'
+    | 'orange'
+    | 'rating'
 
   /**
    * Whether the chip is interactive/clickable

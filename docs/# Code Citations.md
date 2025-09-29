@@ -1,14 +1,15 @@
 # Code Citations
 
 ## License: unknown
+
 https://github.com/MieuxVoter/majority-judgment-api-python/blob/808f889dc2e616c7c6c84400a5bb93261db09863/templates/election/mail_invitation.html
 
 ```
 text-size-adjust: 100%;
 ```
 
-
 ## License: unknown
+
 https://github.com/MieuxVoter/majority-judgment-api-python/blob/808f889dc2e616c7c6c84400a5bb93261db09863/templates/election/mail_invitation.html
 
 ```
@@ -16,18 +17,18 @@ text-size-adjust: 100%;
             -ms-text-size
 ```
 
-
 ## License: unknown
+
 https://github.com/MieuxVoter/majority-judgment-api-python/blob/808f889dc2e616c7c6c84400a5bb93261db09863/templates/election/mail_invitation.html
 
 ```
 text-size-adjust: 100%;
             -ms-text-size-adjust: 100%;
-        
+
 ```
 
-
 ## License: unknown
+
 https://github.com/MieuxVoter/majority-judgment-api-python/blob/808f889dc2e616c7c6c84400a5bb93261db09863/templates/election/mail_invitation.html
 
 ```
@@ -38,8 +39,8 @@ text-size-adjust: 100%;
             -
 ```
 
-
 ## License: unknown
+
 https://github.com/MieuxVoter/majority-judgment-api-python/blob/808f889dc2e616c7c6c84400a5bb93261db09863/templates/election/mail_invitation.html
 
 ```
@@ -50,8 +51,8 @@ text-size-adjust: 100%;
             -ms-interpolation-mode: bic
 ```
 
-
 ## License: unknown
+
 https://github.com/MieuxVoter/majority-judgment-api-python/blob/808f889dc2e616c7c6c84400a5bb93261db09863/templates/election/mail_invitation.html
 
 ```
@@ -60,11 +61,11 @@ text-size-adjust: 100%;
         }
         img {
             -ms-interpolation-mode: bicubic;
-            
+
 ```
 
-
 ## License: unknown
+
 https://github.com/MieuxVoter/majority-judgment-api-python/blob/808f889dc2e616c7c6c84400a5bb93261db09863/templates/election/mail_invitation.html
 
 ```
@@ -77,8 +78,8 @@ text-size-adjust: 100%;
             height
 ```
 
-
 ## License: unknown
+
 https://github.com/MieuxVoter/majority-judgment-api-python/blob/808f889dc2e616c7c6c84400a5bb93261db09863/templates/election/mail_invitation.html
 
 ```
@@ -92,8 +93,8 @@ text-size-adjust: 100%;
             line
 ```
 
-
 ## License: unknown
+
 https://github.com/MieuxVoter/majority-judgment-api-python/blob/808f889dc2e616c7c6c84400a5bb93261db09863/templates/election/mail_invitation.html
 
 ```
@@ -105,11 +106,11 @@ text-size-adjust: 100%;
             border: 0;
             height: auto;
             line-height: 100%;
-            
+
 ```
 
-
 ## License: unknown
+
 https://github.com/MieuxVoter/majority-judgment-api-python/blob/808f889dc2e616c7c6c84400a5bb93261db09863/templates/election/mail_invitation.html
 
 ```
@@ -125,8 +126,8 @@ text-size-adjust: 100%;
             text-
 ```
 
-
 ## License: unknown
+
 https://github.com/MieuxVoter/majority-judgment-api-python/blob/808f889dc2e616c7c6c84400a5bb93261db09863/templates/election/mail_invitation.html
 
 ```
@@ -140,11 +141,11 @@ text-size-adjust: 100%;
             line-height: 100%;
             outline: none;
             text-decoration: none;
-        
+
 ```
 
-
 ## License: unknown
+
 https://github.com/MieuxVoter/majority-judgment-api-python/blob/808f889dc2e616c7c6c84400a5bb93261db09863/templates/election/mail_invitation.html
 
 ```
@@ -162,4 +163,3 @@ text-size-adjust: 100%;
 
         /
 ```
-

@@ -326,7 +326,8 @@ function LoginForm() {
         </div>
         {magicSent && !error && (
           <Alert variant="success" className="mt-2">
-            Magic link sent. Check your inbox/spam. If no email arrives, the user may not exist in this project or SMTP settings may be off.
+            Magic link sent. Check your inbox/spam. If no email arrives, the
+            user may not exist in this project or SMTP settings may be off.
           </Alert>
         )}
         <div className="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400 pt-1">

@@ -8,9 +8,7 @@ export async function GET(request: NextRequest) {
     const sort = searchParams.get('sort') || 'rank'
     const orderBy = searchParams.get('orderBy') || 'asc'
 
-    let query = supabase
-      .from('games')
-      .select('*')
+    let query = supabase.from('games').select('*')
 
     // Apply sorting
     const ascending = orderBy === 'asc'
@@ -31,7 +29,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       games: games || [],
-      total: games?.length || 0
+      total: games?.length || 0,
     })
   } catch (error) {
     console.error('API error:', error)

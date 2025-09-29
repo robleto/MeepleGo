@@ -27,7 +27,7 @@ export function PlayLogEditor({
 }: PlayLogEditorProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  
+
   // Form fields
   const [playedAt, setPlayedAt] = useState(() => {
     if (editLog) return editLog.played_at.slice(0, 16) // YYYY-MM-DDTHH:MM format
@@ -35,8 +35,12 @@ export function PlayLogEditor({
     return now.toISOString().slice(0, 16)
   })
   const [rating, setRating] = useState<number | null>(editLog?.rating ?? null)
-  const [playerCount, setPlayerCount] = useState<number | null>(editLog?.player_count ?? null)
-  const [durationMinutes, setDurationMinutes] = useState<number | null>(editLog?.duration_minutes ?? null)
+  const [playerCount, setPlayerCount] = useState<number | null>(
+    editLog?.player_count ?? null
+  )
+  const [durationMinutes, setDurationMinutes] = useState<number | null>(
+    editLog?.duration_minutes ?? null
+  )
   const [location, setLocation] = useState(editLog?.location ?? '')
   const [notes, setNotes] = useState(editLog?.notes ?? '')
   const [isPublic, setIsPublic] = useState(editLog?.is_public ?? true)
@@ -74,7 +78,7 @@ export function PlayLogEditor({
           .eq('id', editLog.id)
           .select()
           .single()
-        
+
         if (error) throw error
         onUpdated?.(data as PlayLog)
       } else {
@@ -84,7 +88,7 @@ export function PlayLogEditor({
           .insert(logData)
           .select()
           .single()
-        
+
         if (error) throw error
         onCreated?.(data as PlayLog)
       }
@@ -117,7 +121,10 @@ export function PlayLogEditor({
 
       {/* Date & Time */}
       <div>
-        <label htmlFor="playedAt" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+        <label
+          htmlFor="playedAt"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+        >
           Date & Time
         </label>
         <input
@@ -132,19 +139,38 @@ export function PlayLogEditor({
 
       {/* Rating */}
       <div>
-        <label htmlFor="rating" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+        <label
+          htmlFor="rating"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+        >
           Rating (1-10)
         </label>
         <select
           id="rating"
           value={rating || ''}
-          onChange={(e) => setRating(e.target.value ? Number(e.target.value) : null)}
+          onChange={(e) =>
+            setRating(e.target.value ? Number(e.target.value) : null)
+          }
           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white"
         >
           <option value="">No rating</option>
           {Array.from({ length: 10 }, (_, i) => (
             <option key={i + 1} value={i + 1}>
-              {i + 1} - {['Awful', 'Bad', 'Poor', 'Below Average', 'Average', 'Above Average', 'Good', 'Very Good', 'Great', 'Masterpiece'][i]}
+              {i + 1} -{' '}
+              {
+                [
+                  'Awful',
+                  'Bad',
+                  'Poor',
+                  'Below Average',
+                  'Average',
+                  'Above Average',
+                  'Good',
+                  'Very Good',
+                  'Great',
+                  'Masterpiece',
+                ][i]
+              }
             </option>
           ))}
         </select>
@@ -153,14 +179,19 @@ export function PlayLogEditor({
       {/* Player Count & Duration */}
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label htmlFor="playerCount" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label
+            htmlFor="playerCount"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+          >
             Players
           </label>
           <input
             type="number"
             id="playerCount"
             value={playerCount || ''}
-            onChange={(e) => setPlayerCount(e.target.value ? Number(e.target.value) : null)}
+            onChange={(e) =>
+              setPlayerCount(e.target.value ? Number(e.target.value) : null)
+            }
             min="1"
             max="20"
             placeholder="# of players"
@@ -168,14 +199,19 @@ export function PlayLogEditor({
           />
         </div>
         <div>
-          <label htmlFor="duration" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label
+            htmlFor="duration"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+          >
             Duration (min)
           </label>
           <input
             type="number"
             id="duration"
             value={durationMinutes || ''}
-            onChange={(e) => setDurationMinutes(e.target.value ? Number(e.target.value) : null)}
+            onChange={(e) =>
+              setDurationMinutes(e.target.value ? Number(e.target.value) : null)
+            }
             min="1"
             max="1440"
             placeholder="Minutes"
@@ -186,7 +222,10 @@ export function PlayLogEditor({
 
       {/* Location */}
       <div>
-        <label htmlFor="location" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+        <label
+          htmlFor="location"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+        >
           Location
         </label>
         <input
@@ -201,7 +240,10 @@ export function PlayLogEditor({
 
       {/* Notes */}
       <div>
-        <label htmlFor="notes" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+        <label
+          htmlFor="notes"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+        >
           Notes
         </label>
         <textarea
@@ -224,7 +266,10 @@ export function PlayLogEditor({
           onChange={(e) => setIsPublic(e.target.checked)}
           className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
         />
-        <label htmlFor="isPublic" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+        <label
+          htmlFor="isPublic"
+          className="ml-2 block text-sm text-gray-700 dark:text-gray-300"
+        >
           Make this play log public
         </label>
       </div>

@@ -10,10 +10,23 @@ import prettierPlugin from 'eslint-plugin-prettier'
 import globals from 'globals'
 
 export default [
-  { ignores: ['node_modules/', '.next/', 'out/', 'build/', 'data/raw/', 'data/derived/'] },
+  {
+    ignores: [
+      'node_modules/',
+      '.next/',
+      'out/',
+      'build/',
+      'data/raw/',
+      'data/derived/',
+    ],
+  },
   // Non-type-checked utility & config files (avoid parserOptions.project errors)
   {
-    files: ['tailwind.config.js', 'vitest.config.ts', 'supabase/functions/**/*.ts'],
+    files: [
+      'tailwind.config.js',
+      'vitest.config.ts',
+      'supabase/functions/**/*.ts',
+    ],
     languageOptions: {
       parserOptions: { project: null },
     },
@@ -26,7 +39,7 @@ export default [
   {
     files: ['**/*.{js,jsx,ts,tsx}'],
     languageOptions: {
-  parser,
+      parser,
       parserOptions: {
         project: ['./tsconfig.json'],
         sourceType: 'module',
@@ -37,7 +50,7 @@ export default [
       },
     },
     plugins: {
-  '@typescript-eslint': tsPlugin,
+      '@typescript-eslint': tsPlugin,
       prettier: prettierPlugin,
       storybook,
       '@next/next': nextPlugin,
@@ -45,15 +58,15 @@ export default [
     // Merge recommended configs
     rules: {
       ...js.configs.recommended.rules,
-  ...tsPlugin.configs.recommended.rules,
-  ...tsPlugin.configs['recommended-type-checked'].rules,
+      ...tsPlugin.configs.recommended.rules,
+      ...tsPlugin.configs['recommended-type-checked'].rules,
       ...nextPlugin.configs['core-web-vitals'].rules,
       ...storybook.configs.recommended.rules,
       // Project customizations
       'prettier/prettier': 'error',
       '@typescript-eslint/no-unused-vars': [
         'warn',
-        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
       ],
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-unsafe-assignment': 'warn',
@@ -64,7 +77,7 @@ export default [
       '@typescript-eslint/no-unnecessary-type-assertion': 'warn',
       '@typescript-eslint/no-floating-promises': [
         'warn',
-        { ignoreVoid: true, ignoreIIFE: true }
+        { ignoreVoid: true, ignoreIIFE: true },
       ],
       '@typescript-eslint/no-misused-promises': 'warn',
       'prefer-const': 'warn',

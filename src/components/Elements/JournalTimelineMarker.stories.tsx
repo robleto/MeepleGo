@@ -26,7 +26,8 @@ const meta: Meta<typeof JournalTimelineMarker> = {
     variant: {
       control: 'select',
       options: ['date', 'year'],
-      description: 'Display format: "date" shows month/day, "year" shows full year',
+      description:
+        'Display format: "date" shows month/day, "year" shows full year',
     },
     className: {
       control: 'text',
@@ -85,10 +86,16 @@ export const JournalTimeline: Story = {
         <JournalTimelineMarker date="2024-01-15" variant="date" />
         <div className="flex-1 p-6 bg-gray-50 rounded-r-lg">
           <h3 className="text-lg font-semibold mb-2">January 15, 2024</h3>
-          <p className="text-gray-600">Played Wingspan with friends - fantastic engine building game!</p>
+          <p className="text-gray-600">
+            Played Wingspan with friends - fantastic engine building game!
+          </p>
           <div className="mt-2 flex gap-2">
-            <span className="px-2 py-1 bg-emerald-100 text-emerald-700 text-xs rounded">strategy</span>
-            <span className="px-2 py-1 bg-emerald-100 text-emerald-700 text-xs rounded">engine-building</span>
+            <span className="px-2 py-1 bg-emerald-100 text-emerald-700 text-xs rounded">
+              strategy
+            </span>
+            <span className="px-2 py-1 bg-emerald-100 text-emerald-700 text-xs rounded">
+              engine-building
+            </span>
           </div>
         </div>
       </div>
@@ -96,10 +103,16 @@ export const JournalTimeline: Story = {
         <JournalTimelineMarker date="2024-01-14" variant="date" />
         <div className="flex-1 p-6 bg-gray-50 rounded-r-lg">
           <h3 className="text-lg font-semibold mb-2">January 14, 2024</h3>
-          <p className="text-gray-600">Solo game of Spirit Island - challenging but rewarding!</p>
+          <p className="text-gray-600">
+            Solo game of Spirit Island - challenging but rewarding!
+          </p>
           <div className="mt-2 flex gap-2">
-            <span className="px-2 py-1 bg-emerald-100 text-emerald-700 text-xs rounded">solo</span>
-            <span className="px-2 py-1 bg-emerald-100 text-emerald-700 text-xs rounded">cooperative</span>
+            <span className="px-2 py-1 bg-emerald-100 text-emerald-700 text-xs rounded">
+              solo
+            </span>
+            <span className="px-2 py-1 bg-emerald-100 text-emerald-700 text-xs rounded">
+              cooperative
+            </span>
           </div>
         </div>
       </div>
@@ -107,10 +120,16 @@ export const JournalTimeline: Story = {
         <JournalTimelineMarker date="2024-01-12" variant="date" isLast />
         <div className="flex-1 p-6 bg-gray-50 rounded-r-lg">
           <h3 className="text-lg font-semibold mb-2">January 12, 2024</h3>
-          <p className="text-gray-600">Family game night with Ticket to Ride - always a crowd pleaser!</p>
+          <p className="text-gray-600">
+            Family game night with Ticket to Ride - always a crowd pleaser!
+          </p>
           <div className="mt-2 flex gap-2">
-            <span className="px-2 py-1 bg-emerald-100 text-emerald-700 text-xs rounded">family</span>
-            <span className="px-2 py-1 bg-emerald-100 text-emerald-700 text-xs rounded">route-building</span>
+            <span className="px-2 py-1 bg-emerald-100 text-emerald-700 text-xs rounded">
+              family
+            </span>
+            <span className="px-2 py-1 bg-emerald-100 text-emerald-700 text-xs rounded">
+              route-building
+            </span>
           </div>
         </div>
       </div>

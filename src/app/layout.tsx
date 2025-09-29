@@ -1,61 +1,76 @@
 import type { Metadata } from 'next'
-import {
-  Inter,
-  Outfit,
-  Geist,
-  Fraunces,
-  Playfair_Display,
-  Archivo_Black,
-  Epilogue,
-} from 'next/font/google'
+// Temporarily disable Google Fonts import for build environment
+// import {
+//   Inter,
+//   Outfit,
+//   Geist,
+//   Fraunces,
+//   Playfair_Display,
+//   Archivo_Black,
+//   Epilogue,
+// } from 'next/font/google'
 import './globals.css'
 import Navigation from '@/components/Global/Navigation'
 import SiteFooter from '@/components/Global/SiteFooter'
 
-// Primary (Set A) fonts
-const inter = Inter({
-  subsets: ['latin'],
+// Fallback font configuration for build environment
+const inter = {
   variable: '--font-inter',
-  display: 'swap',
-})
-const outfit = Outfit({
-  subsets: ['latin'],
+  className: 'font-sans',
+}
+const outfit = {
   variable: '--font-display',
-  display: 'swap',
-})
+  className: 'font-sans',
+}
 
-// Alternative (Set B) fonts for prestige vibe
+// Alternative (Set B) fonts for prestige vibe - disabled for build
+// const geist = {
+//   variable: '--font-geist',
+//   className: 'font-sans',
+// }
+// const fraunces = {
+//   variable: '--font-fraunces',
+//   className: 'font-serif',
+// }
+// const playfairDisplay = {
+//   variable: '--font-playfair',
+//   className: 'font-serif',
+// }
+// const archivoBlack = {
+//   variable: '--font-archivo-black',
+//   className: 'font-sans',
+// }
+// const epilogue = {
+//   variable: '--font-epilogue',
+//   className: 'font-sans',
+// }
+
+// Alternative (Set B) fonts for prestige vibe - disabled for build
 // Geist (body) + Fraunces (award / display serif) + optional Playfair Display variant
 // We expose separate CSS variables so we can remap --font-inter & --font-display when the
 // html element has the class `typography-b` (see globals.css for the variable remapping).
-const geist = Geist({
-  subsets: ['latin'],
+const geist = {
   variable: '--font-sans-b',
-  display: 'swap',
-})
-const fraunces = Fraunces({
-  subsets: ['latin'],
+  className: 'font-sans',
+}
+const fraunces = {
   variable: '--font-award-b',
-  display: 'swap',
-})
-const playfair = Playfair_Display({
-  subsets: ['latin'],
+  className: 'font-serif',
+}
+const playfair = {
   variable: '--font-award-b-alt',
-  display: 'swap',
-})
+  className: 'font-serif',
+}
 // Poster / bold award title experiment
-const archivoBlack = Archivo_Black({
-  subsets: ['latin'],
-  weight: '400',
+const archivoBlack = {
   variable: '--font-award-poster',
-  display: 'swap',
-})
+  className: 'font-sans',
+}
 // Softer geometric option (lighter presence vs Outfit / Archivo)
-const epilogue = Epilogue({
-  subsets: ['latin'],
+const epilogue = {
   variable: '--font-display-soft',
-  display: 'swap',
-})
+  className: 'font-sans',
+}
 
 export const metadata: Metadata = {
   title: {

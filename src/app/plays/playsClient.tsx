@@ -18,7 +18,15 @@ import {
   addGameToDefaultList,
   removeGameFromDefaultList,
 } from '@/lib/lists'
-import { BookmarkIcon, HeartIcon, XMarkIcon, CubeIcon, StarIcon, HashtagIcon, DocumentTextIcon } from '@heroicons/react/24/outline'
+import {
+  BookmarkIcon,
+  HeartIcon,
+  XMarkIcon,
+  CubeIcon,
+  StarIcon,
+  HashtagIcon,
+  DocumentTextIcon,
+} from '@heroicons/react/24/outline'
 import { PlayIcon } from '@heroicons/react/24/solid'
 import { getRatingSolidClass } from '@/components/Foundations/ratingColors'
 import StatCard from '@/components/Elements/StatCard'
@@ -106,7 +114,7 @@ export default function PlaysClientPage({
   const [editingLog, setEditingLog] = useState<PlayLog | null>(null)
   const [showEditModal, setShowEditModal] = useState(false)
   const [toast, setToast] = useState<UndoToast | null>(null)
-  
+
   // Log Play Modal states (matching Navigation pattern)
   const [showPlayLogModal, setShowPlayLogModal] = useState(false)
   const [selectedGameForPlayLog, setSelectedGameForPlayLog] = useState<{
@@ -286,7 +294,9 @@ export default function PlaysClientPage({
       setAnimatedStats({
         plays: Math.round(from.plays + (to.plays - from.plays) * t),
         unique: Math.round(from.unique + (to.unique - from.unique) * t),
-        gamesWithNotes: Math.round(from.gamesWithNotes + (to.gamesWithNotes - from.gamesWithNotes) * t),
+        gamesWithNotes: Math.round(
+          from.gamesWithNotes + (to.gamesWithNotes - from.gamesWithNotes) * t
+        ),
         avg:
           to.avg == null
             ? null
@@ -301,7 +311,12 @@ export default function PlaysClientPage({
     }
     requestAnimationFrame(frame)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [stats?.totalPlays, stats?.uniqueGames, stats?.avgRating, stats?.gamesWithNotes])
+  }, [
+    stats?.totalPlays,
+    stats?.uniqueGames,
+    stats?.avgRating,
+    stats?.gamesWithNotes,
+  ])
 
   const now = useMemo(() => new Date(), [])
   const withinDays = (iso: string, days: number) =>
@@ -694,30 +709,36 @@ export default function PlaysClientPage({
             )}
           </div>
         )}
-        
+
         {/* Filtered Stats */}
         {!zeroStateActive && filteredLogs.length > 0 && (
           <section className="grid md:grid-cols-5 gap-4">
-            <StatCard 
-              iconBg="bg-blue-500" 
-              Icon={PlayIcon} 
-              iconColor="text-white" 
-              value={filteredLogs.length} 
-              label="Plays" 
+            <StatCard
+              iconBg="bg-blue-500"
+              Icon={PlayIcon}
+              iconColor="text-white"
+              value={filteredLogs.length}
+              label="Plays"
             />
-            <StatCard 
-              iconBg="bg-green-500" 
-              Icon={CubeIcon} 
-              iconColor="text-white" 
-              value={new Set(filteredLogs.map(l => l.game_id)).size} 
-              label="Unique Games" 
+            <StatCard
+              iconBg="bg-green-500"
+              Icon={CubeIcon}
+              iconColor="text-white"
+              value={new Set(filteredLogs.map((l) => l.game_id)).size}
+              label="Unique Games"
             />
-            <StatCard 
-              iconBg="bg-purple-500" 
-              Icon={DocumentTextIcon} 
-              iconColor="text-white" 
-              value={new Set(filteredLogs.filter(l => (l.notes || '').trim().length > 0).map(l => l.game_id)).size} 
-              label="Games with Notes" 
+            <StatCard
+              iconBg="bg-purple-500"
+              Icon={DocumentTextIcon}
+              iconColor="text-white"
+              value={
+                new Set(
+                  filteredLogs
+                    .filter((l) => (l.notes || '').trim().length > 0)
+                    .map((l) => l.game_id)
+                ).size
+              }
+              label="Games with Notes"
             />
             <div className="p-4 border border-gray-200 dark:border-gray-800 rounded-xl bg-white dark:bg-gray-900 shadow-sm flex flex-col justify-between">
               <div className="flex items-center justify-between text-xs uppercase text-gray-500 tracking-wide">
@@ -759,7 +780,7 @@ export default function PlaysClientPage({
             </div>
           </section>
         )}
-        
+
         {/* Zero state for own journal */}
         {zeroStateActive && isOwner && (
           <div className="panel mb-8 flex flex-col md:flex-row md:items-start gap-10 md:gap-20">
@@ -965,228 +986,239 @@ export default function PlaysClientPage({
                       </div>
                     </>
                   )}
-                  {(virtualizationEnabled ? virtualGroups : groups).map((g, groupIndex) => {
-                    const isLastGroup = groupIndex === (virtualizationEnabled ? virtualGroups : groups).length - 1
-                    return (
-                      <li key={g.date} className="relative flex gap-0">
-                        <JournalTimelineMarker 
-                          date={g.date} 
-                          isLast={isLastGroup}
-                          variant="date"
-                        />
-                        <div className="flex-1 space-y-4">
-                          {g.items.map((l) => {
-                            const flatIndex = virtualizationEnabled
-                              ? flatLogs.findIndex((f) => f.play.id === l.id)
-                              : -1
-                            const meta = gameMeta[l.game_id]
-                            const fullNotes = l.notes || ''
-                            const collapsed =
-                              fullNotes.length > 240 && !expandedNotes[l.id]
-                            const displayNotes = collapsed
-                              ? fullNotes.slice(0, 240) + '…'
-                              : fullNotes
-                            const overallRanking =
-                              rankingsMap[l.game_id]?.ranking ?? null
-                            const ratingDisplay =
-                              overallRanking ?? l.rating ?? null
-                            return (
-                              <div
-                                key={l.id}
-                                ref={
-                                  virtualizationEnabled && flatIndex >= 0
-                                    ? itemRef(flatIndex)
-                                    : undefined
-                                }
-                                className={`group relative border rounded-xl bg-white dark:bg-gray-900 px-5 py-4 shadow-sm transition hover:shadow-md hover:-translate-y-0.5 border-gray-200 dark:border-gray-800 flex gap-5 ${highlightId === l.id ? 'ring-2 ring-sky-400 animate-fade-slide' : ''}`}
-                              >
-                                <div className="flex-shrink-0 mt-1">
-                                  {meta && meta.thumb ? (
-                                    <img
-                                      src={meta.thumb}
-                                      alt=""
-                                      className="w-20 h-20 rounded-lg object-cover shadow ring-1 ring-gray-200 dark:ring-gray-700"
-                                    />
-                                  ) : (
-                                    <div className="w-20 h-20 rounded-lg bg-gray-200 dark:bg-gray-700 animate-pulse" />
-                                  )}
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-start justify-between gap-4">
-                                    <div className="min-w-0">
-                                      <span className="font-semibold text-gray-900 dark:text-gray-100 text-base block truncate max-w-[28rem]">
-                                        {meta ? meta.name : 'Loading…'}
-                                      </span>
-                                      {isOwner && (
-                                        <div className="mt-1 flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                                          <button
-                                            type="button"
-                                            onClick={() => {
-                                              setEditingLog(l)
-                                              setShowEditModal(true)
-                                            }}
-                                            className="text-[10px] font-medium text-sky-600 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 rounded"
-                                            aria-label="Edit this log"
-                                          >
-                                            Edit
-                                          </button>
-                                          <button
-                                            type="button"
-                                            onClick={() => handleDuplicate(l)}
-                                            className="text-[10px] font-medium text-emerald-600 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 rounded"
-                                          >
-                                            Duplicate
-                                          </button>
-                                          <button
-                                            type="button"
-                                            onClick={() =>
-                                              handleDeleteInline(l)
-                                            }
-                                            className="text-[10px] font-medium text-red-600 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 rounded"
-                                          >
-                                            Delete
-                                          </button>
-                                        </div>
-                                      )}
-                                      <div className="mt-1 text-[12px] text-gray-600 dark:text-gray-400 flex items-center gap-4 flex-wrap">
-                                        {l.player_count && (
-                                          <span>{l.player_count}p</span>
-                                        )}
-                                        {l.duration_minutes && (
-                                          <span>{l.duration_minutes}m</span>
-                                        )}
-                                        {!l.is_public && (
-                                          <span className="text-gray-500">
-                                            private
-                                          </span>
-                                        )}
-                                      </div>
-                                    </div>
-                                    <div className="flex items-center gap-5 flex-shrink-0 pl-2">
-                                      {isOwner && (
-                                        <div className="flex items-center gap-4 text-sm">
-                                          <button
-                                            type="button"
-                                            onClick={() =>
-                                              toggleList(l.game_id, 'library')
-                                            }
-                                            className={`flex items-center gap-1 font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 rounded ${membershipSets?.library.has(l.game_id) ? 'text-green-600' : 'text-gray-400 hover:text-green-600'}`}
-                                            aria-pressed={
-                                              membershipSets?.library.has(
-                                                l.game_id
-                                              ) || false
-                                            }
-                                            aria-label={
-                                              membershipSets?.library.has(
-                                                l.game_id
-                                              )
-                                                ? 'Remove from Library'
-                                                : 'Add to Library'
-                                            }
-                                          >
-                                            <BookmarkIcon className="h-5 w-5" />
-                                            <span className="hidden sm:inline">
-                                              Own It
-                                            </span>
-                                          </button>
-                                          <button
-                                            type="button"
-                                            onClick={() =>
-                                              toggleList(l.game_id, 'wishlist')
-                                            }
-                                            className={`flex items-center gap-1 font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 rounded ${membershipSets?.wishlist.has(l.game_id) ? 'text-pink-600' : 'text-gray-400 hover:text-pink-600'}`}
-                                            aria-pressed={
-                                              membershipSets?.wishlist.has(
-                                                l.game_id
-                                              ) || false
-                                            }
-                                            aria-label={
-                                              membershipSets?.wishlist.has(
-                                                l.game_id
-                                              )
-                                                ? 'Remove from Wishlist'
-                                                : 'Add to Wishlist'
-                                            }
-                                          >
-                                            <HeartIcon className="h-5 w-5" />
-                                            <span className="hidden sm:inline">
-                                              Wishlist
-                                            </span>
-                                          </button>
-                                        </div>
-                                      )}
-                                      <div className="flex items-center">
-                                        <span
-                                          className={`inline-flex items-center justify-center w-11 h-11 rounded-full text-sm font-semibold shadow-inner ring-2 ring-sky-100 dark:ring-sky-800/40 ${ratingColor(ratingDisplay)}`}
-                                          title={
-                                            overallRanking
-                                              ? `Your rating: ${overallRanking}`
-                                              : l.rating
-                                                ? `Play rating: ${l.rating}`
-                                                : 'No rating yet'
-                                          }
-                                        >
-                                          {ratingDisplay ?? '—'}
+                  {(virtualizationEnabled ? virtualGroups : groups).map(
+                    (g, groupIndex) => {
+                      const isLastGroup =
+                        groupIndex ===
+                        (virtualizationEnabled ? virtualGroups : groups)
+                          .length -
+                          1
+                      return (
+                        <li key={g.date} className="relative flex gap-0">
+                          <JournalTimelineMarker
+                            date={g.date}
+                            isLast={isLastGroup}
+                            variant="date"
+                          />
+                          <div className="flex-1 space-y-4">
+                            {g.items.map((l) => {
+                              const flatIndex = virtualizationEnabled
+                                ? flatLogs.findIndex((f) => f.play.id === l.id)
+                                : -1
+                              const meta = gameMeta[l.game_id]
+                              const fullNotes = l.notes || ''
+                              const collapsed =
+                                fullNotes.length > 240 && !expandedNotes[l.id]
+                              const displayNotes = collapsed
+                                ? fullNotes.slice(0, 240) + '…'
+                                : fullNotes
+                              const overallRanking =
+                                rankingsMap[l.game_id]?.ranking ?? null
+                              const ratingDisplay =
+                                overallRanking ?? l.rating ?? null
+                              return (
+                                <div
+                                  key={l.id}
+                                  ref={
+                                    virtualizationEnabled && flatIndex >= 0
+                                      ? itemRef(flatIndex)
+                                      : undefined
+                                  }
+                                  className={`group relative border rounded-xl bg-white dark:bg-gray-900 px-5 py-4 shadow-sm transition hover:shadow-md hover:-translate-y-0.5 border-gray-200 dark:border-gray-800 flex gap-5 ${highlightId === l.id ? 'ring-2 ring-sky-400 animate-fade-slide' : ''}`}
+                                >
+                                  <div className="flex-shrink-0 mt-1">
+                                    {meta && meta.thumb ? (
+                                      <img
+                                        src={meta.thumb}
+                                        alt=""
+                                        className="w-20 h-20 rounded-lg object-cover shadow ring-1 ring-gray-200 dark:ring-gray-700"
+                                      />
+                                    ) : (
+                                      <div className="w-20 h-20 rounded-lg bg-gray-200 dark:bg-gray-700 animate-pulse" />
+                                    )}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-start justify-between gap-4">
+                                      <div className="min-w-0">
+                                        <span className="font-semibold text-gray-900 dark:text-gray-100 text-base block truncate max-w-[28rem]">
+                                          {meta ? meta.name : 'Loading…'}
                                         </span>
+                                        {isOwner && (
+                                          <div className="mt-1 flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <button
+                                              type="button"
+                                              onClick={() => {
+                                                setEditingLog(l)
+                                                setShowEditModal(true)
+                                              }}
+                                              className="text-[10px] font-medium text-sky-600 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 rounded"
+                                              aria-label="Edit this log"
+                                            >
+                                              Edit
+                                            </button>
+                                            <button
+                                              type="button"
+                                              onClick={() => handleDuplicate(l)}
+                                              className="text-[10px] font-medium text-emerald-600 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 rounded"
+                                            >
+                                              Duplicate
+                                            </button>
+                                            <button
+                                              type="button"
+                                              onClick={() =>
+                                                handleDeleteInline(l)
+                                              }
+                                              className="text-[10px] font-medium text-red-600 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 rounded"
+                                            >
+                                              Delete
+                                            </button>
+                                          </div>
+                                        )}
+                                        <div className="mt-1 text-[12px] text-gray-600 dark:text-gray-400 flex items-center gap-4 flex-wrap">
+                                          {l.player_count && (
+                                            <span>{l.player_count}p</span>
+                                          )}
+                                          {l.duration_minutes && (
+                                            <span>{l.duration_minutes}m</span>
+                                          )}
+                                          {!l.is_public && (
+                                            <span className="text-gray-500">
+                                              private
+                                            </span>
+                                          )}
+                                        </div>
+                                      </div>
+                                      <div className="flex items-center gap-5 flex-shrink-0 pl-2">
+                                        {isOwner && (
+                                          <div className="flex items-center gap-4 text-sm">
+                                            <button
+                                              type="button"
+                                              onClick={() =>
+                                                toggleList(l.game_id, 'library')
+                                              }
+                                              className={`flex items-center gap-1 font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 rounded ${membershipSets?.library.has(l.game_id) ? 'text-green-600' : 'text-gray-400 hover:text-green-600'}`}
+                                              aria-pressed={
+                                                membershipSets?.library.has(
+                                                  l.game_id
+                                                ) || false
+                                              }
+                                              aria-label={
+                                                membershipSets?.library.has(
+                                                  l.game_id
+                                                )
+                                                  ? 'Remove from Library'
+                                                  : 'Add to Library'
+                                              }
+                                            >
+                                              <BookmarkIcon className="h-5 w-5" />
+                                              <span className="hidden sm:inline">
+                                                Own It
+                                              </span>
+                                            </button>
+                                            <button
+                                              type="button"
+                                              onClick={() =>
+                                                toggleList(
+                                                  l.game_id,
+                                                  'wishlist'
+                                                )
+                                              }
+                                              className={`flex items-center gap-1 font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 rounded ${membershipSets?.wishlist.has(l.game_id) ? 'text-pink-600' : 'text-gray-400 hover:text-pink-600'}`}
+                                              aria-pressed={
+                                                membershipSets?.wishlist.has(
+                                                  l.game_id
+                                                ) || false
+                                              }
+                                              aria-label={
+                                                membershipSets?.wishlist.has(
+                                                  l.game_id
+                                                )
+                                                  ? 'Remove from Wishlist'
+                                                  : 'Add to Wishlist'
+                                              }
+                                            >
+                                              <HeartIcon className="h-5 w-5" />
+                                              <span className="hidden sm:inline">
+                                                Wishlist
+                                              </span>
+                                            </button>
+                                          </div>
+                                        )}
+                                        <div className="flex items-center">
+                                          <span
+                                            className={`inline-flex items-center justify-center w-11 h-11 rounded-full text-sm font-semibold shadow-inner ring-2 ring-sky-100 dark:ring-sky-800/40 ${ratingColor(ratingDisplay)}`}
+                                            title={
+                                              overallRanking
+                                                ? `Your rating: ${overallRanking}`
+                                                : l.rating
+                                                  ? `Play rating: ${l.rating}`
+                                                  : 'No rating yet'
+                                            }
+                                          >
+                                            {ratingDisplay ?? '—'}
+                                          </span>
+                                        </div>
                                       </div>
                                     </div>
-                                  </div>
-                                  {l.tags && (
-                                    <div className="flex flex-wrap gap-1 mt-3">
-                                      {l.tags.map((t) => (
-                                        <button
-                                          key={t}
-                                          type="button"
-                                          onClick={() =>
-                                            setTagFilter((prev) =>
-                                              prev === t ? null : t
-                                            )
-                                          }
-                                          className={`px-1.5 py-0.5 rounded text-[10px] transition border focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 ${tagFilter === t ? 'bg-sky-600 text-white border-sky-600 dark:bg-sky-500 dark:border-sky-500' : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 border-transparent hover:bg-emerald-100 dark:hover:bg-emerald-800/40'}`}
-                                          aria-pressed={tagFilter === t}
-                                        >
-                                          {t}
-                                        </button>
-                                      ))}
+                                    {l.tags && (
+                                      <div className="flex flex-wrap gap-1 mt-3">
+                                        {l.tags.map((t) => (
+                                          <button
+                                            key={t}
+                                            type="button"
+                                            onClick={() =>
+                                              setTagFilter((prev) =>
+                                                prev === t ? null : t
+                                              )
+                                            }
+                                            className={`px-1.5 py-0.5 rounded text-[10px] transition border focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 ${tagFilter === t ? 'bg-sky-600 text-white border-sky-600 dark:bg-sky-500 dark:border-sky-500' : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 border-transparent hover:bg-emerald-100 dark:hover:bg-emerald-800/40'}`}
+                                            aria-pressed={tagFilter === t}
+                                          >
+                                            {t}
+                                          </button>
+                                        ))}
+                                      </div>
+                                    )}
+                                    {fullNotes && (
+                                      <div className="mt-3">
+                                        <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap text-[13px] leading-snug">
+                                          {displayNotes}
+                                        </p>
+                                        {collapsed && (
+                                          <button
+                                            type="button"
+                                            onClick={() =>
+                                              setExpandedNotes((prev) => ({
+                                                ...prev,
+                                                [l.id]: true,
+                                              }))
+                                            }
+                                            className="mt-1 text-[10px] text-sky-600 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 rounded"
+                                          >
+                                            Show more
+                                          </button>
+                                        )}
+                                      </div>
+                                    )}
+                                    <div className="mt-4 text-[10px] text-gray-400 flex items-center gap-2">
+                                      <time dateTime={l.played_at}>
+                                        {new Date(
+                                          l.played_at
+                                        ).toLocaleTimeString([], {
+                                          hour: '2-digit',
+                                          minute: '2-digit',
+                                        })}
+                                      </time>
                                     </div>
-                                  )}
-                                  {fullNotes && (
-                                    <div className="mt-3">
-                                      <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap text-[13px] leading-snug">
-                                        {displayNotes}
-                                      </p>
-                                      {collapsed && (
-                                        <button
-                                          type="button"
-                                          onClick={() =>
-                                            setExpandedNotes((prev) => ({
-                                              ...prev,
-                                              [l.id]: true,
-                                            }))
-                                          }
-                                          className="mt-1 text-[10px] text-sky-600 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 rounded"
-                                        >
-                                          Show more
-                                        </button>
-                                      )}
-                                    </div>
-                                  )}
-                                  <div className="mt-4 text-[10px] text-gray-400 flex items-center gap-2">
-                                    <time dateTime={l.played_at}>
-                                      {new Date(l.played_at).toLocaleTimeString(
-                                        [],
-                                        { hour: '2-digit', minute: '2-digit' }
-                                      )}
-                                    </time>
                                   </div>
                                 </div>
-                              </div>
-                            )
-                          })}
-                        </div>
-                      </li>
-                    )
-                  })}
+                              )
+                            })}
+                          </div>
+                        </li>
+                      )
+                    }
+                  )}
                   {virtualizationEnabled && (
                     <div style={{ height: spacerBottom }} aria-hidden="true" />
                   )}
@@ -1213,9 +1245,7 @@ export default function PlaysClientPage({
                     >
                       {/* Header */}
                       <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-                        <h3 className="text-lg font-semibold">
-                          Edit Play Log
-                        </h3>
+                        <h3 className="text-lg font-semibold">Edit Play Log</h3>
                         <button
                           onClick={() => {
                             setShowEditModal(false)
@@ -1230,22 +1260,24 @@ export default function PlaysClientPage({
                       {/* Body */}
                       <div className="p-6 flex-1 overflow-y-auto">
                         <PlayLogEditor
-                        gameId={editingLog.game_id}
-                        gameName={gameMeta[editingLog.game_id]?.name || 'Game'}
-                        editLog={editingLog}
-                        onUpdated={(updated) => {
-                          setLogs((prev) =>
-                            prev.map((pl) =>
-                              pl.id === updated.id ? updated : pl
+                          gameId={editingLog.game_id}
+                          gameName={
+                            gameMeta[editingLog.game_id]?.name || 'Game'
+                          }
+                          editLog={editingLog}
+                          onUpdated={(updated) => {
+                            setLogs((prev) =>
+                              prev.map((pl) =>
+                                pl.id === updated.id ? updated : pl
+                              )
                             )
-                          )
-                          setEditingLog(updated)
-                          setShowEditModal(false)
-                        }}
-                        onCreated={() => {}}
-                        autoFocus
-                        openForm
-                      />
+                            setEditingLog(updated)
+                            setShowEditModal(false)
+                          }}
+                          onCreated={() => {}}
+                          autoFocus
+                          openForm
+                        />
                       </div>
                     </div>
                   </div>
@@ -1289,9 +1321,7 @@ export default function PlaysClientPage({
             >
               {/* Header */}
               <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-                <h3 className="text-lg font-semibold">
-                  Log Your Play
-                </h3>
+                <h3 className="text-lg font-semibold">Log Your Play</h3>
                 <button
                   onClick={() => setShowPlayLogModal(false)}
                   className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
@@ -1302,43 +1332,45 @@ export default function PlaysClientPage({
               </div>
               {/* Body */}
               <div className="p-6 flex-1 overflow-y-auto">
-              {selectedGameForPlayLog ? (
-                <PlayLogEditor
-                  gameId={selectedGameForPlayLog.id}
-                  gameName={selectedGameForPlayLog.name}
-                  openForm
-                  autoFocus
-                  onCreated={(log) => {
-                    setLogs((prev) => [log, ...prev])
-                    setShowPlayLogModal(false)
-                    setSelectedGameForPlayLog(null)
-                    setHighlightId(log.id)
-                    setTimeout(() => setHighlightId(null), 3500)
-                  }}
-                />
-              ) : (
-                <div className="space-y-4">
-                  <p className="text-gray-600 text-sm mb-4">Search for a game to log a play:</p>
-                  <SearchDropdown
-                    onSelect={(game) => {
-                      setSelectedGameForPlayLog({
-                        id: game.id,
-                        name: game.name,
-                      })
-                    }}
-                    placeholder="Search for a game..."
+                {selectedGameForPlayLog ? (
+                  <PlayLogEditor
+                    gameId={selectedGameForPlayLog.id}
+                    gameName={selectedGameForPlayLog.name}
+                    openForm
                     autoFocus
+                    onCreated={(log) => {
+                      setLogs((prev) => [log, ...prev])
+                      setShowPlayLogModal(false)
+                      setSelectedGameForPlayLog(null)
+                      setHighlightId(log.id)
+                      setTimeout(() => setHighlightId(null), 3500)
+                    }}
                   />
-                  <div className="flex justify-end pt-4">
-                    <button
-                      onClick={() => setShowPlayLogModal(false)}
-                      className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
-                    >
-                      Cancel
-                    </button>
+                ) : (
+                  <div className="space-y-4">
+                    <p className="text-gray-600 text-sm mb-4">
+                      Search for a game to log a play:
+                    </p>
+                    <SearchDropdown
+                      onSelect={(game) => {
+                        setSelectedGameForPlayLog({
+                          id: game.id,
+                          name: game.name,
+                        })
+                      }}
+                      placeholder="Search for a game..."
+                      autoFocus
+                    />
+                    <div className="flex justify-end pt-4">
+                      <button
+                        onClick={() => setShowPlayLogModal(false)}
+                        className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                      >
+                        Cancel
+                      </button>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
               </div>
             </div>
           </div>

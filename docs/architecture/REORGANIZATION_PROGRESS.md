@@ -65,7 +65,7 @@ Current status: **37 story files for 96 components** (39% coverage - **+9 new st
 - ✅ SiteFooter.stories.tsx (site-wide footer)
 - ✅ AddToModal.stories.tsx (add to list functionality) **NEW!**
 - ✅ RatingPopup.stories.tsx (rating interaction) **NEW!**
-// Removed GamePosterCard (poster-style card) in favor of consolidated GameCard component.
+  // Removed GamePosterCard (poster-style card) in favor of consolidated GameCard component.
 
 **✅ MILESTONE: All design system elements have stories**
 **✅ MILESTONE: All critical shared components have stories**

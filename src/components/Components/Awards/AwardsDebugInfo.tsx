@@ -32,7 +32,10 @@ export default function AwardsDebugInfo({
     <div className="mt-4 p-3 bg-gray-50 rounded text-xs border">
       <div className="flex justify-between items-start mb-2">
         <h4 className="font-medium">Awards Debug ({year})</h4>
-        <button onClick={() => setShow(false)} className="text-gray-400 p-1 rounded hover:bg-gray-200">
+        <button
+          onClick={() => setShow(false)}
+          className="text-gray-400 p-1 rounded hover:bg-gray-200"
+        >
           <XMarkIcon className="w-4 h-4" />
         </button>
       </div>

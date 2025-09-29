@@ -9,17 +9,20 @@ This guide provides step-by-step instructions for configuring Supabase for produ
 Configure these URLs in your Supabase project dashboard under Authentication → URL Configuration:
 
 #### Production URLs
+
 ```
 https://meeplego.com/auth/callback
 ```
 
 #### Staging URLs (if applicable)
+
 ```
 https://staging.meeplego.com/auth/callback
 https://preview.meeplego.com/auth/callback
 ```
 
 #### Development URLs
+
 ```
 http://localhost:3000/auth/callback
 http://localhost:3001/auth/callback
@@ -40,6 +43,7 @@ http://localhost:3001/auth/callback
 Configure these email templates in Authentication → Email Templates:
 
 #### Confirm Signup Template
+
 ```html
 <h2>Confirm your signup</h2>
 
@@ -51,6 +55,7 @@ Configure these email templates in Authentication → Email Templates:
 ```
 
 #### Magic Link Template
+
 ```html
 <h2>Your magic link</h2>
 
@@ -62,6 +67,7 @@ Configure these email templates in Authentication → Email Templates:
 ```
 
 #### Reset Password Template
+
 ```html
 <h2>Reset your password</h2>
 
@@ -73,6 +79,7 @@ Configure these email templates in Authentication → Email Templates:
 ```
 
 #### Email Change Template
+
 ```html
 <h2>Confirm email change</h2>
 
@@ -99,6 +106,7 @@ Configure these email templates in Authentication → Email Templates:
 ## 3. SMTP Configuration
 
 ### Recommended SMTP Providers
+
 - **Resend** (recommended for developer experience)
 - **SendGrid** (reliable, good deliverability)
 - **Mailgun** (good for transactional emails)
@@ -111,6 +119,7 @@ Configure these email templates in Authentication → Email Templates:
 3. Configure based on your provider:
 
 #### Example: Resend Configuration
+
 ```
 SMTP Host: smtp.resend.com
 SMTP Port: 587
@@ -121,6 +130,7 @@ SMTP Sender Name: MeepleGo
 ```
 
 #### Example: SendGrid Configuration
+
 ```
 SMTP Host: smtp.sendgrid.net
 SMTP Port: 587
@@ -137,6 +147,7 @@ SMTP Sender Name: MeepleGo
 Add these DNS records to your domain registrar or DNS provider:
 
 #### SPF Record (TXT Record)
+
 ```
 Name: @
 Type: TXT
@@ -145,13 +156,16 @@ TTL: 3600
 ```
 
 Replace `[provider-spf]` with your SMTP provider's SPF include:
+
 - Resend: `include:_spf.resend.com`
 - SendGrid: `include:sendgrid.net`
 - Mailgun: `include:mailgun.org`
 - AWS SES: `include:amazonses.com`
 
 #### DKIM Record (TXT Record)
+
 Your SMTP provider will provide the exact DKIM record. Example format:
+
 ```
 Name: [selector]._domainkey.meeplego.com
 Type: TXT
@@ -160,6 +174,7 @@ TTL: 3600
 ```
 
 #### DMARC Record (TXT Record) - Start with Relaxed Policy
+
 ```
 Name: _dmarc.meeplego.com
 Type: TXT
@@ -170,16 +185,19 @@ TTL: 3600
 ### DNS Verification Steps
 
 1. **Check SPF Record**:
+
    ```bash
    dig TXT meeplego.com | grep spf1
    ```
 
 2. **Check DKIM Record**:
+
    ```bash
    dig TXT [selector]._domainkey.meeplego.com
    ```
 
 3. **Check DMARC Record**:
+
    ```bash
    dig TXT _dmarc.meeplego.com
    ```
@@ -191,7 +209,9 @@ TTL: 3600
 ## 5. Email Deliverability Testing
 
 ### Test Recipients
+
 Create test accounts with major providers:
+
 - Gmail: `test@gmail.com`
 - Outlook: `test@outlook.com`
 - iCloud: `test@icloud.com`
@@ -200,6 +220,7 @@ Create test accounts with major providers:
 ### Testing Procedures
 
 1. **Test Signup Flow**:
+
    ```bash
    # Use your auth test page
    curl -X POST "https://meeplego.com/api/auth/test-signup" \
@@ -221,6 +242,7 @@ Create test accounts with major providers:
 ### Email Header Verification
 
 Check that emails pass authentication:
+
 1. View email source/headers
 2. Verify these headers show "PASS":
    - `Authentication-Results: spf=pass`
@@ -228,6 +250,7 @@ Check that emails pass authentication:
    - `Authentication-Results: dmarc=pass`
 
 ### Spam Testing Tools
+
 - [Mail Tester](https://www.mail-tester.com/)
 - [Litmus Spam Testing](https://www.litmus.com/)
 - [GlockApps](https://glockapps.com/)
@@ -262,6 +285,7 @@ NEXT_PUBLIC_AUTH_REDIRECT_BASE=https://meeplego.com
 ## 7. Production Deployment Checklist
 
 ### Pre-Deployment
+
 - [ ] All redirect URLs configured in Supabase
 - [ ] Email templates updated with `{{ .ConfirmationURL }}`
 - [ ] SMTP provider configured and tested
@@ -270,6 +294,7 @@ NEXT_PUBLIC_AUTH_REDIRECT_BASE=https://meeplego.com
 - [ ] Test emails sent to all major providers
 
 ### Post-Deployment
+
 - [ ] Test signup flow with real email addresses
 - [ ] Test magic link flow end-to-end
 - [ ] Test password reset flow
@@ -295,12 +320,14 @@ v=DMARC1; p=reject; rua=mailto:dmarc@meeplego.com; ruf=mailto:dmarc@meeplego.com
 ## 8. Monitoring and Maintenance
 
 ### Regular Checks
+
 - Monitor Supabase auth metrics
 - Review DMARC reports weekly
 - Check email delivery rates
 - Monitor DNS record health
 
 ### Troubleshooting Common Issues
+
 - **Emails in spam**: Check SPF/DKIM/DMARC records
 - **Callback errors**: Verify redirect URLs are exact matches
 - **Session issues**: Clear browser cookies and test again
@@ -313,4 +340,4 @@ v=DMARC1; p=reject; rua=mailto:dmarc@meeplego.com; ruf=mailto:dmarc@meeplego.com
 ✅ **Emails delivered to inbox (not spam) within 30 seconds**  
 ✅ **All auth flows (signup, magic link, password reset) functional**  
 ✅ **DNS records properly configured and propagated**  
-✅ **DMARC policy successfully tightened after testing**  
+✅ **DMARC policy successfully tightened after testing**

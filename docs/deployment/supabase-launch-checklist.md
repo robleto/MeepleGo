@@ -7,6 +7,7 @@ This comprehensive checklist ensures all Supabase configurations are ready for p
 ### ✅ 1. Supabase Project Setup
 
 #### Redirect URL Configuration
+
 - [ ] **Production URLs added to allowlist**:
   - [ ] `https://meeplego.com/auth/callback`
 - [ ] **Staging URLs added to allowlist** (if applicable):
@@ -19,6 +20,7 @@ This comprehensive checklist ensures all Supabase configurations are ready for p
 **Location**: Supabase Dashboard → Authentication → URL Configuration → Redirect URLs
 
 #### Email Template Configuration
+
 - [ ] **Confirm Signup Template** updated with:
   - [ ] `{{ .ConfirmationURL }}` placeholder used
   - [ ] User expectations set (link expires, opens in browser)
@@ -41,6 +43,7 @@ This comprehensive checklist ensures all Supabase configurations are ready for p
 ### ✅ 2. SMTP Provider Setup
 
 #### Provider Selection & Configuration
+
 - [ ] **SMTP provider chosen** (Resend, SendGrid, Mailgun, AWS SES)
 - [ ] **SMTP settings configured in Supabase**:
   - [ ] SMTP Host set correctly
@@ -53,6 +56,7 @@ This comprehensive checklist ensures all Supabase configurations are ready for p
 **Location**: Supabase Dashboard → Settings → Auth → SMTP Settings
 
 #### Domain Verification (with chosen provider)
+
 - [ ] **Domain added to SMTP provider**
 - [ ] **Domain verification completed**
 - [ ] **DKIM keys obtained from provider**
@@ -61,6 +65,7 @@ This comprehensive checklist ensures all Supabase configurations are ready for p
 ### ✅ 3. DNS Configuration
 
 #### SPF Record
+
 - [ ] **SPF record added** to meeplego.com DNS:
   ```
   Type: TXT
@@ -71,6 +76,7 @@ This comprehensive checklist ensures all Supabase configurations are ready for p
 - [ ] **SPF record verified** with `dig TXT meeplego.com`
 
 #### DKIM Record
+
 - [ ] **DKIM record(s) added** from SMTP provider:
   ```
   Type: TXT
@@ -81,6 +87,7 @@ This comprehensive checklist ensures all Supabase configurations are ready for p
 - [ ] **DKIM record verified** with `dig TXT [selector]._domainkey.meeplego.com`
 
 #### DMARC Record (Start with Monitoring)
+
 - [ ] **DMARC record added**:
   ```
   Type: TXT
@@ -91,6 +98,7 @@ This comprehensive checklist ensures all Supabase configurations are ready for p
 - [ ] **DMARC record verified** with `dig TXT _dmarc.meeplego.com`
 
 #### DNS Propagation
+
 - [ ] **DNS propagation verified** (allow 24-48 hours)
 - [ ] **Multiple DNS servers checked** (8.8.8.8, 1.1.1.1, 208.67.222.222)
 - [ ] **Online propagation tools used** (dnschecker.org, whatsmydns.net)
@@ -98,6 +106,7 @@ This comprehensive checklist ensures all Supabase configurations are ready for p
 ### ✅ 4. Environment Variables
 
 #### Production Environment
+
 - [ ] **Environment variables set in hosting provider**:
   - [ ] `NEXT_PUBLIC_SUPABASE_URL`
   - [ ] `NEXT_PUBLIC_SUPABASE_ANON_KEY`
@@ -107,10 +116,12 @@ This comprehensive checklist ensures all Supabase configurations are ready for p
   - [ ] `NEXT_PUBLIC_AUTH_REDIRECT_BASE=https://meeplego.com`
 
 #### Staging Environment (if applicable)
+
 - [ ] **Staging environment variables set**
 - [ ] **Separate Supabase project used for staging**
 
 #### Security Verification
+
 - [ ] **Service role key not exposed to client**
 - [ ] **Environment-specific keys used**
 - [ ] **No production keys in version control**
@@ -120,6 +131,7 @@ This comprehensive checklist ensures all Supabase configurations are ready for p
 ### ✅ 5. Email Deliverability Testing
 
 #### Test Setup
+
 - [ ] **Test email addresses created** for major providers:
   - [ ] Gmail test account
   - [ ] Outlook test account
@@ -127,11 +139,13 @@ This comprehensive checklist ensures all Supabase configurations are ready for p
   - [ ] Yahoo test account (optional)
 
 #### Automated Testing
+
 - [ ] **Email deliverability script run**: `npm run test:email`
 - [ ] **All test emails sent successfully**
 - [ ] **Timing recorded** (should be < 30 seconds)
 
 #### Manual Verification
+
 - [ ] **Signup confirmation emails received**:
   - [ ] Gmail: ✅ Inbox placement ✅ Correct template ✅ Link works
   - [ ] Outlook: ✅ Inbox placement ✅ Correct template ✅ Link works
@@ -146,6 +160,7 @@ This comprehensive checklist ensures all Supabase configurations are ready for p
   - [ ] iCloud: ✅ Inbox placement ✅ Correct template ✅ Link works
 
 #### Email Authentication Verification
+
 - [ ] **Email headers checked** for authentication:
   - [ ] `Authentication-Results: spf=pass`
   - [ ] `Authentication-Results: dkim=pass`
@@ -156,6 +171,7 @@ This comprehensive checklist ensures all Supabase configurations are ready for p
 ### ✅ 6. Authentication Flow Testing
 
 #### End-to-End Testing
+
 - [ ] **Signup flow tested**:
   - [ ] User can signup with email
   - [ ] Confirmation email received and functional
@@ -174,6 +190,7 @@ This comprehensive checklist ensures all Supabase configurations are ready for p
   - [ ] Logout works correctly
 
 #### Cross-Browser Testing
+
 - [ ] **Chrome**: ✅ All flows work
 - [ ] **Safari**: ✅ All flows work
 - [ ] **Firefox**: ✅ All flows work
@@ -181,6 +198,7 @@ This comprehensive checklist ensures all Supabase configurations are ready for p
 - [ ] **Mobile Chrome**: ✅ All flows work
 
 #### Error Handling
+
 - [ ] **Invalid/expired links handled gracefully**
 - [ ] **Network errors handled appropriately**
 - [ ] **Clear error messages displayed**
@@ -190,11 +208,13 @@ This comprehensive checklist ensures all Supabase configurations are ready for p
 ### ✅ 7. DMARC Policy Tightening
 
 #### Week 1: Monitoring Phase
+
 - [ ] **DMARC reports monitored**
 - [ ] **Authentication failures analyzed**
 - [ ] **No legitimate email failures detected**
 
 #### Week 2-3: Quarantine Phase
+
 - [ ] **DMARC policy updated to quarantine**:
   ```
   v=DMARC1; p=quarantine; rua=mailto:dmarc@meeplego.com; ruf=mailto:dmarc@meeplego.com; fo=1
@@ -203,6 +223,7 @@ This comprehensive checklist ensures all Supabase configurations are ready for p
 - [ ] **No user complaints about missing emails**
 
 #### Week 4+: Reject Phase
+
 - [ ] **DMARC policy updated to reject**:
   ```
   v=DMARC1; p=reject; rua=mailto:dmarc@meeplego.com; ruf=mailto:dmarc@meeplego.com; fo=1
@@ -212,16 +233,19 @@ This comprehensive checklist ensures all Supabase configurations are ready for p
 ### ✅ 8. Ongoing Monitoring
 
 #### Daily Monitoring (First Week)
+
 - [ ] **Email delivery metrics checked**
 - [ ] **Authentication failure alerts monitored**
 - [ ] **User signup success rate tracked**
 
 #### Weekly Monitoring
+
 - [ ] **DMARC reports reviewed**
 - [ ] **Email deliverability rates checked**
 - [ ] **DNS record health verified**
 
 #### Monthly Monitoring
+
 - [ ] **SMTP provider metrics reviewed**
 - [ ] **Authentication settings audited**
 - [ ] **Security best practices verified**
@@ -231,6 +255,7 @@ This comprehensive checklist ensures all Supabase configurations are ready for p
 ### ✅ 9. Incident Response
 
 #### Email Delivery Issues
+
 - [ ] **Incident response plan documented**:
   1. Check Supabase auth status
   2. Verify SMTP provider status
@@ -239,6 +264,7 @@ This comprehensive checklist ensures all Supabase configurations are ready for p
   5. Contact SMTP provider support
 
 #### DNS Issues
+
 - [ ] **DNS troubleshooting steps documented**:
   1. Verify record syntax
   2. Check for conflicting records
@@ -249,6 +275,7 @@ This comprehensive checklist ensures all Supabase configurations are ready for p
 ## Acceptance Criteria Verification
 
 ### ✅ Final Verification
+
 - [ ] **✅ Auth emails work across all major providers (Gmail, Outlook, iCloud)**
 - [ ] **✅ All emails pass SPF, DKIM, and DMARC checks**
 - [ ] **✅ Emails delivered to inbox (not spam) within 30 seconds**
@@ -259,6 +286,7 @@ This comprehensive checklist ensures all Supabase configurations are ready for p
 ## Documentation & Handoff
 
 ### ✅ 10. Documentation Complete
+
 - [ ] **Configuration documented** for future reference
 - [ ] **Monitoring procedures documented**
 - [ ] **Emergency contacts and procedures documented**
@@ -269,11 +297,13 @@ This comprehensive checklist ensures all Supabase configurations are ready for p
 ## Quick Reference Commands
 
 ### Test Email Deliverability
+
 ```bash
 npm run test:email
 ```
 
 ### Check DNS Records
+
 ```bash
 dig TXT meeplego.com                    # SPF
 dig TXT _dmarc.meeplego.com            # DMARC
@@ -281,6 +311,7 @@ dig TXT [selector]._domainkey.meeplego.com  # DKIM
 ```
 
 ### Verify Supabase Configuration
+
 ```bash
 # Check environment variables are set
 echo $NEXT_PUBLIC_SUPABASE_URL

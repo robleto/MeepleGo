@@ -24,7 +24,7 @@ export const Default: Story = {
   render: () => {
     return (
       <div className="max-w-4xl mx-auto">
-  <SearchandFilters value={''} onChange={() => {}} filtersCount={0} />
+        <SearchandFilters value={''} onChange={() => {}} filtersCount={0} />
       </div>
     )
   },
@@ -34,7 +34,11 @@ export const WithActiveFilters: Story = {
   render: () => {
     return (
       <div className="max-w-4xl mx-auto">
-  <SearchandFilters value={'sample'} onChange={() => {}} filtersCount={3} />
+        <SearchandFilters
+          value={'sample'}
+          onChange={() => {}}
+          filtersCount={3}
+        />
       </div>
     )
   },

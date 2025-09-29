@@ -5,7 +5,9 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
-import HomepageView, { type UserStats } from '@/components/Components/HomepageView'
+import HomepageView, {
+  type UserStats,
+} from '@/components/Components/HomepageView'
 import type { Game } from '@/types/supabase'
 import awardsData from '@/data/awards.json'
 
@@ -34,7 +36,7 @@ const MOCK_PUBLIC_LISTS = [
     list_type: 'user_custom',
   },
   {
-    id: 'mock-2', 
+    id: 'mock-2',
     name: 'Family Game Night',
     description: 'Perfect games for the whole family',
     created_at: new Date().toISOString(),
@@ -75,7 +77,7 @@ const TRENDING_GAMES: Game[] = Array.from({ length: 20 }, (_, i) => ({
   updated_at: '',
 }))
 
-const PLACEHOLDER_GAMES: Game[] = Array.from({ length: 6 }, (_, i) => ({
+const _PLACEHOLDER_GAMES: Game[] = Array.from({ length: 6 }, (_, i) => ({
   id: `placeholder-${i}` as any,
   bgg_id: 0,
   name: 'Loading…',
@@ -105,18 +107,31 @@ const PLACEHOLDER_GAMES: Game[] = Array.from({ length: 6 }, (_, i) => ({
 export default function HomepageContent() {
   const [user, setUser] = useState<any>(null)
   const [userStats, setUserStats] = useState<UserStats | null>(null)
-  const [featuredGames, setFeaturedGames] = useState<Game[]>(cachedFeaturedGames || TRENDING_GAMES)
+  const [featuredGames, setFeaturedGames] = useState<Game[]>(
+    cachedFeaturedGames || TRENDING_GAMES
+  )
   const [loading, setLoading] = useState(true)
-  const [industryAwards, setIndustryAwards] = useState<any[]>(cachedIndustryAwards || INDUSTRY_AWARDS)
+  const [industryAwards, setIndustryAwards] = useState<any[]>(
+    cachedIndustryAwards || INDUSTRY_AWARDS
+  )
   const [publicLists, setPublicLists] = useState<any[]>(cachedPublicLists || [])
-  const [bggMostPlayed, setBggMostPlayed] = useState<Game[]>(cachedBggMostPlayed || [])
+  const [bggMostPlayed, setBggMostPlayed] = useState<Game[]>(
+    cachedBggMostPlayed || []
+  )
   const [bggHotness, setBggHotness] = useState<Game[]>(cachedBggHotness || [])
-  const [bggBestsellers, setBggBestsellers] = useState<Game[]>(cachedBggBestsellers || [])
-  const [bggListIds, setBggListIds] = useState<{trendingplays?: string, hotness?: string, mostplayed?: string, bestsellers?: string}>({})
+  const [bggBestsellers, setBggBestsellers] = useState<Game[]>(
+    cachedBggBestsellers || []
+  )
+  const [bggListIds, setBggListIds] = useState<{
+    trendingplays?: string
+    hotness?: string
+    mostplayed?: string
+    bestsellers?: string
+  }>({})
 
   useEffect(() => {
     let cancelled = false
-    
+
     // Helper function to fetch BGG list games
     async function fetchBggList(listType: string): Promise<Game[]> {
       try {
@@ -125,24 +140,25 @@ export default function HomepageContent() {
           .select('id')
           .eq('list_type', listType)
           .limit(1)
-        
+
         if (!listErr && list && list.length === 1) {
           const listId = list[0].id
-          
+
           // Store the list ID for linking
           if (listType === 'bgg_mostplayed') {
-            setBggListIds(prev => ({ ...prev, mostplayed: listId }))
+            setBggListIds((prev) => ({ ...prev, mostplayed: listId }))
           } else if (listType === 'bgg_hotness') {
-            setBggListIds(prev => ({ ...prev, hotness: listId }))
+            setBggListIds((prev) => ({ ...prev, hotness: listId }))
           } else if (listType === 'bgg_bestsellers') {
-            setBggListIds(prev => ({ ...prev, bestsellers: listId }))
+            setBggListIds((prev) => ({ ...prev, bestsellers: listId }))
           } else if (listType === 'bgg_trendingplays') {
-            setBggListIds(prev => ({ ...prev, trendingplays: listId }))
+            setBggListIds((prev) => ({ ...prev, trendingplays: listId }))
           }
-          
+
           const { data: listItems, error: itemsErr } = await supabase
             .from('game_list_items')
-            .select(`
+            .select(
+              `
               games (
                 id,
                 name,
@@ -155,15 +171,14 @@ export default function HomepageContent() {
                 max_players,
                 playtime_minutes
               )
-            `)
+            `
+            )
             .eq('list_id', listId)
             .order('ranking', { ascending: true })
             .limit(20)
-          
+
           if (!itemsErr && listItems && listItems.length) {
-            return listItems
-              .map(item => item.games)
-              .filter(Boolean) as any[]
+            return listItems.map((item) => item.games).filter(Boolean) as any[]
           }
         }
       } catch (err) {
@@ -171,7 +186,7 @@ export default function HomepageContent() {
       }
       return []
     }
-    
+
     async function loadData() {
       try {
         const {
@@ -190,11 +205,12 @@ export default function HomepageContent() {
             .limit(1)
           if (!trendingErr && trendingPlays && trendingPlays.length === 1) {
             const trendingId = trendingPlays[0].id
-            setBggListIds(prev => ({ ...prev, trendingplays: trendingId }))
-            
+            setBggListIds((prev) => ({ ...prev, trendingplays: trendingId }))
+
             const { data: listItems, error: itemsErr } = await supabase
               .from('game_list_items')
-              .select(`
+              .select(
+                `
                 games (
                   id,
                   name,
@@ -207,13 +223,14 @@ export default function HomepageContent() {
                   max_players,
                   playtime_minutes
                 )
-              `)
+              `
+              )
               .eq('list_id', trendingId)
               .order('ranking', { ascending: true })
               .limit(20)
             if (!itemsErr && listItems && listItems.length) {
               const games = listItems
-                .map(i => (i as any).games)
+                .map((i) => (i as any).games)
                 .filter(Boolean) as unknown as Game[]
               if (!cancelled) {
                 cachedFeaturedGames = games
@@ -222,7 +239,9 @@ export default function HomepageContent() {
               gotGames = true
             }
           }
-        } catch {}
+        } catch (error) {
+          // Ignore fetch errors, fall back to alternative data sources
+        }
         if (!gotGames) {
           try {
             const res = await fetch('/api/games?limit=20&sort=rank&orderBy=asc')
@@ -236,7 +255,9 @@ export default function HomepageContent() {
                 gotGames = true
               }
             }
-          } catch {}
+          } catch (error) {
+            // Ignore fetch errors, fall back to default games
+          }
         }
         if (!gotGames && !cancelled) {
           cachedFeaturedGames = TRENDING_GAMES
@@ -253,11 +274,12 @@ export default function HomepageContent() {
         // Load public lists (debug version)
         try {
           console.log('Loading public lists...')
-          
+
           // Get the public lists - we know they exist!
           const { data: publicListsData, error: listsError } = await supabase
             .from('game_lists')
-            .select(`
+            .select(
+              `
               id,
               name,
               description,
@@ -274,12 +296,16 @@ export default function HomepageContent() {
                   thumbnail_url
                 )
               )
-            `)
+            `
+            )
             .eq('is_public', true)
             .order('updated_at', { ascending: false })
             .limit(6)
 
-          console.log('Public lists query result:', { publicListsData, listsError })
+          console.log('Public lists query result:', {
+            publicListsData,
+            listsError,
+          })
 
           if (!listsError && publicListsData && publicListsData.length > 0) {
             console.log('SUCCESS: Found public lists:', publicListsData)
@@ -288,7 +314,9 @@ export default function HomepageContent() {
               setPublicLists(publicListsData)
             }
           } else {
-            console.log('ERROR: No public lists found despite database having them')
+            console.log(
+              'ERROR: No public lists found despite database having them'
+            )
             console.log('Error:', listsError)
             // Use mock as absolute fallback
             if (!cancelled) {
@@ -308,7 +336,7 @@ export default function HomepageContent() {
         if (session?.user) {
           try {
             console.log('Loading user stats for user:', session.user.id)
-            
+
             // Get user's rankings for stats
             const { data: rankings, error: rankingsError } = await supabase
               .from('rankings')
@@ -333,14 +361,14 @@ export default function HomepageContent() {
               .from('awards')
               .select('id')
               .eq('user_id', session.user.id)
-            
+
             if (!rankingsError && rankings) {
-              const totalPlays = rankings.filter(r => r.played_it).length
+              const totalPlays = rankings.filter((r) => r.played_it).length
               const uniqueGames = rankings.length
               const gamesOwned = libraryItems?.length || 0
               const listsCreated = userLists?.length || 0
               const awardsCreated = userAwards?.length || 0
-              
+
               // Debug logging
               console.log('User stats debug:', {
                 rankings: rankings.length,
@@ -349,33 +377,51 @@ export default function HomepageContent() {
                 userLists: userLists?.length || 0,
                 listsError,
                 userAwards: userAwards?.length || 0,
-                awardsError
+                awardsError,
               })
-              
-              const ratingsWithValues = rankings.filter(r => r.ranking !== null && r.ranking > 0)
-              const avgRating = ratingsWithValues.length > 0 
-                ? ratingsWithValues.reduce((sum, r) => sum + (r.ranking || 0), 0) / ratingsWithValues.length
-                : null
-              
+
+              const ratingsWithValues = rankings.filter(
+                (r) => r.ranking !== null && r.ranking > 0
+              )
+              const avgRating =
+                ratingsWithValues.length > 0
+                  ? ratingsWithValues.reduce(
+                      (sum, r) => sum + (r.ranking || 0),
+                      0
+                    ) / ratingsWithValues.length
+                  : null
+
               // Group by date for timeline
               const ratingsTimeline = rankings
-                .filter(r => r.ranking !== null && r.created_at)
-                .reduce((acc, r) => {
-                  const date = new Date(r.created_at!).toISOString().split('T')[0]
-                  if (!acc[date]) {
-                    acc[date] = { date, ratings: [], count: 0 }
-                  }
-                  acc[date].ratings.push(r.ranking!)
-                  acc[date].count++
-                  return acc
-                }, {} as Record<string, { date: string, ratings: number[], count: number }>)
-              
-              const timelineArray = Object.values(ratingsTimeline).map(day => ({
-                date: day.date,
-                avgRating: day.ratings.reduce((sum, r) => sum + r, 0) / day.ratings.length,
-                count: day.count
-              }))
-              
+                .filter((r) => r.ranking !== null && r.created_at)
+                .reduce(
+                  (acc, r) => {
+                    const date = new Date(r.created_at!)
+                      .toISOString()
+                      .split('T')[0]
+                    if (!acc[date]) {
+                      acc[date] = { date, ratings: [], count: 0 }
+                    }
+                    acc[date].ratings.push(r.ranking!)
+                    acc[date].count++
+                    return acc
+                  },
+                  {} as Record<
+                    string,
+                    { date: string; ratings: number[]; count: number }
+                  >
+                )
+
+              const timelineArray = Object.values(ratingsTimeline).map(
+                (day) => ({
+                  date: day.date,
+                  avgRating:
+                    day.ratings.reduce((sum, r) => sum + r, 0) /
+                    day.ratings.length,
+                  count: day.count,
+                })
+              )
+
               const stats: UserStats = {
                 totalPlays,
                 uniqueGames,
@@ -384,9 +430,9 @@ export default function HomepageContent() {
                 ratingsTimeline: timelineArray,
                 recentTags: [], // Could add tags logic later
                 listsCreated,
-                awardsCreated
+                awardsCreated,
               }
-              
+
               console.log('User stats loaded:', stats)
               if (!cancelled) {
                 setUserStats(stats)
@@ -403,7 +449,7 @@ export default function HomepageContent() {
                   ratingsTimeline: [],
                   recentTags: [],
                   listsCreated: 0,
-                  awardsCreated: 0
+                  awardsCreated: 0,
                 })
               }
             }
@@ -418,7 +464,7 @@ export default function HomepageContent() {
                 ratingsTimeline: [],
                 recentTags: [],
                 listsCreated: 0,
-                awardsCreated: 0
+                awardsCreated: 0,
               })
             }
           }
@@ -427,27 +473,28 @@ export default function HomepageContent() {
         // Load BGG lists
         try {
           console.log('Loading BGG lists...')
-          
-          const [mostPlayedGames, hotnessGames, bestsellersGames] = await Promise.all([
-            fetchBggList('bgg_mostplayed'),
-            fetchBggList('bgg_hotness'),
-            fetchBggList('bgg_bestsellers')
-          ])
-          
+
+          const [mostPlayedGames, hotnessGames, bestsellersGames] =
+            await Promise.all([
+              fetchBggList('bgg_mostplayed'),
+              fetchBggList('bgg_hotness'),
+              fetchBggList('bgg_bestsellers'),
+            ])
+
           if (!cancelled) {
             cachedBggMostPlayed = mostPlayedGames
             setBggMostPlayed(mostPlayedGames)
-            
+
             cachedBggHotness = hotnessGames
             setBggHotness(hotnessGames)
-            
+
             cachedBggBestsellers = bestsellersGames
             setBggBestsellers(bestsellersGames)
-            
-            console.log('BGG lists loaded:', { 
+
+            console.log('BGG lists loaded:', {
               mostPlayedGames: mostPlayedGames.length,
               hotnessGames: hotnessGames.length,
-              bestsellersGames: bestsellersGames.length
+              bestsellersGames: bestsellersGames.length,
             })
           }
         } catch (error) {
@@ -470,7 +517,7 @@ export default function HomepageContent() {
     featuredGames: featuredGames.length,
     industryAwards: industryAwards.length,
     publicLists: publicLists.length,
-    loading
+    loading,
   })
 
   return (
