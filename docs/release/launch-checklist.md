@@ -4,6 +4,14 @@ Purpose: Ensure a smooth launch to production with working auth, correct configu
 
 ## 1) Supabase Configuration
 
+📚 **See comprehensive documentation**:
+- [**Complete Supabase Launch Checklist**](../deployment/supabase-launch-checklist.md) - Step-by-step guide
+- [Supabase Production Configuration](../deployment/supabase-production-config.md) - Detailed setup instructions
+- [DNS Setup Guide](../deployment/dns-setup.md) - Email deliverability configuration
+- [Environment Variables](../deployment/environment-variables.md) - Production environment setup
+
+**Quick testing**: Run `npm run test:email` to validate email deliverability across providers.
+
 - Allowlist Redirect URLs:
   - `https://meeplego.com/auth/callback`
   - Staging: e.g., `https://staging.meeplego.com/auth/callback`
