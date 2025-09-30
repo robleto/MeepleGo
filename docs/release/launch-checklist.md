@@ -83,14 +83,23 @@ Sanity checks:
 
 ## 4) Performance, Accessibility, SEO
 
+📚 **See detailed documentation**: [Performance, Accessibility, and SEO Guide](./performance-accessibility-seo.md)
+
 - Run Lighthouse on top public pages (Home, Games, Lists, Awards, Profile):
   - Address image sizes, preloads, and obvious layout shifts (CLS).
+  - ✅ Preconnect hints added for external image domains
+  - ✅ Image loading optimization with priority and lazy loading
 - Accessibility:
   - Keyboard navigation on nav, modals, and forms.
   - ARIA roles on alerts and interactive controls (already present in `Alert`).
+  - ✅ Skip-to-main-content link added
+  - ✅ Semantic HTML with proper landmarks
 - SEO:
   - Confirm `<title>`, `<meta name="description">`, OG tags on public pages.
   - Add sitemap.xml and robots.txt (disallow staging).
+  - ✅ Environment-aware robots.txt (staging disallowed)
+  - ✅ Page-specific metadata for Games, Awards, Profile
+  - ✅ Sitemap.xml generation working
 
 ## 5) Legal & Trust
 
