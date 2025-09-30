@@ -30,6 +30,7 @@
     "e2e": "playwright test",
     "e2e:open": "playwright test --ui",
     "test:email": "node scripts/deployment/test-email-deliverability.js",
+    "test:rls": "node scripts/development-tools/test-rls-policies.js",
     "validate:launch": "node scripts/deployment/validate-launch-config.js"
   },
   "keywords": [

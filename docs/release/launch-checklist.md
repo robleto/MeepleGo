@@ -56,6 +56,8 @@ Purpose: Ensure a smooth launch to production with working auth, correct configu
 - Security (RLS):
   - Re-validate Row Level Security policies for all user-facing tables.
   - Create a non-owner test user and ensure they cannot read/write others’ data.
+  - Run automated RLS tests: `npm run test:rls`
+  - See [RLS Testing Documentation](../security/RLS_TESTING.md) for detailed test process and results.
 
 ## 2) Hosting & Environment
 
