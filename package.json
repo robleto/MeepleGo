@@ -28,7 +28,9 @@
     "build-storybook": "storybook build",
     "chromatic": "chromatic --exit-once-uploaded || echo 'Chromatic optional'",
     "e2e": "playwright test",
-    "e2e:open": "playwright test --ui"
+    "e2e:open": "playwright test --ui",
+    "test:email": "node scripts/deployment/test-email-deliverability.js",
+    "validate:launch": "node scripts/deployment/validate-launch-config.js"
   },
   "keywords": [
     "board games",
