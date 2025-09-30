@@ -77,11 +77,24 @@ Sanity checks:
 
 ## 3) Observability
 
-- Analytics (choose one: Plausible, Umami, or similar):
-  - Track: `signup_start`, `magic_link_sent`, `callback_success`, `reset_requested`, `password_updated`, `list_created`.
-- Error Tracking (Sentry recommended):
-  - Capture errors in both client and server (Next.js). Confirm DSN in prod.
-  - Verify source maps are uploaded if using Sentry.
+✅ **Implementation Complete** - See [Observability Setup Guide](../deployment/observability-setup.md)
+
+- **Analytics** (choose one: Plausible, Umami, or similar):
+  - ✅ Utility module created (`src/lib/analytics.ts`)
+  - ✅ Events tracked: `signup_start`, `magic_link_sent`, `callback_success`, `reset_requested`, `password_updated`, `list_created`
+  - 📋 Configure provider (Umami/Plausible) via environment variables
+  - 📋 Add analytics script to production app layout/document
+  - 📋 Test in production: verify events appear in dashboard
+  
+- **Error Tracking** (Sentry recommended):
+  - ✅ Utility module created (`src/lib/errorTracking.ts`)
+  - ✅ Error capture integrated in auth flows and list creation
+  - 📋 Install `@sentry/nextjs`: `npm install @sentry/nextjs`
+  - 📋 Create Sentry config files: `sentry.client.config.ts`, `sentry.server.config.ts`, `sentry.edge.config.ts`
+  - 📋 Configure `next.config.js` with Sentry plugin
+  - 📋 Set DSN in production environment variables
+  - 📋 Verify source maps are uploaded during build
+  - 📋 Test in production: trigger error and verify in Sentry dashboard
 
 ## 4) Performance, Accessibility, SEO
 

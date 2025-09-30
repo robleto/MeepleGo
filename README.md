@@ -69,6 +69,8 @@ Legacy ad-hoc root scripts and large JSON artifacts have been relocated into the
 - **Styling**: Tailwind CSS v3.4 with custom design system
 - **Database**: Supabase (PostgreSQL) with Row Level Security
 - **Authentication**: Supabase Auth
+- **Analytics**: Umami or Plausible (optional)
+- **Error Tracking**: Sentry (optional)
 - **Animations**: GSAP
 - **Drag & Drop**: @dnd-kit
 - **Icons**: Heroicons
@@ -108,7 +110,14 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 
 # BGG API (optional, for game data import)
 BGG_API_BASE_URL=https://boardgamegeek.com/xmlapi2
+
+# Optional: Analytics & Error Tracking
+# See docs/deployment/observability-setup.md for full configuration
+# NEXT_PUBLIC_UMAMI_WEBSITE_ID=your-website-id
+# NEXT_PUBLIC_SENTRY_DSN=your-sentry-dsn
 ```
+
+For a complete list of environment variables, see `.env.example` in the project root.
 
 ### 3. Database Setup
 
@@ -188,6 +197,49 @@ docs/                 # Additional project & pipeline docs
 - Sample data included for development
 
 ## Deployment
+
+### Production Checklist
+
+See the comprehensive [Launch Checklist](docs/release/launch-checklist.md) for full deployment preparation.
+
+**Key deployment topics:**
+- [Supabase Production Configuration](docs/deployment/supabase-production-config.md)
+- [Environment Variables Setup](docs/deployment/environment-variables.md)
+- [Observability Setup (Analytics & Error Tracking)](docs/deployment/observability-setup.md)
+- [DNS & Email Configuration](docs/deployment/dns-setup.md)
+
+### Observability (Optional but Recommended)
+
+MeepleGo includes built-in support for analytics and error tracking:
+
+**Analytics** (choose one):
+- **Umami** (recommended): Privacy-focused, open-source analytics
+- **Plausible**: Simple, privacy-friendly analytics
+- **Custom**: Bring your own analytics endpoint
+
+**Error Tracking**:
+- **Sentry**: Comprehensive error monitoring with source maps
+
+To set up:
+
+1. Install Sentry SDK (if using Sentry):
+   ```bash
+   npm install @sentry/nextjs
+   ```
+
+2. Configure environment variables (see `.env.example`)
+
+3. Follow the [Observability Setup Guide](docs/deployment/observability-setup.md)
+
+**Tracked Events:**
+- `signup_start` - User begins signup
+- `magic_link_sent` - Magic link authentication
+- `callback_success` - Auth callback completed
+- `reset_requested` - Password reset requested
+- `password_updated` - Password changed
+- `list_created` - New list created
+
+All tracking respects user privacy and only runs in production unless explicitly enabled.
 
 ### Vercel (Recommended)
 
