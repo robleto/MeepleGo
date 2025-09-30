@@ -9,6 +9,8 @@ interface GameImageProps {
   className?: string
   onError?: () => void
   onLoad?: () => void
+  priority?: boolean
+  loading?: 'lazy' | 'eager'
 }
 
 export function GameImage({
@@ -19,6 +21,8 @@ export function GameImage({
   className = '',
   onError,
   onLoad,
+  priority = false,
+  loading = 'lazy',
 }: GameImageProps) {
   const [imageState, setImageState] = useState<'loading' | 'loaded' | 'error'>(
     'loading'
@@ -98,6 +102,8 @@ export function GameImage({
         } transition-opacity duration-200`}
         width={400}
         height={400}
+        priority={priority}
+        loading={priority ? undefined : loading}
         onLoadingComplete={handleImageLoad}
         onError={handleImageError as any}
       />
