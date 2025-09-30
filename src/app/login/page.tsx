@@ -4,6 +4,8 @@ import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { useAuthErrorMessage } from '@/hooks/useAuthErrorMessage'
+import { trackEvent } from '@/lib/analytics'
+import { captureError } from '@/lib/errorTracking'
 import AuthLayout from '@/components/Components/AuthLayout'
 import Alert from '@/components/Components/Alert'
 
@@ -127,12 +129,15 @@ function LoginForm() {
       setInfo(
         'Magic link failed. If this email is not registered in this Supabase project you will always see invalid credentials.'
       )
+      captureError(error, { context: 'magic_link', email: email.trim() })
       setStatus('idle')
     } else {
       setMagicSent(true)
       setInfo(
         'Magic link sent (if the email exists). Check inbox/spam. If no email arrives, the user likely does not exist in this project or SMTP settings are off.'
       )
+      // Track magic link sent
+      trackEvent('magic_link_sent', { email: email.trim() })
       setStatus('magic-sent')
     }
   }

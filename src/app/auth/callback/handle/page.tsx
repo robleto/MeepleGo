@@ -3,6 +3,8 @@
 import { useEffect, useState, Suspense } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+import { trackEvent } from '@/lib/analytics'
+import { captureError } from '@/lib/errorTracking'
 
 function HandleInner() {
   const router = useRouter()
@@ -36,6 +38,10 @@ function HandleInner() {
         }
         if (urlError) {
           setError(errorDescription || urlError)
+          captureError(new Error(errorDescription || urlError), {
+            context: 'auth_callback',
+            error: urlError,
+          })
           setTimeout(
             () =>
               router.replace(
@@ -65,6 +71,7 @@ function HandleInner() {
             if (process.env.NODE_ENV === 'development')
               console.error('Session error:', sessionError)
             setError(sessionError.message)
+            captureError(sessionError, { context: 'auth_callback_session' })
             setTimeout(
               () =>
                 router.replace(
@@ -77,6 +84,9 @@ function HandleInner() {
 
           if (!sessionData?.session) {
             setError('Session not found after callback')
+            captureError(new Error('Session not found after callback'), {
+              context: 'auth_callback_no_session',
+            })
             setTimeout(
               () =>
                 router.replace(
@@ -90,6 +100,11 @@ function HandleInner() {
 
         // Determine flow: recovery vs. login
         const type = urlParams.get('type') || hashParams.get('type')
+        
+        // Track successful callback
+        trackEvent('callback_success', {
+          type: type || 'login',
+        })
         if (type === 'recovery') {
           router.replace('/update-password')
           return
@@ -101,6 +116,10 @@ function HandleInner() {
         if (process.env.NODE_ENV === 'development')
           console.error('Unexpected auth error:', err)
         setError('Unexpected error during auth processing')
+        captureError(
+          err instanceof Error ? err : new Error('Unexpected auth error'),
+          { context: 'auth_callback_exception' }
+        )
         setTimeout(
           () =>
             router.replace(

@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+import { trackEvent } from '@/lib/analytics'
+import { captureError } from '@/lib/errorTracking'
 import AuthLayout from '@/components/Components/AuthLayout'
 
 export default function SignUpPage() {
@@ -18,6 +20,10 @@ export default function SignUpPage() {
     setError(null)
     setMessage(null)
     setLoading(true)
+    
+    // Track signup start
+    trackEvent('signup_start', { method: 'email' })
+    
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -26,7 +32,10 @@ export default function SignUpPage() {
       },
     })
     setLoading(false)
-    if (error) return setError(error.message)
+    if (error) {
+      captureError(error, { context: 'signup', email })
+      return setError(error.message)
+    }
     if (data.user) setMessage('Check your email to confirm your account.')
   }
 

@@ -4,6 +4,8 @@ import { Fragment, useState, useEffect } from 'react'
 import { XMarkIcon } from '@heroicons/react/24/outline'
 import Portal from '@/components/Elements/Portal'
 import { supabase } from '@/lib/supabase'
+import { trackEvent } from '@/lib/analytics'
+import { captureError } from '@/lib/errorTracking'
 import { useRouter } from 'next/navigation'
 
 interface CreateListModalProps {
@@ -87,10 +89,18 @@ export default function CreateListModal({
       if (error) {
         console.error('Error creating list:', error)
         showMessage('Failed to create list', 'error')
+        captureError(error, { context: 'create_list', listName: formData.name })
         return
       }
 
       showMessage('List created successfully!', 'success')
+      
+      // Track list creation
+      trackEvent('list_created', {
+        listName: formData.name,
+        isPublic: formData.isPublic,
+        hasDescription: !!formData.description.trim(),
+      })
 
       // Reset form
       setFormData({
@@ -112,6 +122,10 @@ export default function CreateListModal({
     } catch (error) {
       console.error('Error creating list:', error)
       showMessage('Failed to create list', 'error')
+      captureError(
+        error instanceof Error ? error : new Error('Failed to create list'),
+        { context: 'create_list_exception' }
+      )
     } finally {
       setIsLoading(false)
     }

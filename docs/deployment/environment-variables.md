@@ -20,6 +20,20 @@ NEXT_PUBLIC_AUTH_REDIRECT_BASE=https://meeplego.com
 # Optional: Analytics & Monitoring
 NEXT_PUBLIC_ANALYTICS_ID=your-analytics-id
 SENTRY_DSN=your-sentry-dsn
+
+# Optional: Umami Analytics
+NEXT_PUBLIC_UMAMI_WEBSITE_ID=your-website-id
+NEXT_PUBLIC_UMAMI_SRC=https://analytics.yourdomain.com/script.js
+
+# Optional: Plausible Analytics
+NEXT_PUBLIC_PLAUSIBLE_DOMAIN=meeplego.com
+NEXT_PUBLIC_PLAUSIBLE_SRC=https://plausible.io/js/script.js
+
+# Optional: Sentry Configuration
+NEXT_PUBLIC_SENTRY_DSN=https://your-sentry-dsn@sentry.io/project-id
+SENTRY_ORG=your-sentry-org
+SENTRY_PROJECT=meeplego
+SENTRY_AUTH_TOKEN=your-auth-token
 ```
 
 ## Staging Environment (.env.staging)
@@ -40,6 +54,15 @@ NEXT_PUBLIC_AUTH_REDIRECT_BASE=https://staging.meeplego.com
 # Optional: Analytics & Monitoring
 NEXT_PUBLIC_ANALYTICS_ID=staging-analytics-id
 SENTRY_DSN=staging-sentry-dsn
+
+# Optional: Umami Analytics
+NEXT_PUBLIC_UMAMI_WEBSITE_ID=staging-website-id
+NEXT_PUBLIC_UMAMI_SRC=https://analytics-staging.yourdomain.com/script.js
+
+# Optional: Sentry Configuration
+NEXT_PUBLIC_SENTRY_DSN=https://staging-sentry-dsn@sentry.io/project-id
+SENTRY_ORG=your-sentry-org
+SENTRY_PROJECT=meeplego-staging
 ```
 
 ## Development Environment (.env.local)
@@ -187,5 +210,16 @@ npm run test:email
 | `NODE_ENV`                       | All          | Yes      | Environment type (`development`, `production`)     |
 | `NEXT_PUBLIC_AUTH_REDIRECT_BASE` | All          | No       | Base URL for auth redirects (defaults to SITE_URL) |
 | `NEXT_PUBLIC_E2E_MODE`           | Dev/Test     | No       | Enable E2E testing mode                            |
-| `NEXT_PUBLIC_ANALYTICS_ID`       | Prod/Staging | No       | Analytics tracking ID                              |
-| `SENTRY_DSN`                     | Prod/Staging | No       | Error tracking DSN                                 |
+| `NEXT_PUBLIC_ANALYTICS_ID`       | Prod/Staging | No       | Analytics tracking ID (deprecated - use provider-specific vars) |
+| `NEXT_PUBLIC_UMAMI_WEBSITE_ID`   | Prod/Staging | No       | Umami analytics website ID                     |
+| `NEXT_PUBLIC_UMAMI_SRC`          | Prod/Staging | No       | Umami analytics script URL                     |
+| `NEXT_PUBLIC_PLAUSIBLE_DOMAIN`   | Prod/Staging | No       | Plausible analytics domain                     |
+| `NEXT_PUBLIC_PLAUSIBLE_SRC`      | Prod/Staging | No       | Plausible analytics script URL                 |
+| `NEXT_PUBLIC_ANALYTICS_ENDPOINT` | Prod/Staging | No       | Custom analytics endpoint URL                  |
+| `NEXT_PUBLIC_ANALYTICS_ENABLED`  | Development  | No       | Enable analytics in development (true/false)   |
+| `NEXT_PUBLIC_SENTRY_DSN`         | Prod/Staging | No       | Sentry error tracking DSN                      |
+| `SENTRY_DSN`                     | Prod/Staging | No       | Sentry DSN (deprecated - use NEXT_PUBLIC_SENTRY_DSN) |
+| `SENTRY_ORG`                     | Build        | No       | Sentry organization slug                       |
+| `SENTRY_PROJECT`                 | Build        | No       | Sentry project name                            |
+| `SENTRY_AUTH_TOKEN`              | Build        | No       | Sentry auth token for source map upload        |
+| `NEXT_PUBLIC_SENTRY_ENABLED`     | Development  | No       | Enable Sentry in development (true/false)      |

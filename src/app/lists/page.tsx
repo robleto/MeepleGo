@@ -4,6 +4,8 @@ import { useState, useEffect, useMemo } from 'react'
 import PageLayout from '@/components/Components/PageLayout'
 import Heading from '@/components/Components/Heading'
 import { supabase } from '@/lib/supabase'
+import { trackEvent } from '@/lib/analytics'
+import { captureError } from '@/lib/errorTracking'
 import { GameList, GameListWithItems, Profile } from '@/types/supabase'
 import ListCard from '@/components/Components/ListCard'
 import CreateListModal from '@/components/Components/CreateListModal'
@@ -144,8 +146,16 @@ export default function ListsPage() {
 
     if (error) {
       console.error('Error creating list:', error)
+      captureError(error, { context: 'create_list_page', listName: listData.name })
       return
     }
+
+    // Track list creation
+    trackEvent('list_created', {
+      listName: listData.name,
+      isPublic: listData.is_public,
+      hasDescription: !!listData.description,
+    })
 
     // Refresh lists
     await fetchUserLists(userId)
