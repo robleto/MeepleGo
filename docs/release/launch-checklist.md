@@ -12,8 +12,38 @@ Purpose: Ensure a smooth launch to production with working auth, correct configu
   - Use `{{ .ConfirmationURL }}` in magic link and password recovery templates.
   - Include short copy setting expectations (link expires, opens in default browser).
 - SMTP & Deliverability:
-  - Set SPF/DKIM on your sending domain.
-  - Send a test to Gmail/Outlook/Apple Mail; check spam placement.
+  - Choose sending provider (low-volume: Google Workspace SMTP; higher-volume: Postmark/Resend/SendGrid/SES). Use the provider’s exact DNS values below as examples only.
+  - DNS Records on meeplego.com (production):
+    - SPF (TXT at root):
+      - Example (Google Workspace): `v=spf1 include:_spf.google.com ~all`
+      - If using a transactional provider, add their include, e.g., Postmark: `include:spf.mtasv.net`. Keep a single SPF record; combine includes into one line if needed.
+    - DKIM:
+      - Google Workspace: generate in Admin Console; publish TXT at `google._domainkey.meeplego.com` with the provided `v=DKIM1; k=rsa; p=...` value.
+      - Transactional providers typically give one or more CNAMEs for selector(s); publish exactly as provided.
+    - DMARC (TXT at `_dmarc.meeplego.com`): start permissive, then tighten.
+      - Start: `v=DMARC1; p=none; rua=mailto:dmarc@meeplego.com; fo=1; aspf=s; adkim=s`
+      - Later (post-validation): change `p=quarantine` or `p=reject`.
+    - Optional: BIMI (brand logo) and TLS-RPT (TLS reporting) after basics are green.
+  - Verify DNS propagation:
+    - Use your DNS provider’s inspector, or `dig`/`nslookup` to confirm SPF/DKIM/DMARC records are visible.
+  - Configure Supabase SMTP (Authentication → Email):
+    - Host/Port/User/Password from your provider.
+    - From: `noreply@meeplego.com` (domain must match DKIM domain).
+    - Reply-To: `support@meeplego.com` (optional).
+  - Deliverability test (all three):
+    - Send auth emails (magic link and password reset) to Gmail, Outlook, and iCloud.
+    - Inspect headers:
+      - Authentication-Results shows `spf=pass` (aligned), `dkim=pass` (d=meeplego.com), `dmarc=pass`.
+      - Gmail UI: “Show original” → SPF/DKIM/DMARC: PASS; “mailed-by”/“signed-by” = meeplego.com.
+      - Outlook: View message headers (use Microsoft Header Analyzer) and confirm pass.
+      - iCloud Mail: basic check for Inbox vs Junk; optionally forward to Gmail to inspect.
+    - Placement: confirm Inbox for Gmail/Outlook/iCloud (not Promotions/Junk). Record results.
+  - Tighten policy after success:
+    - Update DMARC policy to `p=quarantine` or `p=reject`; consider changing SPF qualifier from `~all` to `-all` if all senders are covered.
+  - Acceptance criteria:
+    - SPF, DKIM, and DMARC pass on Gmail and Outlook; iCloud not marked as Junk.
+    - Magic link and reset emails arrive within ~10s; links work end-to-end on mobile and desktop.
+    - No unexpected senders in DMARC aggregate (rua) reports for 48 hours.
 - Security (RLS):
   - Re-validate Row Level Security policies for all user-facing tables.
   - Create a non-owner test user and ensure they cannot read/write others’ data.
