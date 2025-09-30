@@ -67,6 +67,22 @@ export default function SiteFooter() {
             </li>
             <li>
               <Link
+                href="/help/privacy"
+                className="hover:text-gray-900 dark:hover:text-gray-200 transition"
+              >
+                Privacy Policy
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/help/terms"
+                className="hover:text-gray-900 dark:hover:text-gray-200 transition"
+              >
+                Terms of Service
+              </Link>
+            </li>
+            <li>
+              <Link
                 href="/import"
                 className="hover:text-gray-900 dark:hover:text-gray-200 transition"
               >
