@@ -247,6 +247,11 @@ CREATE POLICY "Users can delete own awards" ON awards
 -- Games table is publicly readable (no RLS needed for viewing)
 -- Users cannot insert/update/delete games directly
 
+-- NOTE: Additional tables with RLS policies are created via migrations:
+-- - play_logs: User play history (migration 20250901000000_create_play_logs.sql)
+-- - categories, mechanics, publishers: Taxonomy tables (migration 20250810100000_taxonomy_normalization.sql)
+-- - game_categories, game_mechanics, game_publishers: Junction tables (migration 20250810100000_taxonomy_normalization.sql)
+
 -- Create a function to handle new user registration
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS trigger AS $$
