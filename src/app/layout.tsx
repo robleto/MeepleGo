@@ -156,6 +156,11 @@ export default function RootLayout({
       <head>
         <link rel="preconnect" href="https://use.typekit.net" />
         <link rel="preconnect" href="https://p.typekit.net" />
+        {/* Preconnect to external image domains for performance */}
+        <link rel="preconnect" href="https://cf.geekdo-images.com" />
+        <link rel="dns-prefetch" href="https://cf.geekdo-images.com" />
+        <link rel="preconnect" href="https://boardgamegeek.com" />
+        <link rel="dns-prefetch" href="https://boardgamegeek.com" />
         {process.env.NEXT_PUBLIC_ADOBE_FONTS_KIT_ID && (
           <link
             rel="stylesheet"
@@ -168,8 +173,17 @@ export default function RootLayout({
           'font-sans min-h-screen text-gray-900 dark:text-white bg-white'
         }
       >
+        {/* Skip to main content link for accessibility */}
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary-600 focus:text-white focus:rounded-md focus:shadow-lg"
+        >
+          Skip to main content
+        </a>
         <Navigation />
-        <div className="pt-16 min-h-[70vh]">{children}</div>
+        <main id="main-content" className="pt-16 min-h-[70vh]">
+          {children}
+        </main>
         <SiteFooter />
       </body>
     </html>
