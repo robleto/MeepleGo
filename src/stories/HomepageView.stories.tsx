@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import HomepageView, { type HomepageViewProps } from '@/components/Components/HomepageView'
+import HomepageView, {
+  type HomepageViewProps,
+} from '@/components/Components/HomepageView'
 
 const meta: Meta<typeof HomepageView> = {
   title: 'Pages/HomepageView',
@@ -40,14 +42,41 @@ const baseArgs: HomepageViewProps = {
   featuredGames: sampleGames,
   userStats: null,
   industryAwards: [
-    { id: 'a1', name: 'Best Strategy Game', year: 2025, winner_game_name: 'Gloomhaven' },
-    { id: 'a2', name: 'Family Game of the Year', year: 2025, winner_game_name: 'Wingspan' },
+    {
+      id: 'a1',
+      name: 'Best Strategy Game',
+      year: 2025,
+      winner_game_name: 'Gloomhaven',
+    },
+    {
+      id: 'a2',
+      name: 'Family Game of the Year',
+      year: 2025,
+      winner_game_name: 'Wingspan',
+    },
     { id: 'a3', name: 'Best Solo Experience', year: 2025 },
   ],
   publicLists: [
-    { id: 'l1', name: 'Top Lightweight Euros', description: 'Fast teach euro style games', games_count: 12, updated_at: new Date().toISOString() },
-    { id: 'l2', name: 'Cozy Autumn Picks', description: 'Warm thematic games for fall', games_count: 8, updated_at: new Date().toISOString() },
-    { id: 'l3', name: 'Solo Night Rotation', games_count: 5, updated_at: new Date().toISOString() },
+    {
+      id: 'l1',
+      name: 'Top Lightweight Euros',
+      description: 'Fast teach euro style games',
+      games_count: 12,
+      updated_at: new Date().toISOString(),
+    },
+    {
+      id: 'l2',
+      name: 'Cozy Autumn Picks',
+      description: 'Warm thematic games for fall',
+      games_count: 8,
+      updated_at: new Date().toISOString(),
+    },
+    {
+      id: 'l3',
+      name: 'Solo Night Rotation',
+      games_count: 5,
+      updated_at: new Date().toISOString(),
+    },
   ],
 }
 

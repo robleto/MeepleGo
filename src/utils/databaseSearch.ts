@@ -207,8 +207,10 @@ export async function searchGamesFallback(
       if (bStartsWith && !aStartsWith) return 1
 
       // If both are exact matches or both start with query, sort by popularity (rank)
-      if ((aNameLower === queryLower && bNameLower === queryLower) || 
-          (aStartsWith && bStartsWith)) {
+      if (
+        (aNameLower === queryLower && bNameLower === queryLower) ||
+        (aStartsWith && bStartsWith)
+      ) {
         const aRank = a.rank || 99999
         const bRank = b.rank || 99999
         return aRank - bRank
@@ -217,7 +219,7 @@ export async function searchGamesFallback(
       // For partial matches, prioritize those with better ranks
       const aRank = a.rank || 99999
       const bRank = b.rank || 99999
-      
+
       // If rank difference is significant, use that
       if (Math.abs(aRank - bRank) > 1000) {
         return aRank - bRank

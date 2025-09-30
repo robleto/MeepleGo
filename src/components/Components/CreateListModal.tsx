@@ -131,9 +131,9 @@ export default function CreateListModal({
   if (!isOpen) return null
 
   // Determine modal positioning based on trigger source
-  const modalClasses = fromNav 
-    ? "items-start pt-20" // More top padding when from nav
-    : "items-center"
+  const modalClasses = fromNav
+    ? 'items-start pt-20' // More top padding when from nav
+    : 'items-center'
 
   return (
     <>
@@ -153,12 +153,12 @@ export default function CreateListModal({
       )}
 
       {/* Modal Backdrop */}
-      <div 
+      <div
         className={`fixed inset-0 z-[400] flex ${modalClasses} justify-center bg-black/40 backdrop-blur-sm p-4`}
         onClick={handleClose}
       >
         {/* Modal Content */}
-        <div 
+        <div
           className="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-2xl shadow-xl transform transition-all"
           onClick={(e) => e.stopPropagation()}
         >

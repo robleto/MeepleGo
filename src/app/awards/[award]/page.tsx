@@ -206,11 +206,11 @@ interface AwardYearGroup {
 
 async function getAwardData(awardType: string): Promise<AwardYearGroup[]> {
   const supabase = await getSupabaseServerClient()
-  
+
   try {
     // Create a pattern to match the award_set values
     let searchPattern = awardType
-    
+
     // Handle special cases for pattern matching
     if (awardType === 'Golden Geek Awards') {
       searchPattern = '%Golden Geek%'
@@ -239,7 +239,8 @@ async function getAwardData(awardType: string): Promise<AwardYearGroup[]> {
     // Get awards with boardgames JSONB data from industry_awards table
     const { data: awards, error } = await supabase
       .from('industry_awards')
-      .select(`
+      .select(
+        `
         id,
         year,
         award_set,
@@ -247,7 +248,8 @@ async function getAwardData(awardType: string): Promise<AwardYearGroup[]> {
         status,
         position,
         boardgames
-      `)
+      `
+      )
       .ilike('award_set', searchPattern)
       .order('year', { ascending: false })
 
@@ -274,7 +276,8 @@ async function getAwardData(awardType: string): Promise<AwardYearGroup[]> {
     // Fetch all game metadata in one query
     const { data: gamesData, error: gamesError } = await supabase
       .from('games')
-      .select(`
+      .select(
+        `
         bgg_id,
         name,
         year_published,
@@ -283,7 +286,8 @@ async function getAwardData(awardType: string): Promise<AwardYearGroup[]> {
         min_players,
         max_players,
         playtime_minutes
-      `)
+      `
+      )
       .in('bgg_id', Array.from(allBggIds))
 
     if (gamesError) {
@@ -303,7 +307,8 @@ async function getAwardData(awardType: string): Promise<AwardYearGroup[]> {
       (award: any) =>
         award.position &&
         award.position !== awardType &&
-        (award.position.includes('Best ') || award.position.includes('Game of the'))
+        (award.position.includes('Best ') ||
+          award.position.includes('Game of the'))
     )
 
     console.log(`Award type "${awardType}" has categories:`, hasCategories)
@@ -313,13 +318,18 @@ async function getAwardData(awardType: string): Promise<AwardYearGroup[]> {
     awards.forEach((award: any) => {
       // Extract games from the boardgames JSONB array
       const boardgames = award.boardgames || []
-      
+
       boardgames.forEach((boardgame: any) => {
         // Convert database award to Honor interface format
         const honor: Honor = {
           name: award.award_set,
           year: award.year,
-          category: award.status === 'Winner' ? 'Winner' : (award.status === 'Nominee' ? 'Nominee' : 'Special'),
+          category:
+            award.status === 'Winner'
+              ? 'Winner'
+              : award.status === 'Nominee'
+                ? 'Nominee'
+                : 'Special',
           award_type: award.award_set,
           position: award.position,
           subcategory: award.category,
@@ -362,9 +372,7 @@ async function getAwardData(awardType: string): Promise<AwardYearGroup[]> {
           }
 
           // Find or create category
-          let category = bucket.categories.find(
-            (c) => c.name === categoryName
-          )
+          let category = bucket.categories.find((c) => c.name === categoryName)
           if (!category) {
             category = {
               name: categoryName,
@@ -431,7 +439,9 @@ async function getAwardData(awardType: string): Promise<AwardYearGroup[]> {
     years.forEach((y) => {
       const dedupe = (arr: Game[]) =>
         Array.from(new Map(arr.map((g) => [g.bgg_id, g])).values())
-      y.nominees = dedupe(y.nominees).sort((a, b) => a.name.localeCompare(b.name))
+      y.nominees = dedupe(y.nominees).sort((a, b) =>
+        a.name.localeCompare(b.name)
+      )
       y.special = dedupe(y.special).sort((a, b) => a.name.localeCompare(b.name))
       // Sort category winners by subcategory then name
       y.categoryWinners.sort(
@@ -659,7 +669,8 @@ function YearSection({
                     <div className={`${nomineeOnly ? '' : 'md:col-span-8'}`}>
                       <div className="flex items-center gap-2 mb-3 font-display">
                         <UserGroupIcon className="w-4 h-4 text-gray-500" />
-                        <h4 className="text-sm font-semibold text-gray-700">Nominees
+                        <h4 className="text-sm font-semibold text-gray-700">
+                          Nominees
                         </h4>
                         <span className="text-xs text-gray-400">
                           ({combinedNominees.length})

@@ -84,7 +84,9 @@ export default function SearchPill(props: SearchPillProps) {
   }
 
   return (
-    <div className={`group flex items-center bg-white dark:bg-gray-900 rounded-full border border-gray-300 dark:border-gray-700 transition shadow-sm px-3 h-11 ${className}`}>
+    <div
+      className={`group flex items-center bg-white dark:bg-gray-900 rounded-full border border-gray-300 dark:border-gray-700 transition shadow-sm px-3 h-11 ${className}`}
+    >
       <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
       <input
         ref={inputRef}

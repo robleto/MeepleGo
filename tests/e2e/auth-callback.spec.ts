@@ -1,7 +1,11 @@
 import { test, expect } from '@playwright/test'
 
 function buildCallbackUrl(base: string, search: string, hash: string) {
-  const sParam = search ? (search.startsWith('?') ? search.slice(1) : search) : ''
+  const sParam = search
+    ? search.startsWith('?')
+      ? search.slice(1)
+      : search
+    : ''
   const sWithFlag = sParam ? `?${sParam}&e2e=1` : '?e2e=1'
   const s = sWithFlag
   const h = hash ? (hash.startsWith('#') ? hash : `#${hash}`) : ''
@@ -14,10 +18,18 @@ function buildCallbackUrl(base: string, search: string, hash: string) {
 // intermediate handoff to /auth/callback/handle and the final path.
 
 test.describe('Auth callback routing', () => {
-  test('forwards to handle and then to /update-password on recovery-ish hash', async ({ page, context, baseURL }) => {
+  test('forwards to handle and then to /update-password on recovery-ish hash', async ({
+    page,
+    context,
+    baseURL,
+  }) => {
     const base = baseURL || 'http://localhost:3001'
     // Simulate recovery with tokens present
-    const url = buildCallbackUrl(base, '', 'type=recovery&access_token=fake&refresh_token=fake')
+    const url = buildCallbackUrl(
+      base,
+      '',
+      'type=recovery&access_token=fake&refresh_token=fake'
+    )
 
     const responses: string[] = []
     page.on('framenavigated', (frame) => {
@@ -28,16 +40,27 @@ test.describe('Auth callback routing', () => {
     await page.goto(url)
 
     // We expect the first hop to /auth/callback/handle due to the server redirect
-    await expect.poll(() => responses.includes('/auth/callback/handle')).toBeTruthy()
+    await expect
+      .poll(() => responses.includes('/auth/callback/handle'))
+      .toBeTruthy()
 
     // The handle page should then redirect to /update-password
     await page.waitForURL('**/update-password')
-    await expect(page).toHaveURL(new RegExp(`${base.replace(/\//g, '\\/')}/update-password`))
+    await expect(page).toHaveURL(
+      new RegExp(`${base.replace(/\//g, '\\/')}/update-password`)
+    )
   })
 
-  test('forwards to handle and then to / for normal login with next missing (tokens without type)', async ({ page, baseURL }) => {
+  test('forwards to handle and then to / for normal login with next missing (tokens without type)', async ({
+    page,
+    baseURL,
+  }) => {
     const base = baseURL || 'http://localhost:3001'
-    const url = buildCallbackUrl(base, '', 'access_token=fake&refresh_token=fake')
+    const url = buildCallbackUrl(
+      base,
+      '',
+      'access_token=fake&refresh_token=fake'
+    )
 
     const paths: string[] = []
     page.on('framenavigated', (frame) => {
@@ -47,7 +70,9 @@ test.describe('Auth callback routing', () => {
 
     await page.goto(url)
 
-    await expect.poll(() => paths.includes('/auth/callback/handle')).toBeTruthy()
+    await expect
+      .poll(() => paths.includes('/auth/callback/handle'))
+      .toBeTruthy()
 
     await page.waitForURL(base + '/')
     await expect(page).toHaveURL(base + '/')
@@ -56,7 +81,11 @@ test.describe('Auth callback routing', () => {
   test('respects next param for normal login', async ({ page, baseURL }) => {
     const base = baseURL || 'http://localhost:3001'
     const next = '/games'
-    const url = buildCallbackUrl(base, `next=${encodeURIComponent(next)}`, 'access_token=fake&refresh_token=fake')
+    const url = buildCallbackUrl(
+      base,
+      `next=${encodeURIComponent(next)}`,
+      'access_token=fake&refresh_token=fake'
+    )
 
     await page.goto(url)
 
@@ -64,9 +93,16 @@ test.describe('Auth callback routing', () => {
     await expect(page).toHaveURL(base + next)
   })
 
-  test('handles error in hash (otp_expired) and redirects to login', async ({ page, baseURL }) => {
+  test('handles error in hash (otp_expired) and redirects to login', async ({
+    page,
+    baseURL,
+  }) => {
     const base = baseURL || 'http://localhost:3001'
-    const url = buildCallbackUrl(base, '', 'error=access_denied&error_description=otp_expired')
+    const url = buildCallbackUrl(
+      base,
+      '',
+      'error=access_denied&error_description=otp_expired'
+    )
 
     await page.goto(url)
 

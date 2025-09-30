@@ -6,7 +6,12 @@ import {
   formatPlayingTime,
   formatPlayerCount,
 } from '@/utils/helpers'
-import { StarIcon, BookmarkIcon, HeartIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import {
+  StarIcon,
+  BookmarkIcon,
+  HeartIcon,
+  XMarkIcon,
+} from '@heroicons/react/24/outline'
 import GameDetailModal from '@/components/Components/GameDetailModal'
 import dynamic from 'next/dynamic'
 const PlayLogEditor = dynamic(

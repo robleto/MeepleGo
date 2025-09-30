@@ -17,9 +17,13 @@ export default function UpdatePasswordPage() {
 
   useEffect(() => {
     const checkSession = async () => {
-      const { data: { session }, error } = await supabase.auth.getSession()
+      const {
+        data: { session },
+        error,
+      } = await supabase.auth.getSession()
       if (error) {
-        if (process.env.NODE_ENV === 'development') console.error('Session error:', error)
+        if (process.env.NODE_ENV === 'development')
+          console.error('Session error:', error)
         setError('Invalid or expired reset link. Please try again.')
         return
       }
@@ -71,8 +75,16 @@ export default function UpdatePasswordPage() {
             className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
           />
         </div>
-        {friendlyError && <Alert variant="error" role="alert">{friendlyError}</Alert>}
-        {message && <Alert variant="success" role="status">{message}</Alert>}
+        {friendlyError && (
+          <Alert variant="error" role="alert">
+            {friendlyError}
+          </Alert>
+        )}
+        {message && (
+          <Alert variant="success" role="status">
+            {message}
+          </Alert>
+        )}
         <button
           type="submit"
           disabled={loading || !!message}

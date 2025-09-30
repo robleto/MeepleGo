@@ -197,7 +197,13 @@ function GamesPageContent() {
         // Use a small tolerance since exact matching may be too restrictive
         // Most games are rounded to 15-minute intervals (60, 75, 90, 105, 120)
         const tolerance = 5 // Small 5-minute tolerance for rounding differences
-        console.log('🕐 Filtering for playtime:', playtime, '±', tolerance, 'minutes')
+        console.log(
+          '🕐 Filtering for playtime:',
+          playtime,
+          '±',
+          tolerance,
+          'minutes'
+        )
         query = query
           .gte('playtime_minutes', playtime - tolerance)
           .lte('playtime_minutes', playtime + tolerance)
@@ -538,7 +544,15 @@ function GamesPageContent() {
     }
 
     initialLoad()
-  }, [searchTerm, sortBy, sortOrder, groupBy, groupSortOrder, filterType, filterValue])
+  }, [
+    searchTerm,
+    sortBy,
+    sortOrder,
+    groupBy,
+    groupSortOrder,
+    filterType,
+    filterValue,
+  ])
 
   const [membershipSets, setMembershipSets] = useState<{
     library: Set<string>
@@ -627,10 +641,10 @@ function GamesPageContent() {
       const weight = Number(weightParam)
       const weightLabels = {
         1: 'Light',
-        2: 'Medium-Light', 
+        2: 'Medium-Light',
         3: 'Medium',
         4: 'Medium-Heavy',
-        5: 'Heavy'
+        5: 'Heavy',
       }
       const label = weightLabels[weight as keyof typeof weightLabels] || weight
       return `${label} complexity games`
@@ -651,32 +665,32 @@ function GamesPageContent() {
   // Calculate active filter count (matches FilterModal logic)
   const getActiveFilterCount = () => {
     let count = 0
-    
+
     // Sort filter (if not default)
     if (sortBy !== 'rank' || sortOrder !== 'asc') {
       count++
     }
-    
+
     // Group filter (if not default)
     if (groupBy !== 'none') {
       count++
     }
-    
+
     // View mode (if not default)
     if (viewMode !== 'grid') {
       count++
     }
-    
+
     // Card density (if not default)
     if (cardVariant !== 'balanced') {
       count++
     }
-    
+
     // Content filters (if active)
     if (filterType !== 'none' && filterValue !== 'all') {
       count++
     }
-    
+
     return count
   }
 
@@ -777,7 +791,11 @@ function GamesPageContent() {
         {/* Filter Title - shown when filtering via URL params */}
         {filterTitle && (
           <div className="border-b border-gray-200 dark:border-gray-700 pb-4">
-            <Heading as="h2" size="lg" className="text-gray-900 dark:text-gray-100">
+            <Heading
+              as="h2"
+              size="lg"
+              className="text-gray-900 dark:text-gray-100"
+            >
               {filterTitle}
             </Heading>
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
@@ -813,11 +831,12 @@ function GamesPageContent() {
                       {group.key}
                     </h3>
                     <div className="text-sm text-gray-500 dark:text-gray-400">
-                      {group.games.length} {group.games.length === 1 ? 'game' : 'games'}
+                      {group.games.length}{' '}
+                      {group.games.length === 1 ? 'game' : 'games'}
                     </div>
                   </div>
                 )}
-                
+
                 {/* Games for this group */}
                 {viewMode === 'grid' ? (
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
@@ -871,54 +890,55 @@ function GamesPageContent() {
         )}
 
         {/* Load More Button - only show if we have server-side pagination */}
-        {!loading && !error && hasMore && groupedGames.some(group => group.games.length > 0) && (
-          <div className="flex justify-center py-8">
-            <button
-              onClick={loadMoreGames}
-              disabled={loadingMore}
-              className="bg-primary-600 text-white px-6 py-3 rounded-md hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
-            >
-              {loadingMore ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  <span>Loading...</span>
-                </>
-              ) : (
-                <span>Load More Games</span>
-              )}
-            </button>
-          </div>
-        )}
-
-        {/* Empty State - no games loaded at all */}
         {!loading &&
           !error &&
-          games.length === 0 && (
-            <div className="text-center py-12">
-              <div className="text-gray-400 mb-4">
-                <Squares2X2Icon className="h-12 w-12 mx-auto" />
-              </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                No games found
-              </h3>
-              <p className="text-gray-600 mb-4">
-                {searchTerm
-                  ? 'No games match your search criteria.'
-                  : 'Get started by adding your first game to the collection.'}
-              </p>
-              {!searchTerm && (
-                <button className="bg-primary-600 text-white px-4 py-2 rounded-md hover:bg-primary-700">
-                  Add Game
-                </button>
-              )}
+          hasMore &&
+          groupedGames.some((group) => group.games.length > 0) && (
+            <div className="flex justify-center py-8">
+              <button
+                onClick={loadMoreGames}
+                disabled={loadingMore}
+                className="bg-primary-600 text-white px-6 py-3 rounded-md hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+              >
+                {loadingMore ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    <span>Loading...</span>
+                  </>
+                ) : (
+                  <span>Load More Games</span>
+                )}
+              </button>
             </div>
           )}
+
+        {/* Empty State - no games loaded at all */}
+        {!loading && !error && games.length === 0 && (
+          <div className="text-center py-12">
+            <div className="text-gray-400 mb-4">
+              <Squares2X2Icon className="h-12 w-12 mx-auto" />
+            </div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              No games found
+            </h3>
+            <p className="text-gray-600 mb-4">
+              {searchTerm
+                ? 'No games match your search criteria.'
+                : 'Get started by adding your first game to the collection.'}
+            </p>
+            {!searchTerm && (
+              <button className="bg-primary-600 text-white px-4 py-2 rounded-md hover:bg-primary-700">
+                Add Game
+              </button>
+            )}
+          </div>
+        )}
 
         {/* No Results for Filter - games exist but none match current filters */}
         {!loading &&
           !error &&
           games.length > 0 &&
-          groupedGames.every(group => group.games.length === 0) && (
+          groupedGames.every((group) => group.games.length === 0) && (
             <div className="text-center py-12">
               <div className="text-gray-400 mb-4">
                 <Squares2X2Icon className="h-12 w-12 mx-auto" />
@@ -958,12 +978,12 @@ function GamesPageContent() {
         uniquePlayerCounts={uniquePlayerCounts}
         uniqueCategories={uniqueCategories}
         uniqueMechanics={uniqueMechanics}
-  defaultSortBy="rank"
-  defaultSortOrder="asc"
-  defaultGroupBy="none"
-  defaultGroupSortOrder="asc"
-  defaultViewMode="grid"
-  defaultCardVariant="balanced"
+        defaultSortBy="rank"
+        defaultSortOrder="asc"
+        defaultGroupBy="none"
+        defaultGroupSortOrder="asc"
+        defaultViewMode="grid"
+        defaultCardVariant="balanced"
       />
     </PageLayout>
   )

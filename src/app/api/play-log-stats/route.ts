@@ -33,7 +33,9 @@ export async function GET(req: NextRequest) {
     const totalPlays = rows?.length || 0
     const uniqueGames = new Set(rows?.map((r: any) => r.game_id)).size
     const gamesWithNotes = new Set(
-      rows?.filter((r: any) => r.notes && r.notes.trim()).map((r: any) => r.game_id)
+      rows
+        ?.filter((r: any) => r.notes && r.notes.trim())
+        .map((r: any) => r.game_id)
     ).size
     const rated = rows?.filter((r: any) => typeof r.rating === 'number') || []
     const avgRating =

@@ -2,9 +2,7 @@
 
 import { useState, Suspense, useMemo } from 'react'
 import PageLayout from '@/components/Components/PageLayout'
-import {
-  useGameDataWithGuest,
-} from '@/utils/sharedGameUtils'
+import { useGameDataWithGuest } from '@/utils/sharedGameUtils'
 import { useRankingsFilters } from '@/utils/gameFilters'
 import GameRowCard from '@/components/Components/GameRowCard'
 import GameCard from '@/components/Components/GameCard'
@@ -19,7 +17,9 @@ function RankingsPageContent() {
   const [showFilters, setShowFilters] = useState(false)
 
   // Filter only games that have rankings
-  const rankedGames = games.filter((g) => typeof g.ranking?.ranking === 'number')
+  const rankedGames = games.filter(
+    (g) => typeof g.ranking?.ranking === 'number'
+  )
 
   const {
     hasMounted,
@@ -63,15 +63,20 @@ function RankingsPageContent() {
   // Calculate rating statistics
   const ratingStats = useMemo(() => {
     const ratingsArray = rankedGames
-      .map(g => g.ranking?.ranking)
+      .map((g) => g.ranking?.ranking)
       .filter((rating): rating is number => typeof rating === 'number')
-    
+
     if (ratingsArray.length === 0) {
       return { avgRating: null, totalRated: 0 }
     }
 
-    const avgRating = ratingsArray.reduce((sum, rating) => sum + rating, 0) / ratingsArray.length
-    return { avgRating: Number(avgRating.toFixed(1)), totalRated: ratingsArray.length }
+    const avgRating =
+      ratingsArray.reduce((sum, rating) => sum + rating, 0) /
+      ratingsArray.length
+    return {
+      avgRating: Number(avgRating.toFixed(1)),
+      totalRated: ratingsArray.length,
+    }
   }, [rankedGames])
 
   if (loading) {
@@ -93,6 +98,7 @@ function RankingsPageContent() {
           <h3 className="mb-2 text-lg font-medium text-gray-900">No ranked games yet</h3>
           <p className="mb-4 text-gray-600">
             {isGuest ? 'Sign in to start ranking your collection.' : 'Start by adding rankings to your games.'}
+
           </p>
         </div>
       </PageLayout>
@@ -124,6 +130,7 @@ function RankingsPageContent() {
 
         {/* Rating Statistics */}
         {rankedGames.length > 0 && (
+
           <section className="grid gap-4 mb-6 md:grid-cols-2">
             <StatCard 
               iconBg="bg-yellow-500" 
@@ -131,13 +138,14 @@ function RankingsPageContent() {
               iconColor="text-white" 
               value={ratingStats.avgRating ?? '—'} 
               label="Average Rating" 
+
             />
-            <StatCard 
-              iconBg="bg-blue-500" 
-              Icon={ArrowTrendingUpIcon} 
-              iconColor="text-white" 
-              value={ratingStats.totalRated} 
-              label="Total Rated Games" 
+            <StatCard
+              iconBg="bg-blue-500"
+              Icon={ArrowTrendingUpIcon}
+              iconColor="text-white"
+              value={ratingStats.totalRated}
+              label="Total Rated Games"
             />
           </section>
         )}
@@ -150,6 +158,7 @@ function RankingsPageContent() {
 
         {/* No results for current filters/search */}
         {rankedGames.length > 0 && filteredGames.length === 0 && (
+
           <div className="py-12 text-center">
             <h3 className="mb-2 text-lg font-medium text-gray-900">No rankings match your filters</h3>
             <p className="mb-4 text-gray-600">Try adjusting your search or clearing some filters.</p>
@@ -164,7 +173,8 @@ function RankingsPageContent() {
                   {section.key}
                 </h2>
                 <div className="text-sm text-gray-500">
-                  {section.games.length} {section.games.length === 1 ? 'game' : 'games'}
+                  {section.games.length}{' '}
+                  {section.games.length === 1 ? 'game' : 'games'}
                 </div>
               </div>
             )}
@@ -233,6 +243,7 @@ function RankingsPageContent() {
 
 export default function RankingsPage() {
   return (
+
     <Suspense fallback={<PageLayout><div className="flex items-center justify-center py-12"><div className="w-8 h-8 border-b-2 rounded-full animate-spin border-primary-600"></div></div></PageLayout>}>
       <RankingsPageContent />
     </Suspense>

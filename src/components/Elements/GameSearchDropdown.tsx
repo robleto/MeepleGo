@@ -205,7 +205,7 @@ export default function GameSearchDropdown({
           showSearchButton={false}
         />
       </div>
-      
+
       {show && (
         <div
           id="game-suggestions"
@@ -279,7 +279,8 @@ export default function GameSearchDropdown({
                     Other Results
                   </div>
                   {grouped.other.map((g, i) => {
-                    const globalIndex = grouped.exactMatches.length + grouped.popular.length + i
+                    const globalIndex =
+                      grouped.exactMatches.length + grouped.popular.length + i
                     return (
                       <SuggestionRow
                         key={`o-${g.id}`}
@@ -314,7 +315,13 @@ interface SuggestionRowProps {
   highlight: (name: string) => React.ReactNode
 }
 
-function SuggestionRow({ game, active, onSelect, onHover, highlight }: SuggestionRowProps) {
+function SuggestionRow({
+  game,
+  active,
+  onSelect,
+  onHover,
+  highlight,
+}: SuggestionRowProps) {
   return (
     <button
       type="button"

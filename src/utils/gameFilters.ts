@@ -73,13 +73,17 @@ export function useViewMode(defaultMode: 'grid' | 'list' = 'grid') {
 
 export function useGameFilters(
   games: GameWithRanking[],
-  options?: { 
-    disableClientSorting?: boolean; 
-    defaultViewMode?: 'grid' | 'list';
-    storageKey?: string;
+  options?: {
+    disableClientSorting?: boolean
+    defaultViewMode?: 'grid' | 'list'
+    storageKey?: string
   }
 ) {
-  const { disableClientSorting = false, defaultViewMode = 'grid', storageKey = 'gamesViewMode' } = options || {}
+  const {
+    disableClientSorting = false,
+    defaultViewMode = 'grid',
+    storageKey = 'gamesViewMode',
+  } = options || {}
   const [hasMounted, setHasMounted] = useState(false)
 
   // Local view mode state (duplicated here so consumers can rely on single hook)
@@ -132,7 +136,9 @@ export function useGameFilters(
 
   const [groupSortOrder, setGroupSortOrder] = useState<GroupSortOrder>(() => {
     if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('gamesGroupSortOrder') as GroupSortOrder
+      const stored = localStorage.getItem(
+        'gamesGroupSortOrder'
+      ) as GroupSortOrder
       return stored || 'asc'
     }
     return 'asc'
@@ -331,7 +337,7 @@ export function useGameFilters(
       filteredGames.forEach((game) => {
         const ranking = game.ranking?.ranking
         let groupKey: string
-        
+
         if (ranking === null || ranking === undefined) {
           groupKey = 'Unranked'
         } else if (ranking >= 9) {
@@ -345,7 +351,7 @@ export function useGameFilters(
         } else {
           groupKey = 'Poor (1-2)'
         }
-        
+
         if (!groups.has(groupKey)) {
           groups.set(groupKey, [])
         }
@@ -355,16 +361,16 @@ export function useGameFilters(
       // Define the order for ranking groups
       const rankingOrder = [
         'Outstanding (9-10)',
-        'Great (7-8)', 
+        'Great (7-8)',
         'Good (5-6)',
         'Fair (3-4)',
         'Poor (1-2)',
-        'Unranked'
+        'Unranked',
       ]
 
       return rankingOrder
-        .filter(key => groups.has(key))
-        .map(key => ({
+        .filter((key) => groups.has(key))
+        .map((key) => ({
           key,
           games: sortGamesInGroup(groups.get(key)!),
         }))
@@ -372,22 +378,39 @@ export function useGameFilters(
 
     if (groupBy === 'ranking_value') {
       const groups = new Map<string, GameWithRanking[]>()
-      filteredGames.forEach(game => {
+      filteredGames.forEach((game) => {
         const val = game.ranking?.ranking
-        const key = (typeof val === 'number' && val >= 1 && val <= 10) ? String(val) : 'Unranked'
+        const key =
+          typeof val === 'number' && val >= 1 && val <= 10
+            ? String(val)
+            : 'Unranked'
         if (!groups.has(key)) groups.set(key, [])
         groups.get(key)!.push(game)
       })
-      const order = ['10','9','8','7','6','5','4','3','2','1','Unranked']
-      return order.filter(k => groups.has(k)).map(k => ({
-        key: k,
-        games: [...groups.get(k)!].sort((a,b) => {
-          // Always sort by BGG rank ascending inside rating buckets for default experience
-          const aRank = (a as any).rank || Infinity
-            , bRank = (b as any).rank || Infinity
-          return aRank - bRank
-        })
-      }))
+      const order = [
+        '10',
+        '9',
+        '8',
+        '7',
+        '6',
+        '5',
+        '4',
+        '3',
+        '2',
+        '1',
+        'Unranked',
+      ]
+      return order
+        .filter((k) => groups.has(k))
+        .map((k) => ({
+          key: k,
+          games: [...groups.get(k)!].sort((a, b) => {
+            // Always sort by BGG rank ascending inside rating buckets for default experience
+            const aRank = (a as any).rank || Infinity,
+              bRank = (b as any).rank || Infinity
+            return aRank - bRank
+          }),
+        }))
     }
 
     if (groupBy === 'year_published') {
@@ -401,7 +424,7 @@ export function useGameFilters(
       })
 
       return Array.from(groups.entries())
-        .sort(([a], [b]) => groupSortOrder === 'asc' ? a - b : b - a) // Respect group sort order
+        .sort(([a], [b]) => (groupSortOrder === 'asc' ? a - b : b - a)) // Respect group sort order
         .map(([year, games]) => ({
           key: year === 0 ? 'Unknown Year' : year.toString(),
           games: sortGamesInGroup(games), // Always sort within groups
@@ -419,7 +442,9 @@ export function useGameFilters(
       })
 
       return Array.from(groups.entries())
-        .sort(([a], [b]) => groupSortOrder === 'asc' ? a.localeCompare(b) : b.localeCompare(a)) // Respect group sort order
+        .sort(([a], [b]) =>
+          groupSortOrder === 'asc' ? a.localeCompare(b) : b.localeCompare(a)
+        ) // Respect group sort order
         .map(([publisher, games]) => ({
           key: publisher,
           games: sortGamesInGroup(games), // Always sort within groups
@@ -437,7 +462,7 @@ export function useGameFilters(
       })
 
       return Array.from(groups.entries())
-        .sort(([a], [b]) => groupSortOrder === 'asc' ? a - b : b - a) // Respect group sort order
+        .sort(([a], [b]) => (groupSortOrder === 'asc' ? a - b : b - a)) // Respect group sort order
         .map(([players, games]) => ({
           key: players === 0 ? 'Unknown Players' : `${players}+ Players`,
           games: sortGamesInGroup(games), // Always sort within groups
@@ -459,7 +484,9 @@ export function useGameFilters(
       })
 
       return Array.from(groups.entries())
-        .sort(([a], [b]) => groupSortOrder === 'asc' ? a.localeCompare(b) : b.localeCompare(a)) // Respect group sort order
+        .sort(([a], [b]) =>
+          groupSortOrder === 'asc' ? a.localeCompare(b) : b.localeCompare(a)
+        ) // Respect group sort order
         .map(([cat, games]) => ({
           key: cat,
           games: sortGamesInGroup(games), // Always sort within groups
@@ -481,7 +508,9 @@ export function useGameFilters(
       })
 
       return Array.from(groups.entries())
-        .sort(([a], [b]) => groupSortOrder === 'asc' ? a.localeCompare(b) : b.localeCompare(a)) // Respect group sort order
+        .sort(([a], [b]) =>
+          groupSortOrder === 'asc' ? a.localeCompare(b) : b.localeCompare(a)
+        ) // Respect group sort order
         .map(([mech, games]) => ({
           key: mech,
           games: sortGamesInGroup(games), // Always sort within groups
@@ -611,7 +640,9 @@ export function useRankingsFilters(
 
   const [groupSortOrder, setGroupSortOrder] = useState<GroupSortOrder>(() => {
     if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('rankingsGroupSortOrder') as GroupSortOrder
+      const stored = localStorage.getItem(
+        'rankingsGroupSortOrder'
+      ) as GroupSortOrder
       return stored || 'desc' // Default to descending for rankings
     }
     return 'desc'
@@ -811,7 +842,7 @@ export function useRankingsFilters(
       filteredGames.forEach((game) => {
         const ranking = game.ranking?.ranking
         let groupKey: string
-        
+
         if (ranking === null || ranking === undefined) {
           groupKey = 'Unranked'
         } else if (ranking >= 9) {
@@ -825,7 +856,7 @@ export function useRankingsFilters(
         } else {
           groupKey = 'Poor (1-2)'
         }
-        
+
         if (!groups.has(groupKey)) {
           groups.set(groupKey, [])
         }
@@ -835,16 +866,16 @@ export function useRankingsFilters(
       // Define the order for ranking groups
       const rankingOrder = [
         'Outstanding (9-10)',
-        'Great (7-8)', 
+        'Great (7-8)',
         'Good (5-6)',
         'Fair (3-4)',
         'Poor (1-2)',
-        'Unranked'
+        'Unranked',
       ]
 
       return rankingOrder
-        .filter(key => groups.has(key))
-        .map(key => ({
+        .filter((key) => groups.has(key))
+        .map((key) => ({
           key,
           games: sortGamesInGroup(groups.get(key)!),
         }))
@@ -852,22 +883,39 @@ export function useRankingsFilters(
 
     if (groupBy === 'ranking_value') {
       const groups = new Map<string, GameWithRanking[]>()
-      filteredGames.forEach(game => {
+      filteredGames.forEach((game) => {
         const val = game.ranking?.ranking
-        const key = (typeof val === 'number' && val >= 1 && val <= 10) ? String(val) : 'Unranked'
+        const key =
+          typeof val === 'number' && val >= 1 && val <= 10
+            ? String(val)
+            : 'Unranked'
         if (!groups.has(key)) groups.set(key, [])
         groups.get(key)!.push(game)
       })
-      const order = ['10','9','8','7','6','5','4','3','2','1','Unranked']
-      return order.filter(k => groups.has(k)).map(k => ({
-        key: k,
-        games: [...groups.get(k)!].sort((a,b) => {
-          // Always sort by BGG rank ascending inside rating buckets
-          const aRank = (a as any).rank || Infinity
-            , bRank = (b as any).rank || Infinity
-          return aRank - bRank
-        })
-      }))
+      const order = [
+        '10',
+        '9',
+        '8',
+        '7',
+        '6',
+        '5',
+        '4',
+        '3',
+        '2',
+        '1',
+        'Unranked',
+      ]
+      return order
+        .filter((k) => groups.has(k))
+        .map((k) => ({
+          key: k,
+          games: [...groups.get(k)!].sort((a, b) => {
+            // Always sort by BGG rank ascending inside rating buckets
+            const aRank = (a as any).rank || Infinity,
+              bRank = (b as any).rank || Infinity
+            return aRank - bRank
+          }),
+        }))
     }
 
     if (groupBy === 'year_published') {
@@ -881,7 +929,7 @@ export function useRankingsFilters(
       })
 
       return Array.from(groups.entries())
-        .sort(([a], [b]) => groupSortOrder === 'asc' ? a - b : b - a) // Respect group sort order
+        .sort(([a], [b]) => (groupSortOrder === 'asc' ? a - b : b - a)) // Respect group sort order
         .map(([year, games]) => ({
           key: year === 0 ? 'Unknown Year' : year.toString(),
           games: sortGamesInGroup(games), // Always sort within groups
@@ -899,7 +947,9 @@ export function useRankingsFilters(
       })
 
       return Array.from(groups.entries())
-        .sort(([a], [b]) => groupSortOrder === 'asc' ? a.localeCompare(b) : b.localeCompare(a)) // Respect group sort order
+        .sort(([a], [b]) =>
+          groupSortOrder === 'asc' ? a.localeCompare(b) : b.localeCompare(a)
+        ) // Respect group sort order
         .map(([publisher, games]) => ({
           key: publisher,
           games: sortGamesInGroup(games), // Always sort within groups
@@ -917,7 +967,7 @@ export function useRankingsFilters(
       })
 
       return Array.from(groups.entries())
-        .sort(([a], [b]) => groupSortOrder === 'asc' ? a - b : b - a) // Respect group sort order
+        .sort(([a], [b]) => (groupSortOrder === 'asc' ? a - b : b - a)) // Respect group sort order
         .map(([players, games]) => ({
           key: players === 0 ? 'Unknown Players' : `${players}+ Players`,
           games: sortGamesInGroup(games), // Always sort within groups
@@ -939,7 +989,9 @@ export function useRankingsFilters(
       })
 
       return Array.from(groups.entries())
-        .sort(([a], [b]) => groupSortOrder === 'asc' ? a.localeCompare(b) : b.localeCompare(a)) // Respect group sort order
+        .sort(([a], [b]) =>
+          groupSortOrder === 'asc' ? a.localeCompare(b) : b.localeCompare(a)
+        ) // Respect group sort order
         .map(([cat, games]) => ({
           key: cat,
           games: sortGamesInGroup(games), // Always sort within groups
@@ -961,7 +1013,9 @@ export function useRankingsFilters(
       })
 
       return Array.from(groups.entries())
-        .sort(([a], [b]) => groupSortOrder === 'asc' ? a.localeCompare(b) : b.localeCompare(a)) // Respect group sort order
+        .sort(([a], [b]) =>
+          groupSortOrder === 'asc' ? a.localeCompare(b) : b.localeCompare(a)
+        ) // Respect group sort order
         .map(([mech, games]) => ({
           key: mech,
           games: sortGamesInGroup(games), // Always sort within groups

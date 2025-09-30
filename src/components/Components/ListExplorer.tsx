@@ -48,8 +48,10 @@ export default function ListExplorer({
 }: ListExplorerProps) {
   const hasExplicitListOrder = hasExplicitOrder
   const [showFilters, setShowFilters] = useState(false)
-  const [cardVariant, setCardVariant] = useState<'detailed' | 'balanced' | 'compact'>('balanced')
-  
+  const [cardVariant, setCardVariant] = useState<
+    'detailed' | 'balanced' | 'compact'
+  >('balanced')
+
   const {
     hasMounted,
     viewMode,
@@ -75,41 +77,41 @@ export default function ListExplorer({
     uniqueMechanics,
     searchTerm,
     setSearchTerm,
-  } = useGameFilters(games, { 
+  } = useGameFilters(games, {
     disableClientSorting: hasExplicitListOrder,
     defaultViewMode: 'list',
-    storageKey: 'listViewMode'
+    storageKey: 'listViewMode',
   })
 
   // Calculate active filter count (same logic as Games page)
   const getActiveFilterCount = () => {
     let count = 0
-    
+
     // Sort filter (if not default)
     if (sortBy !== 'rank' || sortOrder !== 'asc') {
       count++
     }
-    
+
     // Group filter (if not default)
     if (groupBy !== 'none') {
       count++
     }
-    
+
     // View mode (if not default)
     if (viewMode !== 'grid') {
       count++
     }
-    
+
     // Card density (if not default)
     if (cardVariant !== 'balanced') {
       count++
     }
-    
+
     // Content filters (if active)
     if (filterType !== 'none' && filterValue !== 'all') {
       count++
     }
-    
+
     return count
   }
 
@@ -235,7 +237,7 @@ export default function ListExplorer({
           )}
         </div>
       )}
-      
+
       {/* FilterModal */}
       <FilterModal
         open={showFilters}

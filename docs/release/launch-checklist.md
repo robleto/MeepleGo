@@ -5,6 +5,7 @@ Purpose: Ensure a smooth launch to production with working auth, correct configu
 ## 1) Supabase Configuration
 
 📚 **See comprehensive documentation**:
+
 - [**Complete Supabase Launch Checklist**](../deployment/supabase-launch-checklist.md) - Step-by-step guide
 - [Supabase Production Configuration](../deployment/supabase-production-config.md) - Detailed setup instructions
 - [DNS Setup Guide](../deployment/dns-setup.md) - Email deliverability configuration
@@ -67,6 +68,7 @@ Set these env vars on your hosting provider (do NOT expose service role to clien
 - `SUPABASE_SERVICE_ROLE` (server-only functions; not required for general runtime)
 
 Sanity checks:
+
 - Dev-only endpoints are guarded (e.g., `api/auth/generate-recovery`).
 - No `console.log` noise in production (we already gate on `NODE_ENV`).
 - Use the `/auth/callback` handoff → `/auth/callback/handle` pattern in prod.
@@ -136,6 +138,7 @@ Use 2–3 test emails (see the Faux Users section). Verify on both desktop and m
   - Cross-browser behavior: Chrome, Safari, Firefox; mobile Safari/Chrome
 
 Tips:
+
 - Keep one account with a known bad password to quickly test invalid login messaging.
 - Log in with User A in one browser and User B in another to validate RLS boundaries (e.g., lists, rankings).
 - Save screenshots of emails and flows for later docs and debugging.

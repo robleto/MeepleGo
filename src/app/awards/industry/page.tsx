@@ -33,10 +33,10 @@ const AWARD_CATEGORIES: AwardCategory[] = (awardsData as any).categories.map(
 async function getAwardStats(awardType: string): Promise<AwardStats> {
   try {
     const supabase = await getSupabaseServerClient()
-    
+
     // Create a pattern to match the award_set values
     let searchPattern = awardType
-    
+
     // Handle special cases for pattern matching
     if (awardType === 'Golden Geek Awards') {
       searchPattern = '%Golden Geek%'
@@ -61,7 +61,7 @@ async function getAwardStats(awardType: string): Promise<AwardStats> {
       const mainName = awardType.split(' ')[0]
       searchPattern = `%${mainName}%`
     }
-    
+
     // Get award statistics from industry_awards table using pattern matching
     const { data: awards, error } = await supabase
       .from('industry_awards')
@@ -95,7 +95,11 @@ async function getAwardStats(awardType: string): Promise<AwardStats> {
       years.add(award.year)
       if (award.status === 'Winner') {
         winners++
-      } else if (award.status === 'Nominee' || award.status === 'Recommended' || award.status === 'Special') {
+      } else if (
+        award.status === 'Nominee' ||
+        award.status === 'Recommended' ||
+        award.status === 'Special'
+      ) {
         nominees++
       }
     })

@@ -50,9 +50,7 @@ export function AwardCard({
         <div
           className={`mb-5 flex h-16 w-16 items-center justify-center rounded-full border ${circleBorderClass} ${circleBgClass}`}
         >
-          <div className={iconColorClass}>
-            {icon}
-          </div>
+          <div className={iconColorClass}>{icon}</div>
         </div>
       ) : (
         <div className="mb-5">

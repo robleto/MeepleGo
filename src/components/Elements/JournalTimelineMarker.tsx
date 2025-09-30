@@ -18,7 +18,7 @@ export default function JournalTimelineMarker({
   variant = 'date',
 }: JournalTimelineMarkerProps) {
   const dateObj = new Date(date)
-  
+
   const formatDateParts = () => {
     if (variant === 'year') {
       return {
@@ -56,7 +56,7 @@ export default function JournalTimelineMarker({
             <div className="w-1 h-1 rounded-full bg-sky-500 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
           </div>
         </div>
-        
+
         {/* Date text positioned to the left of the timeline */}
         <div className="text-right pr-4 absolute right-full top-0 w-20">
           <div className="text-xs font-semibold tracking-wide text-gray-500 dark:text-gray-400">
@@ -68,7 +68,7 @@ export default function JournalTimelineMarker({
             </div>
           )}
         </div>
-        
+
         <span className="sr-only">{date}</span>
       </div>
     </div>

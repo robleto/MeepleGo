@@ -12,7 +12,7 @@ export interface GameSearchInputProps {
   onSearch?: (value: string) => void // fired on Enter key or explicit search button
   debounceMs?: number
   placeholder?: string
-  
+
   // Styling
   className?: string
   variant?: 'default' | 'modal' | 'pill'
@@ -92,20 +92,26 @@ export default function GameSearchInput(props: GameSearchInputProps) {
 
   // Variant styles
   const containerStyles = {
-    default: 'group flex items-center bg-white dark:bg-gray-900 rounded-full border border-gray-300 dark:border-gray-700 transition shadow-sm px-3 h-11',
-    modal: 'group flex items-center bg-white dark:bg-gray-900 rounded-xl border border-gray-300 dark:border-gray-700 transition shadow-sm px-4 py-3',
+    default:
+      'group flex items-center bg-white dark:bg-gray-900 rounded-full border border-gray-300 dark:border-gray-700 transition shadow-sm px-3 h-11',
+    modal:
+      'group flex items-center bg-white dark:bg-gray-900 rounded-xl border border-gray-300 dark:border-gray-700 transition shadow-sm px-4 py-3',
     pill: 'group flex items-center bg-white/90 dark:bg-gray-900/70 backdrop-blur-sm transition shadow-sm hover:shadow-md focus-within:ring-2 focus-within:ring-sky-500 rounded-full border border-gray-200 dark:border-gray-700 px-4 py-1.5',
   }
 
   const inputStyles = {
-    default: 'flex-1 bg-transparent outline-none px-2 text-sm placeholder:text-gray-400',
-    modal: 'flex-1 bg-transparent outline-none px-2 text-sm placeholder:text-gray-400',
+    default:
+      'flex-1 bg-transparent outline-none px-2 text-sm placeholder:text-gray-400',
+    modal:
+      'flex-1 bg-transparent outline-none px-2 text-sm placeholder:text-gray-400',
     pill: 'flex-1 bg-transparent placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none text-sm leading-tight',
   }
 
   const buttonStyles = {
-    default: 'ml-1 inline-flex items-center justify-center rounded-full bg-primary-600 text-white h-8 w-8 text-sm font-medium shadow hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500',
-    modal: 'ml-2 inline-flex items-center justify-center rounded-lg bg-primary-600 text-white h-8 w-8 text-sm font-medium shadow hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500',
+    default:
+      'ml-1 inline-flex items-center justify-center rounded-full bg-primary-600 text-white h-8 w-8 text-sm font-medium shadow hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500',
+    modal:
+      'ml-2 inline-flex items-center justify-center rounded-lg bg-primary-600 text-white h-8 w-8 text-sm font-medium shadow hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500',
     pill: 'shrink-0 rounded-full text-white flex items-center justify-center shadow-sm transition bg-sky-600 hover:bg-sky-600/90 active:bg-sky-700 h-8 w-8',
   }
 

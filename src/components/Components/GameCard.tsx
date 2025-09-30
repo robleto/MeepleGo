@@ -259,7 +259,9 @@ export default function GameCard({
           )}
           <div
             className={`flex-shrink-0 rounded-md overflow-hidden flex items-center justify-center border border-gray-200 bg-gray-100 dark:bg-gray-700 ${
-              variant === 'compact' ? 'w-12 h-12 sm:w-16 sm:h-16' : 'w-16 h-16 sm:w-20 sm:h-20'
+              variant === 'compact'
+                ? 'w-12 h-12 sm:w-16 sm:h-16'
+                : 'w-16 h-16 sm:w-20 sm:h-20'
             }`}
           >
             {game.thumbnail_url ? (
@@ -281,7 +283,9 @@ export default function GameCard({
           <div className="flex-1 min-w-0">
             <h3
               className={`font-medium text-gray-900 truncate flex items-center gap-1 ${
-                variant === 'compact' ? 'text-sm sm:text-base' : 'text-base sm:text-lg'
+                variant === 'compact'
+                  ? 'text-sm sm:text-base'
+                  : 'text-base sm:text-lg'
               }`}
             >
               {game.name}
@@ -309,7 +313,9 @@ export default function GameCard({
                 <span className="hidden sm:inline">
                   {formatPlayerCount(game.min_players, game.max_players)}
                 </span>
-                <span className="hidden sm:inline">{formatPlayingTime(game.playtime_minutes)}</span>
+                <span className="hidden sm:inline">
+                  {formatPlayingTime(game.playtime_minutes)}
+                </span>
               </div>
             )}
 
@@ -338,9 +344,7 @@ export default function GameCard({
             >
               <div className="flex items-center gap-1.5">
                 <PlayIcon className="w-4 h-4" />
-                <span className="hidden sm:inline">
-                  Played
-                </span>
+                <span className="hidden sm:inline">Played</span>
               </div>
             </Chip>
 
@@ -808,12 +812,12 @@ export default function GameCard({
             {/* Body */}
             <div className="p-6 flex-1 overflow-y-auto">
               <PlayLogEditor
-              gameId={game.id}
-              gameName={game.name}
-              openForm
-              autoFocus
-              onCreated={() => setShowPlayLog(false)}
-            />
+                gameId={game.id}
+                gameName={game.name}
+                openForm
+                autoFocus
+                onCreated={() => setShowPlayLog(false)}
+              />
             </div>
           </div>
         </div>

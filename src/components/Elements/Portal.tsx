@@ -1,4 +1,4 @@
-"use client";
+'use client'
 import { useEffect, useRef, useState, ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 
@@ -7,7 +7,10 @@ interface PortalProps {
   containerId?: string
 }
 
-export default function Portal({ children, containerId = 'portal-root' }: PortalProps) {
+export default function Portal({
+  children,
+  containerId = 'portal-root',
+}: PortalProps) {
   const elRef = useRef<HTMLElement | null>(null)
   const [mounted, setMounted] = useState(false)
 
@@ -25,7 +28,7 @@ export default function Portal({ children, containerId = 'portal-root' }: Portal
     }
     portalRoot.appendChild(elRef.current!)
     setMounted(true)
-    
+
     return () => {
       if (elRef.current && portalRoot) {
         portalRoot.removeChild(elRef.current)

@@ -11,12 +11,14 @@ This directory contains comprehensive documentation for deploying MeepleGo to pr
 ## 📚 Documentation Index
 
 ### Core Guides
+
 - **[Supabase Launch Checklist](./supabase-launch-checklist.md)** - Complete step-by-step launch checklist
 - **[Supabase Production Config](./supabase-production-config.md)** - Detailed configuration guide
 - **[DNS Setup](./dns-setup.md)** - Email deliverability DNS configuration
 - **[Environment Variables](./environment-variables.md)** - Environment setup templates
 
 ### Testing Tools
+
 - **[Email Deliverability Test](../../scripts/deployment/test-email-deliverability.js)** - Automated email testing
 - **[Launch Config Validation](../../scripts/deployment/validate-launch-config.js)** - Pre-launch validation
 
@@ -39,6 +41,7 @@ npm run start
 ## 🚀 Launch Process Overview
 
 ### 1. Pre-Launch Setup
+
 - [ ] Configure Supabase redirect URLs
 - [ ] Set up email templates with `{{ .ConfirmationURL }}`
 - [ ] Choose and configure SMTP provider
@@ -46,18 +49,21 @@ npm run start
 - [ ] Configure environment variables
 
 ### 2. Testing & Validation
+
 - [ ] Run `npm run validate:launch`
 - [ ] Run `npm run test:email`
 - [ ] Test auth flows manually
 - [ ] Verify email headers and deliverability
 
 ### 3. Production Deployment
+
 - [ ] Deploy to hosting provider
 - [ ] Configure production environment variables
 - [ ] Test live authentication flows
 - [ ] Monitor email delivery metrics
 
 ### 4. Post-Launch Monitoring
+
 - [ ] Monitor DMARC reports
 - [ ] Tighten DMARC policy progressively
 - [ ] Track authentication success rates
@@ -66,16 +72,19 @@ npm run start
 ## 🎯 Key Configuration Areas
 
 ### Supabase Dashboard
+
 - Authentication → URL Configuration (Redirect URLs)
 - Authentication → Email Templates
 - Settings → Auth → SMTP Settings
 
 ### DNS Provider
+
 - SPF Record: `v=spf1 include:[provider-spf] ~all`
 - DKIM Record: From SMTP provider
 - DMARC Record: Start with `p=none`, tighten after testing
 
 ### Hosting Provider
+
 - Environment variables for production
 - SSL/TLS configuration
 - Build and deployment settings
@@ -83,12 +92,14 @@ npm run start
 ## 🔍 Troubleshooting
 
 ### Common Issues
+
 - **Email in spam**: Check SPF/DKIM/DMARC records
 - **Auth redirect errors**: Verify exact URL matches in allowlist
 - **Session not found**: Clear browser cookies and test again
 - **DNS not propagating**: Allow 24-48 hours, check multiple DNS servers
 
 ### Debug Commands
+
 ```bash
 # Check DNS records
 dig TXT meeplego.com                    # SPF
@@ -105,15 +116,18 @@ npm run test:email
 ## 📞 Support Resources
 
 ### Documentation
+
 - [Supabase Auth Documentation](https://supabase.com/docs/guides/auth)
 - [Next.js Deployment](https://nextjs.org/docs/deployment)
 
 ### Online Tools
+
 - [MXToolbox](https://mxtoolbox.com/) - DNS and email testing
 - [Mail Tester](https://www.mail-tester.com/) - Email deliverability testing
 - [DNS Propagation Checker](https://dnschecker.org/)
 
 ### Testing Services
+
 - Gmail, Outlook, iCloud for email testing
 - Multiple browsers for auth flow testing
 - Multiple devices for responsive testing
