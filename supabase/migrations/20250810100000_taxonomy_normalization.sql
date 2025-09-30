@@ -44,14 +44,14 @@ CREATE TABLE IF NOT EXISTS public.game_publishers (
 );
 
 -- 3. Helper slug function (safe create) --------------------------------------
-DO $$ BEGIN
+DO $outer$ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_proc WHERE proname = 'mg_slugify') THEN
     CREATE OR REPLACE FUNCTION public.mg_slugify(input text)
-    RETURNS text LANGUAGE sql IMMUTABLE AS $$
+    RETURNS text LANGUAGE sql IMMUTABLE AS $inner$
       SELECT trim(both '-' FROM regexp_replace(lower(coalesce($1,'')), '[^a-z0-9]+', '-', 'g'));
-    $$;
+    $inner$;
   END IF;
-END $$;
+END $outer$;
 
 -- 4. Backfill taxonomy dimension tables -------------------------------------
 -- Categories
