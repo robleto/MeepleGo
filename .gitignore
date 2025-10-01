@@ -125,6 +125,7 @@ jspm_packages/
 # Temporary folders
 tmp/
 temp/
+.history/
 
 # Data artifacts (allow small examples)
 data/raw/

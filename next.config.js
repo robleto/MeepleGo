@@ -1,3 +1,5 @@
+const { withSentryConfig } = require('@sentry/nextjs')
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   serverExternalPackages: ['@supabase/supabase-js'],
@@ -24,4 +26,35 @@ const nextConfig = {
   },
 }
 
-module.exports = nextConfig
+// Sentry configuration options
+const sentryConfig = {
+  // Suppresses source map uploading logs during build
+  silent: true,
+  
+  // Upload source maps during build for better error reporting
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  
+  // Only upload source maps in production and if Sentry is configured
+  hideSourceMaps: true,
+  disableLogger: true,
+  
+  // Automatically tree-shake Sentry logger statements
+  widenClientFileUpload: true,
+  
+  // Tunneling to prevent ad-blockers from blocking Sentry requests
+  tunnelRoute: '/monitoring',
+  
+  // Additional options for better performance
+  reactComponentAnnotation: {
+    enabled: true,
+  },
+}
+
+// Check if Sentry is configured before wrapping
+const shouldUseSentry = process.env.NEXT_PUBLIC_SENTRY_DSN && 
+                       process.env.NODE_ENV === 'production'
+
+module.exports = shouldUseSentry 
+  ? withSentryConfig(nextConfig, sentryConfig)
+  : nextConfig

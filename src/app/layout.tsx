@@ -12,6 +12,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 import Navigation from '@/components/Global/Navigation'
 import SiteFooter from '@/components/Global/SiteFooter'
+import Analytics from '@/components/Analytics/Analytics'
 
 // Fallback font configuration for build environment
 const inter = {
@@ -180,6 +181,7 @@ export default function RootLayout({
         >
           Skip to main content
         </a>
+        <Analytics />
         <Navigation />
         <main id="main-content" className="pt-16 min-h-[70vh]">
           {children}
