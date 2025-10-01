@@ -1,77 +1,59 @@
 import type { Metadata } from 'next'
-// Temporarily disable Google Fonts import for build environment
-// import {
-//   Inter,
-//   Outfit,
-//   Geist,
-//   Fraunces,
-//   Playfair_Display,
-//   Archivo_Black,
-//   Epilogue,
-// } from 'next/font/google'
+import type { ReactNode } from 'react'
+import {
+  Inter,
+  Outfit,
+  Fraunces,
+  Playfair_Display,
+  Archivo_Black,
+  Epilogue,
+} from 'next/font/google'
 import './globals.css'
 import Navigation from '@/components/Global/Navigation'
 import SiteFooter from '@/components/Global/SiteFooter'
 import Analytics from '@/components/Analytics/Analytics'
 
-// Fallback font configuration for build environment
-const inter = {
+const inter = Inter({
+  subsets: ['latin'],
   variable: '--font-inter',
-  className: 'font-sans',
-}
-const outfit = {
+  display: 'swap',
+  weight: ['400', '500', '600', '700'],
+})
+
+const outfit = Outfit({
+  subsets: ['latin'],
   variable: '--font-display',
-  className: 'font-sans',
-}
+  display: 'swap',
+  weight: ['500', '600', '700'],
+})
 
-// Alternative (Set B) fonts for prestige vibe - disabled for build
-// const geist = {
-//   variable: '--font-geist',
-//   className: 'font-sans',
-// }
-// const fraunces = {
-//   variable: '--font-fraunces',
-//   className: 'font-serif',
-// }
-// const playfairDisplay = {
-//   variable: '--font-playfair',
-//   className: 'font-serif',
-// }
-// const archivoBlack = {
-//   variable: '--font-archivo-black',
-//   className: 'font-sans',
-// }
-// const epilogue = {
-//   variable: '--font-epilogue',
-//   className: 'font-sans',
-// }
-
-// Alternative (Set B) fonts for prestige vibe - disabled for build
-// Geist (body) + Fraunces (award / display serif) + optional Playfair Display variant
-// We expose separate CSS variables so we can remap --font-inter & --font-display when the
-// html element has the class `typography-b` (see globals.css for the variable remapping).
-const geist = {
-  variable: '--font-sans-b',
-  className: 'font-sans',
-}
-const fraunces = {
+const fraunces = Fraunces({
+  subsets: ['latin'],
   variable: '--font-award-b',
-  className: 'font-serif',
-}
-const playfair = {
+  display: 'swap',
+  weight: ['400', '600'],
+})
+
+const playfair = Playfair_Display({
+  subsets: ['latin'],
   variable: '--font-award-b-alt',
-  className: 'font-serif',
-}
-// Poster / bold award title experiment
-const archivoBlack = {
+  display: 'swap',
+  weight: ['400', '600'],
+})
+
+const archivoBlack = Archivo_Black({
+  subsets: ['latin'],
   variable: '--font-award-poster',
-  className: 'font-sans',
-}
-// Softer geometric option (lighter presence vs Outfit / Archivo)
-const epilogue = {
+  display: 'swap',
+  weight: ['400'],
+})
+
+const epilogue = Epilogue({
+  subsets: ['latin'],
   variable: '--font-display-soft',
-  className: 'font-sans',
-}
+  display: 'swap',
+  weight: ['400', '500', '600'],
+})
 
 export const metadata: Metadata = {
   title: {
@@ -139,7 +121,7 @@ export const metadata: Metadata = {
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: ReactNode
 }) {
   return (
     <html
@@ -147,7 +129,6 @@ export default function RootLayout({
       className={[
         inter.variable,
         outfit.variable,
-        geist.variable,
         fraunces.variable,
         playfair.variable,
         archivoBlack.variable,
@@ -155,23 +136,22 @@ export default function RootLayout({
       ].join(' ')}
     >
       <head>
-        <link rel="preconnect" href="https://use.typekit.net" />
-        <link rel="preconnect" href="https://p.typekit.net" />
         {/* Preconnect to external image domains for performance */}
         <link rel="preconnect" href="https://cf.geekdo-images.com" />
         <link rel="dns-prefetch" href="https://cf.geekdo-images.com" />
         <link rel="preconnect" href="https://boardgamegeek.com" />
         <link rel="dns-prefetch" href="https://boardgamegeek.com" />
-        {process.env.NEXT_PUBLIC_ADOBE_FONTS_KIT_ID && (
-          <link
-            rel="stylesheet"
-            href={`https://use.typekit.net/${process.env.NEXT_PUBLIC_ADOBE_FONTS_KIT_ID}.css`}
-          />
-        )}
+        <link
+          rel="preload"
+          href="/meeplego.svg"
+          as="image"
+          type="image/svg+xml"
+          fetchPriority="high"
+        />
       </head>
       <body
         className={
-          'font-sans min-h-screen text-gray-900 dark:text-white bg-white'
+          'font-sans min-h-screen bg-white text-gray-900 dark:text-white'
         }
       >
         {/* Skip to main content link for accessibility */}
@@ -183,7 +163,7 @@ export default function RootLayout({
         </a>
         <Analytics />
         <Navigation />
-        <main id="main-content" className="pt-16 min-h-[70vh]">
+        <main id="main-content" className="min-h-[70vh] pt-16">
           {children}
         </main>
         <SiteFooter />

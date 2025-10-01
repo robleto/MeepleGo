@@ -112,15 +112,14 @@ module.exports = {
       fontFamily: {
         sans: [
           'var(--font-inter)',
-          'Proxima Nova',
           'Inter',
           'system-ui',
           'sans-serif',
         ],
         display: [
-          'Rift Soft',
           'var(--font-display)',
           'Outfit',
+          'var(--font-inter)',
           'Inter',
           'system-ui',
           'sans-serif',
@@ -129,7 +128,6 @@ module.exports = {
         prestige: [
           'var(--font-award-b)',
           'Fraunces',
-          'var(--font-display)',
           'serif',
         ],
         prestigeAlt: [
@@ -142,6 +140,8 @@ module.exports = {
           'var(--font-award-poster)',
           'Archivo Black',
           'var(--font-display)',
+          'Outfit',
+          'system-ui',
           'sans-serif',
         ],
         softdisplay: [

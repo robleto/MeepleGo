@@ -38,11 +38,11 @@
 
 ### P0 · Render path & LCP stabilization
 
-- [ ] Replace Adobe Typekit fallback with `next/font` self-hosted fonts (Inter, Outfit, etc.) and `font-display: swap`.
-- [ ] Inline critical hero styles or rely on Tailwind utilities only; remove global marketing CSS.
-- [ ] Convert `Hero` and other static marketing sections to **server components**; expose callbacks via lighter client islands only when needed.
-- [ ] Audit hero image/content: ensure LCP element uses `<Image priority />` or plain text without blocking assets.
-- [ ] Add `<link rel="preload">` for the LCP asset when necessary (background illustration, hero image).
+- [x] Replace Adobe Typekit fallback with `next/font` self-hosted fonts (Inter, Outfit, etc.) and `font-display: swap`.
+- [x] Inline critical hero styles or rely on Tailwind utilities only; remove global marketing CSS.
+- [x] Convert `Hero` and other static marketing sections to **server components**; expose callbacks via lighter client islands only when needed.
+- [x] Audit hero image/content: ensure LCP element uses `<Image priority />` or plain text without blocking assets.
+- [x] Add `<link rel="preload">` for the LCP asset when necessary (background illustration, hero image).
 
 ### P1 · Bundle & JS execution trimming
 

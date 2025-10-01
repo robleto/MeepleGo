@@ -18,7 +18,7 @@ const meta: Meta<typeof Hero> = {
     variant: { control: 'select', options: ['default', 'awards'] },
     title: { control: 'text' },
     subtitle: { control: 'text' },
-    ctaText: { control: 'text' },
+    cta: { control: 'object' },
   },
 }
 export default meta
@@ -51,7 +51,10 @@ export const Custom: Story = {
         text: 'Dynamic filters and personal awards reveal patterns in what you love.',
       },
     ],
-    ctaText: 'Get Started',
+    cta: {
+      label: 'Get Started',
+      href: '/signup',
+    },
   },
 }
 
