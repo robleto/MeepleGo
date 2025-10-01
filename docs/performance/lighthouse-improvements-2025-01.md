@@ -171,10 +171,54 @@ Based on the optimizations implemented:
 - [ ] Lazy render below-the-fold sections
 - [ ] Optimize marketing sections rendering
 
-### P3: CI/CD & Monitoring
-- [ ] Add Lighthouse CI workflow
-- [ ] Implement bundle budget enforcement
-- [ ] Set up automated performance testing
+### P3: CI/CD & Monitoring (Completed)
+- [x] Add Lighthouse CI workflow
+- [x] Implement bundle budget enforcement
+- [x] Set up automated performance testing
+
+## Lighthouse CI Setup
+
+A Lighthouse CI workflow has been added to automatically test performance on every PR and push to main.
+
+### Configuration Files
+
+1. **`.github/workflows/lighthouse.yml`** - GitHub Actions workflow
+   - Runs on PRs and pushes to main
+   - Tests home, games, and awards pages
+   - Uploads results as artifacts
+
+2. **`.lighthouserc.json`** - Lighthouse CI configuration
+   - Performance budget: Score ≥ 85
+   - FCP: ≤ 1.8s
+   - LCP: ≤ 2.5s
+   - TBT: ≤ 200ms
+   - CLS: ≤ 0.05
+
+### Usage
+
+The Lighthouse CI workflow runs automatically on PRs. To run locally:
+
+```bash
+# Install Lighthouse CI
+npm install -g @lhci/cli
+
+# Build the app
+npm run build
+
+# Start the server
+npm run start &
+
+# Run Lighthouse CI
+lhci autorun
+```
+
+### Bundle Budgets
+
+Bundle size budgets have been configured in `next.config.js`:
+- On-demand entries: 60 second cache
+- Pages buffer: 5 pages max
+
+Use `npm run build:analyze` to visualize bundle composition.
 
 ## Testing Instructions
 

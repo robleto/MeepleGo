@@ -35,6 +35,13 @@ const nextConfig = {
   experimental: {
     optimizePackageImports: ['@heroicons/react'],
   },
+  // Performance budgets
+  onDemandEntries: {
+    // Keep pages in memory for 60 seconds
+    maxInactiveAge: 60 * 1000,
+    // Number of pages that should be kept simultaneously
+    pagesBufferLength: 5,
+  },
 }
 
 // Sentry configuration options
