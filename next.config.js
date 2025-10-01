@@ -24,6 +24,17 @@ const nextConfig = {
     // we address the large backlog of warnings. Local "npm run lint" still shows them.
     ignoreDuringBuilds: true,
   },
+  // Performance optimizations
+  compiler: {
+    // Remove console.log in production
+    removeConsole: process.env.NODE_ENV === 'production' ? {
+      exclude: ['error', 'warn'],
+    } : false,
+  },
+  // Enable experimental features for better performance
+  experimental: {
+    optimizePackageImports: ['@heroicons/react'],
+  },
 }
 
 // Sentry configuration options
@@ -51,10 +62,17 @@ const sentryConfig = {
   },
 }
 
+// Bundle analyzer configuration
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true',
+})
+
 // Check if Sentry is configured before wrapping
 const shouldUseSentry = process.env.NEXT_PUBLIC_SENTRY_DSN && 
                        process.env.NODE_ENV === 'production'
 
-module.exports = shouldUseSentry 
-  ? withSentryConfig(nextConfig, sentryConfig)
-  : nextConfig
+module.exports = withBundleAnalyzer(
+  shouldUseSentry 
+    ? withSentryConfig(nextConfig, sentryConfig)
+    : nextConfig
+)

@@ -7,18 +7,18 @@ import * as Sentry from '@sentry/nextjs'
 Sentry.init({
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
 
-  // Adjust this value in production, or use tracesSampler for greater control
-  tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
+  // Reduced sampling for better performance - only track 5% of transactions in production
+  tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.05 : 1.0,
 
   // Setting this option to true will print useful information to the console while you're setting up Sentry.
   debug: process.env.NODE_ENV === 'development',
 
-  // Capture 100% of the sessions in development, but only 10% in production
-  sessionReplaySessionSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
+  // Reduced session replay to 5% in production to minimize performance impact
+  replaysSessionSampleRate: process.env.NODE_ENV === 'production' ? 0.05 : 1.0,
 
   // If the entire session is not sampled, use the below sample rate to sample
   // sessions when an error occurs.
-  sessionReplayOnErrorSampleRate: 1.0,
+  replaysOnErrorSampleRate: 1.0,
 
   // Configure release and environment
   release: process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA,
@@ -40,14 +40,11 @@ Sentry.init({
 
   // Configure integrations
   integrations: [
-    Sentry.browserTracingIntegration({
-      // Set 'tracePropagationTargets' to control for which URLs distributed tracing should be enabled
-      tracePropagationTargets: [
-        'localhost',
-        /^https:\/\/[^/]*\.vercel\.app/,
-        // Add your production domain here
-      ],
+    Sentry.browserTracingIntegration(),
+    Sentry.replayIntegration({
+      // Mask all text and block all media by default for privacy and performance
+      maskAllText: true,
+      blockAllMedia: true,
     }),
-    Sentry.replayIntegration(),
   ],
 })
