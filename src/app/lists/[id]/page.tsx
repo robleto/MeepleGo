@@ -7,6 +7,9 @@ import PageLayout from '@/components/Components/PageLayout'
 import Heading from '@/components/Components/Heading'
 import supabase from '@/lib/supabase'
 import { GameListWithItems } from '@/types/supabase'
+import SearchDropdown from '@/components/Elements/SearchDropdown'
+import Portal from '@/components/Elements/Portal'
+import { XMarkIcon } from '@heroicons/react/24/outline'
 
 interface GameListItemWithGame {
   id: string
@@ -42,11 +45,20 @@ export default function ListDetailPage() {
     membership: Record<string, { library: boolean; wishlist: boolean }>
   }>({ rankings: {}, membership: {} })
   const [enriching, setEnriching] = useState(false)
+  const [sessionUserId, setSessionUserId] = useState<string | null>(null)
+  const [adding, setAdding] = useState(false)
+  const [addError, setAddError] = useState<string | null>(null)
+  const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
+  const [showAddModal, setShowAddModal] = useState(false)
+  const [selectedGameForAdd, setSelectedGameForAdd] = useState<{ id: string; name: string } | null>(null)
+  const [editing, setEditing] = useState(false)
+  const [customOrderDefault, setCustomOrderDefault] = useState<boolean>(false)
+  const [customOrder, setCustomOrder] = useState<boolean>(false)
 
   useEffect(() => {
     if (!listId) return
     let cancelled = false
-    ;(async () => {
+    const load = async () => {
       setLoading(true)
       setNotFound(false)
       const { data, error } = await supabase
@@ -78,11 +90,19 @@ export default function ListDetailPage() {
         }
         setLoading(false)
       }
+    }
+    ;(async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+      if (!cancelled) setSessionUserId(session?.user.id ?? null)
+      await load()
     })()
     return () => {
       cancelled = true
     }
   }, [listId])
+
 
   const sortedItems: GameListItemWithGame[] = useMemo(() => {
     if (!list?.game_list_items) return []
@@ -153,6 +173,52 @@ export default function ListDetailPage() {
       cancelled = true
     }
   }, [sortedItems])
+
+  // Auto-dismiss toast — keep hooks above any early returns to preserve hook order
+  useEffect(() => {
+    if (!toast) return
+    const id = setTimeout(() => setToast(null), 3000)
+    return () => clearTimeout(id)
+  }, [toast])
+
+  // Prevent body scroll when add modal is open
+  useEffect(() => {
+    if (!showAddModal) return
+    const original = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = original
+    }
+  }, [showAddModal])
+
+  // Load and persist per-list custom order preference
+  useEffect(() => {
+    if (!listId) return
+    if (typeof window === 'undefined') return
+    const key = `list:${listId}:customOrder`
+    const stored = localStorage.getItem(key)
+    let enabled = stored === 'true'
+    if (stored === null) {
+      // Fallback: if any item has a non-null ranking, assume custom order exists
+      const hasRank = (list?.game_list_items || []).some(
+        (it: any) => typeof it.ranking === 'number'
+      )
+      enabled = hasRank
+    }
+    setCustomOrderDefault(enabled)
+    setCustomOrder(enabled)
+  }, [listId, list?.game_list_items])
+  useEffect(() => {
+    if (!listId) return
+    if (typeof window === 'undefined') return
+    const key = `list:${listId}:customOrder`
+    // Persist current choice while editing
+    if (editing) localStorage.setItem(key, String(customOrder))
+  }, [editing, customOrder, listId])
+  // Keep outside-edit default in sync with the current toggle while editing
+  useEffect(() => {
+    if (editing) setCustomOrderDefault(customOrder)
+  }, [customOrder, editing])
 
   if (!listId) {
     return (
@@ -231,6 +297,121 @@ export default function ListDetailPage() {
     return base
   })
 
+  const canEdit = !!(list && sessionUserId && list.user_id === sessionUserId)
+
+  async function handleAddGameToList(game: { id: string; name: string }) {
+    if (!list || !canEdit) return
+    setAdding(true)
+    setAddError(null)
+    try {
+      // Determine ranking to append to end of list (max+1)
+      const nextRank = (() => {
+        const ranks = (list.game_list_items || [])
+          .map((i: any) => i.ranking)
+          .filter((r: any) => typeof r === 'number') as number[]
+        return ranks.length ? Math.max(...ranks) + 1 : (list.game_list_items?.length || 0) + 1
+      })()
+      const { data: inserted, error } = await supabase
+        .from('game_list_items')
+        .insert({ list_id: list.id, game_id: game.id, ranking: nextRank })
+        .select('*, game:games(*)')
+        .single()
+      if (error) {
+        // Ignore duplicate entries gracefully
+        if ((error as any).code === '23505') {
+          setToast({ type: 'success', message: `${game.name} is already in this list` })
+          return
+        }
+        console.error('Add game error', error)
+        setAddError('Could not add game to list')
+        setToast({ type: 'error', message: 'Could not add game to list' })
+        return
+      }
+      if (inserted) {
+        setList((prev) =>
+          prev
+            ? {
+                ...prev,
+                game_list_items: [
+                  ...(prev.game_list_items || []),
+                  inserted as any,
+                ],
+              }
+            : prev
+        )
+        setToast({ type: 'success', message: `Added ${game.name}` })
+      }
+    } finally {
+      setAdding(false)
+    }
+  }
+
+  // Move item up/down by swapping rankings
+  async function moveItem(itemId: string, direction: 'up' | 'down') {
+    if (!list || !canEdit) return
+    const items = [...(list.game_list_items || [])] as GameListItemWithGame[]
+    const index = items.findIndex((i) => i.id === itemId)
+    if (index === -1) return
+    const swapIndex = direction === 'up' ? index - 1 : index + 1
+    if (swapIndex < 0 || swapIndex >= items.length) return
+    const a = items[index]
+    const b = items[swapIndex]
+    const aRank = a.ranking ?? index + 1
+    const bRank = b.ranking ?? swapIndex + 1
+    // Optimistic update
+    const updated = items.map((it) =>
+      it.id === a.id ? { ...it, ranking: bRank } : it.id === b.id ? { ...it, ranking: aRank } : it
+    )
+    setList((prev) => (prev ? { ...prev, game_list_items: updated as any } : prev))
+    // Persist both swaps
+    try {
+      const { error } = await supabase.rpc('swap_list_item_ranks', {
+        p_list_id: list.id,
+        p_item_id_a: a.id,
+        p_rank_a: bRank,
+        p_item_id_b: b.id,
+        p_rank_b: aRank,
+      })
+      if (error) throw error
+    } catch (err) {
+      // fallback: update individually
+      await supabase
+        .from('game_list_items')
+        .update({ ranking: bRank })
+        .eq('id', a.id)
+      await supabase
+        .from('game_list_items')
+        .update({ ranking: aRank })
+        .eq('id', b.id)
+    }
+  }
+
+  // Delete item from list
+  async function deleteItem(itemId: string) {
+    if (!list || !canEdit) return
+    const item = (list.game_list_items as any)?.find((i: any) => i.id === itemId)
+    setList((prev) =>
+      prev
+        ? {
+            ...prev,
+            game_list_items: (prev.game_list_items || []).filter((i: any) => i.id !== itemId),
+          }
+        : prev
+    )
+    const { error } = await supabase.from('game_list_items').delete().eq('id', itemId)
+    if (error) {
+      // revert on failure
+      setList((prev) =>
+        prev
+          ? { ...prev, game_list_items: [...(prev.game_list_items || []), item] as any }
+          : prev
+      )
+      setToast({ type: 'error', message: 'Failed to remove from list' })
+    } else {
+      setToast({ type: 'success', message: 'Removed from list' })
+    }
+  }
+
   const handleRankingUpdate = async (
     gameId: string,
     patch: { ranking?: number | null; played_it?: boolean }
@@ -285,14 +466,32 @@ export default function ListDetailPage() {
   }
   const header = (
     <div>
-      <Heading
-        as="h2"
-        size="lg"
-        weightScale
-        className="heading-display mb-2 flex items-center"
-      >
-        {list.name}
-      </Heading>
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <Heading
+          as="h2"
+          size="lg"
+          weightScale
+          className="heading-display mb-2 flex items-center"
+        >
+          {list.name}
+        </Heading>
+        {!isBgg && canEdit && (
+          <div className="ml-auto pt-1">
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full btn-brand text-sm font-medium"
+            >
+              Add New
+            </button>
+            <button
+              onClick={() => setEditing((e) => !e)}
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-full border ml-2 text-sm font-medium bg-white hover:bg-gray-50 border-gray-200"
+            >
+              {editing ? 'Done' : 'Edit'}
+            </button>
+          </div>
+        )}
+      </div>
       {(list.description ||
         (isBgg && bggDefaultDescriptions[list.list_type as string])) && (
         <p className="text-gray-700 text-sm dark:text-gray-300 max-w-3xl">
@@ -312,20 +511,146 @@ export default function ListDetailPage() {
           )}
         </p>
       )}
+      {/* Custom Order toggle under the Updated date, shown only in Edit mode */}
+      {editing && !isBgg && canEdit && (
+        <div className="mt-3 text-xs text-gray-600">
+          <label className="inline-flex items-center gap-2 select-none">
+            <span>Custom Order</span>
+            <button
+              type="button"
+              onClick={() => setCustomOrder((v) => !v)}
+              className={`relative inline-flex items-center h-5 w-9 rounded-full border transition-colors ${customOrder ? 'bg-sky-600 border-sky-600' : 'bg-gray-200 border-gray-300'}`}
+              aria-pressed={customOrder}
+              aria-label="Toggle custom order"
+            >
+              <span
+                className={`inline-block h-4 w-4 bg-white rounded-full shadow transform transition-transform ${customOrder ? 'translate-x-4' : 'translate-x-0.5'}`}
+              />
+            </button>
+          </label>
+        </div>
+      )}
+      {!isBgg && canEdit && addError && (
+        <div className="mt-2 text-xs text-red-600">{addError}</div>
+      )}
     </div>
   )
   return (
     <PageLayout>
       <div className="max-w-7xl mx-auto">
+        {toast && (
+          <div className="toast-stack">
+            <div className={`toast toast-enter ${toast.type === 'success' ? 'toast-success' : ''}`}>
+              <div className="text-xs">{toast.message}</div>
+            </div>
+          </div>
+        )}
+        {/** Determine effective custom order (default outside edit; toggle inside edit) */}
+        {/** showListRanking and hasExplicitOrder use effective flag; DnD only when editing && customOrder */}
         <ListExplorer
           games={explorerGames as any}
           header={header}
           emptyMessage={{ title: 'No games in this list yet.' }}
-          showListRanking
-          hasExplicitOrder={isBgg}
+          showListRanking={editing ? customOrder : customOrderDefault}
+          hasExplicitOrder={editing ? customOrder : customOrderDefault}
           onRankingUpdate={handleRankingUpdate}
+          getListItemControls={
+            canEdit && editing && customOrder && !isBgg
+              ? (game) => {
+                  const item = (sortedItems as any[]).find((i) => i.game_id === game.id)
+                  if (!item) return {}
+                  return {
+                    onRemove: () => deleteItem(item.id),
+                  }
+                }
+              : undefined
+          }
+          onReorder={
+            canEdit && editing && customOrder && !isBgg
+              ? async (ids: string[]) => {
+                  if (!list) return
+                  // ids come ordered as new list order of game ids
+                  const current = [...sortedItems]
+                  const byGameId = new Map(current.map((it) => [it.game_id, it]))
+                  const newItems: GameListItemWithGame[] = []
+                  ids.forEach((gid, idx) => {
+                    const it = byGameId.get(gid)
+                    if (it) newItems.push({ ...it, ranking: idx + 1 })
+                  })
+                  // Optimistic update
+                  setList((prev) => (prev ? { ...prev, game_list_items: newItems as any } : prev))
+                  // Persist changes (batch update)
+                  for (const it of newItems) {
+                    await supabase
+                      .from('game_list_items')
+                      .update({ ranking: it.ranking })
+                      .eq('id', it.id)
+                  }
+                }
+              : undefined
+          }
         />
       </div>
+
+      {/* Add to List Modal */}
+      {showAddModal && canEdit && !isBgg && (
+        <Portal>
+          <div
+            className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm p-0 sm:p-4"
+            onClick={() => {
+              setShowAddModal(false)
+              setSelectedGameForAdd(null)
+            }}
+          >
+            <div
+              className="bg-white dark:bg-gray-900 w-full sm:max-w-xl rounded-t-2xl sm:rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[80vh]"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+                <h3 className="text-lg font-semibold">Add a Game to this List</h3>
+                <button
+                  onClick={() => {
+                    setShowAddModal(false)
+                    setSelectedGameForAdd(null)
+                  }}
+                  className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
+                  aria-label="Close"
+                >
+                  <XMarkIcon className="w-6 h-6 text-gray-500" />
+                </button>
+              </div>
+              {/* Body */}
+              <div className="p-6 flex-1 overflow-y-auto">
+                <div className="space-y-4">
+                  <p className="text-gray-600 text-sm mb-2">Search for a game to add:</p>
+                  <SearchDropdown
+                    onSelect={async (game) => {
+                      setSelectedGameForAdd({ id: game.id, name: game.name })
+                      await handleAddGameToList({ id: game.id, name: game.name })
+                      setShowAddModal(false)
+                      setSelectedGameForAdd(null)
+                    }}
+                    placeholder="Search for a game..."
+                    autoFocus
+                  />
+                  <div className="flex justify-end pt-4">
+                    <button
+                      onClick={() => {
+                        setShowAddModal(false)
+                        setSelectedGameForAdd(null)
+                      }}
+                      className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Portal>
+      )}
     </PageLayout>
   )
 }
