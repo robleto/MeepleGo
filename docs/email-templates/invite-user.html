@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>You're invited to MeepleGo</title>
+  </head>
+  <body style="margin:0;padding:0;background:#f8fafc;">
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+      <tr>
+        <td align="center">
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="640" style="max-width:640px;margin:0 auto;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;">
+            <tr>
+              <td style="padding:24px 28px 8px 28px;">
+
+
+                <img src="https://dsqceuerzoeotrcatxvb.supabase.co/storage/v1/object/public/Images/meeplego-logo-sm.png" width="250" height="55" alt="MeepleGo" style="display:block;border:0;" />                <p style="margin:0 0 12px 0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#334155;font-size:14px;line-height:1.6;">You’ve been invited to join MeepleGo. Confirm your email to get started.</p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:0 28px 8px 28px;">
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="margin:24px auto 16px;">
+                  <tr>
+                    <td bgcolor="#0284C7" style="border-radius:6px;">
+                      <a href="{{ .ConfirmationURL }}" target="_blank" style="display:inline-block;padding:12px 20px;color:#ffffff;text-decoration:none;font-weight:600;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-size:16px;">Accept invite</a>
+                    </td>
+                  </tr>
+                </table>
+                <p style="margin:8px 0 0 0;font-size:13px;color:#4b5563;line-height:1.5;word-break:break-all;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;">If the button doesn’t work, copy and paste this URL into your browser:<br/>
+                  <a href="{{ .ConfirmationURL }}" style="color:#0284C7;">{{ .ConfirmationURL }}</a>
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:24px 28px 28px 28px;">
+                <p style="margin:16px 0 0 0;color:#64748b;font-size:12px;line-height:1.6;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;">This invite was sent to {{ .Email }}. If you weren’t expecting it, you can ignore this email.</p>
+              </td>
+            </tr>
+          </table>
+          <p style="margin:12px 0 24px 0;color:#94a3b8;font-size:12px;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;">© MeepleGo</p>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

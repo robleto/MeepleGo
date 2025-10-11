@@ -60,13 +60,33 @@ function LoginForm() {
     return () => clearTimeout(t)
   }, [queryError])
 
+  async function resolveEmailOrUsername(input: string): Promise<string> {
+    const val = input.trim()
+    if (!val) return ''
+    // Heuristic: treat as email if contains '@' and a dot, else attempt username resolution
+    if (val.includes('@') && val.includes('.')) return val
+    try {
+      const res = await fetch('/api/auth/resolve-username', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: val }),
+      })
+      if (!res.ok) return val // fallback: try as email to get standard error
+      const json = await res.json()
+      return (json.email || val) as string
+    } catch {
+      return val
+    }
+  }
+
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
     setLoading(true)
     setStatus('submitting')
+    const resolved = await resolveEmailOrUsername(email)
     const { data, error } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
+      email: resolved,
       password,
     })
     setLoading(false)
@@ -114,8 +134,9 @@ function LoginForm() {
     setInfo(null)
     setMagicSending(true)
     setStatus('submitting')
+    const resolved = await resolveEmailOrUsername(email)
     const { error } = await supabase.auth.signInWithOtp({
-      email: email.trim(),
+      email: resolved,
       options: {
         shouldCreateUser: false,
         emailRedirectTo: `${redirectBase}/auth/callback`,
@@ -142,9 +163,10 @@ function LoginForm() {
     setError(null)
     setInfo(null)
     try {
+      const resolved = await resolveEmailOrUsername(email)
       const { error } = await supabase.auth.resend({
         type: 'signup',
-        email: email.trim(),
+        email: resolved,
         options: { emailRedirectTo: `${redirectBase}/auth/callback` },
       })
       if (error) {
@@ -178,14 +200,14 @@ function LoginForm() {
       <form onSubmit={onSubmit} className="space-y-5" noValidate>
         <div className="space-y-1">
           <label className="block text-xs font-medium uppercase tracking-wide text-gray-600 dark:text-gray-400">
-            Email
+            Email or Username
           </label>
           <input
-            type="email"
+            type="text"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            autoComplete="email"
+            autoComplete="username"
             className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
             aria-describedby={
               error ? 'auth-error' : info ? 'auth-info' : undefined

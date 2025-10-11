@@ -16,13 +16,14 @@ interface MinimalCookieStore {
 
 type SupabaseServerClient = ReturnType<typeof createServerClient<Database>>
 
-function getCookieStore(): MinimalCookieStore {
-  // nextCookies() returns a readonly interface; casting to our minimal shape suffices
-  return nextCookies() as unknown as MinimalCookieStore
+async function getCookieStore(): Promise<MinimalCookieStore> {
+  // Next.js 15: cookies() must be awaited before using its value
+  const store = await (nextCookies() as unknown as Promise<MinimalCookieStore>)
+  return store
 }
 
 export async function getSupabaseServerClient(): Promise<SupabaseServerClient> {
-  const cookieStore = getCookieStore()
+  const cookieStore = await getCookieStore()
   return createServerClient<Database>(supabaseUrl, supabaseKey, {
     cookies: {
       get(name: string) {
@@ -52,7 +53,7 @@ export async function getSupabaseServerClient(): Promise<SupabaseServerClient> {
 export async function getSupabaseServerClientWithAccessToken(
   accessToken: string
 ): Promise<SupabaseServerClient> {
-  const cookieStore = getCookieStore()
+  const cookieStore = await getCookieStore()
   return createServerClient<Database>(supabaseUrl, supabaseKey, {
     cookies: {
       get(name: string) {

@@ -14,11 +14,11 @@ Sentry.init({
   debug: process.env.NODE_ENV === 'development',
 
   // Capture 100% of the sessions in development, but only 10% in production
-  sessionReplaySessionSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
+  replaysSessionSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
 
   // If the entire session is not sampled, use the below sample rate to sample
   // sessions when an error occurs.
-  sessionReplayOnErrorSampleRate: 1.0,
+  replaysOnErrorSampleRate: 1.0,
 
   // Configure release and environment
   release: process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA,
@@ -39,15 +39,15 @@ Sentry.init({
   },
 
   // Configure integrations
+  // Set 'tracePropagationTargets' to control for which URLs distributed tracing should be enabled
+  tracePropagationTargets: [
+    'localhost',
+    /^https:\/\/[^/]*\.vercel\.app/,
+    // Add your production domain here
+  ],
+
   integrations: [
-    Sentry.browserTracingIntegration({
-      // Set 'tracePropagationTargets' to control for which URLs distributed tracing should be enabled
-      tracePropagationTargets: [
-        'localhost',
-        /^https:\/\/[^/]*\.vercel\.app/,
-        // Add your production domain here
-      ],
-    }),
+    Sentry.browserTracingIntegration(),
     Sentry.replayIntegration(),
   ],
 })
