@@ -7,6 +7,7 @@ This document provides comprehensive test scenarios, procedures, and a results t
 **Purpose**: Validate all authentication flows work correctly across platforms and browsers.
 
 **Test Environment Requirements**:
+
 - 2-3 test email addresses (see [Test Email Setup](#test-email-setup))
 - Desktop browsers: Chrome, Safari, Firefox
 - Mobile devices: iOS (Safari), Android (Chrome)
@@ -39,11 +40,13 @@ Use real email addresses you control for testing. Recommended approaches:
 ### Test Account Recommendations
 
 For comprehensive testing, create at least:
+
 - **Test User 1**: Clean account for happy path testing
 - **Test User 2**: Account with known password for invalid credential testing
 - **Test User 3**: Account for cross-browser and mobile testing
 
 **Tips**:
+
 - Keep one account with a known bad password to test error messages
 - Document test credentials in a secure location (password manager)
 - Save screenshots of emails and flows for documentation
@@ -145,12 +148,14 @@ For comprehensive testing, create at least:
 #### Expected Results
 
 **Valid Credentials**:
+
 - ✅ User logs in successfully
 - ✅ Redirects to `/` or preserved `next` parameter URL
 - ✅ Navigation shows authenticated state
 - ✅ Session persists on refresh
 
 **Invalid Credentials**:
+
 - ✅ Friendly, non-specific error message displayed
 - ✅ No user enumeration (same error for invalid email/password)
 - ✅ User remains on login page
@@ -398,6 +403,7 @@ Test these scenarios on both iOS and Android:
 #### Expected Results
 
 **iOS**:
+
 - ✅ Link opens in Safari (or default browser)
 - ✅ Redirect flow completes successfully
 - ✅ User lands on home page authenticated
@@ -405,6 +411,7 @@ Test these scenarios on both iOS and Android:
 - ✅ Works in private browsing mode
 
 **Android**:
+
 - ✅ Link opens in Chrome (or default browser)
 - ✅ Redirect flow completes successfully
 - ✅ User lands on home page authenticated
@@ -412,6 +419,7 @@ Test these scenarios on both iOS and Android:
 - ✅ Works in incognito mode
 
 **Both Platforms**:
+
 - ✅ No "Cannot open page" errors
 - ✅ HTTPS links work correctly
 - ✅ Deep link redirects are smooth (no visible URL changes)
@@ -433,20 +441,20 @@ Test all scenarios across these platforms:
 ### Desktop Browsers
 
 | Browser | Version | Test Priority |
-|---------|---------|---------------|
-| Chrome | Latest | High |
-| Safari | Latest | High |
-| Firefox | Latest | Medium |
-| Edge | Latest | Low |
+| ------- | ------- | ------------- |
+| Chrome  | Latest  | High          |
+| Safari  | Latest  | High          |
+| Firefox | Latest  | Medium        |
+| Edge    | Latest  | Low           |
 
 ### Mobile Browsers
 
 | Platform | Browser | Version | Test Priority |
-|----------|---------|---------|---------------|
-| iOS | Safari | Latest | High |
-| iOS | Chrome | Latest | Medium |
-| Android | Chrome | Latest | High |
-| Android | Firefox | Latest | Low |
+| -------- | ------- | ------- | ------------- |
+| iOS      | Safari  | Latest  | High          |
+| iOS      | Chrome  | Latest  | Medium        |
+| Android  | Chrome  | Latest  | High          |
+| Android  | Firefox | Latest  | Low           |
 
 ---
 
@@ -464,6 +472,7 @@ Use this template to document your test results. Create a new document for each 
 **Base URL**: [https://meeplego.com or staging URL]
 
 ### Test Accounts Used
+
 1. Email: test1+[timestamp]@gmail.com | Password: [Stored in password manager]
 2. Email: test2+[timestamp]@outlook.com | Password: [Stored in password manager]
 3. Email: test3+[timestamp]@icloud.com | Password: [Stored in password manager]
@@ -477,6 +486,7 @@ Copy this section for each test scenario:
 ### 1. Sign Up with Email + Magic Link
 
 #### Desktop - Chrome
+
 - [ ] Test completed
 - **Status**: ✅ Pass / ❌ Fail / ⚠️ Issue
 - **Notes**: [Any observations, issues, or screenshots]
@@ -484,22 +494,26 @@ Copy this section for each test scenario:
 - **Email placement**: [Inbox/Spam/Promotions]
 
 #### Desktop - Safari
+
 - [ ] Test completed
 - **Status**: ✅ Pass / ❌ Fail / ⚠️ Issue
 - **Notes**: [Any observations, issues, or screenshots]
 
 #### Desktop - Firefox
+
 - [ ] Test completed
 - **Status**: ✅ Pass / ❌ Fail / ⚠️ Issue
 - **Notes**: [Any observations, issues, or screenshots]
 
 #### Mobile - iOS Safari
+
 - [ ] Test completed
 - **Status**: ✅ Pass / ❌ Fail / ⚠️ Issue
 - **Notes**: [Any observations, issues, or screenshots]
 - **Device**: [iPhone model, iOS version]
 
 #### Mobile - Android Chrome
+
 - [ ] Test completed
 - **Status**: ✅ Pass / ❌ Fail / ⚠️ Issue
 - **Notes**: [Any observations, issues, or screenshots]
@@ -542,6 +556,7 @@ Copy this section for each test scenario:
 ## Issues Found
 
 ### Issue 1: [Title]
+
 - **Severity**: Critical / High / Medium / Low
 - **Scenario**: [Which test scenario]
 - **Browser/Platform**: [Where issue occurred]
@@ -556,6 +571,7 @@ Copy this section for each test scenario:
 - **Status**: Open / In Progress / Resolved
 
 ### Issue 2: [Title]
+
 [Repeat structure]
 ```
 
@@ -565,20 +581,25 @@ Copy this section for each test scenario:
 ## Test Summary
 
 ### Pass Rate
+
 - Desktop: [X/Y scenarios passed]
 - Mobile: [X/Y scenarios passed]
 - Overall: [X/Y total tests passed]
 
 ### Critical Issues
+
 - [List any blocking issues]
 
 ### Non-Critical Issues
+
 - [List any minor issues]
 
 ### Recommendations
+
 - [Any recommendations for improvements]
 
 ### Sign-Off
+
 - [ ] All critical issues resolved
 - [ ] Ready for production
 - [ ] Requires additional testing
@@ -594,17 +615,20 @@ Copy this section for each test scenario:
 ### Browser Developer Tools
 
 **Check Network Requests**:
+
 1. Open Developer Tools (F12)
 2. Go to Network tab
 3. Filter by "Fetch/XHR" or "Doc" for redirects
 4. Look for auth-related requests
 
 **Check Console for Errors**:
+
 1. Open Developer Tools (F12)
 2. Go to Console tab
 3. Look for red error messages during auth flows
 
 **Check Cookies/Storage**:
+
 1. Open Developer Tools (F12)
 2. Go to Application tab (Chrome) or Storage tab (Firefox)
 3. Check Cookies and Local Storage for session data
@@ -612,28 +636,33 @@ Copy this section for each test scenario:
 ### Email Header Analysis
 
 **Gmail**:
+
 1. Open email
 2. Click three dots menu → "Show original"
 3. Look for "SPF", "DKIM", "DMARC" in headers
 
 **Outlook**:
+
 1. Open email
 2. File → Properties → Internet headers
 3. Or use Microsoft Message Header Analyzer tool
 
 **General**:
+
 - Look for `Authentication-Results` header
 - Verify `spf=pass`, `dkim=pass`, `dmarc=pass`
 
 ### Mobile Device Testing
 
 **iOS Safari Remote Debugging**:
+
 1. Enable Web Inspector on iOS: Settings → Safari → Advanced → Web Inspector
 2. Connect device to Mac via USB
 3. Open Safari on Mac → Develop → [Your Device]
 4. Select the tab to debug
 
 **Android Chrome Remote Debugging**:
+
 1. Enable Developer Options on Android
 2. Enable USB Debugging
 3. Connect device to computer via USB
@@ -647,6 +676,7 @@ Copy this section for each test scenario:
 Before considering auth flows "launch-ready", ensure:
 
 ### Configuration
+
 - [ ] All redirect URLs configured in Supabase
 - [ ] Email templates customized and tested
 - [ ] SMTP/Email provider configured
@@ -654,6 +684,7 @@ Before considering auth flows "launch-ready", ensure:
 - [ ] Environment variables set correctly
 
 ### Testing Complete
+
 - [ ] All 6 test scenarios completed on desktop (Chrome, Safari, Firefox)
 - [ ] All 6 test scenarios completed on mobile (iOS Safari, Android Chrome)
 - [ ] Email deliverability verified across Gmail, Outlook, iCloud
@@ -661,12 +692,14 @@ Before considering auth flows "launch-ready", ensure:
 - [ ] All critical issues resolved
 
 ### Documentation
+
 - [ ] Test results documented
 - [ ] Issues logged and tracked
 - [ ] Screenshots captured for reference
 - [ ] Test accounts documented securely
 
 ### Acceptance Criteria
+
 - [ ] ≥ 95% of tests passing
 - [ ] 0 critical issues open
 - [ ] Email delivery < 30 seconds

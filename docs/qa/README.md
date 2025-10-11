@@ -5,9 +5,11 @@ This directory contains comprehensive quality assurance documentation for Meeple
 ## Contents
 
 ### 📋 [Manual Auth Flows](./manual-auth-flows.md)
+
 Complete guide for manually testing all authentication flows in MeepleGo. This is the primary reference document for QA testers.
 
 **Use this for**:
+
 - Detailed test scenarios and procedures
 - Understanding expected results
 - Troubleshooting common issues
@@ -15,6 +17,7 @@ Complete guide for manually testing all authentication flows in MeepleGo. This i
 - Email deliverability verification
 
 **Scenarios covered**:
+
 1. Sign up with email + magic link
 2. Login with email/password
 3. Password recovery
@@ -25,9 +28,11 @@ Complete guide for manually testing all authentication flows in MeepleGo. This i
 ---
 
 ### ⚡ [Auth Flows Quick Start](./auth-flows-quick-start.md)
+
 Condensed guide for quickly executing auth flow tests. Perfect for repeat testing or time-constrained QA sessions.
 
 **Use this for**:
+
 - Quick 30-minute test sessions
 - Regression testing
 - Emergency pre-deploy verification
@@ -38,9 +43,11 @@ Condensed guide for quickly executing auth flow tests. Perfect for repeat testin
 ---
 
 ### 📝 [Test Results Template](./auth-flows-test-results-template.md)
+
 Comprehensive template for documenting test results. Copy this file and fill it out during testing.
 
 **Use this for**:
+
 - Recording test results systematically
 - Documenting issues found
 - Tracking test completion
@@ -48,6 +55,7 @@ Comprehensive template for documenting test results. Copy this file and fill it 
 - Historical test records
 
 **How to use**:
+
 1. Copy the template to a new file (e.g., `auth-test-results-2025-10-11.md`)
 2. Fill in test session information
 3. Complete each test scenario section
@@ -59,11 +67,13 @@ Comprehensive template for documenting test results. Copy this file and fill it 
 ## Quick Links
 
 ### Related Documentation
+
 - [MeepleGo Launch Checklist](../release/launch-checklist.md) - Overall launch preparation
 - [Supabase Launch Checklist](../deployment/supabase-launch-checklist.md) - Supabase-specific configuration
 - [Supabase Production Config](../deployment/supabase-production-config.md) - Production setup details
 
 ### Testing Tools
+
 - **Auth Diagnostics Page**: Visit `/auth/providers` on the application for quick auth testing
 - **Email Deliverability Script**: Run `npm run test:email` from repository root
 
@@ -112,6 +122,7 @@ Comprehensive template for documenting test results. Copy this file and fill it 
 ## Test Prioritization
 
 ### Critical (Must Pass Before Launch)
+
 - ✅ Sign up with magic link (desktop + mobile)
 - ✅ Login with email/password (desktop + mobile)
 - ✅ Password recovery (desktop + mobile)
@@ -120,12 +131,14 @@ Comprehensive template for documenting test results. Copy this file and fill it 
 - ✅ Mobile deep links on iOS and Android
 
 ### High Priority (Should Pass Before Launch)
+
 - ⚠️ Expired/invalid link error handling
 - ⚠️ Invalid credentials error messages
 - ⚠️ Sign out/sign in flow
 - ⚠️ Cross-browser compatibility (Chrome, Safari, Firefox)
 
 ### Medium Priority (Nice to Have)
+
 - 📌 Edge browser compatibility
 - 📌 Mobile Firefox/Opera testing
 - 📌 Network interruption handling
@@ -135,24 +148,28 @@ Comprehensive template for documenting test results. Copy this file and fill it 
 ## Common Issues and Solutions
 
 ### Email Not Arriving
+
 - **Check**: Spam/junk folder
 - **Verify**: SMTP configuration in Supabase
 - **Test**: Run `npm run test:email`
 - **Review**: DNS records (SPF, DKIM, DMARC)
 
 ### Magic Link Not Working
+
 - **Check**: Supabase redirect URL configuration
 - **Verify**: Link hasn't expired (1 hour timeout)
 - **Test**: Copy link to browser manually
 - **Review**: Browser console for errors
 
 ### Session Not Persisting
+
 - **Check**: Browser allows cookies
 - **Verify**: Not in private/incognito mode
 - **Test**: Without ad blockers
 - **Review**: CORS settings in Supabase
 
 ### Mobile Link Issues
+
 - **Check**: Link uses HTTPS
 - **Verify**: Opens in mobile browser (not in-app browser)
 - **Test**: Different mobile browser
@@ -165,6 +182,7 @@ Comprehensive template for documenting test results. Copy this file and fill it 
 ### Creating Test Accounts
 
 **Gmail Plus Addressing** (Recommended):
+
 - `yourname+qa1@gmail.com`
 - `yourname+qa2@gmail.com`
 - `yourname+qa3@gmail.com`
@@ -172,6 +190,7 @@ Comprehensive template for documenting test results. Copy this file and fill it 
 - Easy to filter by "+qa"
 
 **Multiple Providers**:
+
 - Gmail: `test1@gmail.com`
 - Outlook: `test2@outlook.com`
 - iCloud: `test3@icloud.com`
@@ -205,6 +224,7 @@ When documenting issues in test results:
 **Description**: [What happened]
 
 **Steps to Reproduce**:
+
 1. [Step 1]
 2. [Step 2]
 
@@ -217,24 +237,28 @@ When documenting issues in test results:
 ### Issue Severity Guidelines
 
 **Critical**:
+
 - Blocks authentication completely
 - Data loss or corruption
 - Security vulnerability
 - Affects all users
 
 **High**:
+
 - Major functionality broken
 - Affects many users
 - No workaround available
 - Poor user experience
 
 **Medium**:
+
 - Minor functionality issue
 - Affects some users
 - Workaround available
 - Usability concern
 
 **Low**:
+
 - Cosmetic issue
 - Edge case
 - Minimal user impact
@@ -245,14 +269,16 @@ When documenting issues in test results:
 ## Test Environment Requirements
 
 ### Desktop Setup
+
 - **Operating Systems**: macOS, Windows, or Linux
 - **Browsers**: Latest versions of Chrome, Safari (macOS), Firefox
-- **Tools**: 
+- **Tools**:
   - Browser developer tools (F12)
   - Screenshot utility
   - Text editor for notes
 
 ### Mobile Setup
+
 - **iOS Device**: iPhone or iPad running latest iOS
 - **Android Device**: Phone or tablet running Android 12+
 - **Tools**:
@@ -261,6 +287,7 @@ When documenting issues in test results:
   - Remote debugging enabled (optional)
 
 ### Network Requirements
+
 - Stable internet connection
 - Access to email accounts
 - Access to test environment URL

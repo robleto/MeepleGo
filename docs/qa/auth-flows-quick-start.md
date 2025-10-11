@@ -5,17 +5,21 @@ This is a condensed guide for quickly running through auth flow testing. For com
 ## Before You Start (5 minutes)
 
 ### 1. Set Up Test Emails
+
 Create 2-3 test email addresses using one of these methods:
+
 - **Gmail Plus**: `yourname+test1@gmail.com`, `yourname+test2@gmail.com`
 - **Multiple Providers**: Gmail, Outlook, iCloud accounts
 - Keep credentials in a password manager
 
 ### 2. Verify Environment
+
 - Confirm you're testing the right environment (production/staging)
 - Check that `/auth/providers` diagnostic page works
 - Have both desktop and mobile device ready
 
 ### 3. Prepare Documentation
+
 - Create a copy of the [Test Results Template](#test-results-template)
 - Have screenshot tool ready
 - Open browser developer tools (F12)
@@ -86,24 +90,28 @@ For each platform, test these critical flows:
 ## Critical Checks
 
 ### Email Deliverability ✉️
+
 - [ ] Emails arrive in < 30 seconds
 - [ ] Emails land in Inbox (not spam)
 - [ ] Links in emails work correctly
 - [ ] Can test with Gmail, Outlook, iCloud
 
 ### Session Management 🔐
+
 - [ ] Session persists on page refresh
 - [ ] Session persists in new tabs
 - [ ] Sign out clears session everywhere
 - [ ] Can sign back in successfully
 
 ### Error Handling ⚠️
+
 - [ ] Invalid credentials → friendly error
 - [ ] Expired links → clear message
 - [ ] Missing fields → validation errors
 - [ ] No application crashes
 
 ### Mobile Deep Links 📱
+
 - [ ] Links open in mobile browser
 - [ ] Redirects complete successfully
 - [ ] Session persists on mobile
@@ -124,45 +132,52 @@ Copy this for quick results tracking:
 ### Desktop Testing
 
 #### Chrome
-- Sign Up: ✅ / ❌  [Notes]
-- Login: ✅ / ❌  [Notes]
-- Password Reset: ✅ / ❌  [Notes]
-- Error Handling: ✅ / ❌  [Notes]
-- Session: ✅ / ❌  [Notes]
+
+- Sign Up: ✅ / ❌ [Notes]
+- Login: ✅ / ❌ [Notes]
+- Password Reset: ✅ / ❌ [Notes]
+- Error Handling: ✅ / ❌ [Notes]
+- Session: ✅ / ❌ [Notes]
 
 #### Safari
-- Sign Up: ✅ / ❌  [Notes]
-- Login: ✅ / ❌  [Notes]
-- Password Reset: ✅ / ❌  [Notes]
-- Error Handling: ✅ / ❌  [Notes]
-- Session: ✅ / ❌  [Notes]
+
+- Sign Up: ✅ / ❌ [Notes]
+- Login: ✅ / ❌ [Notes]
+- Password Reset: ✅ / ❌ [Notes]
+- Error Handling: ✅ / ❌ [Notes]
+- Session: ✅ / ❌ [Notes]
 
 #### Firefox
-- Sign Up: ✅ / ❌  [Notes]
-- Login: ✅ / ❌  [Notes]
-- Password Reset: ✅ / ❌  [Notes]
-- Error Handling: ✅ / ❌  [Notes]
-- Session: ✅ / ❌  [Notes]
+
+- Sign Up: ✅ / ❌ [Notes]
+- Login: ✅ / ❌ [Notes]
+- Password Reset: ✅ / ❌ [Notes]
+- Error Handling: ✅ / ❌ [Notes]
+- Session: ✅ / ❌ [Notes]
 
 ### Mobile Testing
 
 #### iOS Safari [Device/Version]
-- Email Links: ✅ / ❌  [Notes]
-- Password Reset: ✅ / ❌  [Notes]
-- Mobile Login: ✅ / ❌  [Notes]
-- Deep Links: ✅ / ❌  [Notes]
+
+- Email Links: ✅ / ❌ [Notes]
+- Password Reset: ✅ / ❌ [Notes]
+- Mobile Login: ✅ / ❌ [Notes]
+- Deep Links: ✅ / ❌ [Notes]
 
 #### Android Chrome [Device/Version]
-- Email Links: ✅ / ❌  [Notes]
-- Password Reset: ✅ / ❌  [Notes]
-- Mobile Login: ✅ / ❌  [Notes]
-- Deep Links: ✅ / ❌  [Notes]
+
+- Email Links: ✅ / ❌ [Notes]
+- Password Reset: ✅ / ❌ [Notes]
+- Mobile Login: ✅ / ❌ [Notes]
+- Deep Links: ✅ / ❌ [Notes]
 
 ### Issues Found
+
 1. [Issue description] - Severity: [Critical/High/Medium/Low]
 2. [Issue description] - Severity: [Critical/High/Medium/Low]
 
 ### Overall Status
+
 - Total Tests: [X]
 - Passed: [Y]
 - Failed: [Z]
@@ -178,6 +193,7 @@ Copy this for quick results tracking:
 To verify email authentication (SPF/DKIM/DMARC):
 
 **Gmail**:
+
 1. Open email → three dots → "Show original"
 2. Look for these lines:
    ```
@@ -187,6 +203,7 @@ To verify email authentication (SPF/DKIM/DMARC):
    ```
 
 **Outlook**:
+
 1. Open email → File → Properties
 2. Check "Internet headers"
 3. Look for `Authentication-Results` with pass status
@@ -196,21 +213,25 @@ To verify email authentication (SPF/DKIM/DMARC):
 ## Issues? Try These First
 
 ### Email Not Arriving
+
 - Check spam/junk folder
 - Verify email provider configured in Supabase
 - Run `npm run test:email` from repo
 
 ### Link Not Working
+
 - Check Supabase redirect URLs match exactly
 - Verify link hasn't expired (1 hour timeout)
 - Try copying link to browser manually
 
 ### Session Not Persisting
+
 - Check browser allows cookies
 - Try without ad blockers
 - Check CORS settings in Supabase
 
 ### Mobile Link Issues
+
 - Ensure link uses HTTPS
 - Try opening in different mobile browser
 - Check redirect URLs include production domain
@@ -220,12 +241,14 @@ To verify email authentication (SPF/DKIM/DMARC):
 ## Post-Testing
 
 ### Required Actions
+
 1. Document all results using template above
 2. Log any issues found with screenshots
 3. Verify all critical issues are resolved
 4. Get sign-off from stakeholders
 
 ### Before Marking Complete
+
 - [ ] All platforms tested (Chrome, Safari, Firefox, iOS, Android)
 - [ ] All scenarios tested (signup, login, reset, errors, mobile)
 - [ ] Email deliverability verified (< 30 seconds, inbox placement)
