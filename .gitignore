@@ -125,6 +125,7 @@ jspm_packages/
 # Temporary folders
 tmp/
 temp/
+.history/
 
 # Data artifacts (allow small examples)
 data/raw/
@@ -145,3 +146,7 @@ storybook-static/
 
 # Archived legacy component/story folders (still versioned for reference unless moved). Add pattern below to ignore if needed.
 # src/components/_archived/
+
+# Lighthouse CI
+.lighthouseci/
+lighthouse-report.html

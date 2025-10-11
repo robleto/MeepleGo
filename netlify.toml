@@ -3,21 +3,12 @@
   command = "npm run build"
 
 [build.environment]
-  NODE_VERSION = "20"
-  # Disable secrets scanning - these are legitimate environment variables
+  NODE_VERSION = "18"
+
+# Disable secrets scanning for known public values
+[context.production.environment]
   SECRETS_SCAN_ENABLED = "false"
 
-# Alternative approach: Omit specific keys if you want to keep scanning enabled
+# Alternative: If you want to keep secrets scanning but exclude specific patterns
 # [build.environment]
-#   SECRETS_SCAN_OMIT_KEYS = "BGG_API_BASE_URL,BGG_COOKIES,BGG_LIST_OWNER_ID,SUPABASE_ANON_KEY,SUPABASE_DATABASE_URL,SUPABASE_JWT_SECRET,SUPABASE_SERVICE_ROLE_KEY,SUPABASE_URL,NODE_VERSION"
-
-# Headers for better caching
-[[headers]]
-  for = "/_next/static/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-[[headers]]
-  for = "/images/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
+#   SECRETS_SCAN_OMIT_KEYS = "NEXT_PUBLIC_SUPABASE_URL,project_id"

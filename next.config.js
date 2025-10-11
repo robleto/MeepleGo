@@ -1,3 +1,5 @@
+const { withSentryConfig } = require('@sentry/nextjs')
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   serverExternalPackages: ['@supabase/supabase-js'],
@@ -22,6 +24,62 @@ const nextConfig = {
     // we address the large backlog of warnings. Local "npm run lint" still shows them.
     ignoreDuringBuilds: true,
   },
+  // Performance optimizations
+  compiler: {
+    // Remove console.log in production
+    removeConsole: process.env.NODE_ENV === 'production' ? {
+      exclude: ['error', 'warn'],
+    } : false,
+  },
+  // Enable experimental features for better performance
+  experimental: {
+    optimizePackageImports: ['@heroicons/react'],
+  },
+  // Performance budgets
+  onDemandEntries: {
+    // Keep pages in memory for 60 seconds
+    maxInactiveAge: 60 * 1000,
+    // Number of pages that should be kept simultaneously
+    pagesBufferLength: 5,
+  },
 }
 
-module.exports = nextConfig
+// Sentry configuration options
+const sentryConfig = {
+  // Suppresses source map uploading logs during build
+  silent: true,
+  
+  // Upload source maps during build for better error reporting
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  
+  // Only upload source maps in production and if Sentry is configured
+  hideSourceMaps: true,
+  disableLogger: true,
+  
+  // Automatically tree-shake Sentry logger statements
+  widenClientFileUpload: true,
+  
+  // Tunneling to prevent ad-blockers from blocking Sentry requests
+  tunnelRoute: '/monitoring',
+  
+  // Additional options for better performance
+  reactComponentAnnotation: {
+    enabled: true,
+  },
+}
+
+// Bundle analyzer configuration
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true',
+})
+
+// Check if Sentry is configured before wrapping
+const shouldUseSentry = process.env.NEXT_PUBLIC_SENTRY_DSN && 
+                       process.env.NODE_ENV === 'production'
+
+module.exports = withBundleAnalyzer(
+  shouldUseSentry 
+    ? withSentryConfig(nextConfig, sentryConfig)
+    : nextConfig
+)

@@ -1,19 +1,11 @@
 import type { Metadata } from 'next'
-// Temporarily disable Google Fonts import for build environment
-// import {
-//   Inter,
-//   Outfit,
-//   Geist,
-//   Fraunces,
-//   Playfair_Display,
-//   Archivo_Black,
-//   Epilogue,
-// } from 'next/font/google'
 import './globals.css'
 import Navigation from '@/components/Global/Navigation'
 import SiteFooter from '@/components/Global/SiteFooter'
+import AnalyticsWrapper from '@/components/Analytics/AnalyticsWrapper'
 
-// Fallback font configuration for build environment
+// Using system fonts with optimized fallback stack for better performance
+// Google Fonts would be ideal but are loaded via CSS for offline builds
 const inter = {
   variable: '--font-inter',
   className: 'font-sans',
@@ -23,32 +15,7 @@ const outfit = {
   className: 'font-sans',
 }
 
-// Alternative (Set B) fonts for prestige vibe - disabled for build
-// const geist = {
-//   variable: '--font-geist',
-//   className: 'font-sans',
-// }
-// const fraunces = {
-//   variable: '--font-fraunces',
-//   className: 'font-serif',
-// }
-// const playfairDisplay = {
-//   variable: '--font-playfair',
-//   className: 'font-serif',
-// }
-// const archivoBlack = {
-//   variable: '--font-archivo-black',
-//   className: 'font-sans',
-// }
-// const epilogue = {
-//   variable: '--font-epilogue',
-//   className: 'font-sans',
-// }
-
-// Alternative (Set B) fonts for prestige vibe - disabled for build
-// Geist (body) + Fraunces (award / display serif) + optional Playfair Display variant
-// We expose separate CSS variables so we can remap --font-inter & --font-display when the
-// html element has the class `typography-b` (see globals.css for the variable remapping).
+// Placeholder configurations for alternative fonts (not loaded by default)
 const geist = {
   variable: '--font-sans-b',
   className: 'font-sans',
@@ -61,12 +28,10 @@ const playfair = {
   variable: '--font-award-b-alt',
   className: 'font-serif',
 }
-// Poster / bold award title experiment
 const archivoBlack = {
   variable: '--font-award-poster',
   className: 'font-sans',
 }
-// Softer geometric option (lighter presence vs Outfit / Archivo)
 const epilogue = {
   variable: '--font-display-soft',
   className: 'font-sans',
@@ -154,18 +119,20 @@ export default function RootLayout({
       ].join(' ')}
     >
       <head>
-        <link rel="preconnect" href="https://use.typekit.net" />
-        <link rel="preconnect" href="https://p.typekit.net" />
         {/* Preconnect to external image domains for performance */}
         <link rel="preconnect" href="https://cf.geekdo-images.com" />
         <link rel="dns-prefetch" href="https://cf.geekdo-images.com" />
         <link rel="preconnect" href="https://boardgamegeek.com" />
         <link rel="dns-prefetch" href="https://boardgamegeek.com" />
+        {/* Optional: Preconnect to Google Fonts for progressive enhancement */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        {/* Adobe Fonts - loaded async to reduce render blocking */}
         {process.env.NEXT_PUBLIC_ADOBE_FONTS_KIT_ID && (
-          <link
-            rel="stylesheet"
-            href={`https://use.typekit.net/${process.env.NEXT_PUBLIC_ADOBE_FONTS_KIT_ID}.css`}
-          />
+          <>
+            <link rel="preconnect" href="https://use.typekit.net" crossOrigin="anonymous" />
+            <link rel="preconnect" href="https://p.typekit.net" crossOrigin="anonymous" />
+          </>
         )}
       </head>
       <body
@@ -180,6 +147,7 @@ export default function RootLayout({
         >
           Skip to main content
         </a>
+        <AnalyticsWrapper />
         <Navigation />
         <main id="main-content" className="pt-16 min-h-[70vh]">
           {children}
