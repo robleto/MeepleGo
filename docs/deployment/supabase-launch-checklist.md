@@ -170,6 +170,13 @@ This comprehensive checklist ensures all Supabase configurations are ready for p
 
 ### ✅ 6. Authentication Flow Testing
 
+📚 **Complete QA Documentation Available**:
+
+- [QA Documentation Hub](../qa/README.md) - All QA resources
+- [Manual Auth Flows Guide](../qa/manual-auth-flows.md) - Detailed procedures
+- [Quick Start Guide](../qa/auth-flows-quick-start.md) - Fast testing
+- [Test Results Template](../qa/auth-flows-test-results-template.md) - Track results
+
 #### End-to-End Testing
 
 - [ ] **Signup flow tested**:
