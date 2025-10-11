@@ -64,11 +64,13 @@ export default function PersonalAwardsAuto() {
         description?: string
         games: any[]
       }>
-    const mapped = rows.map((r) => ({
-      ranking: (r as any).ranking as number | null,
-      played_it: (r as any).played_it as boolean | null,
-      game: (r as any).games,
-    }))
+    const mapped = rows
+      .map((r) => ({
+        ranking: (r as any).ranking as number | null,
+        played_it: (r as any).played_it as boolean | null,
+        game: (r as any).games ?? null,
+      }))
+      .filter((r) => !!r.game)
     const sorted = mapped
       .filter((r) => r.played_it && (r.ranking ?? 0) > 0)
       .sort((a, b) => (b.ranking ?? 0) - (a.ranking ?? 0))
@@ -89,7 +91,7 @@ export default function PersonalAwardsAuto() {
         label: 'Best Strategy',
         description: 'Depth & planning.',
         filter: (r) =>
-          (r.game.categories || []).some((c: string) =>
+          ((r.game?.categories as string[] | null) || []).some((c: string) =>
             /strategy|wargame|economic|abstract|thematic|euro/i.test(c)
           ),
       },
@@ -98,7 +100,7 @@ export default function PersonalAwardsAuto() {
         label: 'Best Family',
         description: 'Accessible for mixed groups.',
         filter: (r) =>
-          (r.game.categories || []).some((c: string) =>
+          ((r.game?.categories as string[] | null) || []).some((c: string) =>
             /family|gateway|kids/i.test(c)
           ),
       },
@@ -107,17 +109,17 @@ export default function PersonalAwardsAuto() {
         label: 'Best Duo',
         description: 'Great at two players.',
         filter: (r) =>
-          (r.game.min_players === 2 && r.game.max_players === 2) ||
-          (r.game.categories || []).some((c: string) =>
+          ((r.game?.min_players === 2 && r.game?.max_players === 2) ||
+            (((r.game?.categories as string[] | null) || []).some((c: string) =>
             /2.*player|two.?player|duel/i.test(c)
-          ),
+            )))
       },
       {
         id: 'kids',
         label: 'Best Kids',
         description: 'For younger players.',
         filter: (r) =>
-          (r.game.categories || []).some((c: string) =>
+          ((r.game?.categories as string[] | null) || []).some((c: string) =>
             /child|kid|junior|preschool/i.test(c)
           ),
       },
@@ -126,7 +128,7 @@ export default function PersonalAwardsAuto() {
         label: 'Best Card Game',
         description: 'Card driven.',
         filter: (r) =>
-          (r.game.categories || []).some((c: string) =>
+          ((r.game?.categories as string[] | null) || []).some((c: string) =>
             /card|living card/i.test(c)
           ),
       },
@@ -135,7 +137,7 @@ export default function PersonalAwardsAuto() {
         label: 'Best Wargame',
         description: 'Conflict & history.',
         filter: (r) =>
-          (r.game.categories || []).some((c: string) =>
+          ((r.game?.categories as string[] | null) || []).some((c: string) =>
             /war.?game|wargame|conflict|historical/i.test(c)
           ),
       },
@@ -144,7 +146,7 @@ export default function PersonalAwardsAuto() {
         label: 'Best Party',
         description: 'Social & high energy.',
         filter: (r) =>
-          (r.game.categories || []).some((c: string) =>
+          ((r.game?.categories as string[] | null) || []).some((c: string) =>
             /party|social|humor/i.test(c)
           ),
       },
@@ -153,7 +155,7 @@ export default function PersonalAwardsAuto() {
         label: 'Best Trivia',
         description: 'Quiz & fact games.',
         filter: (r) =>
-          (r.game.categories || []).some((c: string) =>
+          ((r.game?.categories as string[] | null) || []).some((c: string) =>
             /trivia|quiz|knowledge/i.test(c)
           ),
       },
@@ -162,7 +164,7 @@ export default function PersonalAwardsAuto() {
         label: 'Best Bluffing',
         description: 'Deduction & deception.',
         filter: (r) =>
-          (r.game.categories || []).some((c: string) =>
+          ((r.game?.categories as string[] | null) || []).some((c: string) =>
             /bluff|deception|hidden role|social deduction/i.test(c)
           ),
       },
@@ -171,7 +173,7 @@ export default function PersonalAwardsAuto() {
         label: 'Best Print & Play',
         description: 'DIY print & play.',
         filter: (r) =>
-          (r.game.categories || []).some((c: string) =>
+          ((r.game?.categories as string[] | null) || []).some((c: string) =>
             /print.?(&|and)?.?play|print.?n.?play|pnp|roll.?and.?write/i.test(c)
           ),
       },
@@ -180,10 +182,10 @@ export default function PersonalAwardsAuto() {
         label: 'Best Cooperative',
         description: 'Work together.',
         filter: (r) =>
-          (r.game.mechanics || []).some((m: string) =>
+          ((r.game?.mechanics as string[] | null) || []).some((m: string) =>
             /coop|campaign|legacy/i.test(m)
           ) ||
-          (r.game.categories || []).some((c: string) =>
+          ((r.game?.categories as string[] | null) || []).some((c: string) =>
             /co.?op|cooperative/i.test(c)
           ),
       },
@@ -192,7 +194,7 @@ export default function PersonalAwardsAuto() {
         label: 'Best Deck Building',
         description: 'Evolving decks.',
         filter: (r) =>
-          (r.game.mechanics || []).some((m: string) =>
+          ((r.game?.mechanics as string[] | null) || []).some((m: string) =>
             /deck.?build|bag.?build/i.test(m)
           ),
       },
@@ -201,23 +203,23 @@ export default function PersonalAwardsAuto() {
         label: 'Best Solo / Solitaire',
         description: 'Strong solo play.',
         filter: (r) =>
-          (r.game.mechanics || []).some((m: string) =>
+          ((r.game?.mechanics as string[] | null) || []).some((m: string) =>
             /solo|solitaire|autom|campaign/i.test(m)
-          ) || r.game.min_players === 1,
+          ) || r.game?.min_players === 1,
       },
       {
         id: 'abstract',
         label: 'Best Abstract',
         description: 'Pure mechanisms.',
         filter: (r) =>
-          (r.game.categories || []).some((c: string) => /abstract/i.test(c)),
+          ((r.game?.categories as string[] | null) || []).some((c: string) => /abstract/i.test(c)),
       },
       {
         id: 'thematic',
         label: 'Best Thematic',
         description: 'Immersive story.',
         filter: (r) =>
-          (r.game.categories || []).some((c: string) =>
+          ((r.game?.categories as string[] | null) || []).some((c: string) =>
             /thematic|adventure|narrative|story/i.test(c)
           ),
       },
@@ -225,21 +227,21 @@ export default function PersonalAwardsAuto() {
         id: 'light',
         label: 'Best Light / Filler',
         description: 'Quick <45m.',
-        filter: (r) => (r.game.playtime_minutes ?? 999) <= 45,
+  filter: (r) => (r.game?.playtime_minutes ?? 999) <= 45,
       },
       {
         id: 'medium',
         label: 'Best Medium Weight',
         description: '~46-90m play.',
         filter: (r) =>
-          (r.game.playtime_minutes ?? 0) > 45 &&
-          (r.game.playtime_minutes ?? 0) <= 100,
+          (r.game?.playtime_minutes ?? 0) > 45 &&
+          (r.game?.playtime_minutes ?? 0) <= 100,
       },
       {
         id: 'long',
         label: 'Best Long / Epic',
         description: 'Epic sessions.',
-        filter: (r) => (r.game.playtime_minutes ?? 0) > 100,
+  filter: (r) => (r.game?.playtime_minutes ?? 0) > 100,
       },
     ]
     return defs
@@ -251,15 +253,15 @@ export default function PersonalAwardsAuto() {
           .filter(def.filter)
           .slice(0, 10)
           .map((r) => ({
-            id: r.game.id,
-            name: r.game.name,
-            year_published: r.game.year_published,
-            image_url: r.game.image_url,
-            thumbnail_url: r.game.thumbnail_url,
-            honors: r.game.honors,
-            categories: r.game.categories,
-            min_players: r.game.min_players,
-            max_players: r.game.max_players,
+            id: r.game!.id,
+            name: r.game!.name,
+            year_published: r.game!.year_published,
+            image_url: r.game!.image_url,
+            thumbnail_url: r.game!.thumbnail_url,
+            honors: r.game!.honors,
+            categories: r.game!.categories,
+            min_players: r.game!.min_players,
+            max_players: r.game!.max_players,
             ranking: r.ranking,
             played_it: r.played_it,
           })),
