@@ -41,9 +41,13 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           BGG_LIST_OWNER_ID: ${{ secrets.BGG_LIST_OWNER_ID }}
         run: |
-          : # write secrets to .env (they must be configured in repo settings)
+          : # Validate required secrets are present and write .env (set in repo settings > Secrets and variables > Actions)
+          missing=0
+          if [ -z "$NEXT_PUBLIC_SUPABASE_URL" ]; then echo "::error::Missing secret NEXT_PUBLIC_SUPABASE_URL"; missing=1; fi
+          if [ -z "$SUPABASE_SERVICE_ROLE_KEY" ]; then echo "::error::Missing secret SUPABASE_SERVICE_ROLE_KEY"; missing=1; fi
+          if [ "$missing" -eq 1 ]; then echo "Required secrets missing. Configure them in GitHub > Settings > Secrets and variables > Actions."; exit 1; fi
           echo "NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL" >> .env
-          echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY" >> .env
+          if [ -n "$NEXT_PUBLIC_SUPABASE_ANON_KEY" ]; then echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY" >> .env; fi
           echo "SUPABASE_SERVICE_ROLE_KEY=$SUPABASE_SERVICE_ROLE_KEY" >> .env
           if [ -n "$BGG_LIST_OWNER_ID" ]; then echo "BGG_LIST_OWNER_ID=$BGG_LIST_OWNER_ID" >> .env; fi
       - name: Run chained backfill

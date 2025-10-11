@@ -3,6 +3,8 @@
 import { useEffect, useState, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import type { PlayLog } from '@/types/supabase'
+import { CalendarIcon } from '@heroicons/react/24/outline'
+import DateTimePicker from '@/components/Elements/DateTimePicker'
 
 interface PlayLogEditorProps {
   gameId: string
@@ -46,6 +48,7 @@ export function PlayLogEditor({
   const [isPublic, setIsPublic] = useState(editLog?.is_public ?? true)
 
   const notesRef = useRef<HTMLTextAreaElement>(null)
+  const dateTimeRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (autoFocus && notesRef.current) {
@@ -121,18 +124,11 @@ export function PlayLogEditor({
 
       {/* Date & Time */}
       <div>
-        <label
-          htmlFor="playedAt"
-          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-        >
-          Date & Time
-        </label>
-        <input
-          type="datetime-local"
+        <DateTimePicker
           id="playedAt"
+          label="Date & Time"
           value={playedAt}
-          onChange={(e) => setPlayedAt(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white"
+          onChange={setPlayedAt}
           required
         />
       </div>
