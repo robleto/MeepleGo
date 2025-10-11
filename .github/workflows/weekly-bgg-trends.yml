@@ -33,6 +33,15 @@ jobs:
         run: npm ci
       - name: Install Playwright Chromium
         run: npx playwright install --with-deps chromium
+      - name: Debug repo ref and scripts
+        run: |
+          echo "GITHUB_REF: $GITHUB_REF"
+          echo "GITHUB_SHA: $GITHUB_SHA"
+          echo "pwd: $(pwd)"
+          echo "List scripts/:"
+          ls -la scripts || true
+          echo "List scripts/database-maintenance/:"
+          ls -la scripts/database-maintenance || true
       - name: Generate .env from secrets
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
