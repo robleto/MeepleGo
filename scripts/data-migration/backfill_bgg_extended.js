@@ -163,6 +163,11 @@ async function fetchBGGXml(bggId, attempt = 1) {
       const backoff = Math.min(30000, 1000 * attempt * attempt)
       console.log(`⏳ Retry ${bggId} after ${backoff}ms (${e.message})`)
       await new Promise((r) => setTimeout(r, backoff))
+      if (attempt % 3 === 0) {
+        const extra = parseInt(process.env.BGG_COOLDOWN_MS || '0', 10) || 2000
+        console.log(`🧊 Applying cool-off ${extra}ms due to repeated 429s`)
+        await new Promise((r) => setTimeout(r, extra))
+      }
       return fetchBGGXml(bggId, attempt + 1)
     }
     console.log(`❌ Failed ${bggId}: ${e.message}`)

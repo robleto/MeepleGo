@@ -19,6 +19,15 @@ on:
         description: 'Skip extended phase'
         type: boolean
         required: false
+      throttleMs:
+        description: 'Throttle between batches (ms), default 500'
+        required: false
+      pageSize:
+        description: 'DB page size per batch, default 100'
+        required: false
+      budgetMinutes:
+        description: 'Time budget in minutes (exit gracefully before timeout), default 110'
+        required: false
 
 jobs:
   refresh:
@@ -61,10 +70,11 @@ jobs:
         env:
           # Conservative defaults tuned for BGG API to avoid 429s
           BGG_MAX_CONCURRENCY: ${{ github.event.inputs.concurrency || '2' }}
-          BGG_PAGE_SIZE: '100'
-          BGG_THROTTLE_MS: '500'
+          BGG_PAGE_SIZE: ${{ github.event.inputs.pageSize || '100' }}
+          BGG_THROTTLE_MS: ${{ github.event.inputs.throttleMs || '500' }}
+          BGG_COOLDOWN_MS: '2000'
           # Leave ~10 minutes headroom before the 120m job timeout
-          MAX_RUNTIME_MINUTES: '110'
+          MAX_RUNTIME_MINUTES: ${{ github.event.inputs.budgetMinutes || '110' }}
         run: |
           CMD="npm run backfill:all --"
           if [ -n "${{ github.event.inputs.limit }}" ]; then CMD="$CMD --limit ${{ github.event.inputs.limit }}"; fi

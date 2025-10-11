@@ -62,8 +62,9 @@ async function main() {
   requireEnv(['NEXT_PUBLIC_SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY'])
   const { limit, concurrency, skipTaglines, skipExtended } = parseArgs()
   const sharedArgs = []
-  if (limit) sharedArgs.push('--limit', String(limit))
-  if (concurrency) sharedArgs.push('--concurrency', String(concurrency))
+  // Child scripts expect --limit=N and --concurrency=N style flags
+  if (limit) sharedArgs.push(`--limit=${String(limit)}`)
+  if (concurrency) sharedArgs.push(`--concurrency=${String(concurrency)}`)
 
   if (!skipTaglines) {
     console.log('\n=== Phase 1: Taglines Backfill ===')

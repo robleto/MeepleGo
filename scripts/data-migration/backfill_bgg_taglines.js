@@ -106,6 +106,12 @@ async function fetchTagline(bggId, attempt = 1) {
       const wait = Math.min(30000, 1500 * attempt)
       console.log(`⏳ 429 for ${bggId}, waiting ${wait}ms (attempt ${attempt})`)
       await new Promise((r) => setTimeout(r, wait))
+      // simple cool-off when many 429s occur
+      if (attempt % 3 === 0) {
+        const extra = parseInt(process.env.BGG_COOLDOWN_MS || '0', 10) || 2000
+        console.log(`🧊 Applying cool-off ${extra}ms due to repeated 429s`)
+        await new Promise((r) => setTimeout(r, extra))
+      }
       return fetchTagline(bggId, attempt + 1)
     }
     if (!res.ok) {
