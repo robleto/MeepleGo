@@ -1,13 +1,12 @@
 import PageLayout from '@/components/Components/PageLayout'
-import Link from 'next/link'
-import Hero from '@/components/Components/Hero'
+import HeroServer from '@/components/Components/HeroServer'
 import HomepageContent from './HomepageContent'
 
 export default function HomePage() {
   return (
     <PageLayout>
-      {/* Hero Section */}
-      <Hero
+      {/* Hero Section - Server Component for better performance */}
+      <HeroServer
         title="Your Personal Board Game Universe"
         subtitle="Track your collection, rate experiences, create awards, and discover your next favorite game. MeepleGo transforms how you engage with your board game hobby."
         steps={[

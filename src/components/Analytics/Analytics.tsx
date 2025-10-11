@@ -10,23 +10,23 @@ export default function Analytics() {
 
   return (
     <>
-      {/* Umami Analytics */}
+      {/* Umami Analytics - Load with lower priority to reduce impact on performance metrics */}
       {process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID && process.env.NEXT_PUBLIC_UMAMI_URL && (
         <Script
           src={`${process.env.NEXT_PUBLIC_UMAMI_URL}/script.js`}
           data-website-id={process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID}
-          strategy="afterInteractive"
+          strategy="lazyOnload"
         />
       )}
       
-      {/* Google Analytics (optional) */}
+      {/* Google Analytics (optional) - Load with lower priority */}
       {process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID && (
         <>
           <Script
             src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID}`}
-            strategy="afterInteractive"
+            strategy="lazyOnload"
           />
-          <Script id="google-analytics" strategy="afterInteractive">
+          <Script id="google-analytics" strategy="lazyOnload">
             {`
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments);}
@@ -37,13 +37,13 @@ export default function Analytics() {
         </>
       )}
       
-      {/* Plausible Analytics (optional) */}
+      {/* Plausible Analytics (optional) - Load with lower priority */}
       {process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN && (
         <Script
           defer
           data-domain={process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN}
           src="https://plausible.io/js/script.js"
-          strategy="afterInteractive"
+          strategy="lazyOnload"
         />
       )}
     </>

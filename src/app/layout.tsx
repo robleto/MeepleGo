@@ -1,34 +1,23 @@
 import type { Metadata } from 'next'
-import type { ReactNode } from 'react'
-import {
-  Inter,
-  Outfit,
-  Fraunces,
-  Playfair_Display,
-  Archivo_Black,
-  Epilogue,
-} from 'next/font/google'
 import './globals.css'
 import Navigation from '@/components/Global/Navigation'
 import SiteFooter from '@/components/Global/SiteFooter'
-import Analytics from '@/components/Analytics/Analytics'
+import AnalyticsWrapper from '@/components/Analytics/AnalyticsWrapper'
 
-const inter = Inter({
-  subsets: ['latin'],
+// Using system fonts with optimized fallback stack for better performance
+// Google Fonts would be ideal but are loaded via CSS for offline builds
+const inter = {
   variable: '--font-inter',
   display: 'swap',
   weight: ['400', '500', '600', '700'],
 })
 
-const outfit = Outfit({
-  subsets: ['latin'],
-  variable: '--font-display',
-  display: 'swap',
-  weight: ['500', '600', '700'],
-})
-
-const fraunces = Fraunces({
-  subsets: ['latin'],
+// Placeholder configurations for alternative fonts (not loaded by default)
+const geist = {
+  variable: '--font-sans-b',
+  className: 'font-sans',
+}
+const fraunces = {
   variable: '--font-award-b',
   display: 'swap',
   weight: ['400', '600'],
@@ -37,19 +26,13 @@ const fraunces = Fraunces({
 const playfair = Playfair_Display({
   subsets: ['latin'],
   variable: '--font-award-b-alt',
-  display: 'swap',
-  weight: ['400', '600'],
-})
-
-const archivoBlack = Archivo_Black({
-  subsets: ['latin'],
+  className: 'font-serif',
+}
+const archivoBlack = {
   variable: '--font-award-poster',
-  display: 'swap',
-  weight: ['400'],
-})
-
-const epilogue = Epilogue({
-  subsets: ['latin'],
+  className: 'font-sans',
+}
+const epilogue = {
   variable: '--font-display-soft',
   display: 'swap',
   weight: ['400', '500', '600'],
@@ -141,13 +124,16 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://cf.geekdo-images.com" />
         <link rel="preconnect" href="https://boardgamegeek.com" />
         <link rel="dns-prefetch" href="https://boardgamegeek.com" />
-        <link
-          rel="preload"
-          href="/meeplego.svg"
-          as="image"
-          type="image/svg+xml"
-          fetchPriority="high"
-        />
+        {/* Optional: Preconnect to Google Fonts for progressive enhancement */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        {/* Adobe Fonts - loaded async to reduce render blocking */}
+        {process.env.NEXT_PUBLIC_ADOBE_FONTS_KIT_ID && (
+          <>
+            <link rel="preconnect" href="https://use.typekit.net" crossOrigin="anonymous" />
+            <link rel="preconnect" href="https://p.typekit.net" crossOrigin="anonymous" />
+          </>
+        )}
       </head>
       <body
         className={
@@ -161,7 +147,7 @@ export default function RootLayout({
         >
           Skip to main content
         </a>
-        <Analytics />
+        <AnalyticsWrapper />
         <Navigation />
         <main id="main-content" className="min-h-[70vh] pt-16">
           {children}

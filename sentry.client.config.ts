@@ -7,14 +7,14 @@ import * as Sentry from '@sentry/nextjs'
 Sentry.init({
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
 
-  // Adjust this value in production, or use tracesSampler for greater control
-  tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
+  // Reduced sampling for better performance - only track 5% of transactions in production
+  tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.05 : 1.0,
 
   // Setting this option to true will print useful information to the console while you're setting up Sentry.
   debug: process.env.NODE_ENV === 'development',
 
-  // Capture 100% of the sessions in development, but only 10% in production
-  replaysSessionSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
+  // Reduced session replay to 5% in production to minimize performance impact
+  replaysSessionSampleRate: process.env.NODE_ENV === 'production' ? 0.05 : 1.0,
 
   // If the entire session is not sampled, use the below sample rate to sample
   // sessions when an error occurs.
@@ -48,6 +48,10 @@ Sentry.init({
 
   integrations: [
     Sentry.browserTracingIntegration(),
-    Sentry.replayIntegration(),
+    Sentry.replayIntegration({
+      // Mask all text and block all media by default for privacy and performance
+      maskAllText: true,
+      blockAllMedia: true,
+    }),
   ],
 })
