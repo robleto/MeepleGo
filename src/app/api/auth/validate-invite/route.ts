@@ -73,11 +73,8 @@ export async function PUT(req: Request) {
 
     const supabase = await getSupabaseServerClient()
     
-    // Increment usage counter
-    const { error } = await supabase
-      .from('invite_codes')
-      .update({ current_uses: supabase.raw('current_uses + 1') as any })
-      .eq('code', code)
+    // Increment usage counter via RPC to ensure atomic update
+    const { error } = await supabase.rpc('increment_invite_uses', { p_code: code })
 
     if (error) {
       console.error('Error incrementing invite code usage:', error)

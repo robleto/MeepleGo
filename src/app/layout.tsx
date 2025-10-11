@@ -1,42 +1,13 @@
 import type { Metadata } from 'next'
+import type { ReactNode } from 'react'
 import './globals.css'
 import Navigation from '@/components/Global/Navigation'
 import SiteFooter from '@/components/Global/SiteFooter'
 import AnalyticsWrapper from '@/components/Analytics/AnalyticsWrapper'
 
-// Using system fonts with optimized fallback stack for better performance
-// Google Fonts would be ideal but are loaded via CSS for offline builds
-const inter = {
-  variable: '--font-inter',
-  display: 'swap',
-  weight: ['400', '500', '600', '700'],
-})
-
-// Placeholder configurations for alternative fonts (not loaded by default)
-const geist = {
-  variable: '--font-sans-b',
-  className: 'font-sans',
-}
-const fraunces = {
-  variable: '--font-award-b',
-  display: 'swap',
-  weight: ['400', '600'],
-})
-
-const playfair = Playfair_Display({
-  subsets: ['latin'],
-  variable: '--font-award-b-alt',
-  className: 'font-serif',
-}
-const archivoBlack = {
-  variable: '--font-award-poster',
-  className: 'font-sans',
-}
-const epilogue = {
-  variable: '--font-display-soft',
-  display: 'swap',
-  weight: ['400', '500', '600'],
-})
+// Using system fonts with optimized fallback stack for better performance.
+// If you want to add Next.js font loaders, wire them explicitly and add their
+// .variable classes to the <html> element. For now, keep it simple/minimal.
 
 export const metadata: Metadata = {
   title: {
@@ -109,14 +80,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={[
-        inter.variable,
-        outfit.variable,
-        fraunces.variable,
-        playfair.variable,
-        archivoBlack.variable,
-        epilogue.variable,
-      ].join(' ')}
+      className={''}
     >
       <head>
         {/* Preconnect to external image domains for performance */}
