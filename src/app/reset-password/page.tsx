@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useAuthErrorMessage } from '@/hooks/useAuthErrorMessage'
+import { trackEvent } from '@/lib/analytics'
+import { captureError } from '@/lib/errorTracking'
 import AuthLayout from '@/components/Components/AuthLayout'
 import Alert from '@/components/Components/Alert'
 
@@ -41,8 +43,13 @@ export default function ResetPasswordPage() {
     if (error) {
       if (process.env.NODE_ENV === 'development')
         console.error('Reset password error:', error)
+      captureError(error, { context: 'reset_password', email })
       return setError(error.message)
     }
+    
+    // Track password reset requested
+    trackEvent('reset_requested', { email })
+    
     setMessage(
       `If an account exists, you will receive an email shortly. Check that the redirect URL (${redirectUrl}) is configured in your Supabase project settings.`
     )

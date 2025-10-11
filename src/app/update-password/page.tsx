@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+import { trackEvent } from '@/lib/analytics'
+import { captureError } from '@/lib/errorTracking'
 import AuthLayout from '@/components/Components/AuthLayout'
 import Alert from '@/components/Components/Alert'
 import { useAuthErrorMessage } from '@/hooks/useAuthErrorMessage'
@@ -43,7 +45,14 @@ export default function UpdatePasswordPage() {
     setLoading(true)
     const { error } = await supabase.auth.updateUser({ password })
     setLoading(false)
-    if (error) return setError(error.message)
+    if (error) {
+      captureError(error, { context: 'update_password' })
+      return setError(error.message)
+    }
+    
+    // Track password updated
+    trackEvent('password_updated')
+    
     setMessage('Your password has been updated.')
     setTimeout(() => router.push('/login'), 1500)
   }
