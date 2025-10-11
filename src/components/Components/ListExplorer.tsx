@@ -65,6 +65,11 @@ export default function ListExplorer({
   getListItemControls,
   onReorder,
 }: ListExplorerProps) {
+  // Sanitize incoming games to avoid runtime errors when upstream provides nulls
+  const safeGames = useMemo(
+    () => (games || []).filter((g): g is GameWithRanking => !!g && !!(g as any).id),
+    [games]
+  )
   const hasExplicitListOrder = hasExplicitOrder
   const liveRegionRef = useRef<HTMLDivElement | null>(null)
   const [showFilters, setShowFilters] = useState(false)
@@ -102,7 +107,7 @@ export default function ListExplorer({
     uniqueMechanics,
     searchTerm,
     setSearchTerm,
-  } = useGameFilters(games, {
+  } = useGameFilters(safeGames, {
     disableClientSorting: hasExplicitListOrder,
     defaultViewMode: 'list',
     storageKey: 'listViewMode',
@@ -145,14 +150,15 @@ export default function ListExplorer({
   const membershipMap = useMemo(() => {
     if (!contextualMembership) return {}
     const map: Record<string, { library: boolean; wishlist: boolean }> = {}
-    games.forEach((g) => {
+    safeGames.forEach((g) => {
+      if (!g?.id) return
       map[g.id] = {
         library: contextualMembership.library?.has(g.id) || false,
         wishlist: contextualMembership.wishlist?.has(g.id) || false,
       }
     })
     return map
-  }, [contextualMembership, games])
+  }, [contextualMembership, safeGames])
 
   if (!hasMounted) {
     return (
@@ -231,7 +237,7 @@ export default function ListExplorer({
             )}
             {viewMode === 'grid' ? (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-                {group.map((game, idx) => {
+                {group.filter((g) => !!g && (g as any).id).map((game, idx) => {
                   const membership =
                     (membershipMap as any)[game.id] || game.list_membership
                   const rank =
@@ -278,8 +284,8 @@ export default function ListExplorer({
                       }
                     }}
                   >
-                    <SortableContext items={group.map((g) => g.id)}>
-                      {group.map((game, idx) => {
+                    <SortableContext items={group.filter((g) => !!g && (g as any).id).map((g) => g.id)}>
+                      {group.filter((g) => !!g && (g as any).id).map((game, idx) => {
                         const membership =
                           (membershipMap as any)[game.id] || game.list_membership
                         const rank =
@@ -312,7 +318,7 @@ export default function ListExplorer({
                     </SortableContext>
                   </DndContext>
                 ) : (
-                  group.map((game, idx) => {
+                  group.filter((g) => !!g && (g as any).id).map((game, idx) => {
                   const membership =
                     (membershipMap as any)[game.id] || game.list_membership
                   const rank =
