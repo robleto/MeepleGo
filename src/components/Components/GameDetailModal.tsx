@@ -105,8 +105,7 @@ export default function GameDetailModal({
   const [taxonTab, setTaxonTab] = useState<'categories' | 'mechanics'>(
     'categories'
   )
-  const [showListPopover, setShowListPopover] = useState(false)
-  const listPopoverRef = useRef<HTMLDivElement | null>(null)
+  // Removed legacy list popover state to reduce DOM/listeners
 
   // Extended BGG metadata / relations
   const [familyCodes, setFamilyCodes] = useState<string[]>(
@@ -250,20 +249,7 @@ export default function GameDetailModal({
     fetchLists()
   }, [activeSection, game.id])
 
-  // Close list popover on outside click
-  useEffect(() => {
-    function handleClick(e: MouseEvent) {
-      if (
-        showListPopover &&
-        listPopoverRef.current &&
-        !listPopoverRef.current.contains(e.target as any)
-      ) {
-        setShowListPopover(false)
-      }
-    }
-    if (showListPopover) document.addEventListener('mousedown', handleClick)
-    return () => document.removeEventListener('mousedown', handleClick)
-  }, [showListPopover])
+  // (List popover outside-click handler removed)
 
   const toggleListMembership = async (listId: string) => {
     const inSet = listMembership.has(listId)
@@ -624,9 +610,7 @@ export default function GameDetailModal({
                 {/* Played / Log Play moved to actions row */}
               </div>
             </div>
-            <div className="flex-1 min-w-0 flex flex-col gap-4">
-              <div className="flex flex-col gap-4">
-                <div className="flex flex-col gap-3">
+            <div className="flex-1 min-w-0 flex flex-col gap-3">
                   <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-2 flex-wrap mr-20">
                       <h1
@@ -770,10 +754,8 @@ export default function GameDetailModal({
                     </p>
                   )}
                 </div>
-              </div>
             </div>
           </div>
-        </div>{' '}
         {/* end header */}
         {/* Main content area with nav + sections */}
         <div className="flex-1 overflow-y-auto px-8 pb-8 pt-6">

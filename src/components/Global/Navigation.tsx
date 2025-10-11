@@ -116,19 +116,21 @@ function SuggestionItem({
     return <>{parts}</>
   }
   return (
-    <div id={`nav-sugg-${index}`} role="option" aria-selected={active}>
-      <button
-        type="button"
-        onMouseEnter={onHover}
-        onMouseDown={(e) => e.preventDefault()}
-        onClick={() => onSelect(game)}
-        className={cn(
-          'w-full flex items-center gap-4 px-6 py-3 text-left transition-colors',
-          active
-            ? 'bg-primary-50 dark:bg-primary-900/30'
-            : 'hover:bg-gray-50 dark:hover:bg-gray-800/60'
-        )}
-      >
+    <button
+      id={`nav-sugg-${index}`}
+      role="option"
+      aria-selected={active}
+      type="button"
+      onMouseEnter={onHover}
+      onMouseDown={(e) => e.preventDefault()}
+      onClick={() => onSelect(game)}
+      className={cn(
+        'w-full flex items-center gap-4 px-6 py-3 text-left transition-colors',
+        active
+          ? 'bg-primary-50 dark:bg-primary-900/30'
+          : 'hover:bg-gray-50 dark:hover:bg-gray-800/60'
+      )}
+    >
         {game.thumbnail_url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -154,8 +156,7 @@ function SuggestionItem({
             )}
           </div>
         </div>
-      </button>
-    </div>
+    </button>
   )
 }
 

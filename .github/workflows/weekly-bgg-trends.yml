@@ -31,6 +31,8 @@ jobs:
           cache: 'npm'
       - name: Install deps
         run: npm ci
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
       - name: Generate .env from secrets
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
@@ -51,8 +53,19 @@ jobs:
           CONCURRENCY: ${{ github.event.inputs.concurrency || 4 }}
           DRY_RUN: ${{ github.event.inputs.dryRun }}
         run: |
-          CMD="node scripts/sync_bgg_trends_playwright.js --timeout-ms=$TIMEOUT_MS --concurrency=$CONCURRENCY"
-          if [ "$DRY_RUN" = 'true' ]; then CMD="$CMD --dry-run"; fi
+          set -euo pipefail
+          # Validate required env
+          if [ -z "${NEXT_PUBLIC_SUPABASE_URL:-}" ] || [ -z "${SUPABASE_SERVICE_ROLE_KEY:-}" ]; then
+            echo "Missing required Supabase env vars; aborting." >&2
+            exit 1
+          fi
+          # Prefer top-level wrapper; fallback to nested path if needed
+          SCRIPT="scripts/sync_bgg_trends_playwright.js"
+          if [ ! -f "$SCRIPT" ]; then
+            SCRIPT="scripts/database-maintenance/sync_bgg_trends_playwright.js"
+          fi
+          CMD="node $SCRIPT --timeout-ms=$TIMEOUT_MS --concurrency=$CONCURRENCY"
+          if [ "${DRY_RUN:-}" = 'true' ]; then CMD="$CMD --dry-run"; fi
           echo "Running: $CMD"
           eval $CMD
       - name: Summary artifact
