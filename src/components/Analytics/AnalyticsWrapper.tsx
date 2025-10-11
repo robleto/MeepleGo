@@ -1,10 +1,9 @@
 'use client'
-import dynamic from 'next/dynamic'
 
-// Lazy load Analytics component - not needed for initial render
-const Analytics = dynamic(() => import('@/components/Analytics/Analytics'), {
-  ssr: false,
-})
+// Render Analytics in a client boundary without next/dynamic to avoid
+// App Router RSC bailouts. The component internally uses next/script
+// and already no-ops in non-production.
+import Analytics from '@/components/Analytics/Analytics'
 
 export default function AnalyticsWrapper() {
   return <Analytics />
