@@ -107,8 +107,11 @@ export default function ListCard({
   }
 
   // Get top 5 games for the fanned display
-  const topGames = list.game_list_items?.slice(0, 5) || []
-  const itemCount = list.game_list_items?.length || 0
+  // Guard against null items and missing game objects
+  const topGames = (list.game_list_items || [])
+    .filter((it: any) => it && it.game && it.game.id)
+    .slice(0, 5)
+  const itemCount = (list.game_list_items || []).filter((it: any) => it && it.game && it.game.id).length
 
   // Determine the correct route based on list type
   const slugify = (s: string) =>
@@ -139,14 +142,16 @@ export default function ListCard({
           <div className="absolute inset-0 flex items-center justify-center">
             {topGames.map((item, index) => {
               const game = item.game
-              const hasError = imageErrors.has(game.id)
+              const gid = game?.id as string
+              if (!gid) return null
+              const hasError = imageErrors.has(gid)
               const zIndex = topGames.length - index
               const rotation = (index - 2) * 8 // Center around index 2
               const xOffset = (index - 2) * 12
 
               return (
                 <div
-                  key={game.id}
+                  key={gid}
                   className="absolute w-16 h-20 rounded-md shadow-lg transition-transform group-hover:scale-105"
                   style={{
                     transform: `rotate(${rotation}deg) translateX(${xOffset}px)`,
@@ -158,12 +163,12 @@ export default function ListCard({
                       src={game.thumbnail_url}
                       alt={game.name}
                       className="w-full h-full object-cover rounded-md border-2 border-white dark:border-gray-600"
-                      onError={() => handleImageError(game.id)}
+                      onError={() => handleImageError(gid)}
                     />
                   ) : (
                     <div className="w-full h-full bg-gray-300 dark:bg-gray-600 rounded-md border-2 border-white dark:border-gray-600 flex items-center justify-center">
                       <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">
-                        {game.name.substring(0, 3).toUpperCase()}
+                        {(game.name || '?').substring(0, 3).toUpperCase()}
                       </span>
                     </div>
                   )}
