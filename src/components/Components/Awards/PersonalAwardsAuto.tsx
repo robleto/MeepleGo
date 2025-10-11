@@ -16,10 +16,12 @@ interface RankingRow {
     image_url?: string | null
     thumbnail_url?: string | null
     categories: string[] | null
+    mechanics?: string[] | null
+    playtime_minutes?: number | null
     min_players: number | null
     max_players: number | null
     honors?: any[] | null
-  }
+  } | null
 }
 
 export default function PersonalAwardsAuto() {
@@ -42,7 +44,7 @@ export default function PersonalAwardsAuto() {
       const { data } = await supabase
         .from('rankings')
         .select(
-          'game_id, ranking, played_it, games:game_id ( id, name, year_published, image_url, thumbnail_url, categories, min_players, max_players, honors )'
+          'game_id, ranking, played_it, games:game_id ( id, name, year_published, image_url, thumbnail_url, categories, mechanics, playtime_minutes, min_players, max_players, honors )'
         )
         .eq('user_id', session.user.id)
       if (!cancelled && data) setRows(data as any)
