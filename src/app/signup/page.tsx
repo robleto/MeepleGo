@@ -11,15 +11,32 @@ export default function SignUpPage() {
   const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [inviteCode, setInviteCode] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
+  const [validatingCode, setValidatingCode] = useState(false)
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
     setMessage(null)
     setLoading(true)
+    
+    // Validate invite code first
+    setValidatingCode(true)
+    const codeValidation = await fetch('/api/auth/validate-invite', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code: inviteCode }),
+    })
+    const codeResult = await codeValidation.json()
+    setValidatingCode(false)
+    
+    if (!codeResult.valid) {
+      setLoading(false)
+      return setError(codeResult.error || 'Invalid invite code')
+    }
     
     // Track signup start
     trackEvent('signup_start', { method: 'email' })
@@ -29,14 +46,30 @@ export default function SignUpPage() {
       password,
       options: {
         emailRedirectTo: `${window.location.origin}/auth/callback`,
+        data: {
+          invite_code_used: inviteCode.toUpperCase(),
+        },
       },
     })
-    setLoading(false)
+    
     if (error) {
       captureError(error, { context: 'signup', email })
+      setLoading(false)
       return setError(error.message)
     }
-    if (data.user) setMessage('Check your email to confirm your account.')
+    
+    if (data.user) {
+      // Increment the invite code usage
+      await fetch('/api/auth/validate-invite', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: inviteCode }),
+      })
+      
+      setMessage('Check your email to confirm your account.')
+    }
+    
+    setLoading(false)
   }
 
   return (
@@ -47,7 +80,28 @@ export default function SignUpPage() {
         <span>By creating an account you agree to basic usage terms.</span>
       }
     >
+      <div className="mb-4 p-3 rounded-md bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+        <p className="text-sm text-blue-900 dark:text-blue-100">
+          🎲 MeepleGo is currently in private beta. You'll need an invite code to sign up.
+        </p>
+      </div>
       <form onSubmit={onSubmit} className="space-y-5">
+        <div className="space-y-1">
+          <label className="block text-xs font-medium uppercase tracking-wide text-gray-600 dark:text-gray-400">
+            Invite Code
+          </label>
+          <input
+            type="text"
+            value={inviteCode}
+            onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
+            required
+            placeholder="BETA2025"
+            className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 uppercase"
+          />
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            Enter your invite code to access the private beta
+          </p>
+        </div>
         <div className="space-y-1">
           <label className="block text-xs font-medium uppercase tracking-wide text-gray-600 dark:text-gray-400">
             Email
@@ -78,10 +132,10 @@ export default function SignUpPage() {
         {message && <p className="text-sm text-green-600">{message}</p>}
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || validatingCode}
           className="w-full inline-flex justify-center items-center px-4 py-2 rounded-md bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 transition-colors"
         >
-          {loading ? 'Creating…' : 'Sign up'}
+          {validatingCode ? 'Validating code…' : loading ? 'Creating…' : 'Sign up'}
         </button>
         <div className="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400 pt-1">
           <a

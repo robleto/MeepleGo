@@ -27,6 +27,7 @@ import {
   HeartIcon,
   XMarkIcon,
   PlusIcon,
+  ChatBubbleLeftIcon,
 } from '@heroicons/react/24/outline'
 
 // Dynamic imports for heavy components
@@ -783,6 +784,13 @@ function Navigation() {
                         <ListBulletIcon className="h-4 w-4 text-gray-400" />{' '}
                         Settings
                       </Link>
+                      <a
+                        href="mailto:feedback@meeplego.com?subject=MeepleGo%20Feedback"
+                        className="flex items-center gap-3 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                      >
+                        <ChatBubbleLeftIcon className="h-4 w-4 text-blue-600" />{' '}
+                        Send Feedback
+                      </a>
                       <div className="px-4 pt-3 pb-2">
                         <div className="text-[10px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2">
                           Theme

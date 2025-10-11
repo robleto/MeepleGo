@@ -89,6 +89,14 @@ export default function SiteFooter() {
                 Import
               </Link>
             </li>
+            <li>
+              <a
+                href="mailto:feedback@meeplego.com?subject=MeepleGo%20Feedback"
+                className="hover:text-gray-900 dark:hover:text-gray-200 transition text-blue-600 dark:text-blue-400"
+              >
+                Send Feedback
+              </a>
+            </li>
           </ul>
         </div>
         <div>
