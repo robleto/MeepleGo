@@ -69,10 +69,19 @@ const sentryConfig = {
   },
 }
 
-// Bundle analyzer configuration
-const withBundleAnalyzer = require('@next/bundle-analyzer')({
-  enabled: process.env.ANALYZE === 'true',
-})
+// Bundle analyzer configuration (optional in dev)
+let withBundleAnalyzer = (cfg) => cfg
+if (process.env.ANALYZE === 'true') {
+  try {
+    withBundleAnalyzer = require('@next/bundle-analyzer')({
+      enabled: true,
+    })
+  } catch (e) {
+    console.warn(
+      "@next/bundle-analyzer not installed; skipping analysis. Install it or set ANALYZE=false to silence this."
+    )
+  }
+}
 
 // Check if Sentry is configured before wrapping
 const shouldUseSentry = process.env.NEXT_PUBLIC_SENTRY_DSN && 
