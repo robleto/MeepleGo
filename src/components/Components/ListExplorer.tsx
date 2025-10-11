@@ -5,7 +5,7 @@ import FilterModal from '@/components/Components/FilterModal'
 import GameCard from '@/components/Components/GameCard'
 import supabase from '@/lib/supabase'
 import { GameWithRanking } from '@/types'
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useRef } from 'react'
 import {
   DndContext,
   PointerSensor,
@@ -66,6 +66,7 @@ export default function ListExplorer({
   onReorder,
 }: ListExplorerProps) {
   const hasExplicitListOrder = hasExplicitOrder
+  const liveRegionRef = useRef<HTMLDivElement | null>(null)
   const [showFilters, setShowFilters] = useState(false)
   const [cardVariant, setCardVariant] = useState<
     'detailed' | 'balanced' | 'compact'
@@ -267,6 +268,14 @@ export default function ListExplorer({
                       if (oldIndex === -1 || newIndex === -1) return
                       const reordered = arrayMove(ids, oldIndex, newIndex)
                       onReorder(reordered)
+                      // Announce reordering for screen readers
+                      if (liveRegionRef.current) {
+                        liveRegionRef.current.textContent = `Moved to position ${newIndex + 1}`
+                        // Clear message shortly after to avoid verbosity
+                        setTimeout(() => {
+                          if (liveRegionRef.current) liveRegionRef.current.textContent = ''
+                        }, 1000)
+                      }
                     }}
                   >
                     <SortableContext items={group.map((g) => g.id)}>
@@ -330,6 +339,13 @@ export default function ListExplorer({
                 )}
               </div>
             )}
+            {/* ARIA live region for announcements */}
+            <div
+              aria-live="polite"
+              aria-atomic="true"
+              className="sr-only"
+              ref={liveRegionRef}
+            />
           </div>
         ))}
       {!loading && !error && filteredGames.length === 0 && (

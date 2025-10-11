@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, Suspense, useMemo } from 'react'
+import { useState, Suspense, useMemo, useEffect } from 'react'
 import PageLayout from '@/components/Components/PageLayout'
 import { useGameDataWithGuest } from '@/utils/sharedGameUtils'
 import { useRankingsFilters } from '@/utils/gameFilters'
@@ -11,10 +11,16 @@ import FilterModal from '@/components/Components/FilterModal'
 import Heading from '@/components/Components/Heading'
 import StatCard from '@/components/Elements/StatCard'
 import { StarIcon, ArrowTrendingUpIcon } from '@heroicons/react/24/outline'
+import supabase from '@/lib/supabase'
+import ListExplorer from '@/components/Components/ListExplorer'
 
 function RankingsPageContent() {
   const { games, loading, isGuest, updateGameRanking } = useGameDataWithGuest()
   const [showFilters, setShowFilters] = useState(false)
+  const [customOrderDefault, setCustomOrderDefault] = useState(false)
+  const [customOrder, setCustomOrder] = useState(false)
+  const [savingOrder, setSavingOrder] = useState<'idle' | 'saving' | 'saved'>('idle')
+  const [lastOrderSnapshot, setLastOrderSnapshot] = useState<string[] | null>(null)
 
   // Filter only games that have rankings
   const rankedGames = games.filter(
@@ -78,6 +84,41 @@ function RankingsPageContent() {
       totalRated: ratingsArray.length,
     }
   }, [rankedGames])
+
+  // Load user preference + explicit order mapping
+  const [orderedGameIds, setOrderedGameIds] = useState<string[] | null>(null)
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+      if (!session) return
+      const userId = session.user.id
+      // Load preference
+      const { data: prefs } = await supabase
+        .from('user_preferences')
+        .select('rankings_custom_order_enabled')
+        .eq('user_id', userId)
+        .maybeSingle()
+      const enabled = !!prefs?.rankings_custom_order_enabled
+      if (!cancelled) {
+        setCustomOrderDefault(enabled)
+        setCustomOrder(enabled)
+      }
+      // Load order
+      const { data: orderRows } = await supabase
+        .from('ranking_order')
+        .select('game_id, position')
+        .eq('user_id', userId)
+        .order('position', { ascending: true })
+      const ids = (orderRows || []).map((r) => r.game_id)
+      if (!cancelled) setOrderedGameIds(ids.length ? ids : null)
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   if (loading) {
     return (
@@ -165,47 +206,119 @@ function RankingsPageContent() {
           </div>
         )}
 
-        {groupedGames.map((section) => (
-          <div key={section.key} className="mb-10">
-            {groupedGames.length > 1 && (
-              <div className="mb-4">
-                <h2 className="text-xl font-semibold text-gray-900">
-                  {section.key}
-                </h2>
-                <div className="text-sm text-gray-500">
-                  {section.games.length}{' '}
-                  {section.games.length === 1 ? 'game' : 'games'}
-                </div>
-              </div>
-            )}
-            {viewMode === 'list' ? (
-              <div className="bg-white border divide-y rounded-lg">
-                {section.games.map((g, i) => (
-                  <GameRowCard
-                    key={g.id}
-                    game={g}
-                    index={i}
-                    onUpdate={updateGameRanking}
+        {/* Editor header with Custom Order toggle, saving indicator, Reset/Undo */}
+        <div className="flex items-start justify-between gap-4 flex-wrap mb-3">
+          <div />
+          <div className="ml-auto pt-1 text-xs text-gray-600">
+            <div className="inline-flex items-center gap-3 select-none">
+              <label className="inline-flex items-center gap-2 select-none">
+                <span>Custom Order</span>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    const next = !customOrder
+                    setCustomOrder(next)
+                    setCustomOrderDefault(next)
+                    setSavingOrder('saving')
+                    const {
+                      data: { session },
+                    } = await supabase.auth.getSession()
+                    if (!session) return
+                    await fetch('/api/rankings/reorder', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ gameIds: orderedGameIds || rankedGames.map((g) => g.id), enableCustomOrder: next }),
+                    })
+                    setSavingOrder('saved')
+                    setTimeout(() => setSavingOrder('idle'), 1200)
+                  }}
+                  className={`relative inline-flex items-center h-5 w-9 rounded-full border transition-colors ${customOrder ? 'bg-sky-600 border-sky-600' : 'bg-gray-200 border-gray-300'}`}
+                  aria-pressed={customOrder}
+                  aria-label="Toggle custom order"
+                >
+                  <span
+                    className={`inline-block h-4 w-4 bg-white rounded-full shadow transform transition-transform ${customOrder ? 'translate-x-4' : 'translate-x-0.5'}`}
                   />
-                ))}
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-                {section.games.map((g) => (
-                  <GameCard
-                    key={g.id}
-                    game={g}
-                    viewMode="grid"
-                    variant="balanced"
-                    // Rankings page simplified membership placeholder
-                    onMembershipChange={() => {}}
-                    // Provide ranking update: GameCard may not expose direct ranking UI; rating edits happen via list mode for now
-                  />
-                ))}
-              </div>
-            )}
+                </button>
+              </label>
+              {savingOrder !== 'idle' && (
+                <span className="text-xs text-gray-500">
+                  {savingOrder === 'saving' ? 'Saving…' : 'Saved'}
+                </span>
+              )}
+              {customOrder && (
+                <button
+                  className="text-xs text-gray-600 hover:text-gray-900 underline"
+                  onClick={async () => {
+                    setSavingOrder('saving')
+                    await fetch('/api/rankings/reorder', { method: 'PUT' })
+                    setOrderedGameIds(null)
+                    setSavingOrder('saved')
+                    setTimeout(() => setSavingOrder('idle'), 1200)
+                  }}
+                >
+                  Reset to default
+                </button>
+              )}
+              {customOrder && lastOrderSnapshot && (
+                <button
+                  className="text-xs text-gray-600 hover:text-gray-900 underline"
+                  onClick={async () => {
+                    if (!lastOrderSnapshot) return
+                    setSavingOrder('saving')
+                    await fetch('/api/rankings/reorder', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ gameIds: lastOrderSnapshot }),
+                    })
+                    setOrderedGameIds(lastOrderSnapshot)
+                    setLastOrderSnapshot(null)
+                    setSavingOrder('saved')
+                    setTimeout(() => setSavingOrder('idle'), 1200)
+                  }}
+                >
+                  Undo last reorder
+                </button>
+              )}
+            </div>
           </div>
-        ))}
+        </div>
+
+        {/* ListExplorer with DnD when custom order is enabled */}
+        <ListExplorer
+          games={(() => {
+            const base = [...rankedGames]
+            if (customOrder && orderedGameIds && orderedGameIds.length) {
+              const byId = new Map(base.map((g) => [g.id, g]))
+              const ordered = orderedGameIds.map((id) => byId.get(id)).filter(Boolean) as typeof rankedGames
+              const remaining = base.filter((g) => !orderedGameIds.includes(g.id))
+              return [...ordered, ...remaining]
+            }
+            return base
+          })()}
+          header={null}
+          emptyMessage={{ title: 'No ranked games yet.' }}
+          showListRanking={customOrder ? true : false}
+          hasExplicitOrder={customOrder}
+          onRankingUpdate={updateGameRanking}
+          onReorder={
+            customOrder
+              ? async (ids: string[]) => {
+                  // snapshot previous order for undo once per session toggle
+                  if (!lastOrderSnapshot) setLastOrderSnapshot(orderedGameIds || rankedGames.map((g) => g.id))
+                  setOrderedGameIds(ids)
+                  setSavingOrder('saving')
+                  await fetch('/api/rankings/reorder', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ gameIds: ids }),
+                  })
+                  setSavingOrder('saved')
+                  setTimeout(() => setSavingOrder('idle'), 1200)
+                }
+              : undefined
+          }
+        />
 
         {/* FilterModal */}
         <FilterModal

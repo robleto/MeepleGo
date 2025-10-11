@@ -54,6 +54,8 @@ export default function ListDetailPage() {
   const [editing, setEditing] = useState(false)
   const [customOrderDefault, setCustomOrderDefault] = useState<boolean>(false)
   const [customOrder, setCustomOrder] = useState<boolean>(false)
+  const [savingOrder, setSavingOrder] = useState<'idle' | 'saving' | 'saved'>('idle')
+  const [lastOrderSnapshot, setLastOrderSnapshot] = useState<string[] | null>(null)
 
   useEffect(() => {
     if (!listId) return
@@ -63,7 +65,7 @@ export default function ListDetailPage() {
       setNotFound(false)
       const { data, error } = await supabase
         .from('game_lists')
-        .select(`*, game_list_items(*, game:games(*))`)
+        .select(`*, custom_order_enabled, game_list_items(*, game:games(*))`)
         .eq('id', listId)
         .maybeSingle()
       if (!cancelled) {
@@ -78,6 +80,9 @@ export default function ListDetailPage() {
           setNotFound(true)
         } else {
           setList(data as any)
+          const dbCustom = !!(data as any).custom_order_enabled
+          setCustomOrderDefault(dbCustom)
+          setCustomOrder(dbCustom)
           if (needsSlug) {
             // Construct slug (basic)
             const slug = (data.name || 'list')
@@ -191,34 +196,7 @@ export default function ListDetailPage() {
     }
   }, [showAddModal])
 
-  // Load and persist per-list custom order preference
-  useEffect(() => {
-    if (!listId) return
-    if (typeof window === 'undefined') return
-    const key = `list:${listId}:customOrder`
-    const stored = localStorage.getItem(key)
-    let enabled = stored === 'true'
-    if (stored === null) {
-      // Fallback: if any item has a non-null ranking, assume custom order exists
-      const hasRank = (list?.game_list_items || []).some(
-        (it: any) => typeof it.ranking === 'number'
-      )
-      enabled = hasRank
-    }
-    setCustomOrderDefault(enabled)
-    setCustomOrder(enabled)
-  }, [listId, list?.game_list_items])
-  useEffect(() => {
-    if (!listId) return
-    if (typeof window === 'undefined') return
-    const key = `list:${listId}:customOrder`
-    // Persist current choice while editing
-    if (editing) localStorage.setItem(key, String(customOrder))
-  }, [editing, customOrder, listId])
-  // Keep outside-edit default in sync with the current toggle while editing
-  useEffect(() => {
-    if (editing) setCustomOrderDefault(customOrder)
-  }, [customOrder, editing])
+  // If needed, we could keep localStorage as a fallback, but DB is now source of truth.
 
   if (!listId) {
     return (
@@ -514,20 +492,95 @@ export default function ListDetailPage() {
       {/* Custom Order toggle under the Updated date, shown only in Edit mode */}
       {editing && !isBgg && canEdit && (
         <div className="mt-3 text-xs text-gray-600">
-          <label className="inline-flex items-center gap-2 select-none">
-            <span>Custom Order</span>
-            <button
-              type="button"
-              onClick={() => setCustomOrder((v) => !v)}
-              className={`relative inline-flex items-center h-5 w-9 rounded-full border transition-colors ${customOrder ? 'bg-sky-600 border-sky-600' : 'bg-gray-200 border-gray-300'}`}
-              aria-pressed={customOrder}
-              aria-label="Toggle custom order"
-            >
-              <span
-                className={`inline-block h-4 w-4 bg-white rounded-full shadow transform transition-transform ${customOrder ? 'translate-x-4' : 'translate-x-0.5'}`}
-              />
-            </button>
-          </label>
+          <div className="inline-flex items-center gap-3 select-none">
+            <label className="inline-flex items-center gap-2 select-none">
+              <span>Custom Order</span>
+              <button
+                type="button"
+                onClick={async () => {
+                  if (!list) return
+                  const next = !customOrder
+                  setCustomOrder(next)
+                  setCustomOrderDefault(next)
+                  // optimistic
+                  setSavingOrder('saving')
+                  const { error } = await supabase
+                    .from('game_lists')
+                    .update({ custom_order_enabled: next })
+                    .eq('id', list.id)
+                  if (error) {
+                    setCustomOrder(!next)
+                    setCustomOrderDefault(!next)
+                  }
+                  setSavingOrder('saved')
+                  setTimeout(() => setSavingOrder('idle'), 1200)
+                }}
+                className={`relative inline-flex items-center h-5 w-9 rounded-full border transition-colors ${customOrder ? 'bg-sky-600 border-sky-600' : 'bg-gray-200 border-gray-300'}`}
+                aria-pressed={customOrder}
+                aria-label="Toggle custom order"
+              >
+                <span
+                  className={`inline-block h-4 w-4 bg-white rounded-full shadow transform transition-transform ${customOrder ? 'translate-x-4' : 'translate-x-0.5'}`}
+                />
+              </button>
+            </label>
+            {savingOrder !== 'idle' && (
+              <span className="text-xs text-gray-500">
+                {savingOrder === 'saving' ? 'Saving…' : 'Saved'}
+              </span>
+            )}
+            {customOrder && (
+              <button
+                className="text-xs text-gray-600 hover:text-gray-900 underline"
+                onClick={async () => {
+                  if (!list) return
+                  const snapshot = list.game_list_items
+                  // optimistic clear
+                  setList({ ...list, game_list_items: (list.game_list_items || []).map((it: any) => ({ ...it, ranking: null })) } as any)
+                  setSavingOrder('saving')
+                  const res = await fetch(`/api/lists/${list.id}/reorder`, { method: 'PUT' })
+                  if (!res.ok) {
+                    setList((prev) => (prev ? { ...prev, game_list_items: snapshot } as any : prev))
+                  }
+                  setSavingOrder('saved')
+                  setTimeout(() => setSavingOrder('idle'), 1200)
+                }}
+              >
+                Reset to default
+              </button>
+            )}
+            {customOrder && lastOrderSnapshot && (
+              <button
+                className="text-xs text-gray-600 hover:text-gray-900 underline"
+                onClick={async () => {
+                  if (!list || !lastOrderSnapshot) return
+                  const byGameId = new Map((list.game_list_items || []).map((it: any) => [it.game_id, it]))
+                  const orderedItemIds = lastOrderSnapshot
+                    .map((gid) => byGameId.get(gid)?.id)
+                    .filter(Boolean)
+                  // optimistic revert display
+                  const newItems: any[] = lastOrderSnapshot
+                    .map((gid, idx) => {
+                      const it = byGameId.get(gid)
+                      return it ? { ...it, ranking: idx + 1 } : null
+                    })
+                    .filter(Boolean)
+                  setList((prev) => (prev ? { ...prev, game_list_items: newItems as any } : prev))
+                  setSavingOrder('saving')
+                  await fetch(`/api/lists/${list.id}/reorder`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ itemIds: orderedItemIds }),
+                  })
+                  setLastOrderSnapshot(null)
+                  setSavingOrder('saved')
+                  setTimeout(() => setSavingOrder('idle'), 1200)
+                }}
+              >
+                Undo last reorder
+              </button>
+            )}
+          </div>
         </div>
       )}
       {!isBgg && canEdit && addError && (
@@ -569,23 +622,32 @@ export default function ListDetailPage() {
             canEdit && editing && customOrder && !isBgg
               ? async (ids: string[]) => {
                   if (!list) return
-                  // ids come ordered as new list order of game ids
-                  const current = [...sortedItems]
-                  const byGameId = new Map(current.map((it) => [it.game_id, it]))
-                  const newItems: GameListItemWithGame[] = []
-                  ids.forEach((gid, idx) => {
-                    const it = byGameId.get(gid)
-                    if (it) newItems.push({ ...it, ranking: idx + 1 })
-                  })
-                  // Optimistic update
-                  setList((prev) => (prev ? { ...prev, game_list_items: newItems as any } : prev))
-                  // Persist changes (batch update)
-                  for (const it of newItems) {
-                    await supabase
-                      .from('game_list_items')
-                      .update({ ranking: it.ranking })
-                      .eq('id', it.id)
+                  // snapshot previous order for potential undo
+                  if (!lastOrderSnapshot) {
+                    setLastOrderSnapshot(sortedItems.map((it) => it.game_id))
                   }
+                  // ids are ordered game IDs; map to item IDs
+                  const byGameId = new Map((list.game_list_items || []).map((it: any) => [it.game_id, it]))
+                  const orderedItemIds = ids.map((gid) => byGameId.get(gid)?.id).filter(Boolean)
+                  // Optimistic update
+                  const newItems: GameListItemWithGame[] = ids
+                    .map((gid, idx) => {
+                      const it = byGameId.get(gid)
+                      return it ? { ...it, ranking: idx + 1 } : null
+                    })
+                    .filter(Boolean) as any
+                  setList((prev) => (prev ? { ...prev, game_list_items: newItems as any } : prev))
+                  setSavingOrder('saving')
+                  const res = await fetch(`/api/lists/${list.id}/reorder`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ itemIds: orderedItemIds }),
+                  })
+                  if (!res.ok) {
+                    // Optional: refetch list for consistency
+                  }
+                  setSavingOrder('saved')
+                  setTimeout(() => setSavingOrder('idle'), 1200)
                 }
               : undefined
           }
