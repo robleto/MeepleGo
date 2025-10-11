@@ -27,6 +27,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Restore backfill state cache
+        uses: actions/cache@v4
+        with:
+          path: tmp
+          key: nightly-backfill-state-${{ github.run_id }}
+          restore-keys: |
+            nightly-backfill-state-
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -50,7 +57,14 @@ jobs:
           if [ -n "$NEXT_PUBLIC_SUPABASE_ANON_KEY" ]; then echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY" >> .env; fi
           echo "SUPABASE_SERVICE_ROLE_KEY=$SUPABASE_SERVICE_ROLE_KEY" >> .env
           if [ -n "$BGG_LIST_OWNER_ID" ]; then echo "BGG_LIST_OWNER_ID=$BGG_LIST_OWNER_ID" >> .env; fi
-      - name: Run chained backfill
+      - name: Run chained backfill (rate-limited)
+        env:
+          # Conservative defaults tuned for BGG API to avoid 429s
+          BGG_MAX_CONCURRENCY: ${{ github.event.inputs.concurrency || '2' }}
+          BGG_PAGE_SIZE: '100'
+          BGG_THROTTLE_MS: '500'
+          # Leave ~10 minutes headroom before the 120m job timeout
+          MAX_RUNTIME_MINUTES: '110'
         run: |
           CMD="npm run backfill:all --"
           if [ -n "${{ github.event.inputs.limit }}" ]; then CMD="$CMD --limit ${{ github.event.inputs.limit }}"; fi
@@ -59,3 +73,9 @@ jobs:
           if [ "${{ github.event.inputs.skipExtended }}" = 'true' ]; then CMD="$CMD --skip-extended"; fi
           echo "Running: $CMD"
           eval $CMD
+      - name: Save backfill state cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: tmp
+          key: nightly-backfill-state-${{ github.run_id }}

@@ -212,9 +212,25 @@ async function main() {
   let afterBggId = state.afterBggId
   let batches = state.batches
   const start = Date.now()
+  // Optional environment-controlled overrides (CI friendly)
+  if (process.env.BGG_MAX_CONCURRENCY && !process.argv.some((a) => a.startsWith('--concurrency='))) {
+    const c = parseInt(process.env.BGG_MAX_CONCURRENCY, 10)
+    if (Number.isFinite(c) && c >= 1) opts.concurrency = c
+  }
+  if (process.env.BGG_CHECKPOINT_INTERVAL && !process.argv.some((a) => a.startsWith('--checkpoint-interval='))) {
+    const ci = parseInt(process.env.BGG_CHECKPOINT_INTERVAL, 10)
+    if (Number.isFinite(ci) && ci >= 1) opts.checkpointInterval = ci
+  }
+  const budgetMinutes = parseInt(process.env.MAX_RUNTIME_MINUTES || '', 10)
+  const budgetMs = Number.isFinite(budgetMinutes) && budgetMinutes > 0 ? budgetMinutes * 60_000 : null
 
   while (true) {
     if (opts.limit !== null && processed >= opts.limit) break
+    if (budgetMs && Date.now() - start > budgetMs) {
+      console.log('⏳ Time budget reached, saving state and exiting gracefully')
+      saveState(opts.stateFile, { afterBggId, processed, updated, batches })
+      break
+    }
     const { data: batch, error } = await selectBatch(opts, afterBggId)
     if (error) {
       console.error('Query error:', error.message)
@@ -230,6 +246,8 @@ async function main() {
       batch.map(async (g) => {
         processed++
         if (opts.limit !== null && processed > opts.limit)
+          return { g, tagline: null, skipped: true }
+        if (budgetMs && Date.now() - start > budgetMs)
           return { g, tagline: null, skipped: true }
         console.log(`🔍 [${processed}] ${g.name} (BGG ${g.bgg_id})`)
         const tagline = await fetchTagline(g.bgg_id)

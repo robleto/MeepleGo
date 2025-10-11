@@ -78,6 +78,19 @@ function parseArgs() {
     else if (a.startsWith('--throttle-ms='))
       opts.throttleMs = Math.max(0, parseInt(a.split('=')[1], 10))
   }
+  // Environment overrides (non-breaking): allow CI to tune without changing CLI
+  if (process.env.BGG_MAX_CONCURRENCY && !process.argv.some((a) => a.startsWith('--concurrency='))) {
+    const c = parseInt(process.env.BGG_MAX_CONCURRENCY, 10)
+    if (Number.isFinite(c) && c >= 1) opts.concurrency = c
+  }
+  if (process.env.BGG_PAGE_SIZE && !process.argv.some((a) => a.startsWith('--page-size='))) {
+    const ps = parseInt(process.env.BGG_PAGE_SIZE, 10)
+    if (Number.isFinite(ps)) opts.pageSize = Math.min(500, Math.max(20, ps))
+  }
+  if (process.env.BGG_THROTTLE_MS && !process.argv.some((a) => a.startsWith('--throttle-ms='))) {
+    const t = parseInt(process.env.BGG_THROTTLE_MS, 10)
+    if (Number.isFinite(t) && t >= 0) opts.throttleMs = t
+  }
   return opts
 }
 
@@ -249,9 +262,17 @@ async function main() {
     attributeNamePrefix: '@_',
   })
   const start = Date.now()
+  // Optional time budget: exit gracefully before CI timeout
+  const budgetMinutes = parseInt(process.env.MAX_RUNTIME_MINUTES || '', 10)
+  const budgetMs = Number.isFinite(budgetMinutes) && budgetMinutes > 0 ? budgetMinutes * 60_000 : null
 
   while (true) {
     if (opts.limit !== null && processed >= opts.limit) break
+    if (budgetMs && Date.now() - start > budgetMs) {
+      console.log('⏳ Time budget reached, saving state and exiting gracefully')
+      saveState(opts.stateFile, { afterBggId, processed, updated })
+      break
+    }
     const { data: batch, error } = await fetchBatch(opts, afterBggId)
     if (error) {
       console.error('Query error:', error.message)
@@ -275,6 +296,7 @@ async function main() {
       await Promise.all(
         slice.map(async (row) => {
           if (opts.limit !== null && processed >= opts.limit) return
+          if (budgetMs && Date.now() - start > budgetMs) return
           processed++
           console.log(`🔍 [${processed}] ${row.name} (BGG ${row.bgg_id})`)
           const xml = await fetchBGGXml(row.bgg_id)
@@ -299,6 +321,11 @@ async function main() {
       )
       // Basic adaptive pause
       await new Promise((r) => setTimeout(r, opts.throttleMs))
+      if (budgetMs && Date.now() - start > budgetMs) {
+        console.log('⏳ Time budget reached during batch, saving state and exiting gracefully')
+        saveState(opts.stateFile, { afterBggId, processed, updated })
+        break
+      }
     }
 
     saveState(opts.stateFile, { afterBggId, processed, updated })
