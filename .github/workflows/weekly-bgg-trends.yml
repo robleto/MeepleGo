@@ -53,6 +53,24 @@ jobs:
           echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY" >> .env
           echo "SUPABASE_SERVICE_ROLE_KEY=$SUPABASE_SERVICE_ROLE_KEY" >> .env
           echo "BGG_LIST_OWNER_ID=$BGG_LIST_OWNER_ID" >> .env
+      - name: Preflight check import endpoint
+        shell: bash
+        env:
+          MEEPLEGO_BASE_URL: ${{ secrets.MEEPLEGO_BASE_URL }}
+          NEXT_PUBLIC_APP_URL: ${{ secrets.NEXT_PUBLIC_APP_URL }}
+        run: |
+          echo "Preflight diagnostics: determining BASE_URL from secrets"
+          BASE_URL="${MEEPLEGO_BASE_URL:-${NEXT_PUBLIC_APP_URL:-}}"
+          if [ -z "$BASE_URL" ]; then
+            echo "No BASE_URL provided via MEEPLEGO_BASE_URL or NEXT_PUBLIC_APP_URL. Skipping preflight curl."
+          else
+            echo "Testing root availability: $BASE_URL/"
+            ROOT_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$BASE_URL/" || true)
+            echo "GET / -> $ROOT_STATUS"
+            echo "Testing POST $BASE_URL/api/import-bgg (expecting 400 on invalid payload)"
+            IMPORT_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST -H "Content-Type: application/json" -d '{"bggId":"invalid"}' "$BASE_URL/api/import-bgg" || true)
+            echo "POST /api/import-bgg -> $IMPORT_STATUS"
+          fi
       - name: Run Playwright trend sync
         env:
           BGG_LIST_OWNER_ID: ${{ secrets.BGG_LIST_OWNER_ID }}
