@@ -8,12 +8,9 @@ import AnalyticsWrapper from '@/components/Analytics/AnalyticsWrapper'
 // Google Fonts would be ideal but are loaded via CSS for offline builds
 const inter = {
   variable: '--font-inter',
-  className: 'font-sans',
-}
-const outfit = {
-  variable: '--font-display',
-  className: 'font-sans',
-}
+  display: 'swap',
+  weight: ['400', '500', '600', '700'],
+})
 
 // Placeholder configurations for alternative fonts (not loaded by default)
 const geist = {
@@ -22,9 +19,12 @@ const geist = {
 }
 const fraunces = {
   variable: '--font-award-b',
-  className: 'font-serif',
-}
-const playfair = {
+  display: 'swap',
+  weight: ['400', '600'],
+})
+
+const playfair = Playfair_Display({
+  subsets: ['latin'],
   variable: '--font-award-b-alt',
   className: 'font-serif',
 }
@@ -34,8 +34,9 @@ const archivoBlack = {
 }
 const epilogue = {
   variable: '--font-display-soft',
-  className: 'font-sans',
-}
+  display: 'swap',
+  weight: ['400', '500', '600'],
+})
 
 export const metadata: Metadata = {
   title: {
@@ -103,7 +104,7 @@ export const metadata: Metadata = {
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: ReactNode
 }) {
   return (
     <html
@@ -111,7 +112,6 @@ export default function RootLayout({
       className={[
         inter.variable,
         outfit.variable,
-        geist.variable,
         fraunces.variable,
         playfair.variable,
         archivoBlack.variable,
@@ -137,7 +137,7 @@ export default function RootLayout({
       </head>
       <body
         className={
-          'font-sans min-h-screen text-gray-900 dark:text-white bg-white'
+          'font-sans min-h-screen bg-white text-gray-900 dark:text-white'
         }
       >
         {/* Skip to main content link for accessibility */}
@@ -149,7 +149,7 @@ export default function RootLayout({
         </a>
         <AnalyticsWrapper />
         <Navigation />
-        <main id="main-content" className="pt-16 min-h-[70vh]">
+        <main id="main-content" className="min-h-[70vh] pt-16">
           {children}
         </main>
         <SiteFooter />

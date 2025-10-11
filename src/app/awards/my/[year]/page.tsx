@@ -243,7 +243,37 @@ export default async function MyAwardsYearPage({
               Derived automatically from your rankings (played + rating ≥ 7)
             </p>
           </div>
-          <AwardsRebuildButtons year={Number(year)} />
+          <div className="flex items-center gap-4">
+            {/* Minimal Custom Order toggle persistence for awards-level preference */}
+            <form
+              action={`/api/awards/preferences`}
+              method="post"
+              onSubmit={(e) => e.preventDefault()}
+              className="hidden sm:block"
+            >
+              {/* Client JS will POST on click; SSR here stays inert */}
+              <button
+                type="button"
+                className="text-xs text-gray-600 hover:text-gray-900 underline"
+                onClick={async () => {
+                  try {
+                    const res = await fetch('/api/awards/preferences')
+                    const js = await res.json().catch(() => ({}))
+                    const next = !js?.awards_custom_order_enabled
+                    await fetch('/api/awards/preferences', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ awards_custom_order_enabled: next }),
+                    })
+                  } catch {}
+                }}
+                title="Toggle awards custom order preference"
+              >
+                Toggle Custom Order
+              </button>
+            </form>
+            <AwardsRebuildButtons year={Number(year)} />
+          </div>
         </div>
 
         <div className="grid gap-6 md:grid-cols-2">

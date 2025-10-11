@@ -15,13 +15,40 @@ const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
 
-// Test email addresses for major providers
-const TEST_EMAILS = [
-  'test+gmail@gmail.com',
-  'test+outlook@outlook.com',
-  'test+icloud@icloud.com',
-  'test+yahoo@yahoo.com',
-]
+function getArgValue(name) {
+  const prefix = `${name}=`
+  for (const arg of process.argv.slice(2)) {
+    if (arg.startsWith(prefix)) return arg.slice(prefix.length)
+  }
+  return null
+}
+
+const rawEmailList =
+  getArgValue('--emails') || process.env.DELIVERABILITY_TEST_EMAILS || ''
+const allowPlaceholders = process.argv.includes('--allow-placeholders')
+const cooldownMs = Number(getArgValue('--cooldown-ms') || '0')
+
+const TEST_EMAILS = Array.from(
+  new Set(
+    rawEmailList
+      .split(',')
+      .map((email) => email.trim())
+      .filter(Boolean)
+  )
+)
+
+function looksLikePlaceholder(email) {
+  const lowered = email.toLowerCase()
+  return (
+    lowered.includes('example.com') ||
+    lowered.includes('example.org') ||
+    lowered.includes('example.net') ||
+    lowered.startsWith('test+') ||
+    lowered.includes('@test.com') ||
+    lowered.includes('@test.co') ||
+    lowered.includes('no-reply@')
+  )
+}
 
 if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
   console.error('❌ Missing Supabase environment variables')
@@ -30,6 +57,21 @@ if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
 }
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+
+if (!TEST_EMAILS.length) {
+  console.error(
+    '❌ No deliverability test emails provided. Supply a comma-separated list via --emails="addr1,addr2" or DELIVERABILITY_TEST_EMAILS.'
+  )
+  process.exit(1)
+}
+
+if (!allowPlaceholders && TEST_EMAILS.some(looksLikePlaceholder)) {
+  console.error(
+    '❌ Detected placeholder-style addresses. Provide real inboxes or rerun with --allow-placeholders if intentional.'
+  )
+  TEST_EMAILS.forEach((email) => console.error(`   • ${email}`))
+  process.exit(1)
+}
 
 async function testEmailDeliverability() {
   console.log('🚀 Starting Email Deliverability Test for MeepleGo')
@@ -81,6 +123,13 @@ async function testEmailDeliverability() {
         )
       }
 
+      if (cooldownMs > 0) {
+        console.log(
+          `    ⏳ Waiting ${cooldownMs}ms before next test to satisfy rate limits...`
+        )
+        await new Promise((resolve) => setTimeout(resolve, cooldownMs))
+      }
+
       // Wait a bit between tests
       await new Promise((resolve) => setTimeout(resolve, 1000))
 
@@ -103,6 +152,13 @@ async function testEmailDeliverability() {
         testResult.timing.magicLink = Math.round(magicEnd - magicStart)
         testResult.tests.magicLink = 'Success - Check inbox for magic link'
         console.log(`    ✅ Magic link sent (${testResult.timing.magicLink}ms)`)
+      }
+
+      if (cooldownMs > 0) {
+        console.log(
+          `    ⏳ Waiting ${cooldownMs}ms before next test to satisfy rate limits...`
+        )
+        await new Promise((resolve) => setTimeout(resolve, cooldownMs))
       }
 
       // Wait a bit between tests
@@ -173,7 +229,8 @@ async function testEmailDeliverability() {
   console.log('  - Authentication-Results: dmarc=pass')
 
   console.log('\n🧹 CLEANUP')
-  console.log('Test users created - clean up with:')
+  console.log('Use `npm run cleanup:test-email-users -- --dry-run` to preview accounts before deletion.')
+  console.log('If you prefer manual SQL, remove the following users:')
   results.forEach((result) => {
     if (result.tests.signup && result.tests.signup.includes('Success')) {
       console.log(`  DELETE FROM auth.users WHERE email = '${result.email}';`)

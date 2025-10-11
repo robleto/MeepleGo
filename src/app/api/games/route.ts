@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { getSupabaseServerClient } from '@/lib/supabaseServer'
 
 export async function GET(request: NextRequest) {
   try {
@@ -8,6 +8,7 @@ export async function GET(request: NextRequest) {
     const sort = searchParams.get('sort') || 'rank'
     const orderBy = searchParams.get('orderBy') || 'asc'
 
+    const supabase = await getSupabaseServerClient()
     let query = supabase.from('games').select('*')
 
     // Apply sorting

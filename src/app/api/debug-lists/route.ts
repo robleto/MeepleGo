@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { getSupabaseServerClient } from '@/lib/supabaseServer'
 
 export async function GET() {
   try {
+    const supabase = await getSupabaseServerClient()
     // Get all lists to see what's in the database
     const { data: allLists, error: allError } = await supabase
       .from('game_lists')

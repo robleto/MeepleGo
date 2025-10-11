@@ -5,7 +5,16 @@ import FilterModal from '@/components/Components/FilterModal'
 import GameCard from '@/components/Components/GameCard'
 import supabase from '@/lib/supabase'
 import { GameWithRanking } from '@/types'
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useRef } from 'react'
+import {
+  DndContext,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core'
+import { SortableContext, useSortable, arrayMove } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 
 interface ListExplorerProps {
   games: GameWithRanking[]
@@ -28,6 +37,14 @@ interface ListExplorerProps {
   ) => void
   disableListRanking?: boolean
   hasExplicitOrder?: boolean
+  // Optional per-item control provider for list pages
+  getListItemControls?: (game: GameWithRanking, index: number) => {
+    canMoveUp?: boolean
+    canMoveDown?: boolean
+    onRemove?: () => void
+  }
+  // Optional drag-and-drop reorder callback receiving new ordered game IDs
+  onReorder?: (ids: string[]) => void
 }
 
 export default function ListExplorer({
@@ -45,12 +62,20 @@ export default function ListExplorer({
   onRankingUpdate,
   disableListRanking,
   hasExplicitOrder = false,
+  getListItemControls,
+  onReorder,
 }: ListExplorerProps) {
   const hasExplicitListOrder = hasExplicitOrder
+  const liveRegionRef = useRef<HTMLDivElement | null>(null)
   const [showFilters, setShowFilters] = useState(false)
   const [cardVariant, setCardVariant] = useState<
     'detailed' | 'balanced' | 'compact'
   >('balanced')
+
+  // DnD sensors must be initialized unconditionally to preserve hook order
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } })
+  )
 
   const {
     hasMounted,
@@ -137,6 +162,39 @@ export default function ListExplorer({
     )
   }
 
+  // Sortable row component used in list view
+  function SortableRow({
+    id,
+    children,
+  }: {
+    id: string
+    children: (handleProps: {
+      attributes: any
+      listeners: any
+      setActivatorNodeRef: (el: HTMLElement | null) => void
+    }) => React.ReactNode
+  }) {
+    const {
+      attributes,
+      listeners,
+      setActivatorNodeRef,
+      setNodeRef,
+      transform,
+      transition,
+      isDragging,
+    } = useSortable({ id })
+    const style: React.CSSProperties = {
+      transform: CSS.Transform.toString(transform),
+      transition,
+      opacity: isDragging ? 0.9 : undefined,
+    }
+    return (
+      <div ref={setNodeRef} style={style} className="relative">
+        {children({ attributes, listeners, setActivatorNodeRef })}
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-6">
       <SearchandFilters
@@ -198,7 +256,63 @@ export default function ListExplorer({
               </div>
             ) : (
               <div className="divide-y divide-gray-100 dark:divide-gray-800 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 overflow-hidden">
-                {group.map((game, idx) => {
+                {getListItemControls && hasExplicitListOrder && onReorder ? (
+                  <DndContext
+                    sensors={sensors}
+                    onDragEnd={(e: DragEndEvent) => {
+                      const { active, over } = e
+                      if (!over || active.id === over.id) return
+                      const ids = group.map((g) => g.id)
+                      const oldIndex = ids.indexOf(String(active.id))
+                      const newIndex = ids.indexOf(String(over.id))
+                      if (oldIndex === -1 || newIndex === -1) return
+                      const reordered = arrayMove(ids, oldIndex, newIndex)
+                      onReorder(reordered)
+                      // Announce reordering for screen readers
+                      if (liveRegionRef.current) {
+                        liveRegionRef.current.textContent = `Moved to position ${newIndex + 1}`
+                        // Clear message shortly after to avoid verbosity
+                        setTimeout(() => {
+                          if (liveRegionRef.current) liveRegionRef.current.textContent = ''
+                        }, 1000)
+                      }
+                    }}
+                  >
+                    <SortableContext items={group.map((g) => g.id)}>
+                      {group.map((game, idx) => {
+                        const membership =
+                          (membershipMap as any)[game.id] || game.list_membership
+                        const rank =
+                          !disableListRanking &&
+                          showListRanking &&
+                          (game as any).__listRanking != null
+                            ? (game as any).__listRanking
+                            : !disableListRanking && showListRanking
+                              ? idx + 1
+                              : null
+                        const controls = getListItemControls?.(game, idx)
+                        return (
+                          <SortableRow key={game.id} id={game.id}>
+                            {(handleProps) => (
+                              <GameCard
+                                key={game.id}
+                                game={{ ...game, list_membership: membership }}
+                                viewMode="list"
+                                variant={cardVariant}
+                                onMembershipChange={onMembershipChange}
+                                listRank={showListRanking ? rank : null}
+                                showDragHandle={true}
+                                dragHandleProps={handleProps}
+                                onRemoveFromCurrentList={controls?.onRemove}
+                              />
+                            )}
+                          </SortableRow>
+                        )
+                      })}
+                    </SortableContext>
+                  </DndContext>
+                ) : (
+                  group.map((game, idx) => {
                   const membership =
                     (membershipMap as any)[game.id] || game.list_membership
                   const rank =
@@ -209,19 +323,29 @@ export default function ListExplorer({
                       : !disableListRanking && showListRanking
                         ? idx + 1
                         : null
-                  return (
-                    <GameCard
-                      key={game.id}
-                      game={{ ...game, list_membership: membership }}
-                      viewMode="list"
-                      variant={cardVariant}
-                      onMembershipChange={onMembershipChange}
-                      listRank={showListRanking ? rank : idx + 1}
-                    />
-                  )
-                })}
+                    const controls = getListItemControls?.(game, idx)
+                    return (
+                      <GameCard
+                        key={game.id}
+                        game={{ ...game, list_membership: membership }}
+                        viewMode="list"
+                        variant={cardVariant}
+                        onMembershipChange={onMembershipChange}
+                        listRank={showListRanking ? rank : null}
+                        onRemoveFromCurrentList={controls?.onRemove}
+                      />
+                    )
+                  })
+                )}
               </div>
             )}
+            {/* ARIA live region for announcements */}
+            <div
+              aria-live="polite"
+              aria-atomic="true"
+              className="sr-only"
+              ref={liveRegionRef}
+            />
           </div>
         ))}
       {!loading && !error && filteredGames.length === 0 && (

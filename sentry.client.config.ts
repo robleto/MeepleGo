@@ -39,6 +39,13 @@ Sentry.init({
   },
 
   // Configure integrations
+  // Set 'tracePropagationTargets' to control for which URLs distributed tracing should be enabled
+  tracePropagationTargets: [
+    'localhost',
+    /^https:\/\/[^/]*\.vercel\.app/,
+    // Add your production domain here
+  ],
+
   integrations: [
     Sentry.browserTracingIntegration(),
     Sentry.replayIntegration({

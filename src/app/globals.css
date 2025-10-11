@@ -74,10 +74,13 @@ a.unstyled:hover,
   --shadow-lg:
     0 8px 24px -4px rgba(15, 23, 42, 0.12), 0 4px 10px rgba(15, 23, 42, 0.08);
 
-  /* Typography overrides: use Proxima Nova for body & Rift Soft for headings */
-  --font-inter: 'Proxima Nova';
-  /* Using explicit font-family declarations; removing Tailwind variable indirection */
-  --font-display: 'Rift Soft';
+  /* Typography defaults provide fallbacks when next/font CSS variables are absent */
+  --font-inter: 'Inter';
+  --font-display: 'Outfit';
+  --font-award-b: 'Fraunces';
+  --font-award-b-alt: 'Playfair Display';
+  --font-award-poster: 'Archivo Black';
+  --font-display-soft: 'Epilogue';
 }
 
 /* Global base font size increase (affects all rem-based typography & spacing) */
@@ -86,13 +89,10 @@ html {
 }
 
 /* --------------------------------------------------
-   Custom Font Faces (ensure you have proper licenses)
-   Place font files in /public/fonts/ ... file names below are suggestions.
-   Proxima Nova and Rift Soft are commercially licensed; replace with valid
-   self-hosted files or load via an authorized service.
+  Custom Font Faces (ensure you have proper licenses)
+  Place font files in /public/fonts/ if you decide to self-host alternates.
+  The default setup relies on next/font Google families (Inter, Outfit, etc.).
 -------------------------------------------------- */
-/* Self-host @font-face blocks removed in favor of Adobe Fonts kit.
-  If you later self-host, restore these with correct file paths. */
 
 @media (prefers-color-scheme: dark) {
   :root {
@@ -132,10 +132,8 @@ html {
 body {
   color: rgb(var(--foreground-rgb));
   background: var(--color-bg);
-  /* Adobe kit supplies Proxima Nova; add alias names to cover kit naming variations */
   font-family:
-    'Proxima Nova',
-    proxima-nova,
+    var(--font-inter, 'Inter'),
     system-ui,
     -apple-system,
     BlinkMacSystemFont,
@@ -231,7 +229,9 @@ h6 {
 }
 .heading-display {
   font-family:
-    'Rift Soft', rift-soft, 'Proxima Nova', proxima-nova, system-ui, sans-serif;
+    var(--font-display, 'Outfit'),
+    system-ui,
+    sans-serif;
 }
 
 /* Structural utilities */

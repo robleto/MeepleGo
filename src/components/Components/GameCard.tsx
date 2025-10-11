@@ -55,6 +55,14 @@ interface GameCardProps {
   titleClassName?: string
   allowWinnerBadgeInListView?: boolean
   listRank?: number | null
+  // Optional list context actions for list pages
+  showDragHandle?: boolean
+  dragHandleProps?: {
+    attributes?: any
+    listeners?: any
+    setActivatorNodeRef?: (el: HTMLElement | null) => void
+  }
+  onRemoveFromCurrentList?: () => void
 }
 
 export default function GameCard({
@@ -70,6 +78,9 @@ export default function GameCard({
   titleClassName,
   allowWinnerBadgeInListView = false,
   listRank = null,
+  showDragHandle,
+  dragHandleProps,
+  onRemoveFromCurrentList,
 }: GameCardProps) {
   const initialLibrary = game.list_membership?.library ?? false
   const initialWishlist = game.list_membership?.wishlist ?? false
@@ -251,9 +262,33 @@ export default function GameCard({
           className={`flex items-center ${variant === 'compact' ? 'space-x-2 sm:space-x-3' : 'space-x-3 sm:space-x-4'}`}
         >
           {listRank != null && (
-            <div className="flex-shrink-0 w-6 sm:w-8 text-center">
-              <div className="inline-flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 rounded-md bg-gray-100 text-gray-700 font-semibold text-xs ring-1 ring-gray-200">
-                {listRank}
+            <div className="flex-shrink-0 flex items-center gap-2">
+              {showDragHandle && (
+                <button
+                  type="button"
+                  title="Drag to reorder"
+                  aria-label="Drag to reorder"
+                  className="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing"
+                  onClick={(e) => e.stopPropagation()}
+                  ref={dragHandleProps?.setActivatorNodeRef as any}
+                  {...(dragHandleProps?.attributes || {})}
+                  {...(dragHandleProps?.listeners || {})}
+                >
+                  {/* six-dot (grip) icon: 3 rows x 2 columns */}
+                  <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <circle cx="7" cy="5" r="1.5" />
+                    <circle cx="13" cy="5" r="1.5" />
+                    <circle cx="7" cy="10" r="1.5" />
+                    <circle cx="13" cy="10" r="1.5" />
+                    <circle cx="7" cy="15" r="1.5" />
+                    <circle cx="13" cy="15" r="1.5" />
+                  </svg>
+                </button>
+              )}
+              <div className="w-6 sm:w-8 text-center">
+                <div className="inline-flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 rounded-md bg-gray-100 text-gray-700 font-semibold text-xs ring-1 ring-gray-200">
+                  {listRank}
+                </div>
               </div>
             </div>
           )}
@@ -425,6 +460,22 @@ export default function GameCard({
                 />
               </button>
             )}
+
+            {/* Remove from current list */}
+            {onRemoveFromCurrentList && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onRemoveFromCurrentList()
+                }}
+                className="ml-1 w-8 h-8 rounded-full border border-gray-300 hover:border-red-400 bg-gray-50 hover:bg-red-50 flex items-center justify-center transition-colors"
+                title="Remove from this list"
+                aria-label="Remove from this list"
+              >
+                <XMarkIcon className="w-4 h-4 text-gray-400 hover:text-red-600" />
+              </button>
+            )}
           </div>
         </div>
 
@@ -495,6 +546,15 @@ export default function GameCard({
             name={game.name}
             variant="square"
           />
+        )}
+
+        {/* Grid view rank badge (top-left), if provided */}
+        {listRank != null && (
+          <div className="absolute top-1 left-1 z-10">
+            <div className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-white text-gray-800 text-xs font-semibold ring-1 ring-gray-200 shadow-sm">
+              {listRank}
+            </div>
+          </div>
         )}
 
         {/* Hover overlay with all interactive controls */}

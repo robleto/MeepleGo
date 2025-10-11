@@ -1,8 +1,9 @@
-import { supabase } from '@/lib/supabase'
+import { getSupabaseServerClient } from '@/lib/supabaseServer'
 import type { NextRequest } from 'next/server'
 
 export async function GET(request: NextRequest) {
   try {
+    const supabase = await getSupabaseServerClient()
     // Get current user
     const {
       data: { user },

@@ -1,18 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase as publicClient } from '@/lib/supabase'
 import { createClient } from '@supabase/supabase-js'
+import { getSupabaseServerClient } from '@/lib/supabaseServer'
 import { XMLParser } from 'fast-xml-parser'
 import { decodeHtmlEntities } from '@/utils/csvParser'
 
 // Lightweight server-side Supabase client (use service role via env var if needed)
-function serverClient() {
+async function serverClient() {
   // Prefer service role for broader RLS bypass if available server-side
   const serviceUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
   if (serviceUrl && serviceKey) {
     return createClient(serviceUrl, serviceKey)
   }
-  return publicClient
+  // Fallback to SSR-aware client bound to request cookies/session
+  return await getSupabaseServerClient()
 }
 
 // Extract helper safely
@@ -181,7 +182,7 @@ export async function POST(req: NextRequest) {
       if (summary.length > 260) summary = summary.slice(0, 260) + '…'
     }
 
-    const client = serverClient()
+  const client = await serverClient()
 
     // Upsert game by bgg_id uniqueness
     const { data: existing, error: existingErr } = await client

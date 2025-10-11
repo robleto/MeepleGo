@@ -142,6 +142,55 @@ export interface Database {
           updated_at?: string | null
         }
       }
+      user_preferences: {
+        Row: {
+          user_id: string
+          rankings_custom_order_enabled: boolean
+          awards_custom_order_enabled: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          user_id: string
+          rankings_custom_order_enabled?: boolean
+          awards_custom_order_enabled?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          user_id?: string
+          rankings_custom_order_enabled?: boolean
+          awards_custom_order_enabled?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      ranking_order: {
+        Row: {
+          id: string
+          user_id: string
+          game_id: string
+          position: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          game_id: string
+          position: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          game_id?: string
+          position?: number
+          created_at?: string
+          updated_at?: string
+        }
+      }
       game_lists: {
         Row: {
           id: string

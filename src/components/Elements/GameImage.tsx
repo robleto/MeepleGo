@@ -11,6 +11,7 @@ interface GameImageProps {
   onLoad?: () => void
   priority?: boolean
   loading?: 'lazy' | 'eager'
+  sizes?: string
 }
 
 export function GameImage({
@@ -23,6 +24,7 @@ export function GameImage({
   onLoad,
   priority = false,
   loading = 'lazy',
+  sizes,
 }: GameImageProps) {
   const [imageState, setImageState] = useState<'loading' | 'loaded' | 'error'>(
     'loading'
@@ -80,7 +82,7 @@ export function GameImage({
         </span>
         {/* Optional small name footer for larger square variant */}
         {variant === 'square' && (
-          <div className="absolute bottom-0 left-0 right-0 text-[10px] font-medium px-1 py-0.5 bg-white/70 dark:bg-black/40 backdrop-blur line-clamp-1 text-center">
+          <div className="absolute bottom-0 left-0 right-0 text-[11px] font-medium px-1 py-0.5 bg-white/70 dark:bg-black/40 backdrop-blur line-clamp-1 text-center">
             {name}
           </div>
         )}
@@ -104,6 +106,13 @@ export function GameImage({
         height={400}
         priority={priority}
         loading={priority ? undefined : loading}
+        sizes={
+          sizes ||
+          (variant === 'thumb'
+            ? '(max-width: 640px) 25vw, (max-width: 1024px) 12vw, 80px'
+            : '(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 256px')
+        }
+        decoding="async"
         onLoadingComplete={handleImageLoad}
         onError={handleImageError as any}
       />

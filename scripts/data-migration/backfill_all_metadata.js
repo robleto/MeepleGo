@@ -13,6 +13,18 @@
 
 const { spawn } = require('child_process')
 const path = require('path')
+const dotenv = require('dotenv')
+dotenv.config({ path: '.env' })
+
+function requireEnv(keys) {
+  const missing = keys.filter((k) => !process.env[k])
+  if (missing.length) {
+    console.error(
+      `Missing required env vars: ${missing.join(', ')}\nTip: Ensure your GitHub Actions workflow writes them to .env from repo secrets.`
+    )
+    process.exit(1)
+  }
+}
 
 function parseArgs() {
   const args = process.argv.slice(2)
@@ -46,6 +58,8 @@ async function runScript(relPath, baseArgs) {
 }
 
 async function main() {
+  // Validate env up-front so we fail fast before spawning children
+  requireEnv(['NEXT_PUBLIC_SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY'])
   const { limit, concurrency, skipTaglines, skipExtended } = parseArgs()
   const sharedArgs = []
   if (limit) sharedArgs.push('--limit', String(limit))

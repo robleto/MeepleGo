@@ -637,7 +637,7 @@ export default function PlaysClientPage({
           </div>
         )}
         {!zeroStateActive && (
-          <div className="flex flex-wrap items-center gap-2 mt-2 text-[11px]">
+          <div className="flex flex-wrap items-center gap-2 mt-2 text-xs">
             {['all', 'week', 'month', 'rated', 'notes'].map((f) => (
               <button
                 key={f}
@@ -680,7 +680,7 @@ export default function PlaysClientPage({
               <option value="120+">120m+</option>
             </select>
             {tagFilter && (
-              <div className="flex items-center gap-1 ml-2 text-[11px] bg-sky-50 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300 px-2 py-1 rounded-full border border-sky-200 dark:border-sky-800">
+              <div className="flex items-center gap-1 ml-2 text-xs bg-sky-50 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300 px-2 py-1 rounded-full border border-sky-200 dark:border-sky-800">
                 <span className="font-medium">Tag:</span>
                 <span>{tagFilter}</span>
                 <button
@@ -702,7 +702,7 @@ export default function PlaysClientPage({
                   setPlayerFilter('all')
                   setDurationFilter('all')
                 }}
-                className="ml-auto text-[10px] text-gray-500 hover:text-gray-700 underline"
+                className="ml-auto text-xs text-gray-500 hover:text-gray-700 underline"
               >
                 Reset Filters
               </button>
@@ -744,7 +744,7 @@ export default function PlaysClientPage({
               <div className="flex items-center justify-between text-xs uppercase text-gray-500 tracking-wide">
                 <span>Streak</span>
                 {summary && (
-                  <span className="text-[10px] normal-case font-medium text-gray-400">
+                  <span className="text-xs normal-case font-medium text-gray-400">
                     Longest {summary.streak.longest}
                   </span>
                 )}
@@ -753,7 +753,7 @@ export default function PlaysClientPage({
                 <div className="text-2xl font-bold tabular-nums">
                   {summary?.streak.current ?? '—'}
                 </div>
-                <span className="text-[11px] text-gray-500 mb-1">days</span>
+                <span className="text-xs text-gray-500 mb-1">days</span>
               </div>
               <div className="mt-3 h-8 flex items-end gap-0.5">
                 {summary?.last30.slice(-30).map((d) => {
@@ -767,7 +767,7 @@ export default function PlaysClientPage({
                     />
                   )
                 })}
-                {!summary && <div className="text-[10px] text-gray-400">—</div>}
+                {!summary && <div className="text-xs text-gray-400">—</div>}
               </div>
             </div>
             <div className="col-span-1 p-4 border border-gray-200 dark:border-gray-800 rounded-xl bg-white dark:bg-gray-900 shadow-sm">
@@ -851,7 +851,7 @@ export default function PlaysClientPage({
                 </div>
                 <div className="flex-1 border-b border-gray-200 dark:border-gray-800 pb-8 last:border-b-0 last:pb-0">
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="w-5 h-5 rounded bg-sky-600/10 text-sky-600 flex items-center justify-center text-[11px] font-bold">
+                    <span className="w-5 h-5 rounded bg-sky-600/10 text-sky-600 flex items-center justify-center text-xs font-bold">
                       P
                     </span>
                     <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-lg">
@@ -870,7 +870,7 @@ export default function PlaysClientPage({
                 </div>
                 <div className="flex-1 border-b border-gray-200 dark:border-gray-800 pb-8 last:border-b-0 last:pb-0">
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="w-5 h-5 rounded bg-sky-600/10 text-sky-600 flex items-center justify-center text-[11px] font-bold">
+                    <span className="w-5 h-5 rounded bg-sky-600/10 text-sky-600 flex items-center justify-center text-xs font-bold">
                       ★
                     </span>
                     <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-lg">
@@ -889,7 +889,7 @@ export default function PlaysClientPage({
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="w-5 h-5 rounded bg-amber-500/10 text-amber-600 flex items-center justify-center text-[11px] font-bold">
+                    <span className="w-5 h-5 rounded bg-amber-500/10 text-amber-600 flex items-center justify-center text-xs font-bold">
                       🏆
                     </span>
                     <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-lg">
@@ -938,7 +938,7 @@ export default function PlaysClientPage({
               Timeline
             </h2>
             {(pageError || statsError || summaryError) && (
-              <div className="text-[11px] rounded-lg border p-3 bg-red-50 dark:bg-red-900/20 border-red-300 dark:border-red-800 text-red-700 dark:text-red-300 space-y-1">
+              <div className="text-xs rounded-lg border p-3 bg-red-50 dark:bg-red-900/20 border-red-300 dark:border-red-800 text-red-700 dark:text-red-300 space-y-1">
                 {pageError && <div>Plays: {pageError}</div>}
                 {statsError && (
                   <div>
@@ -981,7 +981,7 @@ export default function PlaysClientPage({
                   {virtualizationEnabled && (
                     <>
                       <div style={{ height: spacerTop }} aria-hidden="true" />
-                      <div className="sticky top-0 z-10 text-[10px] bg-sky-50 dark:bg-sky-900/40 text-sky-700 dark:text-sky-300 px-2 py-1 rounded mb-2 inline-flex gap-2 items-center shadow">
+                      <div className="sticky top-0 z-10 text-xs bg-sky-50 dark:bg-sky-900/40 text-sky-700 dark:text-sky-300 px-2 py-1 rounded mb-2 inline-flex gap-2 items-center shadow">
                         Virtualized • {flatLogs.length} plays
                       </div>
                     </>
@@ -1051,7 +1051,7 @@ export default function PlaysClientPage({
                                                 setEditingLog(l)
                                                 setShowEditModal(true)
                                               }}
-                                              className="text-[10px] font-medium text-sky-600 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 rounded"
+                                              className="text-xs font-medium text-sky-600 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 rounded"
                                               aria-label="Edit this log"
                                             >
                                               Edit
@@ -1059,7 +1059,7 @@ export default function PlaysClientPage({
                                             <button
                                               type="button"
                                               onClick={() => handleDuplicate(l)}
-                                              className="text-[10px] font-medium text-emerald-600 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 rounded"
+                                              className="text-xs font-medium text-emerald-600 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 rounded"
                                             >
                                               Duplicate
                                             </button>
@@ -1068,7 +1068,7 @@ export default function PlaysClientPage({
                                               onClick={() =>
                                                 handleDeleteInline(l)
                                               }
-                                              className="text-[10px] font-medium text-red-600 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 rounded"
+                                              className="text-xs font-medium text-red-600 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 rounded"
                                             >
                                               Delete
                                             </button>
@@ -1171,7 +1171,7 @@ export default function PlaysClientPage({
                                                 prev === t ? null : t
                                               )
                                             }
-                                            className={`px-1.5 py-0.5 rounded text-[10px] transition border focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 ${tagFilter === t ? 'bg-sky-600 text-white border-sky-600 dark:bg-sky-500 dark:border-sky-500' : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 border-transparent hover:bg-emerald-100 dark:hover:bg-emerald-800/40'}`}
+                                            className={`px-1.5 py-0.5 rounded text-xs transition border focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 ${tagFilter === t ? 'bg-sky-600 text-white border-sky-600 dark:bg-sky-500 dark:border-sky-500' : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 border-transparent hover:bg-emerald-100 dark:hover:bg-emerald-800/40'}`}
                                             aria-pressed={tagFilter === t}
                                           >
                                             {t}
@@ -1193,14 +1193,14 @@ export default function PlaysClientPage({
                                                 [l.id]: true,
                                               }))
                                             }
-                                            className="mt-1 text-[10px] text-sky-600 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 rounded"
+                                            className="mt-1 text-xs text-sky-600 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 rounded"
                                           >
                                             Show more
                                           </button>
                                         )}
                                       </div>
                                     )}
-                                    <div className="mt-4 text-[10px] text-gray-400 flex items-center gap-2">
+                                    <div className="mt-4 text-xs text-gray-400 flex items-center gap-2">
                                       <time dateTime={l.played_at}>
                                         {new Date(
                                           l.played_at
