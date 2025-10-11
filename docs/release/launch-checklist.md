@@ -133,6 +133,13 @@ Sanity checks:
 
 ## 7) Manual QA Scenarios (Auth)
 
+📚 **See comprehensive QA documentation**:
+
+- [**QA Documentation Hub**](../qa/README.md) - Start here for all QA resources
+- [Manual Auth Flows Guide](../qa/manual-auth-flows.md) - Detailed test procedures
+- [Quick Start Guide](../qa/auth-flows-quick-start.md) - 30-minute test sequence
+- [Test Results Template](../qa/auth-flows-test-results-template.md) - Document your results
+
 Use 2–3 test emails (see the Faux Users section). Verify on both desktop and mobile:
 
 1. Sign up with email + magic link
