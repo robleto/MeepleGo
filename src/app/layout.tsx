@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 import './globals.css'
+import { Inter, Outfit } from 'next/font/google'
 import Navigation from '@/components/Global/Navigation'
 import SiteFooter from '@/components/Global/SiteFooter'
 import AnalyticsWrapper from '@/components/Analytics/AnalyticsWrapper'
@@ -72,6 +73,10 @@ export const metadata: Metadata = {
   },
 }
 
+// Load core fonts and expose them via CSS variables used by Tailwind config and globals.css
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' })
+const outfit = Outfit({ subsets: ['latin'], variable: '--font-display', display: 'swap' })
+
 export default function RootLayout({
   children,
 }: {
@@ -80,7 +85,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={''}
+      className={`${inter.variable} ${outfit.variable}`}
     >
       <head>
         {/* Preconnect to external image domains for performance */}
@@ -101,7 +106,7 @@ export default function RootLayout({
       </head>
       <body
         className={
-          'font-sans min-h-screen bg-white text-gray-900 dark:text-white'
+          'font-sans min-h-screen text-gray-900 dark:text-white'
         }
       >
         {/* Skip to main content link for accessibility */}

@@ -30,6 +30,38 @@ async function populateIndustryAwards() {
     console.log('🎯 Starting industry awards population...')
     console.log(`📁 Reading file: ${INPUT_FILE}`)
 
+    // Detect if the boardgames column exists on industry_awards
+    let hasBoardgamesColumn = true
+    try {
+      const { error: probeError } = await supabase
+        .from('industry_awards')
+        .select('boardgames')
+        .limit(1)
+
+      if (probeError) {
+        if (
+          typeof probeError.message === 'string' &&
+          probeError.message.toLowerCase().includes('column') &&
+          probeError.message.toLowerCase().includes('boardgames')
+        ) {
+          hasBoardgamesColumn = false
+          console.log(
+            'ℹ️  boardgames column not found on industry_awards — proceeding without it.'
+          )
+        } else {
+          // Some other error; surface it but continue
+          console.log('⚠️  Warning probing boardgames column:', probeError.message)
+        }
+      }
+    } catch (probeUnexpected) {
+      // In case select throws unexpectedly, default to safe path without boardgames
+      hasBoardgamesColumn = false
+      console.log(
+        'ℹ️  Unable to probe boardgames column, proceeding without it:',
+        probeUnexpected?.message || probeUnexpected
+      )
+    }
+
     // Read the JSON file
     const rawData = fs.readFileSync(INPUT_FILE, 'utf8')
     const honors = JSON.parse(rawData)
@@ -64,28 +96,32 @@ async function populateIndustryAwards() {
             continue
           }
 
-          // Insert the award with boardgames JSONB
+          // Build payload and conditionally include boardgames if supported
+          const payload = {
+            bgg_honor_id: honor.id,
+            slug: honor.slug,
+            bgg_url: honor.url ? `https://boardgamegeek.com${honor.url}` : null,
+            year: honor.year,
+            title: honor.title,
+            primary_name: honor.primaryName || null,
+            alternate_names:
+              honor.alternateNames && honor.alternateNames.length > 0
+                ? honor.alternateNames
+                : null,
+            award_set: honor.awardSet,
+            position: honor.position,
+            status: honor.status,
+            category: honor.category,
+          }
+
+          if (hasBoardgamesColumn) {
+            payload.boardgames = honor.boardgames || []
+          }
+
+          // Insert the award (with or without boardgames JSONB)
           const { data: awardData, error: awardError } = await supabase
             .from('industry_awards')
-            .insert({
-              bgg_honor_id: honor.id,
-              slug: honor.slug,
-              bgg_url: honor.url
-                ? `https://boardgamegeek.com${honor.url}`
-                : null,
-              year: honor.year,
-              title: honor.title,
-              primary_name: honor.primaryName || null,
-              alternate_names:
-                honor.alternateNames && honor.alternateNames.length > 0
-                  ? honor.alternateNames
-                  : null,
-              award_set: honor.awardSet,
-              position: honor.position,
-              status: honor.status,
-              category: honor.category,
-              boardgames: honor.boardgames || [],
-            })
+            .insert(payload)
             .select()
             .single()
 
