@@ -581,10 +581,7 @@ function Navigation() {
     <nav
       aria-label="Primary navigation"
       className={cn(
-        'fixed inset-x-0 top-0 z-50 backdrop-blur-md transition-[transform,background-color,border-color,box-shadow] duration-300',
-        scrolled
-          ? 'bg-white/80 dark:bg-gray-950/70 shadow-sm border-b border-gray-200/60 dark:border-gray-800/60'
-          : 'bg-white/55 dark:bg-gray-950/55',
+        'fixed inset-x-0 top-0 z-50 transition-[transform] duration-300',
         visible ? 'translate-y-0' : '-translate-y-full'
       )}
     >
@@ -612,8 +609,8 @@ function Navigation() {
                   opacity: 0,
                   width: 0,
                   transform: 'translate3d(0,0,0)',
-                  backgroundColor: 'rgba(229, 231, 235, 0.75)', // gray-200 at 75% opacity
-                  borderColor: 'rgba(209, 213, 219, 0.9)', // gray-300, one step darker for definition
+                  backgroundColor: 'rgba(224, 242, 254, 0.7)', // sky-100 with subtle opacity
+                  borderColor: 'rgba(186, 230, 253, 0.6)', // sky-200 border for definition
                   boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.6), 0 6px 12px rgba(0,0,0,0.06)'
                 }}
                 aria-hidden="true"
