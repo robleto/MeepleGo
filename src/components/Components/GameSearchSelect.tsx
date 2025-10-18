@@ -34,7 +34,7 @@ export interface GameSearchSelectProps {
 
 export default function GameSearchSelect({
   onSelect,
-  placeholder = 'Search games…',
+  placeholder = 'Search these games…',
   autoFocus,
   className,
   variant = 'default',

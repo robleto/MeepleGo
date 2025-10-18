@@ -24,7 +24,7 @@ export default function SearchPill(props: SearchPillProps) {
     onChange,
     onSearch,
     debounceMs = DEFAULT_DEBOUNCE,
-    placeholder = 'Search games…',
+    placeholder = 'Search these games…',
     autoFocus = false,
     className = '',
   } = props

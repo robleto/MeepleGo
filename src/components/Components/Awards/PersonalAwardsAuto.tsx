@@ -306,15 +306,46 @@ export default function PersonalAwardsAuto() {
         </Heading>
       </div>
       <div className="space-y-10">
-        {categories.map((block) => (
-          <AwardShowcase
-            key={block.id}
-            id={block.id}
-            title={block.label}
-            description={block.description}
-            games={block.games as any}
-          />
-        ))}
+        {categories.map((block) => {
+          // Use current year as default for editing; user can switch years in editor
+          const year = new Date().getFullYear()
+          // The editor category uses the deriveUserAwards ids; we map some common ones from PersonalAwardsAuto ids
+          const categoryMap: Record<string, string> = {
+            best: 'best_overall',
+            strategy: 'best_strategy',
+            family: 'best_family',
+            duo: 'best_two_player',
+            kids: 'best_kids',
+            card: 'best_card_game',
+            wargame: 'best_wargame',
+            party: 'best_party',
+            trivia: 'best_trivia',
+            bluffing: 'best_bluffing',
+            pnp: 'best_print_play',
+            coop: 'best_coop',
+            deckbuild: 'best_deck_building',
+            solo: 'best_solo',
+            abstract: 'best_overall',
+            thematic: 'best_overall',
+            light: 'best_overall',
+            medium: 'best_overall',
+            long: 'best_overall',
+          }
+          const editorCategory = categoryMap[block.id] || 'best_overall'
+          const editHref = `/awards/my/${year}#${editorCategory}`
+          return (
+            <AwardShowcase
+              key={block.id}
+              id={block.id}
+              title={block.label}
+              description={block.description}
+              games={block.games as any}
+              editHref={editHref}
+              editLabel="Edit"
+              inlineEditable
+            />
+          )
+        })}
         {categories.length === 0 && (
           <p className="text-xs text-gray-500 text-center">
             Add rankings to see personalized categories.

@@ -26,9 +26,9 @@ const sizeStyles = {
     text: 'text-xl',
   },
   lg: {
-    container: 'gap-3',
-    logo: 'h-12 w-12',
-    text: 'text-2xl',
+    container: 'gap-1.5',
+    logo: 'h-8 w-8',
+    text: 'text-xl',
   },
 }
 
@@ -58,7 +58,7 @@ export function Logo({
       {showText && (
         <span
           className={cn(
-            'heading-display font-semibold tracking-normal leading-none',
+            'heading-display uppercase font-bold tracking-normal leading-none',
             styles.text
           )}
         >

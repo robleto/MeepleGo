@@ -7,13 +7,20 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '20')
     const sort = searchParams.get('sort') || 'rank'
     const orderBy = searchParams.get('orderBy') || 'asc'
+    const q = (searchParams.get('q') || '').trim()
 
     const supabase = await getSupabaseServerClient()
     let query = supabase.from('games').select('*')
 
-    // Apply sorting
-    const ascending = orderBy === 'asc'
-    query = query.order(sort, { ascending })
+    // Name search (case-insensitive substring match)
+    if (q) {
+      // If searching, prefer ordering by name for UX
+      query = query.ilike('name', `%${q}%`).order('name', { ascending: true })
+    } else {
+      // Apply sorting only when not searching
+      const ascending = orderBy === 'asc'
+      query = query.order(sort, { ascending })
+    }
 
     // Apply limit
     query = query.limit(limit)

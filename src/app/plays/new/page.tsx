@@ -62,7 +62,7 @@ export default function NewPlayPage() {
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search games…"
+              placeholder="Search these games…"
               className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500"
             />
             {loading && (

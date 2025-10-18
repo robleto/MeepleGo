@@ -36,7 +36,7 @@ export interface SearchDropdownProps {
 
 export default function SearchDropdown({
   onSelect,
-  placeholder = 'Search games…',
+  placeholder = 'Search these games…',
   autoFocus,
   className,
 }: SearchDropdownProps) {

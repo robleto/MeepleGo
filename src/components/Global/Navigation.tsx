@@ -286,6 +286,35 @@ function Navigation() {
   const cacheRef = useRef<Record<string, SuggestionGame[]>>({})
   const abortRef = useRef<AbortController | null>(null)
 
+  // Moving highlighter refs/state
+  const navContainerRef = useRef<HTMLDivElement | null>(null)
+  const highlighterRef = useRef<HTMLDivElement | null>(null)
+  const linkRefs = useRef<Record<string, HTMLAnchorElement | null>>({})
+
+  const moveHighlighterTo = (el: HTMLAnchorElement | null) => {
+    const highlighter = highlighterRef.current
+    const container = navContainerRef.current
+    if (!highlighter || !container || !el) {
+      if (highlighter) highlighter.style.opacity = '0'
+      return
+    }
+    const cRect = container.getBoundingClientRect()
+    const r = el.getBoundingClientRect()
+    const left = r.left - cRect.left
+    const width = r.width
+    // Slight vertical inset for a pill look
+    highlighter.style.opacity = '1'
+    highlighter.style.transform = `translateX(${left}px)`
+    highlighter.style.width = `${width}px`
+  }
+
+  // Update on route changes to the active link
+  useEffect(() => {
+    const activeLink = linkRefs.current[pathname]
+    // Delay until after layout so refs have sizes
+    requestAnimationFrame(() => moveHighlighterTo(activeLink || null))
+  }, [pathname])
+
   // Session/profile
   useEffect(() => {
     ;(async () => {
@@ -552,7 +581,7 @@ function Navigation() {
     <nav
       aria-label="Primary navigation"
       className={cn(
-        'fixed inset-x-0 top-0 z-50 backdrop-blur-md transition-[transform,background,backdrop-filter] duration-300',
+        'fixed inset-x-0 top-0 z-50 backdrop-blur-md transition-[transform,background-color,border-color,box-shadow] duration-300',
         scrolled
           ? 'bg-white/80 dark:bg-gray-950/70 shadow-sm border-b border-gray-200/60 dark:border-gray-800/60'
           : 'bg-white/55 dark:bg-gray-950/55',
@@ -560,22 +589,62 @@ function Navigation() {
       )}
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center gap-4">
+        <div className="flex h-14 items-center gap-4">
           <Logo size="lg" href="/" className="flex-shrink-0" />
-          <div className="hidden md:flex items-center gap-1">
-            {NAV_ITEMS.map((item) => {
-              const active = pathname === item.href
-              return (
-                <NavItem
-                  key={item.href}
-                  name={item.name}
-                  href={item.href}
-                  icon={item.icon}
-                  isActive={active}
-                />
-              )
-            })}
+
+          {/* Reawarding-style nav container */}
+          <div className="hidden md:block min-w-0">
+            <div
+              ref={navContainerRef}
+              className="relative rounded-2xl px-2 backdrop-blur-xl shadow-[0_6px_30px_rgba(0,0,0,0.06)] border bg-white/60 dark:bg-black/30 border-gray-200/60 dark:border-white/10"
+              onMouseLeave={() => {
+                const active = linkRefs.current[pathname] || null
+                moveHighlighterTo(active)
+              }}
+            >
+              {/* Animated highlighter */}
+              <div
+                ref={highlighterRef}
+                className="absolute left-0 rounded-xl pointer-events-none border transition-all duration-300 ease-out will-change-[transform,width]"
+                style={{
+                  top: 6,
+                  bottom: 6,
+                  opacity: 0,
+                  width: 0,
+                  transform: 'translate3d(0,0,0)',
+                  backgroundColor: 'rgba(229, 231, 235, 0.75)', // gray-200 at 75% opacity
+                  borderColor: 'rgba(209, 213, 219, 0.9)', // gray-300, one step darker for definition
+                  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.6), 0 6px 12px rgba(0,0,0,0.06)'
+                }}
+                aria-hidden="true"
+              />
+              <ul className="flex items-center font-medium text-xs font-inter relative z-10">
+                {NAV_ITEMS.map((item) => {
+                  const active = pathname === item.href
+                  return (
+                    <li key={item.href}>
+                      <Link
+                        ref={(el) => {
+                          linkRefs.current[item.href] = el
+                        }}
+                        onMouseEnter={(e) => moveHighlighterTo(e.currentTarget)}
+                        className={cn(
+                          'block px-4 py-2.5 relative transition-colors duration-200 rounded-lg text-center',
+                          active
+                            ? 'text-gray-900 dark:text-gray-100'
+                            : 'text-black dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+                        )}
+                        href={item.href}
+                      >
+                        {item.name}
+                      </Link>
+                    </li>
+                  )
+                })}
+              </ul>
+            </div>
           </div>
+
           <div className="flex-1 hidden md:block" />
           {/* Search (Airbnb-style pill, compact) - TEMPORARILY COMMENTED OUT 
           <div className="hidden md:flex relative w-full max-w-lg">

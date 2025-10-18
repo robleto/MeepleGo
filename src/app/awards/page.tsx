@@ -574,6 +574,15 @@ export default async function AwardsPage({
                 Personal Awards
               </h2>
             </div>
+            <div className="mb-4 flex justify-end">
+              <a
+                href="/awards/my"
+                className="text-xs inline-flex items-center gap-2 px-3 py-1.5 rounded border bg-white hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700"
+                title="Edit your awards"
+              >
+                Edit My Awards
+              </a>
+            </div>
             <div className="space-y-12">
               {personalCategoryBlocks.length === 0 && (
                 <p className="text-xs text-gray-500 text-center">
@@ -588,6 +597,7 @@ export default async function AwardsPage({
                   title={block.label}
                   description={block.description}
                   games={block.games as any}
+                  inlineEditable
                 />
               ))}
               {personalCategoryBlocks.length > 0 && (
