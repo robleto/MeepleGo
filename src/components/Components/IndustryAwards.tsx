@@ -65,7 +65,6 @@ export default function IndustryAwards({
               yearSpan={!preview ? stat.yearSpan : undefined}
               winners={!preview ? stat.totalWinners : undefined}
               nominees={!preview ? stat.totalNominees : undefined}
-              total={!preview ? stat.totalGames : undefined}
               circleBorderClass={category.borderColor}
               circleBgClass={category.backgroundColor}
               iconColorClass={category.iconColor}

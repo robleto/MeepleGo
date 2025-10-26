@@ -585,7 +585,17 @@ function Navigation() {
         visible ? 'translate-y-0' : '-translate-y-full'
       )}
     >
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      {/* Background layer to ensure sticky nav has a visible backdrop over content */}
+      <div
+        aria-hidden
+        className={cn(
+          'absolute inset-0 pointer-events-none border-b z-0',
+          'backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:supports-[backdrop-filter]:bg-gray-900/60',
+          'bg-white/90 dark:bg-gray-900/90',
+          'border-gray-200/70 dark:border-white/10'
+        )}
+      />
+      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-14 items-center gap-4">
           <Logo size="lg" href="/" className="flex-shrink-0" />
 

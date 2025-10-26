@@ -85,6 +85,7 @@ a.unstyled:hover,
 
 /* Global base font size increase (affects all rem-based typography & spacing) */
 html {
+  /* Base font size for rem units */
   font-size: 18px;
 }
 

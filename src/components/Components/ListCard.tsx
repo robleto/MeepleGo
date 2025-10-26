@@ -193,7 +193,7 @@ export default function ListCard({
         <div className="flex items-start justify-between mb-2">
           <div className="flex items-center gap-2 min-w-0 flex-1">
             <div className={getListColor()}>{getListIcon()}</div>
-            <h3 className="font-semibold text-gray-900 dark:text-white truncate tracking-wide uppercase text-[11px]">
+            <h3 className="font-bold text-gray-900 dark:text-white truncate leading-tight text-[0.84rem] sm:text-[0.9rem]">
               {list.name}
             </h3>
             {/* System / BGG badge */}

@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import type { GameWithRanking } from '@/types'
 import { ultimateSearchGames } from './ultimateSearch'
 import { searchGamesWithExactBoost } from './enhancedSearch'
@@ -139,7 +139,12 @@ export function useGameFilters(
       const stored = localStorage.getItem(
         'gamesGroupSortOrder'
       ) as GroupSortOrder
-      return stored || 'asc'
+      if (stored) return stored
+      // Default to descending when grouping by Year
+      const storedGroupBy = localStorage.getItem(
+        'gamesGroupBy'
+      ) as GroupKey | null
+      return storedGroupBy === 'year_published' ? 'desc' : 'asc'
     }
     return 'asc'
   })
@@ -172,41 +177,70 @@ export function useGameFilters(
     }
   }, [sortBy, sortOrder, groupBy, groupSortOrder])
 
+  // When transitioning into Year grouping, prefer Z-A (desc) if no explicit user choice yet
+  const prevGroupByRef = useRef<GroupKey>(groupBy)
+  useEffect(() => {
+    if (prevGroupByRef.current !== groupBy) {
+      if (
+        groupBy === 'year_published' &&
+        prevGroupByRef.current !== 'year_published' &&
+        groupSortOrder === 'asc'
+      ) {
+        setGroupSortOrder('desc')
+      }
+      prevGroupByRef.current = groupBy
+    }
+  }, [groupBy, groupSortOrder])
+
   // Filter games based on current filter settings and search term
   const filteredGames = (() => {
     let filtered = games
 
     // Apply search term first using the ultimate search algorithm
     if (searchTerm.trim()) {
-      // Use the ultimate search that combines multiple algorithms
-      const ultimateResults = ultimateSearchGames(
-        games,
-        searchTerm.trim(),
-        1000
-      )
+      const norm = (s: string) =>
+        s
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
 
-      // If ultimate search finds results, use those; otherwise fall back to enhanced search
-      if (ultimateResults.length > 0) {
-        filtered = ultimateResults
+      const term = norm(searchTerm.trim())
+
+      // Prefer strict substring match on title first
+      const direct = games.filter((g) => norm(g.name || '').includes(term))
+      if (direct.length > 0) {
+        filtered = direct
       } else {
-        // Fallback: enhanced search with exact match boosting
-        const enhancedResults = searchGamesWithExactBoost(
+        // Use the ultimate search that combines multiple algorithms
+        const ultimateResults = ultimateSearchGames(
           games,
           searchTerm.trim(),
           1000
         )
-        if (enhancedResults.length > 0) {
-          filtered = enhancedResults
+
+        // If ultimate search finds results, use those; otherwise fall back to enhanced search
+        if (ultimateResults.length > 0) {
+          filtered = ultimateResults
         } else {
-          // Final fallback: original fuzzy search
-          const fuzzyResults = fuzzySearchGames(games, searchTerm.trim())
-          if (fuzzyResults.length > 0) {
-            filtered = fuzzyResults
+          // Fallback: enhanced search with exact match boosting
+          const enhancedResults = searchGamesWithExactBoost(
+            games,
+            searchTerm.trim(),
+            1000
+          )
+          if (enhancedResults.length > 0) {
+            filtered = enhancedResults
           } else {
-            // Last resort: basic name matching
-            filtered = games.filter((game) =>
-              isGameMatch(searchTerm.trim(), game.name, 0.3)
-            )
+            // Final fallback: original fuzzy search
+            const fuzzyResults = fuzzySearchGames(games, searchTerm.trim())
+            if (fuzzyResults.length > 0) {
+              filtered = fuzzyResults
+            } else {
+              // Last resort: basic name matching
+              filtered = games.filter((game) =>
+                isGameMatch(searchTerm.trim(), game.name, 0.3)
+              )
+            }
           }
         }
       }
@@ -643,7 +677,12 @@ export function useRankingsFilters(
       const stored = localStorage.getItem(
         'rankingsGroupSortOrder'
       ) as GroupSortOrder
-      return stored || 'desc' // Default to descending for rankings
+      if (stored) return stored
+      const storedGroupBy = localStorage.getItem(
+        'rankingsGroupBy'
+      ) as GroupKey | null
+      // Prefer Z-A when defaulting into Year grouping
+      return storedGroupBy === 'year_published' ? 'desc' : 'desc'
     }
     return 'desc'
   })
@@ -683,35 +722,40 @@ export function useRankingsFilters(
 
     // Apply search term first using the ultimate search algorithm
     if (searchTerm.trim()) {
-      // Use the ultimate search that combines multiple algorithms
-      const ultimateResults = ultimateSearchGames(
-        games,
-        searchTerm.trim(),
-        1000
-      )
+      const norm = (s: string) =>
+        s
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
 
-      // If ultimate search finds results, use those; otherwise fall back to enhanced search
-      if (ultimateResults.length > 0) {
-        filtered = ultimateResults
+      const term = norm(searchTerm.trim())
+
+      // 1) Prefer strict substring match on title for rankings
+      const direct = games.filter((g) => norm(g.name || '').includes(term))
+      if (direct.length > 0) {
+        filtered = direct
       } else {
-        // Fallback: enhanced search with exact match boosting
-        const enhancedResults = searchGamesWithExactBoost(
-          games,
-          searchTerm.trim(),
-          1000
-        )
-        if (enhancedResults.length > 0) {
-          filtered = enhancedResults
+        // 2) Fall back to the combined search pipeline
+        const ultimateResults = ultimateSearchGames(games, searchTerm.trim(), 1000)
+        if (ultimateResults.length > 0) {
+          filtered = ultimateResults
         } else {
-          // Final fallback: original fuzzy search
-          const fuzzyResults = fuzzySearchGames(games, searchTerm.trim())
-          if (fuzzyResults.length > 0) {
-            filtered = fuzzyResults
+          const enhancedResults = searchGamesWithExactBoost(
+            games,
+            searchTerm.trim(),
+            1000
+          )
+          if (enhancedResults.length > 0) {
+            filtered = enhancedResults
           } else {
-            // Last resort: basic name matching
-            filtered = games.filter((game) =>
-              isGameMatch(searchTerm.trim(), game.name, 0.3)
-            )
+            const fuzzyResults = fuzzySearchGames(games, searchTerm.trim())
+            if (fuzzyResults.length > 0) {
+              filtered = fuzzyResults
+            } else {
+              filtered = games.filter((game) =>
+                isGameMatch(searchTerm.trim(), game.name, 0.3)
+              )
+            }
           }
         }
       }
@@ -782,6 +826,21 @@ export function useRankingsFilters(
       return true
     })
   })()
+
+  // When transitioning into Year grouping, prefer Z-A (desc) if no explicit user choice yet
+  const prevRankingsGroupByRef = useRef<GroupKey>(groupBy)
+  useEffect(() => {
+    if (prevRankingsGroupByRef.current !== groupBy) {
+      if (
+        groupBy === 'year_published' &&
+        prevRankingsGroupByRef.current !== 'year_published' &&
+        groupSortOrder === 'asc'
+      ) {
+        setGroupSortOrder('desc')
+      }
+      prevRankingsGroupByRef.current = groupBy
+    }
+  }, [groupBy, groupSortOrder])
 
   // Group and sort logic for games (same as useGameFilters)
   const groupedGames = (() => {

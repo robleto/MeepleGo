@@ -9,9 +9,9 @@ export interface AwardCardProps {
   title: string
   description?: string
   yearSpan?: string
+  categories?: number
   winners?: number
   nominees?: number
-  total?: number
   icon?: ReactNode // optional custom icon node
   circleBorderClass?: string
   circleBgClass?: string
@@ -27,9 +27,9 @@ export function AwardCard({
   title,
   description,
   yearSpan,
+  categories = 0,
   winners = 0,
   nominees = 0,
-  total,
   icon,
   circleBorderClass = 'border-gray-200',
   circleBgClass = 'bg-gray-50',
@@ -38,7 +38,6 @@ export function AwardCard({
   showStats = false,
   cta = 'View →',
 }: AwardCardProps) {
-  const computedTotal = total ?? winners + nominees
   const Wrapper: any = href ? Link : 'div'
 
   return (
@@ -78,6 +77,14 @@ export function AwardCard({
           <div className="grid w-full grid-cols-3 gap-2">
             <div className="flex flex-col items-center">
               <span className="text-lg font-medium text-gray-900">
+                {categories}
+              </span>
+              <span className="mt-0.5 text-[11px] uppercase tracking-wide text-gray-500">
+                Categories
+              </span>
+            </div>
+            <div className="flex flex-col items-center">
+              <span className="text-lg font-medium text-gray-900">
                 {winners}
               </span>
               <span className="mt-0.5 text-[11px] uppercase tracking-wide text-gray-500">
@@ -90,14 +97,6 @@ export function AwardCard({
               </span>
               <span className="mt-0.5 text-[11px] uppercase tracking-wide text-gray-500">
                 Nominees
-              </span>
-            </div>
-            <div className="flex flex-col items-center">
-              <span className="text-lg font-medium text-gray-900">
-                {computedTotal}
-              </span>
-              <span className="mt-0.5 text-[11px] uppercase tracking-wide text-gray-500">
-                Total
               </span>
             </div>
           </div>

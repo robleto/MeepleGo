@@ -615,27 +615,6 @@ export default function PlaysClientPage({
   return (
     <div className="bg-gray-50 dark:bg-gray-950 min-h-[calc(100vh-4rem)]">
       <div className="max-w-5xl mx-auto px-4 py-10 space-y-12">
-        {!zeroStateActive && isOwner && (
-          <div className="flex items-start justify-between gap-6 flex-wrap">
-            <Heading
-              as="h1"
-              size="display"
-              align="left"
-              displayFont
-              className="text-balance mb-2 md:mb-4 tracking-tight"
-            >
-              Game Log
-            </Heading>
-            <div className="ml-auto pt-2">
-              <button
-                onClick={() => setShowPlayLogModal(true)}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-full btn-brand text-sm font-medium"
-              >
-                Add New
-              </button>
-            </div>
-          </div>
-        )}
         {!zeroStateActive && (
           <div className="flex flex-wrap items-center gap-2 mt-2 text-xs">
             {['all', 'week', 'month', 'rated', 'notes'].map((f) => (
@@ -691,22 +670,32 @@ export default function PlaysClientPage({
                 </button>
               </div>
             )}
-            {(filter !== 'all' ||
-              tagFilter ||
-              playerFilter !== 'all' ||
-              durationFilter !== 'all') && (
-              <button
-                onClick={() => {
-                  setFilter('all')
-                  setTagFilter(null)
-                  setPlayerFilter('all')
-                  setDurationFilter('all')
-                }}
-                className="ml-auto text-xs text-gray-500 hover:text-gray-700 underline"
-              >
-                Reset Filters
-              </button>
-            )}
+            <div className="ml-auto flex items-center gap-2">
+              {(filter !== 'all' ||
+                tagFilter ||
+                playerFilter !== 'all' ||
+                durationFilter !== 'all') && (
+                <button
+                  onClick={() => {
+                    setFilter('all')
+                    setTagFilter(null)
+                    setPlayerFilter('all')
+                    setDurationFilter('all')
+                  }}
+                  className="text-xs text-gray-500 hover:text-gray-700 underline"
+                >
+                  Reset Filters
+                </button>
+              )}
+              {isOwner && (
+                <button
+                  onClick={() => setShowPlayLogModal(true)}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full btn-brand text-sm font-medium"
+                >
+                  Add New
+                </button>
+              )}
+            </div>
           </div>
         )}
 
@@ -935,7 +924,7 @@ export default function PlaysClientPage({
         {!zeroStateActive && (
           <section className="space-y-6">
             <h2 className="text-2xl md:text-3xl font-semibold tracking-tight text-gray-900 dark:text-gray-100 mb-2">
-              Timeline
+              Game Log
             </h2>
             {(pageError || statsError || summaryError) && (
               <div className="text-xs rounded-lg border p-3 bg-red-50 dark:bg-red-900/20 border-red-300 dark:border-red-800 text-red-700 dark:text-red-300 space-y-1">
@@ -968,14 +957,31 @@ export default function PlaysClientPage({
                 )}
               </div>
             )}
-            {logs.length > 0 && (
+            {filteredLogs.length === 0 ? (
+              <div className="panel py-10 text-center text-sm text-gray-500">
+                <div className="mb-2 font-medium text-gray-700 dark:text-gray-200">No plays in this period</div>
+                <div className="mb-4 text-gray-500">Try a different filter or broaden your timeframe.</div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFilter('all')
+                    setTagFilter(null)
+                    setPlayerFilter('all')
+                    setDurationFilter('all')
+                  }}
+                  className="px-3 py-1.5 text-xs rounded-full border bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
+                >
+                  Reset Filters
+                </button>
+              </div>
+            ) : (
               <div className="relative">
                 <div
                   ref={containerRef}
                   className={
                     virtualizationEnabled
-                      ? 'max-h-[1600px] overflow-auto pr-2 space-y-12 relative'
-                      : 'space-y-12'
+                      ? 'max-h-[1600px] overflow-auto pr-2 space-y-8 relative'
+                      : 'space-y-8'
                   }
                 >
                   {virtualizationEnabled && (
@@ -1000,7 +1006,7 @@ export default function PlaysClientPage({
                             isLast={isLastGroup}
                             variant="date"
                           />
-                          <div className="flex-1 space-y-4">
+                          <div className="flex-1 space-y-3">
                             {g.items.map((l) => {
                               const flatIndex = virtualizationEnabled
                                 ? flatLogs.findIndex((f) => f.play.id === l.id)
@@ -1024,7 +1030,7 @@ export default function PlaysClientPage({
                                       ? itemRef(flatIndex)
                                       : undefined
                                   }
-                                  className={`group relative border rounded-xl bg-white dark:bg-gray-900 px-5 py-4 shadow-sm transition hover:shadow-md hover:-translate-y-0.5 border-gray-200 dark:border-gray-800 flex gap-5 ${highlightId === l.id ? 'ring-2 ring-sky-400 animate-fade-slide' : ''}`}
+                                  className={`group relative border rounded-xl bg-white dark:bg-gray-900 px-5 py-4 shadow-sm transition hover:shadow-md hover:-translate-y-0.5 border-gray-200 dark:border-gray-800 flex gap-4 ${highlightId === l.id ? 'ring-2 ring-sky-400 animate-fade-slide' : ''}`}
                                 >
                                   <div className="flex-shrink-0 mt-1">
                                     {meta && meta.thumb ? (
@@ -1044,7 +1050,7 @@ export default function PlaysClientPage({
                                           {meta ? meta.name : 'Loading…'}
                                         </span>
                                         {isOwner && (
-                                          <div className="mt-1 flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                          <div className="h-0 mt-0 flex items-center gap-3 overflow-hidden transition-all duration-200 opacity-0 group-hover:opacity-100 group-hover:h-5 group-hover:mt-1">
                                             <button
                                               type="button"
                                               onClick={() => {

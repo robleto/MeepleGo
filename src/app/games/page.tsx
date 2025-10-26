@@ -857,6 +857,7 @@ function GamesPageContent() {
                         viewMode={viewMode}
                         variant={cardVariant}
                         onMembershipChange={handleMembershipChange}
+                        imageFit="contain"
                       />
                     ))}
                   </div>

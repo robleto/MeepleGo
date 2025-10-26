@@ -79,9 +79,13 @@ export default function NetflixScrollSection({
         onScroll={checkScrollability}
       >
         <div className="flex gap-4 pb-4" style={{ width: 'max-content' }}>
-          {React.Children.map(children, (child) => (
-            <div className={`flex-none ${itemWidth}`}>{child}</div>
-          ))}
+          {React.Children.toArray(children)
+            .filter(Boolean)
+            .map((child, idx) => (
+              <div key={idx} className={`flex-none ${itemWidth}`}>
+                {child}
+              </div>
+            ))}
         </div>
       </div>
 

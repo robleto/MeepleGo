@@ -92,7 +92,7 @@ export function GameImage({
 
   // Render actual image with loading state
   return (
-    <div className={`relative ${className}`}>
+    <div className={`relative w-full h-full ${className}`}>
       {imageState === 'loading' && (
         <div className="absolute inset-0 bg-gray-200 dark:bg-gray-700 animate-pulse rounded" />
       )}

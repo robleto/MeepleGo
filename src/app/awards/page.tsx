@@ -131,9 +131,9 @@ async function getAwardYearBreakdown(awardType: string) {
 }
 
 interface AwardStats {
-  totalGames: number
-  totalWinners: number
-  totalNominees: number
+  categories: number
+  winners: number
+  nominees: number
   yearSpan: string
 }
 
@@ -173,42 +173,38 @@ async function getAwardStats(awardType: string): Promise<AwardStats> {
     // Get award statistics from industry_awards table using pattern matching
     const { data: awards, error } = await supabase
       .from('industry_awards')
-      .select('year, status')
+      .select('year, status, category')
       .ilike('award_set', searchPattern)
 
     if (error) {
       console.error('Error fetching award stats:', error)
-      return {
-        totalGames: 0,
-        totalWinners: 0,
-        totalNominees: 0,
-        yearSpan: '',
-      }
+      return { categories: 0, winners: 0, nominees: 0, yearSpan: '' }
     }
 
     if (!awards || awards.length === 0) {
-      return {
-        totalGames: 0,
-        totalWinners: 0,
-        totalNominees: 0,
-        yearSpan: '',
-      }
+      return { categories: 0, winners: 0, nominees: 0, yearSpan: '' }
     }
 
     const years = new Set<number>()
     let winners = 0
     let nominees = 0
+    const perYear = new Map<number, { cats: Set<string>; winners: number }>()
 
-    awards.forEach((award: { year: number; status: string }) => {
+    awards.forEach((award: { year: number; status: string; category?: string | null }) => {
       years.add(award.year)
+      if (!perYear.has(award.year)) {
+        perYear.set(award.year, { cats: new Set<string>(), winners: 0 })
+      }
+      const entry = perYear.get(award.year)!
+      const cat = (award.category || '').toString().trim()
+      if (cat && !/^(overall|game of the year)$/i.test(cat)) {
+        entry.cats.add(cat)
+      }
       if (award.status === 'Winner') {
-        winners++
-      } else if (
-        award.status === 'Nominee' ||
-        award.status === 'Recommended' ||
-        award.status === 'Special'
-      ) {
-        nominees++
+        winners += 1
+        entry.winners += 1
+      } else if (/^(Nominee|Recommended|Special)$/i.test(award.status || '')) {
+        nominees += 1
       }
     })
 
@@ -217,23 +213,23 @@ async function getAwardStats(awardType: string): Promise<AwardStats> {
       ? `${yearArray[0]} - ${yearArray[yearArray.length - 1]}`
       : ''
 
-    return {
-      totalGames: winners + nominees,
-      totalWinners: winners,
-      totalNominees: nominees,
-      yearSpan,
-    }
+    // Compute average categories per year, using winners as fallback when no explicit categories
+    let categoriesSum = 0
+    years.forEach((y) => {
+      const entry = perYear.get(y)!
+      let count = entry.cats.size
+      if (count === 0 && entry.winners > 0) count = entry.winners
+      categoriesSum += count
+    })
+    const categoriesAvg = years.size > 0 ? Math.round(categoriesSum / years.size) : 0
+
+    return { categories: categoriesAvg, winners, nominees, yearSpan }
   } catch (error) {
     console.error('Unhandled exception in getAwardStats', {
       awardType,
       error,
     })
-    return {
-      totalGames: 0,
-      totalWinners: 0,
-      totalNominees: 0,
-      yearSpan: '',
-    }
+    return { categories: 0, winners: 0, nominees: 0, yearSpan: '' }
   }
 }
 
@@ -546,20 +542,29 @@ export default async function AwardsPage({
             {AWARD_CATEGORIES.map((category, idx) => {
               const stat = allStats[idx]
               if (!stat) return null
+              const zero = (stat.categories || 0) === 0 && (stat.winners || 0) === 0 && (stat.nominees || 0) === 0
+              if (zero) {
+                console.log('[Awards Landing] Hiding zero-data award', {
+                  id: category.id,
+                  name: category.name,
+                  awardType: (awardsData as any).awardTypeMap?.[category.id],
+                })
+                return null
+              }
               return (
                 <AwardCard
                   key={category.id}
                   href={`/awards/${category.id}`}
                   title={category.name}
                   description={category.description}
-                  yearSpan={undefined}
-                  winners={undefined as any}
-                  nominees={undefined as any}
-                  total={undefined}
+                  yearSpan={stat.yearSpan}
+                  categories={stat.categories}
+                  winners={stat.winners}
+                  nominees={stat.nominees}
                   circleBorderClass={category.borderColor}
                   circleBgClass={category.backgroundColor}
                   iconColorClass={category.iconColor}
-                  showStats={false}
+                  showStats
                 />
               )
             })}

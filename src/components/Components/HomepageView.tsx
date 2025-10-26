@@ -332,7 +332,6 @@ export function HomepageView({
                   yearSpan={undefined}
                   winners={undefined as any}
                   nominees={undefined as any}
-                  total={undefined}
                   circleBorderClass={award.borderColor || 'border-amber-200'}
                   circleBgClass={award.backgroundColor || 'bg-amber-50'}
                   iconColorClass={award.iconColor || 'text-amber-600'}
@@ -662,7 +661,6 @@ export function HomepageView({
                 yearSpan={undefined}
                 winners={undefined as any}
                 nominees={undefined as any}
-                total={undefined}
                 circleBorderClass={award.borderColor || 'border-amber-200'}
                 circleBgClass={award.backgroundColor || 'bg-amber-50'}
                 iconColorClass={award.iconColor || 'text-amber-600'}

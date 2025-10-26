@@ -63,6 +63,8 @@ interface GameCardProps {
     setActivatorNodeRef?: (el: HTMLElement | null) => void
   }
   onRemoveFromCurrentList?: () => void
+  // Controls object-fit for grid image (default cover for tighter layouts)
+  imageFit?: 'cover' | 'contain'
 }
 
 export default function GameCard({
@@ -81,6 +83,7 @@ export default function GameCard({
   showDragHandle,
   dragHandleProps,
   onRemoveFromCurrentList,
+  imageFit = 'cover',
 }: GameCardProps) {
   const initialLibrary = game.list_membership?.library ?? false
   const initialWishlist = game.list_membership?.wishlist ?? false
@@ -260,6 +263,7 @@ export default function GameCard({
         )}
         <div
           className={`flex items-center ${variant === 'compact' ? 'space-x-2 sm:space-x-3' : 'space-x-3 sm:space-x-4'}`}
+          style={{ fontSize: '0.875rem' }}
         >
           {listRank != null && (
             <div className="flex-shrink-0 flex items-center gap-2">
@@ -317,11 +321,11 @@ export default function GameCard({
           </div>
           <div className="flex-1 min-w-0">
             <h3
-              className={`font-medium text-gray-900 truncate flex items-center gap-1 ${
-                variant === 'compact'
-                  ? 'text-sm sm:text-base'
-                  : 'text-base sm:text-lg'
-              }`}
+              className={`font-bold text-gray-900 truncate flex items-center gap-1 ${
+                  variant === 'compact'
+                    ? 'text-[0.72rem] sm:text-[0.8rem]'
+                    : 'text-[0.8rem] sm:text-[0.9rem]'
+                }`}
             >
               {game.name}
               {isAwardWinner &&
@@ -343,7 +347,7 @@ export default function GameCard({
 
             {/* Metadata - show for balanced and detailed variants */}
             {(variant === 'balanced' || variant === 'detailed') && showMeta && (
-              <div className="flex items-center space-x-2 sm:space-x-4 text-xs sm:text-sm text-gray-500">
+              <div className="flex items-center space-x-2 sm:space-x-4 text-[0.7rem] sm:text-[0.8rem] text-gray-500">
                 <span>{formatYear(game.year_published)}</span>
                 <span className="hidden sm:inline">
                   {formatPlayerCount(game.min_players, game.max_players)}
@@ -356,7 +360,7 @@ export default function GameCard({
 
             {/* Compact variant shows only year inline */}
             {variant === 'compact' && (
-              <div className="text-xs text-gray-500 tabular-nums">
+              <div className="text-[0.7rem] text-gray-500 tabular-nums">
                 {formatYear(game.year_published)}
               </div>
             )}
@@ -531,12 +535,12 @@ export default function GameCard({
       <div
         className={`aspect-square relative w-full mx-auto rounded-t-lg overflow-hidden border border-gray-200 dark:border-gray-700 ${variant === 'compact' ? 'bg-gradient-to-b from-gray-200 to-gray-100 dark:from-gray-800 dark:to-gray-900' : 'bg-gradient-to-b from-gray-300 to-gray-200 dark:from-gray-800 dark:to-gray-700'}`}
       >
-        {game.image_url ? (
+        {game.image_url || game.thumbnail_url ? (
           <Image
-            src={game.image_url}
+            src={(game.image_url || game.thumbnail_url) as string}
             alt={game.name}
             fill
-            className="object-contain"
+            className={imageFit === 'contain' ? 'object-contain p-1' : 'object-cover'}
             sizes="(max-width: 640px) 150px, (max-width: 768px) 150px, (max-width: 1024px) 150px, 150px"
           />
         ) : (
@@ -762,11 +766,14 @@ export default function GameCard({
       {/* Game Info */}
       <div
         className={`p-3 ${variant === 'compact' ? 'pb-2' : ''} flex flex-col flex-1 min-h-0`}
+        style={{ fontSize: '0.875rem' }}
       >
         {/* Title (same size for all variants) */}
         <div className="flex-shrink-0">
           <h3
-            className={`font-medium text-gray-900 text-md leading-tight line-clamp-2 ${titleClassName || ''}`}
+            className={`font-bold text-gray-900 leading-tight line-clamp-2 ${
+              titleClassName || ''
+            } ${variant === 'compact' ? 'text-[0.76rem]' : 'text-[0.84rem]'} `}
           >
             {game.name.length > 48
               ? `${game.name.substring(0, 48)}...`
@@ -780,14 +787,14 @@ export default function GameCard({
 
           {/* Description/tagline - only show for non-compact variants */}
           {variant === 'detailed' && (game as any).tagline && (
-            <p className="mt-0.5 text-sm leading-snug text-gray-600 dark:text-gray-400 line-clamp-2 min-h-[1.35rem]">
+            <p className="mt-0.5 text-[0.8rem] leading-snug text-gray-600 dark:text-gray-400 line-clamp-2 min-h-[1.2rem]">
               {truncate(game.tagline || '', 90)}
             </p>
           )}
 
           {/* Year below title for balanced and detailed variants */}
           {(variant === 'balanced' || variant === 'detailed') && (
-            <div className="mt-0.5 text-xs text-gray-500 tabular-nums">
+            <div className="mt-0.5 text-[0.7rem] text-gray-500 tabular-nums">
               {formatYear(game.year_published)}
             </div>
           )}
@@ -795,7 +802,7 @@ export default function GameCard({
 
         {/* Bottom-aligned metadata section - for balanced and detailed variants */}
         <div
-          className={`mt-auto pt-2 space-y-1 text-xs ${emphasizeMeta ? 'text-gray-700' : 'text-gray-500'} flex-shrink-0`}
+          className={`mt-auto pt-2 space-y-1 ${emphasizeMeta ? 'text-gray-700' : 'text-gray-500'} flex-shrink-0 text-[0.7rem]`}
         >
           {(variant === 'balanced' || variant === 'detailed') && showMeta && (
             <div className="flex items-center justify-between text-xs">

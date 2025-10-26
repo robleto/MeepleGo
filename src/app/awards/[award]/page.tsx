@@ -6,6 +6,7 @@ import {
   CalendarIcon,
   UserGroupIcon,
   StarIcon,
+  Squares2X2Icon,
 } from '@heroicons/react/24/outline'
 import GameCard from '@/components/Components/GameCard'
 import Heading from '@/components/Components/Heading'
@@ -230,6 +231,14 @@ async function getAwardData(awardType: string): Promise<AwardYearGroup[]> {
       searchPattern = '%Dice Tower%'
     } else if (awardType === "As d'Or - Jeu de l'Année") {
       searchPattern = "%As d'Or%"
+    } else if (awardType === 'Board Game Quest Awards') {
+      searchPattern = '%Board Game Quest%'
+    } else if (awardType === 'Parents Choice') {
+      // Match with or without apostrophe in award_set
+      searchPattern = '%Parents%Choice%'
+    } else if (awardType === 'Juego del Año') {
+      // Avoid strict diacritics matching in ilike pattern
+      searchPattern = '%Juego del A%'
     } else {
       // For other awards, try to match the first part of the name
       const mainName = awardType.split(' ')[0]
@@ -246,7 +255,6 @@ async function getAwardData(awardType: string): Promise<AwardYearGroup[]> {
         award_set,
         category,
         status,
-        position,
         boardgames
       `
       )
@@ -254,7 +262,7 @@ async function getAwardData(awardType: string): Promise<AwardYearGroup[]> {
       .order('year', { ascending: false })
 
     if (error) {
-      console.error('Error fetching award data:', error)
+      console.warn('Warning: error fetching award data', { message: (error as any)?.message })
       return []
     }
 
@@ -263,35 +271,100 @@ async function getAwardData(awardType: string): Promise<AwardYearGroup[]> {
     }
 
     // Extract all unique BGG IDs from all awards to fetch game data in one query
+    // Support both bggId and bgg_id keys from JSONB
     const allBggIds = new Set<number>()
     awards.forEach((award: any) => {
       const boardgames = award.boardgames || []
       boardgames.forEach((boardgame: any) => {
-        if (boardgame.bggId) {
-          allBggIds.add(boardgame.bggId)
-        }
+        const bggId =
+          typeof boardgame.bggId === 'number'
+            ? boardgame.bggId
+            : typeof boardgame.bgg_id === 'number'
+              ? boardgame.bgg_id
+              : undefined
+        if (typeof bggId === 'number') allBggIds.add(bggId)
       })
     })
 
-    // Fetch all game metadata in one query
-    const { data: gamesData, error: gamesError } = await supabase
-      .from('games')
-      .select(
-        `
-        bgg_id,
-        name,
-        year_published,
-        image_url,
-        thumbnail_url,
-        min_players,
-        max_players,
-        playtime_minutes
-      `
-      )
-      .in('bgg_id', Array.from(allBggIds))
+    // Also consult link table (industry_award_games) if available to enrich bgg_ids and names
+    const awardIds = (awards || []).map((a: any) => a.id).filter(Boolean)
+    const linkByAward = new Map<string, Array<any>>()
+    if (awardIds.length > 0) {
+      const { data: links, error: linkErr } = await supabase
+        .from('industry_award_games')
+        .select('*')
+        .in('award_id', awardIds as any)
+      if (linkErr) {
+        console.warn('Warning: error fetching industry_award_games', { message: (linkErr as any)?.message })
+      } else if (Array.isArray(links)) {
+        links.forEach((row: any) => {
+          const aId = String(row.award_id)
+          const bggIdFromLink = [
+            row.bgg_id,
+            row.game_bgg_id,
+            row.bggId,
+            typeof row.bgg_id_str === 'string' ? Number(row.bgg_id_str) : undefined,
+          ].find((v: any) => typeof v === 'number')
+          if (typeof bggIdFromLink === 'number') allBggIds.add(bggIdFromLink)
+          const arr = linkByAward.get(aId) || []
+          arr.push({
+            bgg_id: typeof bggIdFromLink === 'number' ? bggIdFromLink : undefined,
+            name: row.game_name || row.name || row.title || null,
+            // Try a variety of likely image/thumbnail fields
+            image_url:
+              row.image_url || row.game_image_url || row.image || null,
+            thumbnail_url:
+              row.thumbnail_url ||
+              row.game_thumbnail_url ||
+              row.thumb_url ||
+              row.thumb ||
+              null,
+            // Try to capture status/result indicators
+            status_raw:
+              row.status ||
+              row.result ||
+              row.award_status ||
+              row.award_result ||
+              row.recognition ||
+              row.type ||
+              null,
+            is_winner:
+              typeof row.is_winner === 'boolean'
+                ? row.is_winner
+                : typeof row.winner === 'boolean'
+                  ? row.winner
+                  : undefined,
+            category_raw:
+              row.category || row.subcategory || row.position || row.section || null,
+          })
+          linkByAward.set(aId, arr)
+        })
+      }
+    }
 
-    if (gamesError) {
-      console.error('Error fetching games data:', gamesError)
+    // Fetch all game metadata in one query
+    let gamesData: any[] | null = null
+    if (allBggIds.size > 0) {
+      const { data, error: gamesError } = await supabase
+        .from('games')
+        .select(
+          `
+          bgg_id,
+          name,
+          year_published,
+          image_url,
+          thumbnail_url,
+          min_players,
+          max_players,
+          playtime_minutes
+        `
+        )
+        .in('bgg_id', Array.from(allBggIds))
+
+      if (gamesError) {
+        console.warn('Warning: error fetching games data', { message: (gamesError as any)?.message })
+      }
+      gamesData = data || null
     }
 
     // Create a map for quick game lookups by BGG ID
@@ -302,24 +375,83 @@ async function getAwardData(awardType: string): Promise<AwardYearGroup[]> {
       })
     }
 
-    // Check if this award type has categories by looking for position-based awards
-    const hasCategories = awards.some(
-      (award: any) =>
-        award.position &&
-        award.position !== awardType &&
-        (award.position.includes('Best ') ||
-          award.position.includes('Game of the'))
-    )
+    // Fallback: gather names for which we couldn't find a game by bgg_id, then try exact-name lookup
+    const missingNames = new Set<string>()
+    awards.forEach((award: any) => {
+      const boardgames = Array.isArray(award.boardgames)
+        ? award.boardgames
+        : []
+      boardgames.forEach((boardgame: any) => {
+        const bggId =
+          typeof boardgame.bggId === 'number'
+            ? boardgame.bggId
+            : typeof boardgame.bgg_id === 'number'
+              ? boardgame.bgg_id
+              : undefined
+        if (typeof bggId === 'number') {
+          if (!gamesMap.has(bggId) && typeof boardgame.name === 'string') {
+            missingNames.add(boardgame.name)
+          }
+        } else if (typeof boardgame.name === 'string') {
+          missingNames.add(boardgame.name)
+        }
+      })
+      // Include names from link table for this award id
+      const aId = String(award.id)
+      const linkRows = linkByAward.get(aId) || []
+      linkRows.forEach((lr: any) => {
+        if (typeof lr?.bgg_id === 'number' && !gamesMap.has(lr.bgg_id)) {
+          // we don't know the name yet, but if also provided include it
+          if (typeof lr?.name === 'string') missingNames.add(lr.name)
+        } else if (typeof lr?.name === 'string') {
+          missingNames.add(lr.name)
+        }
+      })
+    })
 
-    console.log(`Award type "${awardType}" has categories:`, hasCategories)
+    const nameMap = new Map<string, any>()
+    if (missingNames.size > 0) {
+      const names = Array.from(missingNames).slice(0, 500) // guard against excessive IN list
+      const { data: byName, error: byNameErr } = await supabase
+        .from('games')
+        .select(
+          `
+          bgg_id,
+          name,
+          year_published,
+          image_url,
+          thumbnail_url,
+          min_players,
+          max_players,
+          playtime_minutes
+        `
+        )
+        .in('name', names)
+      if (byNameErr) {
+        console.warn('Warning: error fetching games by name', { message: (byNameErr as any)?.message })
+      } else if (byName) {
+        byName.forEach((g) => nameMap.set(g.name, g))
+      }
+    }
+
+    // Check if this award type has categories by examining the category field
+    const hasCategories = awards.some((award: any) => {
+      const c = (award.category || '').toString().trim().toLowerCase()
+      return c && c !== 'overall' && !/game of the year/i.test(c)
+    })
+
+  // Note: avoid noisy server logs in RSC
 
     const yearMap = new Map<number, AwardYearGroup>()
 
     awards.forEach((award: any) => {
-      // Extract games from the boardgames JSONB array
-      const boardgames = award.boardgames || []
+      // Extract games from the boardgames JSONB array safely
+      const boardgames = Array.isArray(award.boardgames)
+        ? award.boardgames
+        : []
 
       boardgames.forEach((boardgame: any) => {
+        try {
         // Convert database award to Honor interface format
         const honor: Honor = {
           name: award.award_set,
@@ -336,13 +468,38 @@ async function getAwardData(awardType: string): Promise<AwardYearGroup[]> {
         }
 
         // Get full game data from our games table, fallback to basic boardgames data
-        const fullGameData = gamesMap.get(boardgame.bggId)
+          const bggId =
+          typeof boardgame.bggId === 'number'
+            ? boardgame.bggId
+            : typeof boardgame.bgg_id === 'number'
+              ? boardgame.bgg_id
+              : undefined
+        let fullGameData =
+          typeof bggId === 'number' ? gamesMap.get(bggId) : undefined
+        if (!fullGameData && typeof boardgame?.name === 'string') {
+          fullGameData = nameMap.get(boardgame.name)
+        }
+        // If still missing, try to match via link table by normalized name
+        let linkMatch: any | null = null
+        if (!fullGameData) {
+          const aId = String(award.id)
+          const linkRows = linkByAward.get(aId) || []
+          const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '')
+          const bn = typeof boardgame?.name === 'string' ? norm(boardgame.name) : ''
+          const match = linkRows.find((lr: any) => typeof lr?.name === 'string' && norm(lr.name) === bn)
+          if (match) linkMatch = match
+          if (match && typeof match.bgg_id === 'number') {
+            fullGameData = gamesMap.get(match.bgg_id) || nameMap.get(match.name)
+          }
+        }
+        // Skip if we have neither an id nor a name to show
+        if (typeof bggId !== 'number' && !boardgame?.name) return
         const gameData: Game = {
-          bgg_id: boardgame.bggId,
-          name: fullGameData?.name || boardgame.name,
-          year_published: fullGameData?.year_published || 0,
-          image_url: fullGameData?.image_url,
-          thumbnail_url: fullGameData?.thumbnail_url,
+          bgg_id: (typeof bggId === 'number' ? bggId : 0) as number,
+          name: fullGameData?.name || boardgame.name || 'Unknown',
+          year_published: fullGameData?.year_published || award.year || 0,
+          image_url: fullGameData?.image_url || linkMatch?.image_url || undefined,
+          thumbnail_url: fullGameData?.thumbnail_url || linkMatch?.thumbnail_url || undefined,
           honors: [honor], // Single honor for this context
         }
 
@@ -361,10 +518,7 @@ async function getAwardData(awardType: string): Promise<AwardYearGroup[]> {
         if (hasCategories) {
           // For categorized awards (like Golden Geek), group by position/category
           const categoryName =
-            award.position?.replace(
-              new RegExp(`^${awardType.replace('Awards', '').trim()} ?`),
-              ''
-            ) || 'Unknown Category'
+            (award.category?.toString().trim() || '') || 'Category'
 
           // Initialize categories map if needed
           if (!bucket.categories) {
@@ -413,7 +567,7 @@ async function getAwardData(awardType: string): Promise<AwardYearGroup[]> {
                 })
             } else {
               bucket.categoryWinners.push({
-                subcategory: award.category,
+                subcategory: award.category || 'Category',
                 game: gameData,
                 honor,
               })
@@ -428,7 +582,109 @@ async function getAwardData(awardType: string): Promise<AwardYearGroup[]> {
             }
           }
         }
+        } catch (e) {
+          // Ignore malformed boardgame entries
+        }
       })
+      // If boardgames array is empty or incomplete, also fold in link-table rows as entries
+      const aId = String(award.id)
+      const linkRows = linkByAward.get(aId) || []
+      if (linkRows.length > 0) {
+        // Ensure bucket exists for this year
+        if (!yearMap.has(award.year)) {
+          yearMap.set(award.year, {
+            year: award.year,
+            primary: null,
+            categoryWinners: [],
+            nominees: [],
+            special: [],
+          })
+        }
+        const bucket = yearMap.get(award.year)!
+        const norm = (s: string) => s.toLowerCase().trim()
+        for (const lr of linkRows) {
+          try {
+            const bggId = typeof lr.bgg_id === 'number' ? lr.bgg_id : undefined
+            let fullGameData = typeof bggId === 'number' ? gamesMap.get(bggId) : undefined
+            if (!fullGameData && typeof lr?.name === 'string') {
+              fullGameData = nameMap.get(lr.name)
+            }
+            if (typeof bggId !== 'number' && !lr?.name) continue
+
+            // Derive status
+            const raw = typeof lr.status_raw === 'string' ? lr.status_raw : (award.status || '')
+            const rawNorm = norm(String(raw))
+            let derivedStatus: 'Winner' | 'Nominee' | 'Special'
+            if (lr.is_winner === true || /winner|won|game of the year|goty|gewinner/.test(rawNorm)) {
+              derivedStatus = 'Winner'
+            } else if (/nominee|nominated|shortlist|finalist|runner/.test(rawNorm)) {
+              derivedStatus = 'Nominee'
+            } else {
+              derivedStatus = 'Special'
+            }
+
+            const catNameRaw = lr.category_raw || award.category || ''
+            const categoryName = String(catNameRaw || '').toString().trim() || 'Category'
+
+            const honor: Honor = {
+              name: award.award_set,
+              year: award.year,
+              category: derivedStatus,
+              award_type: award.award_set,
+              subcategory: categoryName,
+            }
+
+            const gameData: Game = {
+              bgg_id: (typeof bggId === 'number' ? bggId : 0) as number,
+              name: fullGameData?.name || lr.name || 'Unknown',
+              year_published: fullGameData?.year_published || award.year || 0,
+              image_url: fullGameData?.image_url || lr.image_url || undefined,
+              thumbnail_url: fullGameData?.thumbnail_url || lr.thumbnail_url || undefined,
+              honors: [honor],
+            }
+
+            if (hasCategories) {
+              // Ensure categories array exists
+              if (!bucket.categories) bucket.categories = []
+              let category = bucket.categories.find((c) => c.name === categoryName)
+              if (!category) {
+                category = { name: categoryName, winner: null, nominees: [], special: [] }
+                bucket.categories.push(category)
+              }
+              if (derivedStatus === 'Winner') {
+                // Only set if empty to avoid overriding actual JSON winner
+                if (!category.winner) category.winner = gameData
+              } else if (derivedStatus === 'Nominee') {
+                if (!category.nominees.find((g) => g.bgg_id === gameData.bgg_id)) {
+                  category.nominees.push(gameData)
+                }
+              } else {
+                if (!category.special.find((g) => g.bgg_id === gameData.bgg_id)) {
+                  category.special.push(gameData)
+                }
+              }
+            } else {
+              // Simple awards structure
+              if (derivedStatus === 'Winner') {
+                const overallLike = !award.category || /overall|game of the year|spiel des jahres|kinderspiel des jahres|kennerspiel des jahres/i.test(String(award.category))
+                if (overallLike) {
+                  if (!bucket.primary) bucket.primary = { game: gameData, honor }
+                  else {
+                    // If a primary winner already exists, treat additional winners as category winners
+                    bucket.categoryWinners.push({ subcategory: categoryName || 'Category', game: gameData, honor })
+                  }
+                } else {
+                  bucket.categoryWinners.push({ subcategory: categoryName || 'Category', game: gameData, honor })
+                }
+              } else if (derivedStatus === 'Nominee') {
+                if (!bucket.nominees.find((g) => g.bgg_id === gameData.bgg_id)) bucket.nominees.push(gameData)
+              } else {
+                if (!bucket.special.find((g) => g.bgg_id === gameData.bgg_id)) bucket.special.push(gameData)
+              }
+            }
+          } catch {}
+        }
+      }
     })
 
     const years: AwardYearGroup[] = Array.from(yearMap.values()).sort(
@@ -440,14 +696,14 @@ async function getAwardData(awardType: string): Promise<AwardYearGroup[]> {
       const dedupe = (arr: Game[]) =>
         Array.from(new Map(arr.map((g) => [g.bgg_id, g])).values())
       y.nominees = dedupe(y.nominees).sort((a, b) =>
-        a.name.localeCompare(b.name)
+        (a.name || '').localeCompare(b.name || '')
       )
-      y.special = dedupe(y.special).sort((a, b) => a.name.localeCompare(b.name))
+      y.special = dedupe(y.special).sort((a, b) => (a.name || '').localeCompare(b.name || ''))
       // Sort category winners by subcategory then name
       y.categoryWinners.sort(
         (a, b) =>
-          a.subcategory.localeCompare(b.subcategory) ||
-          a.game.name.localeCompare(b.game.name)
+          (a.subcategory || '').localeCompare(b.subcategory || '') ||
+          (a.game.name || '').localeCompare(b.game.name || '')
       )
 
       // Sort categories if present
@@ -462,7 +718,7 @@ async function getAwardData(awardType: string): Promise<AwardYearGroup[]> {
 
     return years
   } catch (error) {
-    console.error('Error in getAwardData:', error)
+    console.warn('Warning: exception in getAwardData', { message: (error as any)?.message })
     return []
   }
 }
@@ -567,41 +823,47 @@ function YearSection({
             {yearData.year}
           </h2>
         </div>
-        {/* Meta summary */}
-        <div className="text-xs text-gray-500 mb-6 font-medium">
-          {hasCategories ? (
-            <>
-              {yearData.categories!.length} categor
-              {yearData.categories!.length !== 1 ? 'ies' : 'y'}
-              {yearData.categories!.reduce(
-                (sum, cat) => sum + cat.nominees.length,
+        {/* Meta summary with icons */}
+        <div className="text-xs text-gray-600 mb-6 font-medium flex flex-wrap items-center gap-x-6 gap-y-2">
+          {(() => {
+            if (hasCategories) {
+              const categoriesCount = yearData.categories!.length
+              const winnersCount = yearData.categories!.reduce(
+                (sum, c) => sum + (c.winner ? 1 : 0),
                 0
-              ) > 0 &&
-                `, ${yearData.categories!.reduce((sum, cat) => sum + cat.nominees.length, 0)} nominee${yearData.categories!.reduce((sum, cat) => sum + cat.nominees.length, 0) !== 1 ? 's' : ''}`}
-              {yearData.categories!.reduce(
-                (sum, cat) => sum + cat.special.length,
+              )
+              const nomineesCount = yearData.categories!.reduce(
+                (sum, c) => sum + c.nominees.length,
                 0
-              ) > 0 &&
-                `, ${yearData.categories!.reduce((sum, cat) => sum + cat.special.length, 0)} special`}
-            </>
-          ) : (
-            <>
-              {yearData.primary ? 1 : 0} primary
-              {yearData.categoryWinners.length > 0 &&
-                `, ${yearData.categoryWinners.length} category winner${yearData.categoryWinners.length !== 1 ? 's' : ''}`}
-              {multiEqual &&
-                yearData.primary &&
-                yearData.primary.honor &&
-                yearData.primary.honor.award_type.match(
-                  /Mensa Select|Meeples Choice/
-                ) &&
-                ' (multi-equal)'}
-              {yearData.nominees.length > 0 &&
-                `, ${yearData.nominees.length} nominee${yearData.nominees.length !== 1 ? 's' : ''}`}
-              {yearData.special.length > 0 &&
-                `, ${yearData.special.length} special`}
-            </>
-          )}
+              )
+              const specialCount = yearData.categories!.reduce(
+                (sum, c) => sum + c.special.length,
+                0
+              )
+              return (
+                <>
+                  <span className="inline-flex items-center gap-1.5"><Squares2X2Icon className="w-4 h-4 text-gray-500" /> {categoriesCount} {categoriesCount === 1 ? 'category' : 'categories'}</span>
+                  <span className="inline-flex items-center gap-1.5"><TrophyIcon className="w-4 h-4 text-amber-500" /> {winnersCount} winner{winnersCount === 1 ? '' : 's'}</span>
+                  <span className="inline-flex items-center gap-1.5"><UserGroupIcon className="w-4 h-4 text-gray-500" /> {nomineesCount} nominee{nomineesCount === 1 ? '' : 's'}</span>
+                  {specialCount > 0 && (
+                    <span className="inline-flex items-center gap-1.5"><StarIcon className="w-4 h-4 text-sky-500" /> {specialCount} special</span>
+                  )}
+                </>
+              )
+            }
+            const winnersCount = (yearData.primary ? 1 : 0) + yearData.categoryWinners.length
+            const nomineesCount = yearData.nominees.length
+            const specialCount = yearData.special.length
+            return (
+              <>
+                <span className="inline-flex items-center gap-1.5"><TrophyIcon className="w-4 h-4 text-amber-500" /> {winnersCount} winner{winnersCount === 1 ? '' : 's'}</span>
+                <span className="inline-flex items-center gap-1.5"><UserGroupIcon className="w-4 h-4 text-gray-500" /> {nomineesCount} nominee{nomineesCount === 1 ? '' : 's'}</span>
+                {specialCount > 0 && (
+                  <span className="inline-flex items-center gap-1.5"><StarIcon className="w-4 h-4 text-sky-500" /> {specialCount} special</span>
+                )}
+              </>
+            )
+          })()}
         </div>
 
         {normalizedCategories &&
@@ -632,6 +894,7 @@ function YearSection({
                   className="mb-6 flex items-center font-semibold gap-2"
                 >
                   <TrophyIcon className="w-5 h-5 text-yellow-500" />
+                  <span className="text-yellow-500 text-sm font-semibold leading-none">{yearData.year}</span>
                   <span>{category.name}</span>
                 </Heading>
                 <div
@@ -801,6 +1064,38 @@ export default async function AwardPage({
 
   const IconComponent = awardConfig.icon
 
+  // Global stats across all years (support both categorized and non-categorized structures)
+  const globalStats = (() => {
+    return awardData.reduce(
+      (acc, y) => {
+        if (Array.isArray(y.categories) && y.categories.length) {
+          acc.categories += y.categories.length
+          acc.winners += y.categories.reduce(
+            (s, c) => s + (c.winner ? 1 : 0),
+            0
+          )
+          acc.nominees += y.categories.reduce(
+            (s, c) => s + c.nominees.length,
+            0
+          )
+          acc.special += y.categories.reduce(
+            (s, c) => s + c.special.length,
+            0
+          )
+        } else {
+          const winnersCount = (y.primary ? 1 : 0) + y.categoryWinners.length
+          const categoriesCount = winnersCount // treat each winner slot as a category
+          acc.categories += categoriesCount
+          acc.winners += winnersCount
+          acc.nominees += y.nominees.length
+          acc.special += y.special.length
+        }
+        return acc
+      },
+      { categories: 0, winners: 0, nominees: 0, special: 0 }
+    )
+  })()
+
   return (
     <PageLayout>
       <div className="max-w-6xl mx-auto px-4 py-8">
@@ -854,19 +1149,12 @@ export default async function AwardPage({
             </div>
             <div className="flex items-center gap-2">
               <TrophyIcon className="w-4 h-4" />
-              {awardData.reduce(
-                (sum, y) =>
-                  sum + (y.primary ? 1 : 0) + y.categoryWinners.length,
-                0
-              )}{' '}
+              {globalStats.winners}{' '}
               Winners
             </div>
             <div className="flex items-center gap-2">
               <UserGroupIcon className="w-4 h-4" />
-              {awardData.reduce(
-                (sum, year) => sum + year.nominees.length + year.special.length,
-                0
-              )}{' '}
+              {globalStats.nominees + globalStats.special}{' '}
               Other Recognitions
             </div>
           </div>

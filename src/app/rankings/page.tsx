@@ -159,15 +159,7 @@ function RankingsPageContent() {
   return (
     <PageLayout>
       <div className="max-w-screen-xl mx-auto">
-        <div className="mb-6">
-          <SearchandFilters
-            value={searchTerm}
-            onChange={setSearchTerm}
-            placeholder="Search your ranked games…"
-            filtersCount={activeFilterCount}
-            onOpenFilters={() => setShowFilters(true)}
-          />
-        </div>
+        {/* Search and filters are provided by ListExplorer below; removed duplicate top bar */}
 
         {/* Rating Statistics */}
         {rankedGames.length > 0 && (
@@ -320,35 +312,7 @@ function RankingsPageContent() {
           }
         />
 
-        {/* FilterModal */}
-        <FilterModal
-          open={showFilters}
-          onClose={() => setShowFilters(false)}
-          sortBy={sortBy}
-          setSortBy={setSortBy}
-          sortOrder={sortOrder}
-          setSortOrder={setSortOrder}
-          groupBy={groupBy}
-          setGroupBy={setGroupBy}
-          groupSortOrder={groupSortOrder}
-          setGroupSortOrder={setGroupSortOrder}
-          viewMode={viewMode}
-          setViewMode={setViewMode}
-          filterType={filterType}
-          setFilterType={(t) => setFilterType(t as any)}
-          filterValue={filterValue}
-          setFilterValue={setFilterValue}
-          uniqueYears={uniqueYears}
-          uniquePublishers={uniquePublishers}
-          uniquePlayerCounts={uniquePlayerCounts}
-          uniqueCategories={uniqueCategories}
-          uniqueMechanics={uniqueMechanics}
-          defaultSortBy="rank"
-          defaultSortOrder="asc"
-          defaultGroupBy="ranking_value"
-          defaultGroupSortOrder="desc"
-          defaultViewMode="list"
-        />
+        {/* Rankings-specific FilterModal removed; ListExplorer manages filters */}
       </div>
     </PageLayout>
   )
