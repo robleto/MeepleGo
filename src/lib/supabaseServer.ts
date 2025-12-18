@@ -5,44 +5,30 @@ import { cookies as nextCookies } from 'next/headers'
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co'
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key'
 
-// Types for the minimal subset of Next.js cookies API we rely on.
-interface MinimalCookieStore {
-  get: (name: string) => { name: string; value: string } | undefined
-  set: (
-    options: { name: string; value: string } & Partial<CookieOptions>
-  ) => void
-  delete: (options: { name: string } & Partial<CookieOptions>) => void
-}
-
 type SupabaseServerClient = ReturnType<typeof createServerClient<Database>>
 
-async function getCookieStore(): Promise<MinimalCookieStore> {
+type CookieStore = Awaited<ReturnType<typeof nextCookies>>
+
+async function getCookieStore(): Promise<CookieStore> {
   // Next.js 15: cookies() must be awaited before using its value
-  const store = await (nextCookies() as unknown as Promise<MinimalCookieStore>)
-  return store
+  return await nextCookies()
 }
 
 export async function getSupabaseServerClient(): Promise<SupabaseServerClient> {
   const cookieStore = await getCookieStore()
   return createServerClient<Database>(supabaseUrl, supabaseKey, {
     cookies: {
-      get(name: string) {
-        return cookieStore.get(name)?.value
+      getAll() {
+        return cookieStore.getAll()
       },
-      set(name: string, value: string, options?: CookieOptions) {
+      setAll(cookiesToSet) {
         try {
-          cookieStore.set({ name, value, ...(options ?? {}) })
+          cookiesToSet.forEach(({ name, value, options }) => {
+            cookieStore.set(name, value, options)
+          })
         } catch (err) {
           if (process.env.NODE_ENV === 'development')
             console.warn('Cookie set failed', err)
-        }
-      },
-      remove(name: string, options?: CookieOptions) {
-        try {
-          cookieStore.delete({ name, ...(options ?? {}) })
-        } catch (err) {
-          if (process.env.NODE_ENV === 'development')
-            console.warn('Cookie delete failed', err)
         }
       },
     },
@@ -56,23 +42,17 @@ export async function getSupabaseServerClientWithAccessToken(
   const cookieStore = await getCookieStore()
   return createServerClient<Database>(supabaseUrl, supabaseKey, {
     cookies: {
-      get(name: string) {
-        return cookieStore.get(name)?.value
+      getAll() {
+        return cookieStore.getAll()
       },
-      set(name: string, value: string, options?: CookieOptions) {
+      setAll(cookiesToSet) {
         try {
-          cookieStore.set({ name, value, ...(options ?? {}) })
+          cookiesToSet.forEach(({ name, value, options }) => {
+            cookieStore.set(name, value, options)
+          })
         } catch (err) {
           if (process.env.NODE_ENV === 'development')
             console.warn('Cookie set failed', err)
-        }
-      },
-      remove(name: string, options?: CookieOptions) {
-        try {
-          cookieStore.delete({ name, ...(options ?? {}) })
-        } catch (err) {
-          if (process.env.NODE_ENV === 'development')
-            console.warn('Cookie delete failed', err)
         }
       },
     },

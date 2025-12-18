@@ -1,5 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createServerClient } from '@supabase/ssr'
 const listNameCache: Record<string, { slug: string; ts: number }> = {}
+
+const supabaseUrl =
+  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co'
+const supabaseAnonKey =
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key'
+
+function createMiddlewareSupabaseClient(req: NextRequest, res: NextResponse) {
+  return createServerClient(supabaseUrl, supabaseAnonKey, {
+    cookies: {
+      getAll() {
+        return req.cookies.getAll()
+      },
+      setAll(cookiesToSet) {
+        cookiesToSet.forEach(({ name, value, options }) => {
+          res.cookies.set(name, value, options)
+        })
+      },
+    },
+  })
+}
 
 // Redirect legacy /lists/:uuid to /lists/:slugified-name-:uuid
 export async function middleware(req: NextRequest) {
@@ -60,9 +81,19 @@ export async function middleware(req: NextRequest) {
       /* ignore */
     }
   }
-  return NextResponse.next()
+
+  // Supabase SSR: refresh session cookies on every request.
+  // This prevents "logged out" behavior in server components and after redirects.
+  const res = NextResponse.next()
+  try {
+    const supabase = createMiddlewareSupabaseClient(req, res)
+    await supabase.auth.getUser()
+  } catch {
+    // Non-fatal: middleware should not block requests if Supabase is unavailable.
+  }
+  return res
 }
 
 export const config = {
-  matcher: ['/lists/:path*'],
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml).*)'],
 }

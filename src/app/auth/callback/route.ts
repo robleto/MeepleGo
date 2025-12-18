@@ -3,9 +3,41 @@
 // the server, so we emit a tiny HTML document that preserves the full URL and
 // client-redirects to /auth/callback/handle for processing.
 
+import { NextRequest, NextResponse } from 'next/server'
+import { getSupabaseServerClient } from '@/lib/supabaseServer'
+
 export const dynamic = 'force-dynamic'
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+	// Prefer server-side code exchange (PKCE flow). This is the most reliable for
+	// email confirmations, magic links, and password recovery in modern Supabase.
+	try {
+		const url = new URL(req.url)
+		const code = url.searchParams.get('code')
+		if (code) {
+			const supabase = await getSupabaseServerClient()
+			const { error } = await supabase.auth.exchangeCodeForSession(code)
+			if (error) {
+				const errorUrl = new URL('/login', url.origin)
+				errorUrl.searchParams.set('error', error.message)
+				return NextResponse.redirect(errorUrl)
+			}
+
+			const type = url.searchParams.get('type')
+			const next = url.searchParams.get('next')
+			const destination = type === 'recovery' ? '/update-password' : next || '/'
+
+			const forwardedHost = req.headers.get('x-forwarded-host')
+			const isLocalEnv = process.env.NODE_ENV === 'development'
+			if (!isLocalEnv && forwardedHost) {
+				return NextResponse.redirect(`https://${forwardedHost}${destination}`)
+			}
+			return NextResponse.redirect(new URL(destination, url.origin))
+		}
+	} catch {
+		// Fall through to client-side handler
+	}
+
   const html = `<!doctype html>
 		<html>
 			<head>

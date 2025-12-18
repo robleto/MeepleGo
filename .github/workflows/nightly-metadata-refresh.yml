@@ -1,5 +1,9 @@
 name: Nightly Metadata Refresh
 
+permissions:
+  contents: read
+  actions: write
+
 on:
   schedule:
     - cron: '15 5 * * *' # 05:15 UTC nightly (adjust as desired)
@@ -31,18 +35,21 @@ on:
 
 jobs:
   refresh:
+    concurrency:
+      group: nightly-metadata-refresh-${{ github.ref }}
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     timeout-minutes: 120
     steps:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Restore backfill state cache
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
           path: tmp
-          key: nightly-backfill-state-${{ github.run_id }}
+          key: nightly-backfill-state-${{ github.ref_name }}-${{ github.run_id }}
           restore-keys: |
-            nightly-backfill-state-
+            nightly-backfill-state-${{ github.ref_name }}-
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -55,7 +62,6 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          BGG_LIST_OWNER_ID: ${{ secrets.BGG_LIST_OWNER_ID }}
         run: |
           : # Validate required secrets are present and write .env (set in repo settings > Secrets and variables > Actions)
           missing=0
@@ -65,7 +71,6 @@ jobs:
           echo "NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL" >> .env
           if [ -n "$NEXT_PUBLIC_SUPABASE_ANON_KEY" ]; then echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY" >> .env; fi
           echo "SUPABASE_SERVICE_ROLE_KEY=$SUPABASE_SERVICE_ROLE_KEY" >> .env
-          if [ -n "$BGG_LIST_OWNER_ID" ]; then echo "BGG_LIST_OWNER_ID=$BGG_LIST_OWNER_ID" >> .env; fi
       - name: Run chained backfill (rate-limited)
         env:
           # Conservative defaults tuned for BGG API to avoid 429s
@@ -76,6 +81,7 @@ jobs:
           # Leave ~10 minutes headroom before the 120m job timeout
           MAX_RUNTIME_MINUTES: ${{ github.event.inputs.budgetMinutes || '110' }}
         run: |
+          set -euo pipefail
           CMD="npm run backfill:all --"
           if [ -n "${{ github.event.inputs.limit }}" ]; then CMD="$CMD --limit ${{ github.event.inputs.limit }}"; fi
           if [ -n "${{ github.event.inputs.concurrency }}" ]; then CMD="$CMD --concurrency ${{ github.event.inputs.concurrency }}"; fi
@@ -85,7 +91,8 @@ jobs:
           eval $CMD
       - name: Save backfill state cache
         if: always()
+        continue-on-error: true
         uses: actions/cache/save@v4
         with:
           path: tmp
-          key: nightly-backfill-state-${{ github.run_id }}
+          key: nightly-backfill-state-${{ github.ref_name }}-${{ github.run_id }}

@@ -53,8 +53,29 @@ function HandleInner() {
           return
         }
 
+        // Prefer PKCE code exchange when present (modern Supabase email links)
+        const code = urlParams.get('code')
+        if (code && !isE2E) {
+          const { error: exchangeError } =
+            await supabase.auth.exchangeCodeForSession(code)
+          if (exchangeError) {
+            setError(exchangeError.message)
+            captureError(exchangeError, {
+              context: 'auth_callback_exchange_code',
+            })
+            setTimeout(
+              () =>
+                router.replace(
+                  '/login?error=' + encodeURIComponent(exchangeError.message)
+                ),
+              1500
+            )
+            return
+          }
+        }
+
         if (!isE2E) {
-          // Give Supabase time to detect and persist the session from the hash
+          // Give Supabase time to detect and persist the session (from hash or code exchange)
           let sessionData:
             | Awaited<ReturnType<typeof supabase.auth.getSession>>['data']
             | null = null
