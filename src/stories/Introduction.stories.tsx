@@ -41,7 +41,7 @@ const IntroductionPage = () => {
             </h3>
           </div>
           <p className="text-gray-600">
-            Distinctive color-coded ratings from Awful (red) to Masterpiece (sky
+            Distinctive color-coded ratings from Awful (red) to All-Timer (sky
             blue) with meaningful progression.
           </p>
         </div>

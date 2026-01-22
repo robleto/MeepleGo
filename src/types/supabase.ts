@@ -276,6 +276,26 @@ export interface Database {
           updated_at?: string | null
         }
       }
+      user_follows: {
+        Row: {
+          id: string
+          follower_id: string
+          following_id: string
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          follower_id: string
+          following_id: string
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          follower_id?: string
+          following_id?: string
+          created_at?: string | null
+        }
+      }
       awards: {
         Row: {
           id: string
@@ -436,6 +456,7 @@ export type Ranking = Database['public']['Tables']['rankings']['Row']
 export type GameList = Database['public']['Tables']['game_lists']['Row']
 export type GameListItem =
   Database['public']['Tables']['game_list_items']['Row']
+export type UserFollow = Database['public']['Tables']['user_follows']['Row']
 export type Award = Database['public']['Tables']['awards']['Row']
 export type PlayLog = Database['public']['Tables']['play_logs']['Row']
 export type Category = Database['public']['Tables']['categories']['Row']

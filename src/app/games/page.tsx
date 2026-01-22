@@ -64,6 +64,10 @@ function GamesPageContent() {
     uniqueMechanics,
   } = useGameFilters(games, {
     disableClientSorting: true, // Server handles sorting
+    defaultViewMode: 'grid',
+    defaultSortBy: 'rating',
+    defaultSortOrder: 'desc',
+    storageKeyPrefix: 'games',
   })
 
   // Read filter parameters from URL and set filter state
@@ -118,6 +122,8 @@ function GamesPageContent() {
         return { column: 'year_published', ascending: order === 'asc' }
       case 'rank':
         return { column: 'rank', ascending: order === 'asc' }
+      case 'rating':
+        return { column: 'rating', ascending: order === 'asc' }
       case 'ranking':
         // For user rankings, we'll need a different approach since it's in a different table
         return { column: 'name', ascending: order === 'asc' } // Fallback to name for now
@@ -150,8 +156,8 @@ function GamesPageContent() {
     }
     const single = buildOrderClause(sortField, order)
 
-    // For BGG rank sorting, we need to handle nulls properly
-    if (sortField === 'rank') {
+    // For BGG rank/rating sorting, we need to handle nulls properly
+    if (sortField === 'rank' || sortField === 'rating') {
       return [
         {
           column: single.column,
@@ -667,7 +673,7 @@ function GamesPageContent() {
     let count = 0
 
     // Sort filter (if not default)
-    if (sortBy !== 'rank' || sortOrder !== 'asc') {
+    if (sortBy !== 'rating' || sortOrder !== 'desc') {
       count++
     }
 

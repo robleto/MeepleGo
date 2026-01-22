@@ -104,7 +104,7 @@ const meta: Meta = {
                 }}
               ></div>
               <span>
-                <strong>1-2:</strong> Awful/Bad
+                <strong>1-2:</strong> Awful/So Bad
               </span>
             </div>
             <div
@@ -119,7 +119,7 @@ const meta: Meta = {
                 }}
               ></div>
               <span>
-                <strong>3-4:</strong> Poor/Below Average
+                <strong>3-4:</strong> Weak/Meh
               </span>
             </div>
             <div
@@ -134,7 +134,7 @@ const meta: Meta = {
                 }}
               ></div>
               <span>
-                <strong>5-6:</strong> Average/Above Average
+                <strong>5-6:</strong> Just OK/Decent
               </span>
             </div>
             <div
@@ -149,7 +149,7 @@ const meta: Meta = {
                 }}
               ></div>
               <span>
-                <strong>7-8:</strong> Good/Very Good
+                <strong>7-8:</strong> Good/Great
               </span>
             </div>
             <div
@@ -164,7 +164,7 @@ const meta: Meta = {
                 }}
               ></div>
               <span>
-                <strong>9-10:</strong> Great/Masterpiece
+                <strong>9-10:</strong> Brilliant/All-Timer
               </span>
             </div>
           </div>

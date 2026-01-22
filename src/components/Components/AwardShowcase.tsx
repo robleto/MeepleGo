@@ -139,7 +139,21 @@ export default function AwardShowcase({
           }))
         const seen = new Set(seedGamesFromProps.map((g) => g.id))
         const combined = [...seedGamesFromProps.map(g => ({...g, rating: (games.find(gg => String(gg.id) === g.id) as any)?.ranking ?? null})), ...extras.filter((g: any) => !seen.has(g.id))]
-        if (!cancelled) setSeedGames(combined)
+        if (!cancelled) {
+          setSeedGames(combined)
+          setGameMap((prev) => {
+            const next = { ...prev }
+            combined.forEach((g) => {
+              next[String(g.id)] = {
+                id: String(g.id),
+                name: g.name,
+                thumbnail_url: (g as any).thumbnail_url ?? null,
+                rating: (g as any).rating ?? null,
+              }
+            })
+            return next
+          })
+        }
       } catch {
         // ignore
       }
@@ -149,6 +163,32 @@ export default function AwardShowcase({
       cancelled = true
     }
   }, [showEditor, inlineEditable, id, games, currentYear])
+
+  const displayGames = useMemo(() => {
+    if (!inlineEditable || !row) return games
+    const winnerId = row.winner_id ? String(row.winner_id) : null
+    const nomineeIds = (row.nominees || []).map((n: any) => String(n))
+    const orderedIds = winnerId
+      ? [winnerId, ...nomineeIds.filter((id: string) => id !== winnerId)]
+      : nomineeIds
+    const fallback = (id: string) => ({
+      id,
+      name: `#${id}`,
+      thumbnail_url: null,
+      ranking: null,
+    })
+    return orderedIds
+      .map((id: string) => gameMap[id] || seedGames.find((g) => String(g.id) === id) || fallback(id))
+      .map((g: any) => ({
+        id: g.id,
+        name: g.name,
+        thumbnail_url: g.thumbnail_url ?? null,
+        ranking: g.rating ?? (g as any).ranking ?? null,
+      })) as any
+  }, [inlineEditable, row, gameMap, seedGames, games])
+
+  const winnerGame = displayGames[0] || winner
+  const nomineeGames = displayGames.slice(1)
 
   return (
     <section
@@ -211,14 +251,14 @@ export default function AwardShowcase({
           {/* Winner Section */}
           <div className="flex justify-center md:justify-start mb-6">
             <div className="w-full max-w-xs">
-              <WinnerCard game={winner} />
+              <WinnerCard game={winnerGame} />
             </div>
           </div>
 
           {/* Nominees Section - Horizontal Scroll */}
-          {nominees.length > 0 && (
+          {nomineeGames.length > 0 && (
             <div>
-              <NomineeGrid nominees={nominees} layout="scroll" />
+              <NomineeGrid nominees={nomineeGames} layout="scroll" />
             </div>
           )}
         </div>
@@ -228,13 +268,13 @@ export default function AwardShowcase({
           <div className="grid grid-cols-12 gap-8 items-start">
             {/* Winner - Takes 4 columns */}
             <div className="col-span-4">
-              <WinnerCard game={winner} />
+              <WinnerCard game={winnerGame} />
             </div>
 
             {/* Nominees - Takes 8 columns with dense grid */}
             <div className="col-span-8">
-              {nominees.length > 0 && (
-                <NomineeGrid nominees={nominees} layout="grid" />
+              {nomineeGames.length > 0 && (
+                <NomineeGrid nominees={nomineeGames} layout="grid" />
               )}
             </div>
           </div>

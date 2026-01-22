@@ -22,12 +22,12 @@ export async function PATCH(
     const text = await req.text()
     body = Object.fromEntries(new URLSearchParams(text).entries())
   }
-  // Coerce numeric fields
+  // Normalize ID fields (award game IDs are UUID strings)
   if (body.winner_id === '') body.winner_id = null
-  if (body.winner_id != null) body.winner_id = Number(body.winner_id)
-  if (body.add_nominee != null) body.add_nominee = Number(body.add_nominee)
+  if (body.winner_id != null) body.winner_id = String(body.winner_id)
+  if (body.add_nominee != null) body.add_nominee = String(body.add_nominee)
   if (body.remove_nominee != null)
-    body.remove_nominee = Number(body.remove_nominee)
+    body.remove_nominee = String(body.remove_nominee)
 
   let supabase = await getSupabaseServerClient()
   let {
@@ -64,10 +64,35 @@ export async function PATCH(
     return NextResponse.json({ error: fetchErr.message }, { status: 500 })
 
   if (!existing) {
-    return NextResponse.json(
-      { error: 'Award row not found. Rebuild first.' },
-      { status: 404 }
-    )
+    const nominees: any[] = Array.isArray(body.nominees)
+      ? body.nominees.map((n: any) => String(n))
+      : []
+    const winner_id = body.winner_id ? String(body.winner_id) : null
+    if (winner_id && !nominees.includes(winner_id)) {
+      nominees.push(winner_id)
+    }
+    const { error: insertErr } = await supabase
+      .from('awards')
+      .upsert(
+        {
+          user_id: session.user.id,
+          year: yearNum,
+          category: categoryId,
+          nominees,
+          winner_id,
+          manual_override: true,
+          refreshed_at: new Date().toISOString(),
+          stale: false,
+        },
+        { onConflict: 'user_id,year,category' }
+      )
+    if (insertErr) {
+      return NextResponse.json(
+        { error: insertErr.message },
+        { status: 500 }
+      )
+    }
+    return NextResponse.json({ ok: true, created: true })
   }
 
   if (body.unlock) {

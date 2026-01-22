@@ -40,6 +40,7 @@ export default function NomineeGrid({
                     viewMode="grid"
                     variant="compact"
                     hideWinnerBadge
+                    imageFit="contain"
                   />
                 </div>
               ))}
@@ -59,6 +60,7 @@ export default function NomineeGrid({
                   variant="compact"
                   hideWinnerBadge
                   className="min-h-[120px] h-full flex flex-col"
+                  imageFit="contain"
                 />
               </div>
             ))}

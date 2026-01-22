@@ -40,15 +40,15 @@ export function getRatingLabel(rating: number | null): string {
 
   const labels: Record<number, string> = {
     1: 'Awful',
-    2: 'Bad',
-    3: 'Poor',
-    4: 'Below Average',
-    5: 'Average',
-    6: 'Above Average',
+    2: 'So Bad',
+    3: 'Weak',
+    4: 'Meh',
+    5: 'Just OK',
+    6: 'Decent',
     7: 'Good',
-    8: 'Very Good',
-    9: 'Great',
-    10: 'Masterpiece',
+    8: 'Great',
+    9: 'Brilliant',
+    10: 'All-Timer',
   }
 
   return labels[Math.round(rating)] || 'Unknown'

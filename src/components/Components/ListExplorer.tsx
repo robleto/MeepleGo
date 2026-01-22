@@ -1,11 +1,17 @@
 'use client'
-import { useGameFilters, useViewMode } from '@/utils/gameFilters'
+import {
+  useGameFilters,
+  type SortKey,
+  type SortOrder,
+  type GroupKey,
+  type GroupSortOrder,
+} from '@/utils/gameFilters'
 import SearchandFilters from '@/components/Components/SearchandFilters'
 import FilterModal from '@/components/Components/FilterModal'
 import GameCard from '@/components/Components/GameCard'
 import supabase from '@/lib/supabase'
 import { GameWithRanking } from '@/types'
-import { useMemo, useState, useRef } from 'react'
+import { useMemo, useState, useRef, useEffect } from 'react'
 import {
   DndContext,
   PointerSensor,
@@ -23,6 +29,8 @@ interface ListExplorerProps {
   onRefresh?: () => void
   header?: React.ReactNode
   headerActions?: React.ReactNode
+  searchPlacement?: 'top' | 'header'
+  stickyHeader?: boolean
   emptyMessage?: { icon?: React.ReactNode; title: string; body?: string }
   contextualMembership?: { library: Set<string>; wishlist: Set<string> } | null
   onMembershipChange?: (
@@ -37,6 +45,12 @@ interface ListExplorerProps {
   ) => void
   disableListRanking?: boolean
   hasExplicitOrder?: boolean
+  defaultViewMode?: 'grid' | 'list'
+  defaultSortBy?: SortKey
+  defaultSortOrder?: SortOrder
+  defaultGroupBy?: GroupKey
+  defaultGroupSortOrder?: GroupSortOrder
+  storageKeyPrefix?: string
   // Optional per-item control provider for list pages
   getListItemControls?: (game: GameWithRanking, index: number) => {
     canMoveUp?: boolean
@@ -54,6 +68,8 @@ export default function ListExplorer({
   onRefresh,
   header,
   headerActions,
+  searchPlacement = 'top',
+  stickyHeader = false,
   emptyMessage,
   contextualMembership,
   onMembershipChange,
@@ -62,6 +78,12 @@ export default function ListExplorer({
   onRankingUpdate,
   disableListRanking,
   hasExplicitOrder = false,
+  defaultViewMode,
+  defaultSortBy,
+  defaultSortOrder,
+  defaultGroupBy,
+  defaultGroupSortOrder,
+  storageKeyPrefix,
   getListItemControls,
   onReorder,
 }: ListExplorerProps) {
@@ -72,6 +94,8 @@ export default function ListExplorer({
   )
   const hasExplicitListOrder = hasExplicitOrder
   const liveRegionRef = useRef<HTMLDivElement | null>(null)
+  const stickySentinelRef = useRef<HTMLDivElement | null>(null)
+  const [isHeaderStuck, setIsHeaderStuck] = useState(false)
   const [showFilters, setShowFilters] = useState(false)
   const [cardVariant, setCardVariant] = useState<
     'detailed' | 'balanced' | 'compact'
@@ -109,26 +133,44 @@ export default function ListExplorer({
     setSearchTerm,
   } = useGameFilters(safeGames, {
     disableClientSorting: hasExplicitListOrder,
-    defaultViewMode: 'list',
-    storageKey: 'listViewMode',
+    defaultViewMode: defaultViewMode ?? 'list',
+    defaultSortBy,
+    defaultSortOrder,
+    defaultGroupBy,
+    defaultGroupSortOrder,
+    storageKeyPrefix: storageKeyPrefix ?? 'lists',
   })
 
   // Calculate active filter count (same logic as Games page)
   const getActiveFilterCount = () => {
     let count = 0
 
+    const defaultSortByResolved = defaultSortBy ?? 'rank'
+    const defaultSortOrderResolved = defaultSortOrder ?? 'asc'
+    const defaultGroupByResolved = defaultGroupBy ?? 'none'
+    const defaultGroupSortOrderResolved =
+      defaultGroupSortOrder ??
+      (defaultGroupByResolved === 'year_published' ? 'desc' : 'asc')
+    const defaultViewModeResolved = defaultViewMode ?? 'list'
+
     // Sort filter (if not default)
-    if (sortBy !== 'rank' || sortOrder !== 'asc') {
+    if (
+      sortBy !== defaultSortByResolved ||
+      sortOrder !== defaultSortOrderResolved
+    ) {
       count++
     }
 
     // Group filter (if not default)
-    if (groupBy !== 'none') {
+    if (
+      groupBy !== defaultGroupByResolved ||
+      groupSortOrder !== defaultGroupSortOrderResolved
+    ) {
       count++
     }
 
     // View mode (if not default)
-    if (viewMode !== 'grid') {
+    if (viewMode !== defaultViewModeResolved) {
       count++
     }
 
@@ -159,6 +201,20 @@ export default function ListExplorer({
     })
     return map
   }, [contextualMembership, safeGames])
+
+  const searchInHeader = searchPlacement === 'header' && !!header
+
+  useEffect(() => {
+    if (!stickyHeader) return
+    const sentinel = stickySentinelRef.current
+    if (!sentinel) return
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsHeaderStuck(entry.intersectionRatio === 0),
+      { threshold: [0, 1] }
+    )
+    observer.observe(sentinel)
+    return () => observer.disconnect()
+  }, [stickyHeader])
 
   if (!hasMounted) {
     return (
@@ -203,20 +259,53 @@ export default function ListExplorer({
 
   return (
     <div className="space-y-6">
-      <SearchandFilters
-        value={searchTerm}
-        onChange={setSearchTerm}
-        onSearch={setSearchTerm}
-        filtersCount={activeFilterCount}
-        onOpenFilters={() => setShowFilters(true)}
-      />
+      {!searchInHeader && (
+        <SearchandFilters
+          value={searchTerm}
+          onChange={setSearchTerm}
+          onSearch={setSearchTerm}
+          filtersCount={activeFilterCount}
+          onOpenFilters={() => setShowFilters(true)}
+        />
+      )}
       {header && (
-        <div className="flex items-start justify-between gap-4 flex-wrap">
-          <div className="min-w-0 flex-1">{header}</div>
-          {headerActions && (
-            <div className="flex-shrink-0">{headerActions}</div>
+        <>
+          {stickyHeader && (
+            <div ref={stickySentinelRef} className="h-px" aria-hidden />
           )}
-        </div>
+          <div
+            className={
+              stickyHeader
+                ? `sticky top-0 z-20 py-3 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 backdrop-blur transition-colors duration-200 ${
+                    isHeaderStuck
+                      ? 'bg-gray-50/96 dark:bg-gray-900/96 border-b border-gray-200/70 dark:border-white/10'
+                      : 'bg-transparent border-b border-transparent'
+                  }`
+                : ''
+            }
+          >
+            <div className="flex items-start justify-between gap-4 flex-wrap">
+              <div className="min-w-0 flex-1">{header}</div>
+              {(searchInHeader || headerActions) && (
+                <div className="flex items-center gap-3 flex-wrap justify-end">
+                  {searchInHeader && (
+                    <SearchandFilters
+                      value={searchTerm}
+                      onChange={setSearchTerm}
+                      onSearch={setSearchTerm}
+                      filtersCount={activeFilterCount}
+                      onOpenFilters={() => setShowFilters(true)}
+                      className="max-w-none mx-0 w-full sm:w-auto"
+                    />
+                  )}
+                  {headerActions && (
+                    <div className="flex-shrink-0">{headerActions}</div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </>
       )}
       {loading && (
         <div className="flex items-center justify-center py-12 text-gray-500">
@@ -256,6 +345,7 @@ export default function ListExplorer({
                       variant={cardVariant}
                       onMembershipChange={onMembershipChange}
                       listRank={showListRanking ? rank : null}
+                      imageFit="contain"
                     />
                   )
                 })}
@@ -307,6 +397,7 @@ export default function ListExplorer({
                                 variant={cardVariant}
                                 onMembershipChange={onMembershipChange}
                                 listRank={showListRanking ? rank : null}
+                                imageFit="contain"
                                 showDragHandle={true}
                                 dragHandleProps={handleProps}
                                 onRemoveFromCurrentList={controls?.onRemove}
@@ -338,6 +429,7 @@ export default function ListExplorer({
                         variant={cardVariant}
                         onMembershipChange={onMembershipChange}
                         listRank={showListRanking ? rank : null}
+                        imageFit="contain"
                         onRemoveFromCurrentList={controls?.onRemove}
                       />
                     )

@@ -1,17 +1,32 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef, type ReactNode } from 'react'
 import PageLayout from '@/components/Components/PageLayout'
 import Heading from '@/components/Components/Heading'
+import SectionHeader from '@/components/Components/SectionHeader'
 import { supabase } from '@/lib/supabase'
 import { trackEvent } from '@/lib/analytics'
 import { captureError } from '@/lib/errorTracking'
 import { GameList, GameListWithItems, Profile } from '@/types/supabase'
 import ListCard from '@/components/Components/ListCard'
 import CreateListModal from '@/components/Components/CreateListModal'
-import { PlusIcon } from '@heroicons/react/24/outline'
 
-export default function ListsPage() {
+export function ListsContent({
+  embedded = false,
+  showDefaults = true,
+  showPublic = true,
+  publicOnly = false,
+}: {
+  embedded?: boolean
+  showDefaults?: boolean
+  showPublic?: boolean
+  publicOnly?: boolean
+}) {
+  const Wrapper = embedded
+    ? (({ children }: { children: ReactNode }) => <>{children}</>)
+    : PageLayout
+  const stickySentinelRef = useRef<HTMLDivElement | null>(null)
+  const [isHeaderStuck, setIsHeaderStuck] = useState(false)
   const [userLists, setUserLists] = useState<GameListWithItems[]>([])
   const [publicLists, setPublicLists] = useState<GameListWithItems[]>([])
   const [loading, setLoading] = useState(true)
@@ -19,6 +34,12 @@ export default function ListsPage() {
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [userId, setUserId] = useState<string | null>(null)
   const [isAdmin, setIsAdmin] = useState(false)
+  const pinnedListTypes = [
+    'bgg_bestsellers',
+    'bgg_hotness',
+    'bgg_trendingplays',
+    'bgg_mostplayed',
+  ]
 
   const fetchProfile = async (uid: string) => {
     const { data, error } = await supabase
@@ -32,6 +53,10 @@ export default function ListsPage() {
   const fetchLists = async () => {
     setLoading(true)
     try {
+      if (publicOnly) {
+        await fetchPublicLists()
+        return
+      }
       const {
         data: { session },
       } = await supabase.auth.getSession()
@@ -59,6 +84,18 @@ export default function ListsPage() {
   useEffect(() => {
     fetchLists()
   }, [])
+
+  useEffect(() => {
+    if (!embedded) return
+    const sentinel = stickySentinelRef.current
+    if (!sentinel) return
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsHeaderStuck(entry.intersectionRatio === 0),
+      { threshold: [0, 1] }
+    )
+    observer.observe(sentinel)
+    return () => observer.disconnect()
+  }, [embedded])
 
   const fetchUserLists = async (userId: string) => {
     const { data, error } = await supabase
@@ -104,7 +141,24 @@ export default function ListsPage() {
       return
     }
 
-    setPublicLists(data || [])
+    const lists = data || []
+    const sortIndex = (listType?: string | null) =>
+      listType ? pinnedListTypes.indexOf(listType) : -1
+    const sorted = [...lists].sort((a, b) => {
+      const aIndex = sortIndex(a.list_type)
+      const bIndex = sortIndex(b.list_type)
+      const aPinned = aIndex !== -1
+      const bPinned = bIndex !== -1
+      if (aPinned || bPinned) {
+        if (!aPinned) return 1
+        if (!bPinned) return -1
+        return aIndex - bIndex
+      }
+      const aDate = new Date(a.updated_at || a.created_at || '').getTime()
+      const bDate = new Date(b.updated_at || b.created_at || '').getTime()
+      return bDate - aDate
+    })
+    setPublicLists(sorted)
   }
 
   const defaultLists = useMemo(() => {
@@ -164,33 +218,47 @@ export default function ListsPage() {
 
   if (loading) {
     return (
-      <PageLayout>
+      <Wrapper>
         <div className="py-20 text-center text-gray-500 dark:text-gray-400">
           Loading lists...
         </div>
-      </PageLayout>
+      </Wrapper>
     )
   }
 
   return (
-    <PageLayout>
+    <Wrapper>
       <div className="space-y-8">
         {/* My Lists Section */}
-        <div>
-          {!isGuest && (
-            <div className="mb-2">
-              <h2 className="heading-display text-2xl font-normal tracking-wide text-gray-700 dark:text-gray-300 mb-1">
-                My Lists
-              </h2>
-            </div>
-          )}
+        {!publicOnly && (
+          <div>
+            {!isGuest && (
+            <>
+              {embedded && (
+                <div ref={stickySentinelRef} className="h-px" aria-hidden />
+              )}
+              <div
+                className={
+                  embedded
+                    ? `sticky top-0 z-20 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 py-3 ${
+                        isHeaderStuck
+                          ? 'bg-gray-50/95 dark:bg-gray-900/95 backdrop-blur border-b border-gray-200/70 dark:border-white/10'
+                          : 'bg-transparent'
+                      }`
+                    : 'mb-2'
+                }
+              >
+                <SectionHeader title="My Lists" containerClassName="mb-0" />
+              </div>
+            </>
+            )}
           {/* <p className="text-sm text-gray-600 dark:text-gray-400 mb-6 max-w-2xl">
             {isGuest
               ? 'Browse public community and BGG powered lists. Sign in to build and curate your own collections.'
               : 'Your personal library, wishlist, and custom curated collections. Create, edit, and share public lists.'}
           </p> */}
 
-          {isGuest ? (
+            {isGuest ? (
             <div className="panel mb-10 flex flex-col md:flex-row md:items-start gap-10 md:gap-20">
               <div className="flex-1">
                 <Heading
@@ -271,16 +339,17 @@ export default function ListsPage() {
                 </li>
               </ol>
             </div>
-          ) : (
+            ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {/* Default Lists (Library & Wishlist) */}
-              {defaultLists.map((list) => (
-                <ListCard
-                  key={list.id}
-                  list={list}
-                  onUpdate={() => fetchUserLists(userId!)}
-                />
-              ))}
+              {showDefaults &&
+                defaultLists.map((list) => (
+                  <ListCard
+                    key={list.id}
+                    list={list}
+                    onUpdate={() => fetchUserLists(userId!)}
+                  />
+                ))}
 
               {/* Custom Lists */}
               {customLists.map((list) => (
@@ -292,46 +361,29 @@ export default function ListsPage() {
               ))}
 
               {/* Admin additional editable public lists */}
-              {adminEditablePublic.map((list) => (
-                <ListCard
-                  key={list.id}
-                  list={list}
-                  onUpdate={() => {
-                    fetchPublicLists()
-                    if (userId) fetchUserLists(userId)
-                  }}
-                />
-              ))}
+              {showPublic &&
+                adminEditablePublic.map((list) => (
+                  <ListCard
+                    key={list.id}
+                    list={list}
+                    onUpdate={() => {
+                      fetchPublicLists()
+                      if (userId) fetchUserLists(userId)
+                    }}
+                  />
+                ))}
 
-              {/* Create New List Card */}
-              <div
-                onClick={() => setShowCreateModal(true)}
-                className="bg-gray-50 dark:bg-gray-800 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 hover:border-gray-400 dark:hover:border-gray-500 transition-colors cursor-pointer group"
-              >
-                <div className="text-center">
-                  <div className="w-16 h-16 bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-300 dark:group-hover:bg-gray-600 transition-colors">
-                    <PlusIcon className="w-8 h-8 text-gray-400 dark:text-gray-500" />
-                  </div>
-                  <Heading as="h3" size="sm" className="mb-2">
-                    Create New List
-                  </Heading>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Organize your games into custom collections
-                  </p>
-                </div>
-              </div>
             </div>
-          )}
-        </div>
+            )}
+          </div>
+        )}
 
         {/* Public Lists Section */}
-        {publicLists.length > 0 && (
+        {showPublic && publicLists.length > 0 && (
           <div>
-            <div className="mb-2">
-              <h2 className="heading-display text-2xl font-normal tracking-wide text-gray-700 dark:text-gray-300 mb-1">
-                Public Lists
-              </h2>
-            </div>
+            {!publicOnly && (
+              <SectionHeader title="Public Lists" containerClassName="mb-2" />
+            )}
             {/* <p className="text-sm text-gray-600 dark:text-gray-400 mb-6 max-w-2xl">
               Recently updated public & system generated (BGG) lists.
             </p> */}
@@ -360,6 +412,10 @@ export default function ListsPage() {
           }}
         />
       )}
-    </PageLayout>
+    </Wrapper>
   )
+}
+
+export default function ListsPage() {
+  return <ListsContent publicOnly />
 }

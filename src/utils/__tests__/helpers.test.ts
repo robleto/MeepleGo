@@ -75,21 +75,21 @@ describe('formatPlayerCount', () => {
 describe('getRatingLabel', () => {
   it('returns correct labels for all ratings', () => {
     expect(getRatingLabel(1)).toBe('Awful')
-    expect(getRatingLabel(2)).toBe('Bad')
-    expect(getRatingLabel(3)).toBe('Poor')
-    expect(getRatingLabel(4)).toBe('Below Average')
-    expect(getRatingLabel(5)).toBe('Average')
-    expect(getRatingLabel(6)).toBe('Above Average')
+    expect(getRatingLabel(2)).toBe('So Bad')
+    expect(getRatingLabel(3)).toBe('Weak')
+    expect(getRatingLabel(4)).toBe('Meh')
+    expect(getRatingLabel(5)).toBe('Just OK')
+    expect(getRatingLabel(6)).toBe('Decent')
     expect(getRatingLabel(7)).toBe('Good')
-    expect(getRatingLabel(8)).toBe('Very Good')
-    expect(getRatingLabel(9)).toBe('Great')
-    expect(getRatingLabel(10)).toBe('Masterpiece')
+    expect(getRatingLabel(8)).toBe('Great')
+    expect(getRatingLabel(9)).toBe('Brilliant')
+    expect(getRatingLabel(10)).toBe('All-Timer')
   })
 
   it('handles decimal ratings by rounding', () => {
     expect(getRatingLabel(7.3)).toBe('Good')
-    expect(getRatingLabel(8.7)).toBe('Great')
-    expect(getRatingLabel(5.5)).toBe('Above Average')
+    expect(getRatingLabel(8.7)).toBe('Brilliant')
+    expect(getRatingLabel(5.5)).toBe('Decent')
   })
 
   it('handles null/undefined ratings', () => {

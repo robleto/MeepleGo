@@ -7,7 +7,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import NavItem from '../Elements/NavItem'
-import { cn } from '@/utils/helpers'
+import { cn, getGameUrl } from '@/utils/helpers'
 import { Button } from '../Elements/Button'
 import Logo from '../Foundations/Logo'
 import dynamic from 'next/dynamic'
@@ -17,6 +17,7 @@ import {
   CubeIcon as GamesIcon,
   ListBulletIcon,
   PlayIcon,
+  PencilSquareIcon,
   MoonIcon,
   SunIcon,
   MagnifyingGlassIcon,
@@ -27,7 +28,6 @@ import {
   HeartIcon,
   XMarkIcon,
   PlusIcon,
-  ChatBubbleLeftIcon,
 } from '@heroicons/react/24/outline'
 
 // Dynamic imports for heavy components
@@ -49,10 +49,9 @@ interface NavLinkItem {
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>
 }
 const NAV_ITEMS: NavLinkItem[] = [
-  { name: 'Awards', href: '/awards', icon: TrophyIcon },
   { name: 'Games', href: '/games', icon: GamesIcon },
   { name: 'Lists', href: '/lists', icon: ListBulletIcon },
-  { name: 'Journal', href: '/plays', icon: PlayIcon },
+  { name: 'Awards', href: '/awards', icon: TrophyIcon },
 ]
 
 interface SuggestionGame {
@@ -279,6 +278,7 @@ function Navigation() {
   })
   const [flat, setFlat] = useState<SuggestionGame[]>([])
   const [show, setShow] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [activeIndex, setActiveIndex] = useState(-1)
   const inputRef = useRef<HTMLInputElement | null>(null)
@@ -512,7 +512,8 @@ function Navigation() {
     setFlat([])
     setQuery('')
     setActiveIndex(-1)
-    router.push(`/games?gameId=${g.id}`)
+    setSearchOpen(false)
+    router.push(getGameUrl({ id: g.id, name: g.name }))
   }
 
   const onKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -567,6 +568,7 @@ function Navigation() {
       if (e.key === 'Escape') {
         if (showAddMenu) setShowAddMenu(false)
         if (showUserMenu) setShowUserMenu(false)
+        if (searchOpen) setSearchOpen(false)
       }
     }
     window.addEventListener('mousedown', onPointerDown)
@@ -576,6 +578,12 @@ function Navigation() {
       window.removeEventListener('keydown', onKey)
     }
   }, [showAddMenu, showUserMenu])
+
+  useEffect(() => {
+    if (searchOpen) {
+      requestAnimationFrame(() => inputRef.current?.focus())
+    }
+  }, [searchOpen])
 
   return (
     <nav
@@ -736,6 +744,178 @@ function Navigation() {
               aria-haspopup="menu"
               aria-expanded={showAddMenu}
             />
+            <div className="relative">
+              <div
+                className={cn(
+                  'flex items-center gap-2 rounded-full border border-gray-200 dark:border-gray-700 bg-white/90 dark:bg-gray-900/70 shadow-sm backdrop-blur-sm transition-all duration-200 overflow-hidden',
+                  searchOpen
+                    ? 'w-72 pl-2 pr-2 py-1.5'
+                    : 'w-9 h-9 justify-center p-0'
+                )}
+              >
+                <button
+                  type="button"
+                  onClick={() =>
+                    setSearchOpen((v) => {
+                      const next = !v
+                      if (!next) {
+                        setShow(false)
+                        setQuery('')
+                      }
+                      return next
+                    })
+                  }
+                  aria-label="Search"
+                  className={cn(
+                    'shrink-0 flex items-center justify-center rounded-full text-gray-600 dark:text-gray-300',
+                    searchOpen
+                      ? 'h-7 w-7 hover:bg-gray-100 dark:hover:bg-gray-800'
+                      : 'h-9 w-9'
+                  )}
+                >
+                  <MagnifyingGlassIcon className="h-4 w-4 ml-2" />
+                </button>
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={query}
+                  onChange={(e) => {
+                    setQuery(e.target.value)
+                    if (e.target.value) setShow(true)
+                  }}
+                  onKeyDown={onKey}
+                  onFocus={() => {
+                    if (flat.length) setShow(true)
+                  }}
+                  placeholder="Search games"
+                  className={cn(
+                    'bg-transparent text-sm placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none transition-all duration-200',
+                    searchOpen ? 'w-full opacity-100' : 'w-0 opacity-0 pointer-events-none'
+                  )}
+                  role="combobox"
+                  aria-autocomplete="list"
+                  aria-expanded={show}
+                  aria-controls="nav-suggestions"
+                  aria-activedescendant={
+                    activeIndex >= 0 && show
+                      ? `nav-sugg-${activeIndex}`
+                      : undefined
+                  }
+                />
+              </div>
+              {searchOpen && show && (
+                <div
+                  ref={dropdownRef}
+                  id="nav-suggestions"
+                  role="listbox"
+                  className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-xl overflow-hidden max-h-[400px] overflow-y-auto z-50 text-sm"
+                >
+                  {loading && (
+                    <div className="px-6 py-4 text-gray-500 dark:text-gray-400">
+                      Searching…
+                    </div>
+                  )}
+                  {!loading && !flat.length && (
+                    <div className="px-6 py-6 text-center">
+                      <div className="w-10 h-10 mx-auto mb-2 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                        <MagnifyingGlassIcon className="w-5 h-5 text-gray-400" />
+                      </div>
+                      <div className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">
+                        No games found
+                      </div>
+                      <div className="text-[11px] text-gray-400 dark:text-gray-500">
+                        Try another search term
+                      </div>
+                    </div>
+                  )}
+                  {!loading && flat.length > 0 && (
+                    <>
+                      {grouped.exactMatches.length > 0 && (
+                        <div className="border-b border-gray-100 dark:border-gray-800">
+                          <div className="px-6 py-2 bg-gray-50 dark:bg-gray-800/50 text-[11px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                            Exact Match
+                          </div>
+                          {grouped.exactMatches.map((g, i) => (
+                            <SuggestionItem
+                              key={`e-${g.id}`}
+                              game={g}
+                              active={activeIndex === i}
+                              index={i}
+                              query={query}
+                              onSelect={selectGame}
+                              onHover={() => setActiveIndex(i)}
+                            />
+                          ))}
+                        </div>
+                      )}
+                      {grouped.popular.length > 0 && (
+                        <div className="border-b border-gray-100 dark:border-gray-800">
+                          <div className="px-6 py-2 bg-gray-50 dark:bg-gray-800/50 text-[11px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                            <TrophyIcon className="w-3.5 h-3.5" /> Popular
+                          </div>
+                          {grouped.popular.map((g, i) => {
+                            const idx = grouped.exactMatches.length + i
+                            return (
+                              <SuggestionItem
+                                key={`p-${g.id}`}
+                                game={g}
+                                active={activeIndex === idx}
+                                index={idx}
+                                query={query}
+                                onSelect={selectGame}
+                                onHover={() => setActiveIndex(idx)}
+                              />
+                            )
+                          })}
+                        </div>
+                      )}
+                      {grouped.other.length > 0 && (
+                        <div>
+                          <div className="px-6 py-2 bg-gray-50 dark:bg-gray-800/50 text-[11px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                            <CubeIcon className="w-3.5 h-3.5" /> Other
+                          </div>
+                          {grouped.other.map((g, i) => {
+                            const idx =
+                              grouped.exactMatches.length +
+                              grouped.popular.length +
+                              i
+                            return (
+                              <SuggestionItem
+                                key={`o-${g.id}`}
+                                game={g}
+                                active={activeIndex === idx}
+                                index={idx}
+                                query={query}
+                                onSelect={selectGame}
+                                onHover={() => setActiveIndex(idx)}
+                              />
+                            )
+                          })}
+                        </div>
+                      )}
+                    </>
+                  )}
+                  <div className="border-t border-gray-100 dark:border-gray-800">
+                    <div className="px-6 py-2 text-[11px] text-gray-400 dark:text-gray-500">
+                      Press Enter to search • ↑↓ navigate
+                    </div>
+                    <div className="px-6 py-2 text-center">
+                      <Link
+                        href="/add"
+                        onClick={() => {
+                          setShow(false)
+                          setQuery('')
+                          setSearchOpen(false)
+                        }}
+                        className="text-xs text-gray-400 dark:text-gray-500 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                      >
+                        Can't find your game? Add it here
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
             {showAddMenu && (
               <div
                 className="absolute right-full mr-2 top-0 mt-10 w-60 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-xl p-2 z-50"
@@ -783,8 +963,8 @@ function Navigation() {
                     aria-expanded={showUserMenu}
                     className="flex items-center gap-2 rounded-full p-1 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                     title={
-                      profile?.full_name ||
                       profile?.username ||
+                      profile?.full_name ||
                       session.user.email ||
                       'Profile'
                     }
@@ -794,10 +974,10 @@ function Navigation() {
                       <img
                         src={profile.avatar_url}
                         alt="Profile"
-                        className="w-8 h-8 rounded-full object-cover ring-2 ring-gray-200 dark:ring-gray-700"
+                        className="w-7 h-7 rounded-full object-cover ring-2 ring-gray-200 dark:ring-gray-700"
                       />
                     ) : (
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white text-sm font-medium ring-2 ring-gray-200 dark:ring-gray-700">
+                      <div className="w-7 h-7 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white text-[12px] font-medium ring-2 ring-gray-200 dark:ring-gray-700">
                         {(
                           profile?.username ||
                           profile?.full_name ||
@@ -820,53 +1000,87 @@ function Navigation() {
                     >
                       <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800">
                         <div className="font-medium text-gray-900 dark:text-white truncate">
-                          {profile?.full_name || profile?.username || 'User'}
+                          {profile?.username || profile?.full_name || 'User'}
                         </div>
                         <div className="text-gray-500 dark:text-gray-400 truncate text-xs">
                           {session?.user.email}
                         </div>
                       </div>
-                      <Link
-                        href="/profile"
-                        className="flex items-center gap-3 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                      >
-                        <UserCircleIcon className="h-4 w-4 text-gray-400" />{' '}
-                        Profile
-                      </Link>
-                      <Link
-                        href="/rankings"
-                        className="flex items-center gap-3 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                      >
-                        <ChartBarIcon className="h-4 w-4 text-gray-400" />{' '}
-                        Rankings
-                      </Link>
-                      <Link
-                        href="/library"
-                        className="flex items-center gap-3 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                      >
-                        <BookmarkIcon className="h-4 w-4 text-green-600" />{' '}
-                        Library
-                      </Link>
-                      <Link
-                        href="/wishlist"
-                        className="flex items-center gap-3 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                      >
-                        <HeartIcon className="h-4 w-4 text-pink-600" /> Wishlist
-                      </Link>
+                      <div className="px-2 py-2">
+                        {[
+                          {
+                            label: 'Overview',
+                            href: '/profile?tab=overview',
+                            Icon: UserCircleIcon,
+                          },
+                          {
+                            label: 'Library',
+                            href: '/profile?tab=games',
+                            Icon: BookmarkIcon,
+                          },
+                          {
+                            label: 'Watchlist',
+                            href: '/profile?tab=watchlist',
+                            Icon: HeartIcon,
+                          },
+                          {
+                            label: 'Collections',
+                            href: '/profile?tab=collections',
+                            Icon: CubeIcon,
+                          },
+                          {
+                            label: 'Awards',
+                            href: '/profile?tab=awards',
+                            Icon: TrophyIcon,
+                          },
+                          {
+                            label: 'Rankings',
+                            href: '/profile?tab=rankings',
+                            Icon: ChartBarIcon,
+                          },
+                          {
+                            label: 'Lists',
+                            href: '/profile?tab=lists',
+                            Icon: ListBulletIcon,
+                          },
+                          {
+                            label: 'Journal',
+                            href: '/profile?tab=journal',
+                            Icon: PencilSquareIcon,
+                          },
+                          {
+                            label: 'Stats',
+                            href: '/profile?tab=stats',
+                            Icon: ChartBarIcon,
+                          },
+                        ].map(({ label, href, Icon }) => (
+                          <Link
+                            key={label}
+                            href={href}
+                            className="flex items-center gap-2 px-3 py-1.5 rounded-md text-xs hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                          >
+                            <Icon className="h-3.5 w-3.5 text-gray-400" />
+                            <span className="text-gray-700 dark:text-gray-200">
+                              {label}
+                            </span>
+                          </Link>
+                        ))}
+                      </div>
+                      <hr className="my-1 border-gray-100 dark:border-gray-800" />
                       <Link
                         href="/settings"
-                        className="flex items-center gap-3 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                        className="flex items-center gap-2 px-4 py-2 text-xs hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                       >
-                        <ListBulletIcon className="h-4 w-4 text-gray-400" />{' '}
+                        <ListBulletIcon className="h-3.5 w-3.5 text-gray-400" />
                         Settings
                       </Link>
-                      <a
-                        href="mailto:feedback@meeplego.com?subject=MeepleGo%20Feedback"
-                        className="flex items-center gap-3 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                      <button
+                        onClick={signOut}
+                        className="w-full flex items-center gap-2 px-4 py-2 text-xs hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-red-600 dark:text-red-400"
                       >
-                        <ChatBubbleLeftIcon className="h-4 w-4 text-blue-600" />{' '}
-                        Send Feedback
-                      </a>
+                        <ArrowRightOnRectangleIcon className="h-3.5 w-3.5" />
+                        Sign out
+                      </button>
                       <div className="px-4 pt-3 pb-2">
                         <div className="text-[10px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2">
                           Theme
@@ -892,14 +1106,6 @@ function Navigation() {
                           ))}
                         </div>
                       </div>
-                      <hr className="my-1 border-gray-100 dark:border-gray-800" />
-                      <button
-                        onClick={signOut}
-                        className="w-full flex items-center gap-3 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-red-600 dark:text-red-400"
-                      >
-                        <ArrowRightOnRectangleIcon className="h-4 w-4" /> Sign
-                        out
-                      </button>
                     </div>
                   )}
                 </>

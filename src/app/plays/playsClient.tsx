@@ -9,7 +9,6 @@ import { supabase } from '@/lib/supabase'
 import type { PlayLog } from '@/types/supabase'
 import GameSearchSelect from '@/components/Components/GameSearchSelect'
 import type { SuggestionGame } from '@/components/Components/GameSearchSelect'
-import Heading from '@/components/Components/Heading'
 import { JournalTimelineMarker } from '@/components/Elements'
 import Portal from '@/components/Elements/Portal'
 import SearchDropdown from '@/components/Elements/SearchDropdown'
@@ -23,13 +22,11 @@ import {
   HeartIcon,
   XMarkIcon,
   CubeIcon,
-  StarIcon,
   HashtagIcon,
   DocumentTextIcon,
 } from '@heroicons/react/24/outline'
 import { PlayIcon } from '@heroicons/react/24/solid'
 import { getRatingSolidClass } from '@/components/Foundations/ratingColors'
-import StatCard from '@/components/Elements/StatCard'
 import PlayLogEditor from '@/components/Components/PlayLogEditor'
 import ZeroState from '@/components/Components/ZeroState'
 
@@ -615,6 +612,49 @@ export default function PlaysClientPage({
   return (
     <div className="bg-gray-50 dark:bg-gray-950 min-h-[calc(100vh-4rem)]">
       <div className="max-w-5xl mx-auto px-4 py-10 space-y-12">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <h1 className="text-3xl md:text-4xl font-semibold tracking-tight text-gray-900 dark:text-gray-100">
+            Game Journal
+          </h1>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:justify-end">
+            {[
+              {
+                iconBg: 'bg-blue-500',
+                Icon: PlayIcon,
+                label: 'Plays',
+                value: animatedStats.plays,
+              },
+              {
+                iconBg: 'bg-green-500',
+                Icon: CubeIcon,
+                label: 'Unique Games',
+                value: animatedStats.unique,
+              },
+              {
+                iconBg: 'bg-purple-500',
+                Icon: DocumentTextIcon,
+                label: 'Games w/ Notes',
+                value: animatedStats.gamesWithNotes,
+              },
+            ].map((item) => (
+              <div key={item.label} className="flex items-center gap-3">
+                <div
+                  className={`flex items-center justify-center w-8 h-8 rounded-xl ${item.iconBg}`}
+                >
+                  <item.Icon className="w-5 h-5 text-white" />
+                </div>
+                <div className="leading-tight">
+                  <div className="text-base font-semibold text-gray-900 dark:text-white">
+                    {item.value}
+                  </div>
+                  <div className="text-[10px] font-semibold tracking-wider text-gray-500 dark:text-gray-400 uppercase">
+                    {item.label}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
         {!zeroStateActive && (
           <div className="flex flex-wrap items-center gap-2 mt-2 text-xs">
             {['all', 'week', 'month', 'rated', 'notes'].map((f) => (
@@ -697,77 +737,6 @@ export default function PlaysClientPage({
               )}
             </div>
           </div>
-        )}
-
-        {/* Filtered Stats */}
-        {!zeroStateActive && filteredLogs.length > 0 && (
-          <section className="grid md:grid-cols-5 gap-4">
-            <StatCard
-              iconBg="bg-blue-500"
-              Icon={PlayIcon}
-              iconColor="text-white"
-              value={filteredLogs.length}
-              label="Plays"
-            />
-            <StatCard
-              iconBg="bg-green-500"
-              Icon={CubeIcon}
-              iconColor="text-white"
-              value={new Set(filteredLogs.map((l) => l.game_id)).size}
-              label="Unique Games"
-            />
-            <StatCard
-              iconBg="bg-purple-500"
-              Icon={DocumentTextIcon}
-              iconColor="text-white"
-              value={
-                new Set(
-                  filteredLogs
-                    .filter((l) => (l.notes || '').trim().length > 0)
-                    .map((l) => l.game_id)
-                ).size
-              }
-              label="Games with Notes"
-            />
-            <div className="p-4 border border-gray-200 dark:border-gray-800 rounded-xl bg-white dark:bg-gray-900 shadow-sm flex flex-col justify-between">
-              <div className="flex items-center justify-between text-xs uppercase text-gray-500 tracking-wide">
-                <span>Streak</span>
-                {summary && (
-                  <span className="text-xs normal-case font-medium text-gray-400">
-                    Longest {summary.streak.longest}
-                  </span>
-                )}
-              </div>
-              <div className="mt-1 flex items-end gap-2">
-                <div className="text-2xl font-bold tabular-nums">
-                  {summary?.streak.current ?? '—'}
-                </div>
-                <span className="text-xs text-gray-500 mb-1">days</span>
-              </div>
-              <div className="mt-3 h-8 flex items-end gap-0.5">
-                {summary?.last30.slice(-30).map((d) => {
-                  const h = d.count === 0 ? 2 : d.count >= 6 ? 24 : d.count * 4
-                  return (
-                    <div
-                      key={d.date}
-                      title={`${d.date}: ${d.count} plays`}
-                      className="w-1 rounded-sm bg-sky-500/60 dark:bg-sky-400/60"
-                      style={{ height: h }}
-                    />
-                  )
-                })}
-                {!summary && <div className="text-xs text-gray-400">—</div>}
-              </div>
-            </div>
-            <div className="col-span-1 p-4 border border-gray-200 dark:border-gray-800 rounded-xl bg-white dark:bg-gray-900 shadow-sm">
-              <div className="text-xs uppercase text-gray-500 tracking-wide mb-3">
-                Activity
-              </div>
-              <div className="text-sm text-gray-600 dark:text-gray-300">
-                Filtered period stats
-              </div>
-            </div>
-          </section>
         )}
 
         {/* Zero state for own journal */}
@@ -923,9 +892,6 @@ export default function PlaysClientPage({
         )}
         {!zeroStateActive && (
           <section className="space-y-6">
-            <h2 className="text-2xl md:text-3xl font-semibold tracking-tight text-gray-900 dark:text-gray-100 mb-2">
-              Game Log
-            </h2>
             {(pageError || statsError || summaryError) && (
               <div className="text-xs rounded-lg border p-3 bg-red-50 dark:bg-red-900/20 border-red-300 dark:border-red-800 text-red-700 dark:text-red-300 space-y-1">
                 {pageError && <div>Plays: {pageError}</div>}
@@ -1251,7 +1217,29 @@ export default function PlaysClientPage({
                     >
                       {/* Header */}
                       <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-                        <h3 className="text-lg font-semibold">Edit Play Log</h3>
+                        <div className="flex items-center gap-3">
+                          <div className="w-11 h-11 rounded-xl bg-gray-100 dark:bg-gray-800 overflow-hidden flex items-center justify-center">
+                            {gameMeta[editingLog.game_id]?.thumb ? (
+                              <img
+                                src={gameMeta[editingLog.game_id]?.thumb || ''}
+                                alt={gameMeta[editingLog.game_id]?.name || 'Game'}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">
+                                JE
+                              </div>
+                            )}
+                          </div>
+                          <div>
+                            <div className="text-xs uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">
+                              Journal Entry
+                            </div>
+                            <div className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                              {gameMeta[editingLog.game_id]?.name || 'Game'}
+                            </div>
+                          </div>
+                        </div>
                         <button
                           onClick={() => {
                             setShowEditModal(false)

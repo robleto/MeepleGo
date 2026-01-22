@@ -607,6 +607,8 @@ export default function ListDetailPage() {
           showListRanking={editing ? customOrder : customOrderDefault}
           hasExplicitOrder={editing ? customOrder : customOrderDefault}
           onRankingUpdate={handleRankingUpdate}
+          defaultViewMode="list"
+          storageKeyPrefix={list?.id ? `list-${list.id}` : 'list-detail'}
           getListItemControls={
             canEdit && editing && customOrder && !isBgg
               ? (game) => {

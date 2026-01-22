@@ -1,24 +1,29 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import PageLayout from '@/components/Components/PageLayout'
+import SectionHeader from '@/components/Components/SectionHeader'
 import ListExplorer from '@/components/Components/ListExplorer'
 import { getOrCreateDefaultLists, getMembershipSets } from '@/lib/lists'
 import { supabase } from '@/lib/supabase'
 import { GameWithRanking } from '@/types'
-import { ArrowPathIcon } from '@heroicons/react/24/outline'
 
-export default function WishlistPage() {
+export function WishlistContent({
+  embedded = false,
+}: {
+  embedded?: boolean
+}) {
+  const Wrapper = embedded
+    ? (({ children }: { children: ReactNode }) => <>{children}</>)
+    : PageLayout
   const [games, setGames] = useState<GameWithRanking[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [refreshing, setRefreshing] = useState(false)
   const [membershipSets, setMembershipSets] = useState<{
     library: Set<string>
     wishlist: Set<string>
   } | null>(null)
 
   const fetchWishlist = async () => {
-    setRefreshing(true)
     setError(null)
     try {
       const {
@@ -68,7 +73,6 @@ export default function WishlistPage() {
       setError('Failed to load wishlist.')
     } finally {
       setLoading(false)
-      setRefreshing(false)
     }
   }
 
@@ -78,42 +82,34 @@ export default function WishlistPage() {
 
   const header = (
     <div>
-      <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-        My Wishlist
-      </h1>
-      <p className="text-gray-600 dark:text-gray-400">
-        Games you want to play or buy
-      </p>
+      <SectionHeader title="My Wishlist" containerClassName="mb-0" />
     </div>
-  )
-  const headerActions = (
-    <button
-      onClick={fetchWishlist}
-      disabled={refreshing}
-      className="inline-flex items-center gap-2 text-sm px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50"
-    >
-      <ArrowPathIcon
-        className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`}
-      />{' '}
-      Refresh
-    </button>
   )
 
   return (
-    <PageLayout>
+    <Wrapper>
       <ListExplorer
         games={games}
         loading={loading}
         error={error}
         header={header}
-        headerActions={headerActions}
+        searchPlacement="header"
+        stickyHeader
         contextualMembership={membershipSets}
         emptyMessage={{
           title: 'Your wishlist is empty',
           body: 'Add games by clicking the heart icon.',
         }}
         disableListRanking
+        defaultViewMode="grid"
+        defaultSortBy="name"
+        defaultSortOrder="asc"
+        storageKeyPrefix="wishlist"
       />
-    </PageLayout>
+    </Wrapper>
   )
+}
+
+export default function WishlistPage() {
+  return <WishlistContent />
 }

@@ -70,7 +70,7 @@ function NomineeItem({
   const ratingClass = getRatingSolidClass(rating)
   
   return (
-    <li
+    <div
       ref={setNodeRef}
       style={style}
       className={`group relative flex items-center gap-3 px-3 py-3 rounded-lg border bg-white dark:bg-gray-800 cursor-grab active:cursor-grabbing transition-shadow hover:shadow-md ${
@@ -81,6 +81,8 @@ function NomineeItem({
       {...attributes}
       {...listeners}
       title={name}
+      role="button"
+      tabIndex={0}
     >
       <Bars3Icon className="w-4 h-4 text-gray-400 shrink-0" aria-hidden="true" />
       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -108,7 +110,7 @@ function NomineeItem({
           )}
         </div>
       </div>
-    </li>
+    </div>
   )
 }
 

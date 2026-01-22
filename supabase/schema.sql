@@ -136,10 +136,27 @@ CREATE TABLE public.awards (
   CONSTRAINT awards_winner_id_fkey FOREIGN KEY (winner_id) REFERENCES games (id)
 ) TABLESPACE pg_default;
 
+-- Create user follows table
+CREATE TABLE public.user_follows (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  follower_id uuid NOT NULL,
+  following_id uuid NOT NULL,
+  created_at timestamp with time zone NULL DEFAULT now(),
+  CONSTRAINT user_follows_pkey PRIMARY KEY (id),
+  CONSTRAINT user_follows_unique UNIQUE (follower_id, following_id),
+  CONSTRAINT user_follows_follower_fkey FOREIGN KEY (follower_id) REFERENCES profiles (id) ON DELETE CASCADE,
+  CONSTRAINT user_follows_following_fkey FOREIGN KEY (following_id) REFERENCES profiles (id) ON DELETE CASCADE,
+  CONSTRAINT user_follows_no_self CHECK (follower_id <> following_id)
+) TABLESPACE pg_default;
+
 -- Create indexes for awards
 CREATE INDEX IF NOT EXISTS awards_user_id_idx ON public.awards (user_id);
 CREATE INDEX IF NOT EXISTS awards_year_idx ON public.awards (year);
 CREATE INDEX IF NOT EXISTS awards_category_idx ON public.awards (category);
+
+-- Create indexes for user follows
+CREATE INDEX IF NOT EXISTS user_follows_follower_id_idx ON public.user_follows (follower_id);
+CREATE INDEX IF NOT EXISTS user_follows_following_id_idx ON public.user_follows (following_id);
 
 -- Functions for updating timestamps
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -175,10 +192,14 @@ ALTER TABLE rankings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE game_lists ENABLE ROW LEVEL SECURITY;
 ALTER TABLE game_list_items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE awards ENABLE ROW LEVEL SECURITY;
+ALTER TABLE user_follows ENABLE ROW LEVEL SECURITY;
 
 -- Profiles: Users can only see and edit their own profile
 CREATE POLICY "Users can view own profile" ON profiles
   FOR SELECT USING (auth.uid() = id);
+
+CREATE POLICY "Authenticated users can view profiles" ON profiles
+  FOR SELECT USING (auth.uid() IS NOT NULL);
 
 CREATE POLICY "Users can update own profile" ON profiles
   FOR UPDATE USING (auth.uid() = id);
@@ -198,6 +219,16 @@ CREATE POLICY "Users can update own rankings" ON rankings
 
 CREATE POLICY "Users can delete own rankings" ON rankings
   FOR DELETE USING (user_id = auth.uid());
+
+-- User follows: users can view, follow, and unfollow
+CREATE POLICY "User can view their follows" ON user_follows
+  FOR SELECT USING (follower_id = auth.uid() OR following_id = auth.uid());
+
+CREATE POLICY "User can follow others" ON user_follows
+  FOR INSERT WITH CHECK (follower_id = auth.uid());
+
+CREATE POLICY "User can unfollow" ON user_follows
+  FOR DELETE USING (follower_id = auth.uid());
 
 -- Game Lists: Users can see public lists and their own lists
 CREATE POLICY "Users can view public lists and own lists" ON game_lists

@@ -23,6 +23,7 @@ export default function WinnerCard({ game, className = '' }: WinnerCardProps) {
           viewMode="grid"
           hideWinnerBadge
           variant="balanced"
+          imageFit="contain"
         />
       </div>
     </div>

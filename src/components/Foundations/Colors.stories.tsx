@@ -17,15 +17,15 @@ export default meta
 
 const ratingColors = [
   { value: 1, color: 'red-600', label: 'Awful' },
-  { value: 2, color: 'orange-600', label: 'Bad' },
-  { value: 3, color: 'amber-600', label: 'Poor' },
-  { value: 4, color: 'yellow-600', label: 'Below Average' },
-  { value: 5, color: 'lime-600', label: 'Average' },
-  { value: 6, color: 'green-600', label: 'Above Average' },
+  { value: 2, color: 'orange-600', label: 'So Bad' },
+  { value: 3, color: 'amber-600', label: 'Weak' },
+  { value: 4, color: 'yellow-600', label: 'Meh' },
+  { value: 5, color: 'lime-600', label: 'Just OK' },
+  { value: 6, color: 'green-600', label: 'Decent' },
   { value: 7, color: 'emerald-600', label: 'Good' },
-  { value: 8, color: 'teal-600', label: 'Very Good' },
-  { value: 9, color: 'cyan-600', label: 'Great' },
-  { value: 10, color: 'sky-600', label: 'Masterpiece' },
+  { value: 8, color: 'teal-600', label: 'Great' },
+  { value: 9, color: 'cyan-600', label: 'Brilliant' },
+  { value: 10, color: 'sky-600', label: 'All-Timer' },
 ]
 
 export const RatingScale: StoryObj = {

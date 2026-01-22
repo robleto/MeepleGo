@@ -36,7 +36,6 @@ export function PlayLogEditor({
     const now = new Date()
     return now.toISOString().slice(0, 16)
   })
-  const [rating, setRating] = useState<number | null>(editLog?.rating ?? null)
   const [playerCount, setPlayerCount] = useState<number | null>(
     editLog?.player_count ?? null
   )
@@ -65,7 +64,7 @@ export function PlayLogEditor({
       const logData = {
         game_id: gameId,
         played_at: new Date(playedAt).toISOString(),
-        rating: rating || null,
+        rating: editLog?.rating ?? null,
         player_count: playerCount || null,
         duration_minutes: durationMinutes || null,
         location: location.trim() || null,
@@ -98,7 +97,6 @@ export function PlayLogEditor({
 
       // Reset form if creating new
       if (!editLog) {
-        setRating(null)
         setPlayerCount(null)
         setDurationMinutes(null)
         setLocation('')
@@ -122,58 +120,17 @@ export function PlayLogEditor({
         </div>
       )}
 
-      {/* Date & Time */}
-      <div>
-        <DateTimePicker
-          id="playedAt"
-          label="Date & Time"
-          value={playedAt}
-          onChange={setPlayedAt}
-          required
-        />
-      </div>
-
-      {/* Rating */}
-      <div>
-        <label
-          htmlFor="rating"
-          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-        >
-          Rating (1-10)
-        </label>
-        <select
-          id="rating"
-          value={rating || ''}
-          onChange={(e) =>
-            setRating(e.target.value ? Number(e.target.value) : null)
-          }
-          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white"
-        >
-          <option value="">No rating</option>
-          {Array.from({ length: 10 }, (_, i) => (
-            <option key={i + 1} value={i + 1}>
-              {i + 1} -{' '}
-              {
-                [
-                  'Awful',
-                  'Bad',
-                  'Poor',
-                  'Below Average',
-                  'Average',
-                  'Above Average',
-                  'Good',
-                  'Very Good',
-                  'Great',
-                  'Masterpiece',
-                ][i]
-              }
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Player Count & Duration */}
-      <div className="grid grid-cols-2 gap-3">
+      {/* Date & Players */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="sm:col-span-2">
+          <DateTimePicker
+            id="playedAt"
+            label="Date & Time"
+            value={playedAt}
+            onChange={setPlayedAt}
+            required
+          />
+        </div>
         <div>
           <label
             htmlFor="playerCount"
@@ -191,6 +148,26 @@ export function PlayLogEditor({
             min="1"
             max="20"
             placeholder="# of players"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white"
+          />
+        </div>
+      </div>
+
+      {/* Location & Duration */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="sm:col-span-2">
+          <label
+            htmlFor="location"
+            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+          >
+            Location
+          </label>
+          <input
+            type="text"
+            id="location"
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            placeholder="Where did you play?"
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white"
           />
         </div>
@@ -214,24 +191,6 @@ export function PlayLogEditor({
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white"
           />
         </div>
-      </div>
-
-      {/* Location */}
-      <div>
-        <label
-          htmlFor="location"
-          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-        >
-          Location
-        </label>
-        <input
-          type="text"
-          id="location"
-          value={location}
-          onChange={(e) => setLocation(e.target.value)}
-          placeholder="Where did you play?"
-          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white"
-        />
       </div>
 
       {/* Notes */}

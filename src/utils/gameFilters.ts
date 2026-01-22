@@ -16,6 +16,7 @@ export type SortKey =
   | 'name'
   | 'year_published'
   | 'rank'
+  | 'rating'
   | 'ranking'
   | 'playtime_minutes'
   | 'min_players'
@@ -36,6 +37,7 @@ export const SORT_OPTIONS = [
   { value: 'name' as SortKey, label: 'Name' },
   { value: 'year_published' as SortKey, label: 'Year' },
   { value: 'rank' as SortKey, label: 'BGG Rank' },
+  { value: 'rating' as SortKey, label: 'BGG Rating' },
   { value: 'ranking' as SortKey, label: 'My Rating' },
   { value: 'playtime_minutes' as SortKey, label: 'Play Time' },
   { value: 'min_players' as SortKey, label: 'Min Players' },
@@ -76,29 +78,42 @@ export function useGameFilters(
   options?: {
     disableClientSorting?: boolean
     defaultViewMode?: 'grid' | 'list'
-    storageKey?: string
+    defaultSortBy?: SortKey
+    defaultSortOrder?: SortOrder
+    defaultGroupBy?: GroupKey
+    defaultGroupSortOrder?: GroupSortOrder
+    storageKeyPrefix?: string
   }
 ) {
   const {
     disableClientSorting = false,
     defaultViewMode = 'grid',
-    storageKey = 'gamesViewMode',
+    defaultSortBy = 'rank',
+    defaultSortOrder = 'asc',
+    defaultGroupBy = 'none',
+    defaultGroupSortOrder = 'asc',
+    storageKeyPrefix = 'games',
   } = options || {}
+  const viewKey = `${storageKeyPrefix}ViewMode`
+  const sortByKey = `${storageKeyPrefix}SortBy`
+  const sortOrderKey = `${storageKeyPrefix}SortOrder`
+  const groupByKey = `${storageKeyPrefix}GroupBy`
+  const groupSortOrderKey = `${storageKeyPrefix}GroupSortOrder`
   const [hasMounted, setHasMounted] = useState(false)
 
   // Local view mode state (duplicated here so consumers can rely on single hook)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>(() => {
     if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem(storageKey) as 'grid' | 'list'
+      const stored = localStorage.getItem(viewKey) as 'grid' | 'list'
       return stored || defaultViewMode
     }
     return defaultViewMode
   })
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      localStorage.setItem(storageKey, viewMode)
+      localStorage.setItem(viewKey, viewMode)
     }
-  }, [viewMode, storageKey])
+  }, [viewMode, viewKey])
 
   // Search state
   const [searchTerm, setSearchTerm] = useState('')
@@ -106,47 +121,39 @@ export function useGameFilters(
   // Initialize state from localStorage
   const [sortBy, setSortBy] = useState<SortKey>(() => {
     if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('gamesSortBy') as SortKey
-      // Migration: convert old 'rating' to new 'rank'
-      if (stored === ('rating' as any)) {
-        localStorage.setItem('gamesSortBy', 'rank')
-        return 'rank'
-      }
-      const result = stored || 'rank'
-      return result // Updated default to BGG rank
+      const stored = localStorage.getItem(sortByKey) as SortKey
+      const result = stored || defaultSortBy
+      return result
     }
-    return 'rank'
+    return defaultSortBy
   })
 
   const [sortOrder, setSortOrder] = useState<SortOrder>(() => {
     if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('gamesSortOrder') as SortOrder
-      return stored || 'asc' // Updated default to ascending (1 -> higher for BGG rank)
+      const stored = localStorage.getItem(sortOrderKey) as SortOrder
+      return stored || defaultSortOrder
     }
-    return 'asc'
+    return defaultSortOrder
   })
 
   const [groupBy, setGroupBy] = useState<GroupKey>(() => {
     if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('gamesGroupBy') as GroupKey
-      return stored || 'none' // Default: no grouping for games
+      const stored = localStorage.getItem(groupByKey) as GroupKey
+      return stored || defaultGroupBy
     }
-    return 'none'
+    return defaultGroupBy
   })
 
   const [groupSortOrder, setGroupSortOrder] = useState<GroupSortOrder>(() => {
     if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem(
-        'gamesGroupSortOrder'
-      ) as GroupSortOrder
+      const stored = localStorage.getItem(groupSortOrderKey) as GroupSortOrder
       if (stored) return stored
       // Default to descending when grouping by Year
-      const storedGroupBy = localStorage.getItem(
-        'gamesGroupBy'
-      ) as GroupKey | null
-      return storedGroupBy === 'year_published' ? 'desc' : 'asc'
+      const storedGroupBy = localStorage.getItem(groupByKey) as GroupKey | null
+      if (storedGroupBy === 'year_published') return 'desc'
+      return defaultGroupSortOrder
     }
-    return 'asc'
+    return defaultGroupSortOrder
   })
 
   const [filterType, setFilterType] = useState<
@@ -170,12 +177,12 @@ export function useGameFilters(
   // Save games-specific filter state
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      localStorage.setItem('gamesSortBy', sortBy)
-      localStorage.setItem('gamesSortOrder', sortOrder)
-      localStorage.setItem('gamesGroupBy', groupBy)
-      localStorage.setItem('gamesGroupSortOrder', groupSortOrder)
+      localStorage.setItem(sortByKey, sortBy)
+      localStorage.setItem(sortOrderKey, sortOrder)
+      localStorage.setItem(groupByKey, groupBy)
+      localStorage.setItem(groupSortOrderKey, groupSortOrder)
     }
-  }, [sortBy, sortOrder, groupBy, groupSortOrder])
+  }, [sortBy, sortOrder, groupBy, groupSortOrder, sortByKey, sortOrderKey, groupByKey, groupSortOrderKey])
 
   // When transitioning into Year grouping, prefer Z-A (desc) if no explicit user choice yet
   const prevGroupByRef = useRef<GroupKey>(groupBy)
@@ -335,6 +342,11 @@ export function useGameFilters(
         if (sortBy === 'rank') {
           const aRating = (a as any).rank || Infinity
           const bRating = (b as any).rank || Infinity
+          return sortOrder === 'asc' ? aRating - bRating : bRating - aRating
+        }
+        if (sortBy === 'rating') {
+          const aRating = (a as any).rating ?? -Infinity
+          const bRating = (b as any).rating ?? -Infinity
           return sortOrder === 'asc' ? aRating - bRating : bRating - aRating
         }
         if (sortBy === 'playtime_minutes') {
@@ -651,17 +663,17 @@ export function useRankingsFilters(
   const [sortBy, setSortBy] = useState<SortKey>(() => {
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem('rankingsSortBy') as SortKey
-      return stored || 'rank' // Default to BGG rank ordering
+      return stored || 'ranking' // Default to My Rating
     }
-    return 'rank'
+    return 'ranking'
   })
 
   const [sortOrder, setSortOrder] = useState<SortOrder>(() => {
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem('rankingsSortOrder') as SortOrder
-      return stored || 'asc' // Ascending BGG rank (1 -> ...)
+      return stored || 'desc' // High-to-low ratings
     }
-    return 'asc'
+    return 'desc'
   })
 
   const [groupBy, setGroupBy] = useState<GroupKey>(() => {
@@ -865,6 +877,11 @@ export function useRankingsFilters(
         if (sortBy === 'rank') {
           const aRating = (a as any).rank || Infinity
           const bRating = (b as any).rank || Infinity
+          return sortOrder === 'asc' ? aRating - bRating : bRating - aRating
+        }
+        if (sortBy === 'rating') {
+          const aRating = (a as any).rating ?? -Infinity
+          const bRating = (b as any).rating ?? -Infinity
           return sortOrder === 'asc' ? aRating - bRating : bRating - aRating
         }
         if (sortBy === 'playtime_minutes') {

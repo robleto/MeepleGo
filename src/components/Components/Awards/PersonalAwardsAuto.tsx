@@ -2,7 +2,7 @@
 import { useEffect, useState, useMemo } from 'react'
 import { supabase } from '@/lib/supabase'
 import AwardShowcase from '@/components/Components/AwardShowcase'
-import Heading from '@/components/Components/Heading'
+import SectionHeader from '@/components/Components/SectionHeader'
 import Hero from '@/components/Components/Hero'
 
 interface RankingRow {
@@ -272,7 +272,7 @@ export default function PersonalAwardsAuto() {
   if (loading) {
     return (
       <div className="mb-14 animate-pulse">
-        <div className="h-4 w-32 bg-gray-200 rounded mb-4" />
+        <div className="w-32 h-4 mb-4 bg-gray-200 rounded" />
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="h-48 bg-gray-100 rounded" />
@@ -286,12 +286,8 @@ export default function PersonalAwardsAuto() {
       <div>
         <Hero variant="awards" />
         <div className="mb-16">
-          <div className="flex items-end justify-between mb-5">
-            <Heading as="h2" variant="section" className="mb-1">
-              Your Personal Awards
-            </Heading>
-          </div>
-          <p className="text-xs text-gray-500 text-center">
+          <SectionHeader title="My Awards" />
+          <p className="text-xs text-center text-gray-500">
             Sign in to see your personalized awards based on your game ratings.
           </p>
         </div>
@@ -300,11 +296,7 @@ export default function PersonalAwardsAuto() {
   }
   return (
     <div className="mb-16">
-      <div className="flex items-end justify-between mb-5">
-        <Heading as="h2" variant="section" className="mb-1">
-          Your Personal Awards
-        </Heading>
-      </div>
+      <SectionHeader title="My Awards" />
       <div className="space-y-10">
         {categories.map((block) => {
           // Use current year as default for editing; user can switch years in editor
@@ -347,7 +339,7 @@ export default function PersonalAwardsAuto() {
           )
         })}
         {categories.length === 0 && (
-          <p className="text-xs text-gray-500 text-center">
+          <p className="text-xs text-center text-gray-500">
             Add rankings to see personalized categories.
           </p>
         )}
