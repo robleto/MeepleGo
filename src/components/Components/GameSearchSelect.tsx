@@ -29,7 +29,10 @@ export interface GameSearchSelectProps {
   placeholder?: string
   autoFocus?: boolean
   className?: string
-  variant?: 'default' | 'hero'
+  /** Size variant: 'default' for inline use, 'landing' for hero sections */
+  variant?: 'default' | 'landing'
+  /** @deprecated Use variant="landing" instead */
+  hero?: boolean
 }
 
 export default function GameSearchSelect({
@@ -38,7 +41,10 @@ export default function GameSearchSelect({
   autoFocus,
   className,
   variant = 'default',
+  hero = false,
 }: GameSearchSelectProps) {
+  // Support legacy hero prop, but prefer variant
+  const isLanding = variant === 'landing' || hero
   const [query, setQuery] = useState('')
   const [grouped, setGrouped] = useState<GroupedSuggestions>({
     exactMatches: [],
@@ -157,7 +163,7 @@ export default function GameSearchSelect({
         parts.push(
           <span
             key={i}
-            className="bg-yellow-200 dark:bg-yellow-600/40 rounded px-0.5"
+            className="bg-yellow-200 rounded px-0.5"
           >
             {match}
           </span>
@@ -193,15 +199,14 @@ export default function GameSearchSelect({
     reset()
   }
 
-  const hero = variant === 'hero'
   return (
-    <div className={cn('relative', className, hero && 'group')}>
+    <div className={cn('relative', className, isLanding && 'group')}>
       <div
         className={cn(
-          'flex w-full items-center gap-3 rounded-full border bg-white/90 dark:bg-gray-900/70 backdrop-blur-sm transition shadow-sm hover:shadow-md focus-within:ring-2 focus-within:ring-sky-500',
-          hero
-            ? 'px-8 py-5 text-lg border-gray-200 dark:border-gray-700'
-            : 'px-4 py-1.5 border-gray-200 dark:border-gray-700'
+          'flex w-full items-center gap-3 border bg-white/95 backdrop-blur-sm transition shadow-sm hover:shadow-md focus-within:ring-2 focus-within:ring-sky-500',
+          isLanding
+            ? 'px-4 sm:px-5 py-3 text-base border-gray-200 rounded-xl shadow-md'
+            : 'px-4 py-1.5 border-gray-200 rounded-full'
         )}
       >
         <input
@@ -218,8 +223,8 @@ export default function GameSearchSelect({
           }}
           placeholder={placeholder}
           className={cn(
-            'flex-1 bg-transparent placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none',
-            hero ? 'text-base leading-tight' : 'text-sm leading-tight'
+            'flex-1 bg-transparent placeholder-gray-400 focus:outline-none',
+            isLanding ? 'text-base leading-tight' : 'text-sm leading-tight'
           )}
           role="combobox"
           aria-autocomplete="list"
@@ -242,11 +247,11 @@ export default function GameSearchSelect({
           aria-label="Search"
           className={cn(
             'shrink-0 rounded-full text-white flex items-center justify-center shadow-sm transition bg-sky-600 hover:bg-sky-600/90 active:bg-sky-700',
-            hero ? 'h-14 w-14 text-xl' : 'h-8 w-8'
+            isLanding ? 'h-10 w-10' : 'h-8 w-8'
           )}
         >
           <MagnifyingGlassIcon
-            className={cn(hero ? 'h-7 w-7' : 'h-4.5 w-4.5')}
+            className={cn(isLanding ? 'h-5 w-5' : 'h-4.5 w-4.5')}
           />
         </button>
       </div>
@@ -255,22 +260,23 @@ export default function GameSearchSelect({
           ref={dropdownRef}
           id="game-suggestions"
           role="listbox"
-          className="absolute left-0 right-0 top-full mt-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-xl overflow-hidden max-h-[400px] overflow-y-auto z-[260] text-sm"
+          className="absolute left-0 right-0 top-full mt-2 bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden overflow-y-auto z-[300] text-sm"
+          style={{ maxHeight: isLanding ? 'min(320px, 45vh)' : 'min(360px, 45vh)' }}
         >
           {loading && (
-            <div className="px-6 py-4 text-gray-500 dark:text-gray-400">
+            <div className="px-6 py-4 text-gray-500">
               Searching…
             </div>
           )}
           {!loading && !flat.length && (
             <div className="px-6 py-6 text-center">
-              <div className="w-10 h-10 mx-auto mb-2 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+              <div className="w-10 h-10 mx-auto mb-2 rounded-full bg-gray-100 flex items-center justify-center">
                 <MagnifyingGlassIcon className="w-5 h-5 text-gray-400" />
               </div>
-              <div className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">
+              <div className="text-gray-500 text-sm font-medium mb-1">
                 No games found
               </div>
-              <div className="text-[11px] text-gray-400 dark:text-gray-500">
+              <div className="text-[11px] text-gray-400">
                 Try another search term
               </div>
             </div>
@@ -278,8 +284,8 @@ export default function GameSearchSelect({
           {!loading && flat.length > 0 && (
             <>
               {grouped.exactMatches.length > 0 && (
-                <div className="border-b border-gray-100 dark:border-gray-800">
-                  <div className="px-6 py-2 bg-gray-50 dark:bg-gray-800/50 text-[11px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                <div className="border-b border-gray-100">
+                  <div className="px-6 py-2 bg-gray-50 text-[11px] font-semibold uppercase tracking-wide text-gray-500">
                     Exact Match
                   </div>
                   {grouped.exactMatches.map((g, i) => (
@@ -297,8 +303,8 @@ export default function GameSearchSelect({
                 </div>
               )}
               {grouped.popular.length > 0 && (
-                <div className="border-b border-gray-100 dark:border-gray-800">
-                  <div className="px-6 py-2 bg-gray-50 dark:bg-gray-800/50 text-[11px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                <div className="border-b border-gray-100">
+                  <div className="px-6 py-2 bg-gray-50 text-[11px] font-semibold uppercase tracking-wide text-gray-500 flex items-center gap-2">
                     <TrophyIcon className="w-3.5 h-3.5" /> Popular
                   </div>
                   {grouped.popular.map((g, i) => {
@@ -320,7 +326,7 @@ export default function GameSearchSelect({
               )}
               {grouped.other.length > 0 && (
                 <div>
-                  <div className="px-6 py-2 bg-gray-50 dark:bg-gray-800/50 text-[11px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                  <div className="px-6 py-2 bg-gray-50 text-[11px] font-semibold uppercase tracking-wide text-gray-500 flex items-center gap-2">
                     <CubeIcon className="w-3.5 h-3.5" /> Other
                   </div>
                   {grouped.other.map((g, i) => {
@@ -343,7 +349,7 @@ export default function GameSearchSelect({
               )}
             </>
           )}
-          <div className="border-t border-gray-100 dark:border-gray-800 px-6 py-2 text-[11px] text-gray-400 dark:text-gray-500">
+          <div className="border-t border-gray-100 px-6 py-2 text-[11px] text-gray-400">
             Enter to select • ↑↓ navigate • Esc close
           </div>
         </div>
@@ -379,8 +385,8 @@ function SuggestionRow({
         className={cn(
           'w-full flex items-center gap-4 px-6 py-3 text-left transition-colors',
           active
-            ? 'bg-primary-50 dark:bg-primary-900/30'
-            : 'hover:bg-gray-50 dark:hover:bg-gray-800/60'
+            ? 'bg-primary-50'
+            : 'hover:bg-gray-50'
         )}
       >
         {game.thumbnail_url ? (
@@ -388,18 +394,18 @@ function SuggestionRow({
           <img
             src={game.thumbnail_url}
             alt=""
-            className="w-10 h-10 rounded-lg object-cover ring-1 ring-gray-200 dark:ring-gray-700"
+            className="w-10 h-10 rounded-lg object-cover ring-1 ring-gray-200"
           />
         ) : (
-          <div className="w-10 h-10 rounded-lg bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-[10px] font-semibold text-gray-600 dark:text-gray-300">
+          <div className="w-10 h-10 rounded-lg bg-gray-200 flex items-center justify-center text-[10px] font-semibold text-gray-600">
             {game.name.slice(0, 2).toUpperCase()}
           </div>
         )}
         <div className="min-w-0 flex-1">
-          <div className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+          <div className="text-sm font-medium text-gray-900 truncate">
             {highlight(game.name)}
           </div>
-          <div className="text-[11px] text-gray-500 dark:text-gray-400 flex items-center gap-2">
+          <div className="text-[11px] text-gray-500 flex items-center gap-2">
             {game.year_published && <span>{game.year_published}</span>}
             {game.rating != null && (
               <span className="font-mono text-gray-400">
