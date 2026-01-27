@@ -60,12 +60,28 @@ export default function SignUpPage() {
     
     if (data.user) {
       // Increment the invite code usage
-      await fetch('/api/auth/validate-invite', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: inviteCode }),
-      })
-      
+      try {
+        const incrementRes = await fetch('/api/auth/validate-invite', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code: inviteCode }),
+        })
+        if (!incrementRes.ok) {
+          const incrementErr = await incrementRes.json().catch(() => ({}))
+          captureError(new Error(incrementErr.error || 'Failed to increment invite code'), {
+            context: 'signup_invite_increment',
+            code: inviteCode,
+            userId: data.user.id,
+          })
+        }
+      } catch (err: unknown) {
+        captureError(err instanceof Error ? err : new Error(String(err)), {
+          context: 'signup_invite_increment',
+          code: inviteCode,
+          userId: data.user.id,
+        })
+      }
+
       setMessage('Check your email to confirm your account.')
     }
     

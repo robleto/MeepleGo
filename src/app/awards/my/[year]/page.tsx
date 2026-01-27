@@ -60,20 +60,9 @@ async function fetchAwards(year: number) {
     (c) => !haveCategories.has(c.id)
   )
 
-  console.log('Awards fetch debug:', {
-    year,
-    existingAwards: data?.length || 0,
-    haveCategories: Array.from(haveCategories),
-    missingConfigs: missingConfigs.map((c) => c.id),
-  })
-
   let debugInfo = { totalRankings: 0, qualifyingRankings: 0 }
 
   if (missingConfigs.length > 0) {
-    console.log(
-      'Generating missing categories:',
-      missingConfigs.map((c) => c.id)
-    )
     // Pull rankings once
     const { data: rows } = await supabase
       .from('rankings')
@@ -111,23 +100,10 @@ async function fetchAwards(year: number) {
       (r: any) => r.played_it && (r.rating || 0) >= 7
     ).length
     const derived = deriveAwards({ profileId: session.user.id, year, rankings })
-    console.log('Derived awards result:', {
-      derivedCount: derived.length,
-      categories: derived.map((d) => d.category),
-      derivedSample: derived.slice(0, 2).map((d) => ({
-        category: d.category,
-        nominees: d.nominees?.length,
-        winner_id: d.winner_id,
-      })),
-    })
 
     // Upsert only missing categories (respect manual overrides if any exist later)
     for (const d of derived) {
       if (haveCategories.size && haveCategories.has(d.category)) continue
-      console.log(`Upserting category ${d.category}:`, {
-        nominees: d.nominees?.length,
-        winner_id: d.winner_id,
-      })
       const { error } = await supabase.from('awards').upsert(
         {
           user_id: session.user.id,
@@ -142,18 +118,9 @@ async function fetchAwards(year: number) {
         },
         { onConflict: 'user_id,year,category' }
       )
-      // Log errors but don't fail page load
-      if (error) {
-        console.error(
-          `Failed to auto-create award ${d.category} for year ${year}:`,
-          error
-        )
-      } else {
-        console.log(`Successfully upserted award ${d.category}`)
-      }
+      // Errors are silent - don't fail page load for auto-generation issues
     }
     // Re-fetch after inserts
-    console.log('Re-fetching awards after auto-generation...')
     const refetch = await supabase
       .from('awards')
       .select(
@@ -164,12 +131,6 @@ async function fetchAwards(year: number) {
       .order('category')
     if (!refetch.error && refetch.data) {
       data = refetch.data
-      console.log('Refetch successful:', {
-        count: refetch.data.length,
-        categories: refetch.data.map((a) => a.category),
-      })
-    } else {
-      console.error('Refetch failed:', refetch.error)
     }
   }
   // Collect all game IDs
@@ -215,10 +176,8 @@ export default async function MyAwardsYearPage({
 }: {
   params: Promise<{ year: string }>
 }) {
-  console.log('=== MyAwardsYearPage START ===')
   const params = await paramsPromise
   const { year } = params
-  console.log('Year param:', year)
 
   // Get data including auto-generation logic
   const { session, awards, gameMap, debugInfo } = await fetchAwards(
@@ -226,12 +185,8 @@ export default async function MyAwardsYearPage({
   )
 
   if (!session) {
-    console.log('No session, returning fallback')
     return <SessionFallback year={Number(year)} />
   }
-
-  console.log('Session user ID:', session.user.id)
-  console.log('Awards count:', awards.length)
 
   return (
     <PageLayout>
