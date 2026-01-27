@@ -277,11 +277,6 @@ export default async function AwardsPage({
                 (stat.winners || 0) === 0 &&
                 (stat.nominees || 0) === 0
               if (zero) {
-                console.log('[Awards Landing] Hiding zero-data award', {
-                  id: category.id,
-                  name: category.name,
-                  awardType: (awardsData as any).awardTypeMap?.[category.id],
-                })
                 return null
               }
               return (

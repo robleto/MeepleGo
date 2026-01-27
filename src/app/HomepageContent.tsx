@@ -265,17 +265,14 @@ export default function HomepageContent() {
         }
 
         // Ensure awards are loaded
-        console.log('Loading industry awards from JSON data')
         if (!cancelled) {
           cachedIndustryAwards = INDUSTRY_AWARDS
           setIndustryAwards(INDUSTRY_AWARDS)
         }
 
-        // Load public lists (debug version)
+        // Load public lists
         try {
-          console.log('Loading public lists...')
-
-          // Get the public lists - we know they exist!
+          // Get the public lists
           const { data: publicListsData, error: listsError } = await supabase
             .from('game_lists')
             .select(
@@ -302,30 +299,19 @@ export default function HomepageContent() {
             .order('updated_at', { ascending: false })
             .limit(6)
 
-          console.log('Public lists query result:', {
-            publicListsData,
-            listsError,
-          })
-
           if (!listsError && publicListsData && publicListsData.length > 0) {
-            console.log('SUCCESS: Found public lists:', publicListsData)
             if (!cancelled) {
               cachedPublicLists = publicListsData
               setPublicLists(publicListsData)
             }
           } else {
-            console.log(
-              'ERROR: No public lists found despite database having them'
-            )
-            console.log('Error:', listsError)
             // Use mock as absolute fallback
             if (!cancelled) {
               cachedPublicLists = MOCK_PUBLIC_LISTS
               setPublicLists(MOCK_PUBLIC_LISTS)
             }
           }
-        } catch (error) {
-          console.error('Error loading public lists:', error)
+        } catch {
           if (!cancelled) {
             cachedPublicLists = MOCK_PUBLIC_LISTS
             setPublicLists(MOCK_PUBLIC_LISTS)
@@ -335,7 +321,6 @@ export default function HomepageContent() {
         // Load user stats if authenticated
         if (session?.user) {
           try {
-            console.log('Loading user stats for user:', session.user.id)
 
             // Get user's rankings for stats
             const { data: rankings, error: rankingsError } = await supabase
@@ -368,17 +353,6 @@ export default function HomepageContent() {
               const gamesOwned = libraryItems?.length || 0
               const listsCreated = userLists?.length || 0
               const awardsCreated = userAwards?.length || 0
-
-              // Debug logging
-              console.log('User stats debug:', {
-                rankings: rankings.length,
-                libraryItems: libraryItems?.length || 0,
-                libraryError,
-                userLists: userLists?.length || 0,
-                listsError,
-                userAwards: userAwards?.length || 0,
-                awardsError,
-              })
 
               const ratingsWithValues = rankings.filter(
                 (r) => r.ranking !== null && r.ranking > 0
@@ -433,12 +407,10 @@ export default function HomepageContent() {
                 awardsCreated,
               }
 
-              console.log('User stats loaded:', stats)
               if (!cancelled) {
                 setUserStats(stats)
               }
             } else {
-              console.log('No rankings found or error:', rankingsError)
               // Set empty stats for authenticated users with no data
               if (!cancelled) {
                 setUserStats({
@@ -453,8 +425,7 @@ export default function HomepageContent() {
                 })
               }
             }
-          } catch (error) {
-            console.error('Error loading user stats:', error)
+          } catch {
             if (!cancelled) {
               setUserStats({
                 totalPlays: 0,
@@ -472,8 +443,6 @@ export default function HomepageContent() {
 
         // Load BGG lists
         try {
-          console.log('Loading BGG lists...')
-
           const [mostPlayedGames, hotnessGames, bestsellersGames] =
             await Promise.all([
               fetchBggList('bgg_mostplayed'),
@@ -490,18 +459,12 @@ export default function HomepageContent() {
 
             cachedBggBestsellers = bestsellersGames
             setBggBestsellers(bestsellersGames)
-
-            console.log('BGG lists loaded:', {
-              mostPlayedGames: mostPlayedGames.length,
-              hotnessGames: hotnessGames.length,
-              bestsellersGames: bestsellersGames.length,
-            })
           }
-        } catch (error) {
-          console.error('Error loading BGG lists:', error)
+        } catch {
+          // BGG lists are optional, continue without them
         }
-      } catch (e) {
-        if (!cancelled) console.error('Error loading homepage data:', e)
+      } catch {
+        // Continue with cached/fallback data
       } finally {
         if (!cancelled) setLoading(false)
       }
@@ -511,14 +474,6 @@ export default function HomepageContent() {
       cancelled = true
     }
   }, [])
-
-  // Debug logging
-  console.log('Homepage data:', {
-    featuredGames: featuredGames.length,
-    industryAwards: industryAwards.length,
-    publicLists: publicLists.length,
-    loading,
-  })
 
   return (
     <HomepageView

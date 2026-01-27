@@ -1016,7 +1016,7 @@ export default function PlaysClientPage({
                                           {meta ? meta.name : 'Loading…'}
                                         </span>
                                         {isOwner && (
-                                          <div className="h-0 mt-0 flex items-center gap-3 overflow-hidden transition-all duration-200 opacity-0 group-hover:opacity-100 group-hover:h-5 group-hover:mt-1">
+                                          <div className="mt-1 flex items-center gap-3 sm:h-0 sm:mt-0 sm:overflow-hidden sm:transition-all sm:duration-200 sm:opacity-0 sm:group-hover:opacity-100 sm:group-hover:h-5 sm:group-hover:mt-1">
                                             <button
                                               type="button"
                                               onClick={() => {
@@ -1032,6 +1032,7 @@ export default function PlaysClientPage({
                                               type="button"
                                               onClick={() => handleDuplicate(l)}
                                               className="text-xs font-medium text-emerald-600 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 rounded"
+                                              aria-label="Duplicate this log"
                                             >
                                               Duplicate
                                             </button>
@@ -1041,6 +1042,7 @@ export default function PlaysClientPage({
                                                 handleDeleteInline(l)
                                               }
                                               className="text-xs font-medium text-red-600 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 rounded"
+                                              aria-label="Delete this log"
                                             >
                                               Delete
                                             </button>

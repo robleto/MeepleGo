@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useCallback, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Button } from '../Elements/Button'
 import Image from 'next/image'
 import { GameWithRanking } from '@/types'
@@ -8,6 +8,7 @@ import { supabase } from '@/lib/supabase'
 import { addGameToDefaultList, removeGameFromDefaultList } from '@/lib/lists'
 import { formatYear } from '@/utils/helpers'
 import { XMarkIcon } from '@heroicons/react/24/outline'
+import { captureError } from '@/lib/errorTracking'
 import {
   RATING_SOLID_CLASS,
   RATING_SELECTION_VALUES,
@@ -42,7 +43,15 @@ export default function AddToModal({
   const [wishlist, setWishlist] = useState<boolean>(false)
   const [comment, setComment] = useState<string>('')
   const [saving, setSaving] = useState(false)
-  // Removed advanced section for now
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
+
+  // Auto-dismiss toast
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => setToast(null), 3000)
+      return () => clearTimeout(timer)
+    }
+  }, [toast])
 
   // When game changes (opened from card) seed state
   useEffect(() => {
@@ -71,65 +80,76 @@ export default function AddToModal({
       return
     }
     setSaving(true)
+    let hasError = false
+
     try {
       // Ranking upsert
       const {
         data: { session },
       } = await supabase.auth.getSession()
-      if (session) {
-        const optimistic: any = {
-          user_id: session.user.id,
-          game_id: game.id,
-          ranking: rating,
-          played_it: played,
-        }
-        const { error } = await supabase
-          .from('rankings')
-          .upsert(optimistic, { onConflict: 'user_id,game_id' })
-        if (error) console.error(error)
+
+      if (!session) {
+        setToast({ message: 'Please log in to save changes', type: 'error' })
+        setSaving(false)
+        return
       }
-      // Memberships
-      // library
+
+      // Save rating
+      const { error: rankingError } = await supabase
+        .from('rankings')
+        .upsert(
+          {
+            user_id: session.user.id,
+            game_id: game.id,
+            ranking: rating,
+            played_it: played,
+            public_note: comment.trim() || null,
+          },
+          { onConflict: 'user_id,game_id' }
+        )
+
+      if (rankingError) {
+        hasError = true
+        captureError(rankingError, { context: 'add_to_modal_ranking', gameId: game.id })
+      }
+
+      // Memberships - library
       if (library !== (game.list_membership?.library ?? false)) {
-        if (library) {
-          await addGameToDefaultList(game.id, 'library')
-          onMembershipChange?.(game.id, { library: true })
+        const success = library
+          ? await addGameToDefaultList(game.id, 'library')
+          : await removeGameFromDefaultList(game.id, 'library')
+        if (success) {
+          onMembershipChange?.(game.id, { library })
         } else {
-          await removeGameFromDefaultList(game.id, 'library')
-          onMembershipChange?.(game.id, { library: false })
+          hasError = true
         }
       }
+
+      // Memberships - wishlist
       if (wishlist !== (game.list_membership?.wishlist ?? false)) {
-        if (wishlist) {
-          await addGameToDefaultList(game.id, 'wishlist')
-          onMembershipChange?.(game.id, { wishlist: true })
+        const success = wishlist
+          ? await addGameToDefaultList(game.id, 'wishlist')
+          : await removeGameFromDefaultList(game.id, 'wishlist')
+        if (success) {
+          onMembershipChange?.(game.id, { wishlist })
         } else {
-          await removeGameFromDefaultList(game.id, 'wishlist')
-          onMembershipChange?.(game.id, { wishlist: false })
+          hasError = true
         }
       }
-      // Persist public note if present (null if blank)
-      if (comment.trim().length || rating != null || played) {
-        const {
-          data: { session },
-        } = await supabase.auth.getSession()
-        if (session) {
-          const { error: noteErr } = await supabase.from('rankings').upsert(
-            {
-              user_id: session.user.id,
-              game_id: game.id,
-              ranking: rating,
-              played_it: played,
-              public_note: comment.trim() || null,
-            },
-            { onConflict: 'user_id,game_id' }
-          )
-          if (noteErr) console.error(noteErr)
-        }
+
+      if (hasError) {
+        setToast({ message: 'Some changes may not have saved', type: 'error' })
+      } else {
+        setToast({ message: 'Saved!', type: 'success' })
+        // Close after brief delay so user sees success
+        setTimeout(() => onClose(), 500)
+        return
       }
+    } catch (err) {
+      captureError(err, { context: 'add_to_modal_save', gameId: game?.id })
+      setToast({ message: 'Failed to save changes', type: 'error' })
     } finally {
       setSaving(false)
-      onClose()
     }
   }
 
@@ -288,18 +308,35 @@ export default function AddToModal({
           {/* Advanced omitted for now */}
         </div>
         {/* Footer */}
-        <div className="flex items-center justify-end px-6 py-4 border-t bg-gray-50 gap-3">
-          <Button variant="outline" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button
-            variant="primary"
-            disabled={saving || !game}
-            onClick={handleSave}
-            loading={saving}
-          >
-            Save
-          </Button>
+        <div className="flex items-center justify-between px-6 py-4 border-t bg-gray-50">
+          {/* Toast message */}
+          {toast && (
+            <div
+              className={`text-sm px-3 py-1.5 rounded ${
+                toast.type === 'error'
+                  ? 'bg-red-100 text-red-700'
+                  : 'bg-green-100 text-green-700'
+              }`}
+              role="status"
+              aria-live="polite"
+            >
+              {toast.message}
+            </div>
+          )}
+          {!toast && <div />}
+          <div className="flex gap-3">
+            <Button variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              disabled={saving || !game}
+              onClick={handleSave}
+              loading={saving}
+            >
+              Save
+            </Button>
+          </div>
         </div>
       </div>
     </div>

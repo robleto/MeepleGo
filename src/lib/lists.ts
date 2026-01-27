@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase'
+import { captureError } from '@/lib/errorTracking'
 
 export type DefaultLists = { library?: string; wishlist?: string }
 export type MembershipSets = { library: Set<string>; wishlist: Set<string> }
@@ -95,7 +96,7 @@ export async function addGameToDefaultList(
     .insert({ list_id: listId, game_id: gameId })
   if (error && error.code !== '23505') {
     // ignore duplicate
-    console.error('addGameToDefaultList error', error)
+    captureError(error, { context: 'addGameToDefaultList', gameId, listType })
     return false
   }
   return true
@@ -114,7 +115,7 @@ export async function removeGameFromDefaultList(
     .eq('list_id', listId)
     .eq('game_id', gameId)
   if (error) {
-    console.error('removeGameFromDefaultList error', error)
+    captureError(error, { context: 'removeGameFromDefaultList', gameId, listType })
     return false
   }
   return true
