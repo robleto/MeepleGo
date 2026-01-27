@@ -1,15 +1,15 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { Suspense, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import PageLayout from '@/components/Components/PageLayout'
-import { RankingsContent } from '@/app/rankings/page'
-import { LibraryContent } from '@/app/library/page'
-import { WishlistContent } from '@/app/wishlist/page'
+import { RankingsContent } from '@/app/rankings/RankingsContent'
+import { LibraryContent } from '@/app/library/LibraryContent'
+import { WishlistContent } from '@/app/wishlist/WishlistContent'
 import PersonalAwardsAuto from '@/components/Components/Awards/PersonalAwardsAuto'
-import { ListsContent } from '@/app/lists/page'
+import { ListsContent } from '@/app/lists/ListsContent'
 import PlaysClientPage from '@/app/plays/playsClient'
 import Heading from '@/components/Components/Heading'
 import {
@@ -48,7 +48,7 @@ interface ProfileLite {
   avatar_url: string | null
 }
 
-export default function ProfilePage() {
+function ProfilePageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const tabContainerRef = useRef<HTMLDivElement | null>(null)
@@ -815,5 +815,21 @@ export default function ProfilePage() {
         )}
       </div>
     </PageLayout>
+  )
+}
+
+export default function ProfilePage() {
+  return (
+    <Suspense
+      fallback={
+        <PageLayout>
+          <div className="flex items-center justify-center py-12">
+            <div className="w-8 h-8 border-b-2 rounded-full animate-spin border-primary-600"></div>
+          </div>
+        </PageLayout>
+      }
+    >
+      <ProfilePageContent />
+    </Suspense>
   )
 }

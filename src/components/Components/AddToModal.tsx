@@ -145,8 +145,8 @@ export default function AddToModal({
         setTimeout(() => onClose(), 500)
         return
       }
-    } catch (err) {
-      captureError(err, { context: 'add_to_modal_save', gameId: game?.id })
+    } catch (err: unknown) {
+      captureError(err instanceof Error ? err : new Error(String(err)), { context: 'add_to_modal_save', gameId: game?.id })
       setToast({ message: 'Failed to save changes', type: 'error' })
     } finally {
       setSaving(false)

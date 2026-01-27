@@ -28,6 +28,7 @@ import {
 import { PlayIcon } from '@heroicons/react/24/solid'
 import { getRatingSolidClass } from '@/components/Foundations/ratingColors'
 import PlayLogEditor from '@/components/Components/PlayLogEditor'
+import Heading from '@/components/Components/Heading'
 import ZeroState from '@/components/Components/ZeroState'
 
 interface Stats {

@@ -74,8 +74,8 @@ export default function SignUpPage() {
             userId: data.user.id,
           })
         }
-      } catch (err) {
-        captureError(err, {
+      } catch (err: unknown) {
+        captureError(err instanceof Error ? err : new Error(String(err)), {
           context: 'signup_invite_increment',
           code: inviteCode,
           userId: data.user.id,
