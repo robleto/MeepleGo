@@ -580,7 +580,7 @@ async function main() {
         failed++
         console.log(`❌ ${id} ${e.message}`)
       }
-      // Delay between requests to avoid rate limiting (500ms for inline imports)
+      // Delay between requests to avoid rate limiting
       await new Promise((r) => setTimeout(r, 500))
     }
   }

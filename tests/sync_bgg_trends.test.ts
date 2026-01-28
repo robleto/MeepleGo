@@ -41,16 +41,20 @@ describe('BGG API Integration', () => {
   describe('Retry logic', () => {
     it('should use exponential backoff for retries', () => {
       // Test that delays increase exponentially
-      const delays = [0, 1, 2, 3].map((attempt) => Math.pow(2, attempt) * 1000)
+      // For retryAttempt values 0, 1, 2 (3 total attempts)
+      const delays = [0, 1, 2].map((attempt) => Math.pow(2, attempt) * 1000)
 
-      expect(delays).toEqual([1000, 2000, 4000, 8000])
+      expect(delays).toEqual([1000, 2000, 4000])
     })
 
     it('should limit retry attempts to 3', () => {
       const maxRetries = 3
-      const retryAttempt = 3
-
-      expect(retryAttempt >= maxRetries).toBe(true)
+      
+      // Verify that retryAttempt 3 would fail the retry condition
+      expect(3 < maxRetries).toBe(false)
+      
+      // Verify that retryAttempt 2 would allow one more retry
+      expect(2 < maxRetries).toBe(true)
     })
   })
 
