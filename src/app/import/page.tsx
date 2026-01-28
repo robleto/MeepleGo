@@ -284,23 +284,19 @@ export default function ImportPage() {
     setStep('import')
 
     try {
-      console.log('Starting import...')
       const {
         data: { user },
         error: userError,
       } = await supabase.auth.getUser()
 
       if (userError) {
-        console.error('Auth error:', userError)
         throw new Error(`Authentication error: ${userError.message}`)
       }
 
       if (!user) {
-        console.error('No user found')
         throw new Error('Not authenticated - please log in first')
       }
 
-      console.log('User authenticated:', user.id)
       const results: ImportResult[] = []
 
       for (const row of csvData) {
@@ -313,24 +309,13 @@ export default function ImportPage() {
           : true
         const isOwned = ownedValue !== false // true or null (unknown) = import, false = skip
 
-        console.log(
-          `Processing: ${gameName} (owned: ${isOwned}, raw owned value: "${row[mapping.owned] || 'N/A'}")`
-        )
-
         try {
           const game = await searchGame(gameName, gameYear?.toString())
 
           if (game && game.id) {
-            console.log(`Found game: ${game.name} (${game.id})`)
-
             // Only add to library if the game is owned
             if (isOwned) {
-              console.log(
-                `Game is owned, proceeding to add to library: ${gameName}`
-              )
-
               const libraryListId = '15369a6b-cabe-4e20-869d-0457f34ca424'
-              console.log(`Using library list ID: ${libraryListId}`)
 
               // Check if already in library
               const { data: existingItem, error: checkError } = await supabase
@@ -342,22 +327,16 @@ export default function ImportPage() {
 
               if (checkError && checkError.code !== 'PGRST116') {
                 // PGRST116 is "not found" error
-                console.error(
-                  'Error checking existing library item:',
-                  checkError
-                )
                 throw checkError
               }
 
               if (!existingItem) {
-                console.log(`Adding to library: ${gameName}`)
-
                 const playedValue = mapping.played
                   ? parseCSVBoolean(row[mapping.played])
                   : false
 
                 // Add directly to game_list_items table
-                const { data: insertData, error: insertError } = await supabase
+                const { error: insertError } = await supabase
                   .from('game_list_items')
                   .insert({
                     list_id: libraryListId,
@@ -369,26 +348,11 @@ export default function ImportPage() {
                   .select()
 
                 if (insertError) {
-                  console.error(
-                    'Error inserting into game_list_items:',
-                    insertError
-                  )
                   throw new Error(
                     `Failed to add game to library: ${insertError.message}`
                   )
                 }
-
-                console.log(
-                  `Successfully added to library: ${gameName}`,
-                  insertData
-                )
-              } else {
-                console.log(`Game already in library: ${gameName}`)
               }
-            } else {
-              console.log(
-                `Skipping library addition for unowned game: ${gameName} (raw value: "${row[mapping.owned] || 'N/A'}")`
-              )
             }
 
             results.push({
@@ -400,7 +364,6 @@ export default function ImportPage() {
               csv_data: row,
             })
           } else {
-            console.log(`No game found for: ${gameName}`)
             results.push({
               game_name: gameName,
               status: 'not_found',
@@ -411,7 +374,6 @@ export default function ImportPage() {
             })
           }
         } catch (error) {
-          console.error('Import error for game:', gameName, error)
           results.push({
             game_name: gameName,
             status: 'error',
@@ -424,11 +386,9 @@ export default function ImportPage() {
         }
       }
 
-      console.log('Import completed. Results:', results.length)
       setResults(results)
       setStep('results')
     } catch (error) {
-      console.error('Import failed:', error)
       alert(
         'Import failed: ' +
           (error instanceof Error ? error.message : 'Unknown error')

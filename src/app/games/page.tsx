@@ -203,13 +203,6 @@ function GamesPageContent() {
         // Use a small tolerance since exact matching may be too restrictive
         // Most games are rounded to 15-minute intervals (60, 75, 90, 105, 120)
         const tolerance = 5 // Small 5-minute tolerance for rounding differences
-        console.log(
-          '🕐 Filtering for playtime:',
-          playtime,
-          '±',
-          tolerance,
-          'minutes'
-        )
         query = query
           .gte('playtime_minutes', playtime - tolerance)
           .lte('playtime_minutes', playtime + tolerance)
@@ -417,57 +410,11 @@ function GamesPageContent() {
         }
 
         // Diagnostics
-        const nonNullRanks = gamesData.filter((g) => g.rank != null)
-        const nullRanks = gamesData.length - nonNullRanks.length
-        const topSample = gamesData
-          .slice(0, 10)
-          .map((g) => ({ n: g.name, r: g.rank }))
-        const topRanksSorted = [...nonNullRanks]
-          .sort((a, b) => a.rank - b.rank)
-          .slice(0, 15)
-          .map((g) => ({ n: g.name, r: g.rank }))
-        const gloom = gamesData.find((g) =>
-          g.name.toLowerCase().includes('gloomhaven')
-        )
-        console.log('🩺 Rank Debug:', {
-          fetched: gamesData.length,
-          rankedBatch: rankedBatch.length,
-          unrankedBatch: unrankedBatch.length,
-          nonNull: nonNullRanks.length,
-          nulls: nullRanks,
-          sample: topSample,
-          topRanksSorted,
-          gloomhaven: gloom ? { rank: gloom.rank } : 'not in first page',
-        })
-
         // Transform to internal type
         const gamesWithRankings: GameWithRanking[] = gamesData.map((game) => ({
           ...game,
           ranking: game.rankings?.[0] || null,
         }))
-
-        console.log('🎮 Initial games loaded:', gamesWithRankings.length)
-        console.log(
-          '📅 First 10 games by year:',
-          gamesWithRankings
-            .slice(0, 10)
-            .map((g) => ({ name: g.name, year: g.year_published }))
-        )
-        console.log(
-          '🔍 2025 games found:',
-          gamesWithRankings.filter((g) => g.year_published === 2025).length
-        )
-        console.log(
-          '📊 Year distribution:',
-          gamesWithRankings.reduce(
-            (acc, game) => {
-              const year = game.year_published || 'Unknown'
-              acc[year] = (acc[year] || 0) + 1
-              return acc
-            },
-            {} as Record<string | number, number>
-          )
-        )
 
         // If grouping by year, ensure we include all games from the top year (e.g., 2025) before truncating
         let combined = gamesWithRankings

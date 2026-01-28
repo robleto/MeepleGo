@@ -26,6 +26,13 @@ function text(node: any): string | null {
 
 export async function POST(req: NextRequest) {
   try {
+    // Require authentication
+    const supabase = await getSupabaseServerClient()
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
+    }
+
     const { bggId } = await req.json()
     if (!bggId || !Number.isFinite(Number(bggId))) {
       return NextResponse.json({ error: 'Invalid bggId' }, { status: 400 })
