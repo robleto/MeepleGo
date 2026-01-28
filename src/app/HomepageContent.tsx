@@ -9,6 +9,13 @@ import HomepageView, {
   type UserStats,
 } from '@/components/Components/HomepageView'
 import type { Game } from '@/types/supabase'
+import type {
+  MostAwardedGame,
+  HighestRankedGame,
+  SleeperHitGame,
+  HotTakeGame,
+  ComebackGame,
+} from '@/types'
 import awardsData from '@/data/awards.json'
 
 // Module-level cache for React Strict Mode stability
@@ -128,8 +135,22 @@ export default function HomepageContent() {
     mostplayed?: string
     bestsellers?: string
   }>({})
-
-  useEffect(() => {
+  
+  // Discovery lists state
+  const [discoveryLists, setDiscoveryLists] = useState<{
+    mostAwarded: MostAwardedGame[]
+    highestRanked: HighestRankedGame[]
+    sleeperHits: SleeperHitGame[]
+    hotTakes: HotTakeGame[]
+    comebackGames: ComebackGame[]
+  }>({
+    mostAwarded: [],
+    highestRanked: [],
+    sleeperHits: [],
+    hotTakes: [],
+    comebackGames: [],
+  })
+  const [discoveryLoading, setDiscoveryLoading] = useState(false)
     let cancelled = false
 
     // Helper function to fetch BGG list games
@@ -441,6 +462,54 @@ export default function HomepageContent() {
           }
         }
 
+        // Load discovery lists for authenticated users
+        if (session?.user) {
+          setDiscoveryLoading(true)
+          try {
+            const [
+              mostAwardedResult,
+              highestRankedResult,
+              sleeperHitsResult,
+              hotTakesResult,
+              comebackGamesResult,
+            ] = await Promise.all([
+              supabase.rpc('get_most_awarded_this_year', {
+                user_uuid: session.user.id,
+              }),
+              supabase.rpc('get_highest_ranked', {
+                user_uuid: session.user.id,
+              }),
+              supabase.rpc('get_sleeper_hits', {
+                user_uuid: session.user.id,
+                max_num_ratings: 3000,
+              }),
+              supabase.rpc('get_hot_takes', {
+                user_uuid: session.user.id,
+                min_num_ratings: 750,
+              }),
+              supabase.rpc('get_comeback_games', {
+                user_uuid: session.user.id,
+              }),
+            ])
+
+            if (!cancelled) {
+              setDiscoveryLists({
+                mostAwarded: (mostAwardedResult.data || []) as MostAwardedGame[],
+                highestRanked: (highestRankedResult.data ||
+                  []) as HighestRankedGame[],
+                sleeperHits: (sleeperHitsResult.data || []) as SleeperHitGame[],
+                hotTakes: (hotTakesResult.data || []) as HotTakeGame[],
+                comebackGames: (comebackGamesResult.data ||
+                  []) as ComebackGame[],
+              })
+            }
+          } catch (error) {
+            console.error('Error loading discovery lists:', error)
+          } finally {
+            if (!cancelled) setDiscoveryLoading(false)
+          }
+        }
+
         // Load BGG lists
         try {
           const [mostPlayedGames, hotnessGames, bestsellersGames] =
@@ -487,6 +556,8 @@ export default function HomepageContent() {
       bggHotness={bggHotness}
       bggBestsellers={bggBestsellers}
       bggListIds={bggListIds}
+      discoveryLists={discoveryLists}
+      discoveryLoading={discoveryLoading}
     />
   )
 }
