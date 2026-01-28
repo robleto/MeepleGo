@@ -112,9 +112,9 @@ export default function ListCard({
   const isCollectionList = list.list_type === 'library'
   const fanLimit = isCollectionList ? 3 : 5
   const topGames = (list.game_list_items || [])
-    .filter((it: any) => it && it.game && it.game.id)
+    .filter((it: any) => it?.game?.id)
     .slice(0, fanLimit)
-  const itemCount = (list.game_list_items || []).filter((it: any) => it && it.game && it.game.id).length
+  const itemCount = (list.game_list_items || []).filter((it: any) => it?.game?.id).length
 
   // Determine the correct route based on list type
   const slugify = (s: string) =>
@@ -149,9 +149,10 @@ export default function ListCard({
         {topGames.length > 0 ? (
           <div className="absolute inset-0 flex items-center justify-center -top-6">
             {topGames.map((item, index) => {
-              const game = item.game
-              const gid = game?.id as string
-              if (!gid) return null
+              const game = item?.game
+              if (!game?.id) return null
+              
+              const gid = game.id as string
               const hasError = imageErrors.has(gid)
               const zIndex = topGames.length - index
               const center = (topGames.length - 1) / 2
