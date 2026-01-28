@@ -151,6 +151,8 @@ export default function HomepageContent() {
     comebackGames: [],
   })
   const [discoveryLoading, setDiscoveryLoading] = useState(false)
+
+  useEffect(() => {
     let cancelled = false
 
     // Helper function to fetch BGG list games
