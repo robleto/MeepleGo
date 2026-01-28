@@ -10,7 +10,6 @@ import {
   HeartIcon,
   ListBulletIcon,
   PlusIcon,
-  MapPinIcon,
 } from '@heroicons/react/24/outline'
 
 interface ListCardProps {
@@ -141,11 +140,6 @@ export default function ListCard({
     >
       {/* Fanned Game Images Header */}
       <div className="relative h-24">
-        {isPinned && (
-          <div className="absolute top-2 right-2 z-10 inline-flex items-center justify-center w-7 h-7 rounded-full bg-white/90 border border-gray-200 text-gray-700 shadow-sm">
-            <MapPinIcon className="w-4 h-4" />
-          </div>
-        )}
         {topGames.length > 0 ? (
           <div className="absolute inset-0 flex items-center justify-center -top-6">
             {topGames.map((item, index) => {
