@@ -64,39 +64,30 @@ export function HeroServer({
 
   return (
     <div
-      className={`panel mb-14 md:mb-20 flex flex-col md:flex-row md:items-start gap-10 md:gap-20 ${className}`}
+      className={`panel mb-8 sm:mb-14 md:mb-20 flex flex-col md:flex-row md:items-start gap-6 sm:gap-10 md:gap-20 ${className}`}
     >
       <div className="flex-1">
-        <Heading
-          as="h1"
-          size="display"
-          align="left"
-          displayFont
-          className="mb-6"
-        >
+        <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-3 sm:mb-6 text-gray-900 leading-tight">
           {title}
-        </Heading>
+        </h1>
         {subtitle && (
-          <p className="text-lg md:text-xl text-gray-600 max-w-xl leading-snug">
+          <p className="text-sm sm:text-lg md:text-xl text-gray-600 max-w-xl leading-relaxed">
             {subtitle}
           </p>
         )}
       </div>
       {steps && steps.length > 0 && (
-        <ol className="flex-1 space-y-10 md:space-y-12 relative">
+        <ol className="flex-1 space-y-5 sm:space-y-10 md:space-y-12 relative">
           {steps.map((step, idx) => (
-            <li key={idx} className="flex items-start gap-5">
-              <div className="flex-shrink-0 text-sm font-semibold w-6 h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center mt-1">
+            <li key={idx} className="flex items-start gap-3 sm:gap-5">
+              <div className="flex-shrink-0 text-xs sm:text-sm font-semibold w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center mt-0.5 sm:mt-1">
                 {idx + 1}
               </div>
-              <div className="flex-1 border-b border-gray-200 pb-8 last:border-b-0 last:pb-0">
-                <div className="flex items-center gap-2 mb-2">
-                  {step.icon}
-                  <h3 className="font-semibold text-gray-900 text-lg">
-                    {step.heading}
-                  </h3>
-                </div>
-                <p className="text-sm text-gray-500 leading-snug max-w-md">
+              <div className="flex-1 border-b border-gray-200 pb-5 sm:pb-8 last:border-b-0 last:pb-0">
+                <h3 className="font-semibold text-gray-900 text-sm sm:text-lg mb-1">
+                  {step.heading}
+                </h3>
+                <p className="text-xs sm:text-sm text-gray-500 leading-relaxed max-w-md">
                   {step.text}
                 </p>
               </div>

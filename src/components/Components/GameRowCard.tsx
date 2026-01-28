@@ -5,6 +5,7 @@ import {
   formatYear,
   formatPlayingTime,
   formatPlayerCount,
+  getRatingLabel,
 } from '@/utils/helpers'
 import {
   StarIcon,
@@ -119,7 +120,7 @@ export default function GameRowCard({
         </div>
 
         {/* Game thumbnail (consistent with GameCard proportions) */}
-        <div className="relative w-20 h-20 flex-shrink-0 rounded-md overflow-hidden bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-600">
+        <div className="relative w-20 h-20 flex-shrink-0 rounded-md overflow-hidden bg-gray-100 border border-gray-200">
           {game.thumbnail_url ? (
             <img
               src={game.thumbnail_url}
@@ -148,7 +149,7 @@ export default function GameRowCard({
             )}
           </h3>
           {density === 'expanded' && showTagline && game.tagline && (
-            <div className="text-xs text-gray-600 dark:text-gray-400 leading-snug mt-0.5">
+            <div className="text-xs text-gray-600 leading-snug mt-0.5">
               {game.tagline}
             </div>
           )}
@@ -247,12 +248,17 @@ export default function GameRowCard({
             aria-label={rankingValue ? `Rating ${rankingValue}` : 'Rate game'}
           >
             {rankingValue ? (
-              <RatingChip
-                value={rankingValue}
-                size="sm"
-                shape="circle"
-                variant="subtle"
-              />
+              <div className="flex items-center gap-2">
+                <RatingChip
+                  value={rankingValue}
+                  size="sm"
+                  shape="circle"
+                  variant="subtle"
+                />
+                <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-600">
+                  {getRatingLabel(rankingValue)}
+                </span>
+              </div>
             ) : (
               <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-gray-400 ring-1 ring-inset ring-gray-200">
                 <StarIcon className="h-4 w-4" />
@@ -262,12 +268,17 @@ export default function GameRowCard({
         ) : (
           <div className="min-w-[2.25rem] flex items-center justify-center">
             {rankingValue ? (
-              <RatingChip
-                value={rankingValue}
-                size="sm"
-                shape="circle"
-                variant="subtle"
-              />
+              <div className="flex items-center gap-2">
+                <RatingChip
+                  value={rankingValue}
+                  size="sm"
+                  shape="circle"
+                  variant="subtle"
+                />
+                <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-600">
+                  {getRatingLabel(rankingValue)}
+                </span>
+              </div>
             ) : null}
           </div>
         )}
@@ -313,12 +324,12 @@ export default function GameRowCard({
             className="absolute inset-0 bg-black/40"
             onClick={() => setShowPlayLog(false)}
           />
-          <div className="relative w-full max-w-lg mx-auto bg-white dark:bg-gray-900 rounded-2xl shadow-xl p-6 overflow-y-auto max-h-[90vh]">
+          <div className="relative w-full max-w-lg mx-auto bg-white rounded-2xl shadow-xl p-6 overflow-y-auto max-h-[90vh]">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold">Log a Play</h2>
               <button
                 onClick={() => setShowPlayLog(false)}
-                className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
+                className="p-2 rounded-md hover:bg-gray-100"
                 aria-label="Close"
               >
                 <XMarkIcon className="w-6 h-6 text-gray-500" />

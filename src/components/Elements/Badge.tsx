@@ -79,25 +79,25 @@ const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
 
     const variantClasses = {
       default: subtle
-        ? 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+        ? 'bg-gray-100 text-gray-800'
         : 'bg-gray-500 text-white',
       primary: subtle
-        ? 'bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-300'
+        ? 'bg-sky-100 text-sky-800'
         : 'bg-sky-500 text-white',
       secondary: subtle
-        ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300'
+        ? 'bg-purple-100 text-purple-800'
         : 'bg-purple-500 text-white',
       success: subtle
-        ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
+        ? 'bg-green-100 text-green-800'
         : 'bg-green-500 text-white',
       warning: subtle
-        ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300'
+        ? 'bg-yellow-100 text-yellow-800'
         : 'bg-yellow-500 text-white',
       error: subtle
-        ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
+        ? 'bg-red-100 text-red-800'
         : 'bg-red-500 text-white',
       info: subtle
-        ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300'
+        ? 'bg-blue-100 text-blue-800'
         : 'bg-blue-500 text-white',
     }
 

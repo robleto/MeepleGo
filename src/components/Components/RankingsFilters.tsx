@@ -69,7 +69,7 @@ function SuggestionItem({
         parts.push(
           <span
             key={i}
-            className="bg-yellow-200 dark:bg-yellow-600/40 rounded px-0.5"
+            className="bg-yellow-200 rounded px-0.5"
           >
             {match}
           </span>
@@ -92,8 +92,8 @@ function SuggestionItem({
         onClick={() => onSelect(game)}
         className={`w-full flex items-center gap-4 px-4 py-3 text-left transition-colors ${
           active
-            ? 'bg-primary-50 dark:bg-primary-900/30'
-            : 'hover:bg-gray-50 dark:hover:bg-gray-800/60'
+            ? 'bg-primary-50'
+            : 'hover:bg-gray-50'
         }`}
       >
         {game.thumbnail_url ? (
@@ -101,18 +101,18 @@ function SuggestionItem({
           <img
             src={game.thumbnail_url}
             alt=""
-            className="w-10 h-10 rounded-lg object-cover ring-1 ring-gray-200 dark:ring-gray-700"
+            className="w-10 h-10 rounded-lg object-cover ring-1 ring-gray-200"
           />
         ) : (
-          <div className="w-10 h-10 rounded-lg bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-[10px] font-semibold text-gray-600 dark:text-gray-300">
+          <div className="w-10 h-10 rounded-lg bg-gray-200 flex items-center justify-center text-[10px] font-semibold text-gray-600">
             {game.name.slice(0, 2).toUpperCase()}
           </div>
         )}
         <div className="min-w-0 flex-1">
-          <div className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+          <div className="text-sm font-medium text-gray-900 truncate">
             {highlight(game.name)}
           </div>
-          <div className="text-[11px] text-gray-500 dark:text-gray-400 flex items-center gap-2">
+          <div className="text-[11px] text-gray-500 flex items-center gap-2">
             {game.year_published && <span>{game.year_published}</span>}
             {game.rating != null && (
               <span className="font-mono text-gray-400">
@@ -375,7 +375,7 @@ export default function RankingsFilters({
         <div className="flex items-center justify-center">
           {/* Centered Smart Search */}
           <div className="relative w-full max-w-md">
-            <div className="flex w-full items-center gap-2 rounded-full border border-gray-200 dark:border-gray-700 bg-white/85 dark:bg-gray-900/70 px-4 py-1.5 shadow-sm hover:shadow-md backdrop-blur-sm transition focus-within:ring-2 focus-within:ring-primary-500">
+            <div className="flex w-full items-center gap-2 rounded-full border border-gray-200 bg-white/85 px-4 py-1.5 shadow-sm hover:shadow-md backdrop-blur-sm transition focus-within:ring-2 focus-within:ring-primary-500">
               <input
                 ref={inputRef}
                 type="text"
@@ -386,7 +386,7 @@ export default function RankingsFilters({
                 onFocus={() => {
                   if (flat.length) setShowSuggestions(true)
                 }}
-                className="flex-1 bg-transparent placeholder-gray-400 dark:placeholder-gray-500 text-sm leading-tight focus:outline-none"
+                className="flex-1 bg-transparent placeholder-gray-400 text-sm leading-tight focus:outline-none"
                 role="combobox"
                 aria-autocomplete="list"
                 aria-expanded={showSuggestions}
@@ -417,22 +417,22 @@ export default function RankingsFilters({
                 ref={dropdownRef}
                 id="search-suggestions"
                 role="listbox"
-                className="absolute left-0 right-0 top-full mt-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-xl overflow-hidden max-h-[400px] overflow-y-auto z-50 text-sm"
+                className="absolute left-0 right-0 top-full mt-2 bg-white border border-gray-200 rounded-2xl shadow-xl overflow-hidden max-h-[400px] overflow-y-auto z-50 text-sm"
               >
                 {searchLoading && (
-                  <div className="px-4 py-4 text-gray-500 dark:text-gray-400">
+                  <div className="px-4 py-4 text-gray-500">
                     Searching…
                   </div>
                 )}
                 {!searchLoading && !flat.length && (
                   <div className="px-4 py-6 text-center">
-                    <div className="w-10 h-10 mx-auto mb-2 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                    <div className="w-10 h-10 mx-auto mb-2 rounded-full bg-gray-100 flex items-center justify-center">
                       <MagnifyingGlassIcon className="w-5 h-5 text-gray-400" />
                     </div>
-                    <div className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">
+                    <div className="text-gray-500 text-sm font-medium mb-1">
                       No ranked games found
                     </div>
-                    <div className="text-[11px] text-gray-400 dark:text-gray-500">
+                    <div className="text-[11px] text-gray-400">
                       Try another search term
                     </div>
                   </div>
@@ -440,8 +440,8 @@ export default function RankingsFilters({
                 {!searchLoading && flat.length > 0 && (
                   <>
                     {grouped.exactMatches.length > 0 && (
-                      <div className="border-b border-gray-100 dark:border-gray-800">
-                        <div className="px-4 py-2 bg-gray-50 dark:bg-gray-800/50 text-[11px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                      <div className="border-b border-gray-100">
+                        <div className="px-4 py-2 bg-gray-50 text-[11px] font-semibold uppercase tracking-wide text-gray-500">
                           Exact Match
                         </div>
                         {grouped.exactMatches.map((g, i) => (
@@ -458,8 +458,8 @@ export default function RankingsFilters({
                       </div>
                     )}
                     {grouped.popular.length > 0 && (
-                      <div className="border-b border-gray-100 dark:border-gray-800">
-                        <div className="px-4 py-2 bg-gray-50 dark:bg-gray-800/50 text-[11px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                      <div className="border-b border-gray-100">
+                        <div className="px-4 py-2 bg-gray-50 text-[11px] font-semibold uppercase tracking-wide text-gray-500 flex items-center gap-2">
                           <TrophyIcon className="w-3.5 h-3.5" /> Popular
                         </div>
                         {grouped.popular.map((g, i) => {
@@ -480,7 +480,7 @@ export default function RankingsFilters({
                     )}
                     {grouped.other.length > 0 && (
                       <div>
-                        <div className="px-4 py-2 bg-gray-50 dark:bg-gray-800/50 text-[11px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                        <div className="px-4 py-2 bg-gray-50 text-[11px] font-semibold uppercase tracking-wide text-gray-500 flex items-center gap-2">
                           <CubeIcon className="w-3.5 h-3.5" /> Other
                         </div>
                         {grouped.other.map((g, i) => {
@@ -504,8 +504,8 @@ export default function RankingsFilters({
                     )}
                   </>
                 )}
-                <div className="border-t border-gray-100 dark:border-gray-800">
-                  <div className="px-4 py-2 text-[11px] text-gray-400 dark:text-gray-500">
+                <div className="border-t border-gray-100">
+                  <div className="px-4 py-2 text-[11px] text-gray-400">
                     Press Enter to search • ↑↓ navigate • Esc to close
                   </div>
                 </div>

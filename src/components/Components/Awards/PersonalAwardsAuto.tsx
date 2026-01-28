@@ -24,7 +24,13 @@ interface RankingRow {
   } | null
 }
 
-export default function PersonalAwardsAuto() {
+export default function PersonalAwardsAuto({ 
+  forcedUserId,
+  username 
+}: { 
+  forcedUserId?: string
+  username?: string 
+} = {}) {
   const [loading, setLoading] = useState(true)
   const [sessionUserId, setSessionUserId] = useState<string | null>(null)
   const [rows, setRows] = useState<RankingRow[]>([])
@@ -33,20 +39,32 @@ export default function PersonalAwardsAuto() {
     let cancelled = false
     async function load() {
       setLoading(true)
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-      if (!session) {
-        setLoading(false)
-        return
+      
+      let userId: string
+      
+      if (forcedUserId) {
+        // Viewing another user's awards
+        userId = forcedUserId
+        setSessionUserId(forcedUserId)
+      } else {
+        // Viewing own awards
+        const {
+          data: { session },
+        } = await supabase.auth.getSession()
+        if (!session) {
+          setLoading(false)
+          return
+        }
+        userId = session.user.id
+        setSessionUserId(userId)
       }
-      setSessionUserId(session.user.id)
+      
       const { data } = await supabase
         .from('rankings')
         .select(
           'game_id, ranking, played_it, games:game_id ( id, name, year_published, image_url, thumbnail_url, categories, mechanics, playtime_minutes, min_players, max_players, honors )'
         )
-        .eq('user_id', session.user.id)
+        .eq('user_id', userId)
       if (!cancelled && data) setRows(data as any)
       if (!cancelled) setLoading(false)
     }
@@ -54,7 +72,7 @@ export default function PersonalAwardsAuto() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [forcedUserId])
 
   const categories = useMemo(() => {
     if (!rows.length)
@@ -286,7 +304,7 @@ export default function PersonalAwardsAuto() {
       <div>
         <Hero variant="awards" />
         <div className="mb-16">
-          <SectionHeader title="My Awards" />
+          <SectionHeader title={username ? `${username}'s Awards` : 'My Awards'} />
           <p className="text-xs text-center text-gray-500">
             Sign in to see your personalized awards based on your game ratings.
           </p>
@@ -296,7 +314,7 @@ export default function PersonalAwardsAuto() {
   }
   return (
     <div className="mb-16">
-      <SectionHeader title="My Awards" />
+      <SectionHeader title={username ? `${username}'s Awards` : 'My Awards'} />
       <div className="space-y-10">
         {categories.map((block) => {
           // Use current year as default for editing; user can switch years in editor

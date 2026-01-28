@@ -134,7 +134,7 @@ export function PlayLogEditor({
         <div>
           <label
             htmlFor="playerCount"
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            className="block text-sm font-medium text-gray-700 mb-1"
           >
             Players
           </label>
@@ -148,7 +148,7 @@ export function PlayLogEditor({
             min="1"
             max="20"
             placeholder="# of players"
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
           />
         </div>
       </div>
@@ -158,7 +158,7 @@ export function PlayLogEditor({
         <div className="sm:col-span-2">
           <label
             htmlFor="location"
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            className="block text-sm font-medium text-gray-700 mb-1"
           >
             Location
           </label>
@@ -168,13 +168,13 @@ export function PlayLogEditor({
             value={location}
             onChange={(e) => setLocation(e.target.value)}
             placeholder="Where did you play?"
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
           />
         </div>
         <div>
           <label
             htmlFor="duration"
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            className="block text-sm font-medium text-gray-700 mb-1"
           >
             Duration (min)
           </label>
@@ -188,7 +188,7 @@ export function PlayLogEditor({
             min="1"
             max="1440"
             placeholder="Minutes"
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
           />
         </div>
       </div>
@@ -197,7 +197,7 @@ export function PlayLogEditor({
       <div>
         <label
           htmlFor="notes"
-          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+          className="block text-sm font-medium text-gray-700 mb-1"
         >
           Notes
         </label>
@@ -208,7 +208,7 @@ export function PlayLogEditor({
           onChange={(e) => setNotes(e.target.value)}
           placeholder="How was the game? Any memorable moments?"
           rows={3}
-          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white"
+          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
         />
       </div>
 
@@ -223,7 +223,7 @@ export function PlayLogEditor({
         />
         <label
           htmlFor="isPublic"
-          className="ml-2 block text-sm text-gray-700 dark:text-gray-300"
+          className="ml-2 block text-sm text-gray-700"
         >
           Make this play log public
         </label>

@@ -196,13 +196,13 @@ export const FilterModal: React.FC<FilterModalProps> = ({
   if (!open) return null
   return (
     <div
-      className={`fixed inset-0 z-50 flex ${modalClasses} justify-center p-4`}
+      className={`fixed inset-0 z-50 flex ${modalClasses} justify-center md:p-4 p-0`}
     >
       <div
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
         onClick={onClose}
       />
-      <div className="relative bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+      <div className="relative bg-white md:rounded-xl rounded-none shadow-2xl max-w-2xl w-full md:max-h-[80vh] h-[100dvh] overflow-y-auto">
         {/* Close button positioned absolutely in top-right corner */}
         <button
           onClick={onClose}
@@ -219,8 +219,8 @@ export const FilterModal: React.FC<FilterModalProps> = ({
 
             {/* Active Filters Summary */}
             {hasActiveFilters && (
-              <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 space-y-2 border border-gray-200 dark:border-gray-700">
-                <div className="text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wide">
+              <div className="bg-gray-50 rounded-lg p-3 space-y-2 border border-gray-200">
+                <div className="text-xs font-medium text-gray-700 uppercase tracking-wide">
                   Active Filters ({activeFilters.length})
                 </div>
                 <div className="flex flex-wrap gap-1.5">
@@ -229,7 +229,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({
                     <button
                       key={filter.id}
                       onClick={filter.onRemove}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 shadow-sm hover:bg-red-50 hover:border-red-300 hover:text-red-700 dark:hover:bg-red-900/20 dark:hover:border-red-700 dark:hover:text-red-300 transition-all duration-200 group cursor-pointer"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs bg-white border border-gray-200 text-gray-700 shadow-sm hover:bg-red-50 hover:border-red-300 hover:text-red-700 transition-all duration-200 group cursor-pointer"
                       title={`Remove: ${filter.label}`}
                     >
                       <span className="font-medium">{filter.label}</span>

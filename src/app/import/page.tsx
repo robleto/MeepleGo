@@ -587,7 +587,8 @@ export default function ImportPage() {
               Review the first few rows before importing:
             </p>
 
-            <div className="overflow-x-auto mb-6">
+            {/* Desktop Table View */}
+            <div className="hidden md:block overflow-x-auto mb-6">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
@@ -636,6 +637,40 @@ export default function ImportPage() {
                   ))}
                 </tbody>
               </table>
+            </div>
+
+            {/* Mobile Card View */}
+            <div className="md:hidden space-y-3 mb-6">
+              {csvData.slice(0, 5).map((row, index) => (
+                <div
+                  key={index}
+                  className="bg-gray-50 rounded-lg p-4 space-y-2"
+                >
+                  <div className="font-medium text-gray-900">
+                    {row[mapping.name]}
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    {mapping.year && (
+                      <div>
+                        <span className="text-gray-500">Year:</span>{' '}
+                        <span className="text-gray-900">{row[mapping.year]}</span>
+                      </div>
+                    )}
+                    {mapping.owned && (
+                      <div>
+                        <span className="text-gray-500">Owned:</span>{' '}
+                        <span className="text-gray-900">{row[mapping.owned]}</span>
+                      </div>
+                    )}
+                    {mapping.played && (
+                      <div className="col-span-2">
+                        <span className="text-gray-500">Played It:</span>{' '}
+                        <span className="text-gray-900">{row[mapping.played]}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
 
             <div className="bg-blue-50 border border-blue-200 rounded-md p-4 mb-6">

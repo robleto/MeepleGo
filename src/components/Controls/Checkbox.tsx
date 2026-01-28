@@ -1,6 +1,6 @@
 'use client'
 
-import React, { forwardRef } from 'react'
+import React, { forwardRef, useId } from 'react'
 import { cn } from '@/utils/helpers'
 
 export interface CheckboxProps
@@ -30,16 +30,16 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
     const sizeClasses = { sm: 'h-4 w-4', md: 'h-5 w-5', lg: 'h-6 w-6' }
     const stateClasses = {
       default:
-        'border-gray-300 dark:border-gray-600 text-sky-600 focus:ring-sky-500',
+        'border-gray-300 text-sky-600 focus:ring-sky-500',
       error:
-        'border-red-300 dark:border-red-600 text-red-600 focus:ring-red-500',
+        'border-red-300 text-red-600 focus:ring-red-500',
       success:
-        'border-green-300 dark:border-green-600 text-green-600 focus:ring-green-500',
+        'border-green-300 text-green-600 focus:ring-green-500',
     }
     const labelSize = { sm: 'text-sm', md: 'text-sm', lg: 'text-base' }
     const descriptionSize = { sm: 'text-xs', md: 'text-xs', lg: 'text-sm' }
-    const checkboxId =
-      id || `checkbox-${Math.random().toString(36).slice(2, 11)}`
+    const generatedId = useId()
+    const checkboxId = id || `checkbox-${generatedId}`
     return (
       <div className={cn('flex items-start', className)}>
         <div className="flex items-center h-5">
@@ -47,7 +47,7 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
             id={checkboxId}
             type="checkbox"
             className={cn(
-              'rounded border bg-white dark:bg-gray-700 focus:ring-2 focus:ring-offset-0 transition-colors cursor-pointer',
+              'rounded border bg-white focus:ring-2 focus:ring-offset-0 transition-colors cursor-pointer',
               sizeClasses[size],
               stateClasses[state],
               disabled && 'opacity-50 cursor-not-allowed'
@@ -67,7 +67,7 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
               <label
                 htmlFor={checkboxId}
                 className={cn(
-                  'font-medium text-gray-900 dark:text-white cursor-pointer',
+                  'font-medium text-gray-900 cursor-pointer',
                   labelSize[size],
                   disabled && 'opacity-50 cursor-not-allowed'
                 )}
@@ -78,7 +78,7 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
             {description && (
               <p
                 className={cn(
-                  'text-gray-500 dark:text-gray-400',
+                  'text-gray-500',
                   descriptionSize[size],
                   disabled && 'opacity-50'
                 )}

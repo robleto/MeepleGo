@@ -611,58 +611,113 @@ export default function PlaysClientPage({
   const zeroStateActive = !loading && initialLoaded && logs.length === 0
 
   return (
-    <div className="bg-gray-50 dark:bg-gray-950 min-h-[calc(100vh-4rem)]">
-      <div className="max-w-5xl mx-auto px-4 py-10 space-y-12">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <h1 className="text-3xl md:text-4xl font-semibold tracking-tight text-gray-900 dark:text-gray-100">
-            Game Journal
-          </h1>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:justify-end">
-            {[
-              {
-                iconBg: 'bg-blue-500',
-                Icon: PlayIcon,
-                label: 'Plays',
-                value: animatedStats.plays,
-              },
-              {
-                iconBg: 'bg-green-500',
-                Icon: CubeIcon,
-                label: 'Unique Games',
-                value: animatedStats.unique,
-              },
-              {
-                iconBg: 'bg-purple-500',
-                Icon: DocumentTextIcon,
-                label: 'Games w/ Notes',
-                value: animatedStats.gamesWithNotes,
-              },
-            ].map((item) => (
-              <div key={item.label} className="flex items-center gap-3">
-                <div
-                  className={`flex items-center justify-center w-8 h-8 rounded-xl ${item.iconBg}`}
-                >
-                  <item.Icon className="w-5 h-5 text-white" />
+    <div className="bg-gray-50 min-h-[calc(100vh-4rem)]">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-6">
+        {/* Compact Header with Title, Stats, and Add Button */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:gap-6">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-normal tracking-tight text-gray-900" style={{ fontFamily: 'var(--font-display)' }}>
+              Game Journal
+            </h1>
+            {/* Compact Stats - inline on desktop */}
+            <div className="hidden lg:flex items-center gap-4">
+              {[
+                {
+                  iconBg: 'bg-blue-500',
+                  Icon: PlayIcon,
+                  label: 'Plays',
+                  value: animatedStats.plays,
+                },
+                {
+                  iconBg: 'bg-green-500',
+                  Icon: CubeIcon,
+                  label: 'Unique Games',
+                  value: animatedStats.unique,
+                },
+                {
+                  iconBg: 'bg-purple-500',
+                  Icon: DocumentTextIcon,
+                  label: 'Games w/ Notes',
+                  value: animatedStats.gamesWithNotes,
+                },
+              ].map((item) => (
+                <div key={item.label} className="flex items-center gap-2">
+                  <div
+                    className={`flex items-center justify-center w-7 h-7 rounded-lg ${item.iconBg}`}
+                  >
+                    <item.Icon className="w-4 h-4 text-white" />
+                  </div>
+                  <div className="leading-tight">
+                    <div className="text-sm font-medium text-gray-900">
+                      {item.value}
+                    </div>
+                    <div className="text-[10px] font-medium text-gray-500">
+                      {item.label}
+                    </div>
+                  </div>
                 </div>
-                <div className="leading-tight">
-                  <div className="text-base font-semibold text-gray-900 dark:text-white">
-                    {item.value}
-                  </div>
-                  <div className="text-[10px] font-semibold tracking-wider text-gray-500 dark:text-gray-400 uppercase">
-                    {item.label}
-                  </div>
+              ))}
+            </div>
+          </div>
+          {/* Add Button */}
+          {isOwner && !zeroStateActive && (
+            <button
+              onClick={() => setShowPlayLogModal(true)}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full btn-brand text-sm font-medium flex-shrink-0 self-start sm:self-auto"
+            >
+              Add New
+            </button>
+          )}
+        </div>
+
+        {/* Mobile/Tablet Stats - Below title on smaller screens */}
+        <div className="lg:hidden grid grid-cols-3 gap-3">
+          {[
+            {
+              iconBg: 'bg-blue-500',
+              Icon: PlayIcon,
+              label: 'Plays',
+              value: animatedStats.plays,
+            },
+            {
+              iconBg: 'bg-green-500',
+              Icon: CubeIcon,
+              label: 'Unique Games',
+              value: animatedStats.unique,
+            },
+            {
+              iconBg: 'bg-purple-500',
+              Icon: DocumentTextIcon,
+              label: 'Games w/ Notes',
+              value: animatedStats.gamesWithNotes,
+            },
+          ].map((item) => (
+            <div key={item.label} className="flex items-center gap-2">
+              <div
+                className={`flex items-center justify-center w-7 h-7 rounded-lg ${item.iconBg}`}
+              >
+                <item.Icon className="w-4 h-4 text-white" />
+              </div>
+              <div className="leading-tight min-w-0">
+                <div className="text-sm font-medium text-gray-900">
+                  {item.value}
+                </div>
+                <div className="text-[9px] sm:text-[10px] font-medium text-gray-500 truncate">
+                  {item.label}
                 </div>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
+
+        {/* Filters */}
         {!zeroStateActive && (
-          <div className="flex flex-wrap items-center gap-2 mt-2 text-xs">
+          <div className="flex flex-wrap items-center gap-2 text-xs">
             {['all', 'week', 'month', 'rated', 'notes'].map((f) => (
               <button
                 key={f}
                 onClick={() => setFilter(f as any)}
-                className={`px-3 py-1 rounded-full border transition font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 ${filter === f ? 'bg-sky-600 text-white border-sky-600 shadow-sm' : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'}`}
+                className={`px-3 py-1.5 rounded-full border transition font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 ${filter === f ? 'bg-sky-600 text-white border-sky-600 shadow-sm' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`}
               >
                 {f === 'all'
                   ? 'All'
@@ -678,7 +733,7 @@ export default function PlaysClientPage({
             <select
               value={playerFilter}
               onChange={(e) => setPlayerFilter(e.target.value as PlayerFilter)}
-              className="px-3 py-1 rounded-full border bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600"
+              className="px-3 py-1.5 rounded-full border bg-white border-gray-200 text-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600"
             >
               <option value="all">All Players</option>
               <option value="solo">Solo</option>
@@ -691,7 +746,7 @@ export default function PlaysClientPage({
               onChange={(e) =>
                 setDurationFilter(e.target.value as DurationFilter)
               }
-              className="px-3 py-1 rounded-full border bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600"
+              className="px-3 py-1.5 rounded-full border bg-white border-gray-200 text-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600"
             >
               <option value="all">Any Length</option>
               <option value="<=30">≤30m</option>
@@ -700,43 +755,33 @@ export default function PlaysClientPage({
               <option value="120+">120m+</option>
             </select>
             {tagFilter && (
-              <div className="flex items-center gap-1 ml-2 text-xs bg-sky-50 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300 px-2 py-1 rounded-full border border-sky-200 dark:border-sky-800">
+              <div className="flex items-center gap-1 text-xs bg-sky-50 text-sky-700 px-2 py-1 rounded-full border border-sky-200">
                 <span className="font-medium">Tag:</span>
                 <span>{tagFilter}</span>
                 <button
                   onClick={() => setTagFilter(null)}
-                  className="text-sky-600 dark:text-sky-400 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 rounded"
+                  className="text-sky-600 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 rounded"
                 >
                   ×
                 </button>
               </div>
             )}
-            <div className="ml-auto flex items-center gap-2">
-              {(filter !== 'all' ||
-                tagFilter ||
-                playerFilter !== 'all' ||
-                durationFilter !== 'all') && (
-                <button
-                  onClick={() => {
-                    setFilter('all')
-                    setTagFilter(null)
-                    setPlayerFilter('all')
-                    setDurationFilter('all')
-                  }}
-                  className="text-xs text-gray-500 hover:text-gray-700 underline"
-                >
-                  Reset Filters
-                </button>
-              )}
-              {isOwner && (
-                <button
-                  onClick={() => setShowPlayLogModal(true)}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full btn-brand text-sm font-medium"
-                >
-                  Add New
-                </button>
-              )}
-            </div>
+            {(filter !== 'all' ||
+              tagFilter ||
+              playerFilter !== 'all' ||
+              durationFilter !== 'all') && (
+              <button
+                onClick={() => {
+                  setFilter('all')
+                  setTagFilter(null)
+                  setPlayerFilter('all')
+                  setDurationFilter('all')
+                }}
+                className="ml-auto text-xs text-gray-500 hover:text-gray-700 underline"
+              >
+                Reset Filters
+              </button>
+            )}
           </div>
         )}
 
@@ -773,7 +818,7 @@ export default function PlaysClientPage({
                   </Heading>
                 </div>
               </div>
-              <p className="text-lg md:text-xl text-gray-600 dark:text-gray-400 max-w-xl leading-snug mb-8">
+              <p className="text-lg md:text-xl text-gray-600 max-w-xl leading-snug mb-8">
                 Build a living history of what you play. Ratings turn into
                 rankings, and rankings power personalized awards.
               </p>
@@ -801,49 +846,49 @@ export default function PlaysClientPage({
             </div>
             <ol className="flex-1 space-y-10 md:space-y-12 relative">
               <div
-                className="absolute left-3 top-6 bottom-0 w-px bg-gradient-to-b from-sky-200 via-sky-100 to-transparent dark:from-sky-800 dark:via-sky-900/40"
+                className="absolute left-3 top-6 bottom-0 w-px bg-gradient-to-b from-sky-200 via-sky-100 to-transparent"
                 aria-hidden="true"
               ></div>
               <li className="flex items-start gap-5">
-                <div className="flex-shrink-0 text-sm font-semibold w-6 h-6 rounded-full bg-sky-100 text-sky-700 flex items-center justify-center mt-1 dark:bg-sky-900/40 dark:text-sky-300 shadow-sm ring-2 ring-white dark:ring-gray-800">
+                <div className="flex-shrink-0 text-sm font-semibold w-6 h-6 rounded-full bg-sky-100 text-sky-700 flex items-center justify-center mt-1 shadow-sm ring-2 ring-white">
                   1
                 </div>
-                <div className="flex-1 border-b border-gray-200 dark:border-gray-800 pb-8 last:border-b-0 last:pb-0">
+                <div className="flex-1 border-b border-gray-200 pb-8 last:border-b-0 last:pb-0">
                   <div className="flex items-center gap-2 mb-2">
                     <span className="w-5 h-5 rounded bg-sky-600/10 text-sky-600 flex items-center justify-center text-xs font-bold">
                       P
                     </span>
-                    <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-lg">
+                    <h3 className="font-semibold text-gray-900 text-lg">
                       Log plays
                     </h3>
                   </div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 leading-snug max-w-md">
+                  <p className="text-sm text-gray-500 leading-snug max-w-md">
                     Add each session with players, time, notes & tags. A
                     detailed timeline forms automatically.
                   </p>
                 </div>
               </li>
               <li className="flex items-start gap-5">
-                <div className="flex-shrink-0 text-sm font-semibold w-6 h-6 rounded-full bg-sky-100 text-sky-700 flex items-center justify-center mt-1 dark:bg-sky-900/40 dark:text-sky-300 shadow-sm ring-2 ring-white dark:ring-gray-800">
+                <div className="flex-shrink-0 text-sm font-semibold w-6 h-6 rounded-full bg-sky-100 text-sky-700 flex items-center justify-center mt-1 shadow-sm ring-2 ring-white">
                   2
                 </div>
-                <div className="flex-1 border-b border-gray-200 dark:border-gray-800 pb-8 last:border-b-0 last:pb-0">
+                <div className="flex-1 border-b border-gray-200 pb-8 last:border-b-0 last:pb-0">
                   <div className="flex items-center gap-2 mb-2">
                     <span className="w-5 h-5 rounded bg-sky-600/10 text-sky-600 flex items-center justify-center text-xs font-bold">
                       ★
                     </span>
-                    <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-lg">
+                    <h3 className="font-semibold text-gray-900 text-lg">
                       Rate & rank
                     </h3>
                   </div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 leading-snug max-w-md">
+                  <p className="text-sm text-gray-500 leading-snug max-w-md">
                     Give every played game a 1–10 rating. Your personal ranking
                     list updates and trends emerge.
                   </p>
                 </div>
               </li>
               <li className="flex items-start gap-5">
-                <div className="flex-shrink-0 text-sm font-semibold w-6 h-6 rounded-full bg-sky-100 text-sky-700 flex items-center justify-center mt-1 dark:bg-sky-900/40 dark:text-sky-300 shadow-sm ring-2 ring-white dark:ring-gray-800">
+                <div className="flex-shrink-0 text-sm font-semibold w-6 h-6 rounded-full bg-sky-100 text-sky-700 flex items-center justify-center mt-1 shadow-sm ring-2 ring-white">
                   3
                 </div>
                 <div className="flex-1">
@@ -851,11 +896,11 @@ export default function PlaysClientPage({
                     <span className="w-5 h-5 rounded bg-amber-500/10 text-amber-600 flex items-center justify-center text-xs font-bold">
                       🏆
                     </span>
-                    <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-lg">
+                    <h3 className="font-semibold text-gray-900 text-lg">
                       Unlock awards
                     </h3>
                   </div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 leading-snug max-w-md">
+                  <p className="text-sm text-gray-500 leading-snug max-w-md">
                     Your plays + ratings auto‑generate personal award
                     categories. Fine‑tune nominees & winners anytime.
                   </p>
@@ -894,7 +939,7 @@ export default function PlaysClientPage({
         {!zeroStateActive && (
           <section className="space-y-6">
             {(pageError || statsError || summaryError) && (
-              <div className="text-xs rounded-lg border p-3 bg-red-50 dark:bg-red-900/20 border-red-300 dark:border-red-800 text-red-700 dark:text-red-300 space-y-1">
+              <div className="text-xs rounded-lg border p-3 bg-red-50 border-red-300 text-red-700 space-y-1">
                 {pageError && <div>Plays: {pageError}</div>}
                 {statsError && (
                   <div>
@@ -926,7 +971,7 @@ export default function PlaysClientPage({
             )}
             {filteredLogs.length === 0 ? (
               <div className="panel py-10 text-center text-sm text-gray-500">
-                <div className="mb-2 font-medium text-gray-700 dark:text-gray-200">No plays in this period</div>
+                <div className="mb-2 font-medium text-gray-700">No plays in this period</div>
                 <div className="mb-4 text-gray-500">Try a different filter or broaden your timeframe.</div>
                 <button
                   type="button"
@@ -936,7 +981,7 @@ export default function PlaysClientPage({
                     setPlayerFilter('all')
                     setDurationFilter('all')
                   }}
-                  className="px-3 py-1.5 text-xs rounded-full border bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
+                  className="px-3 py-1.5 text-xs rounded-full border bg-white border-gray-200 hover:bg-gray-50"
                 >
                   Reset Filters
                 </button>
@@ -954,7 +999,7 @@ export default function PlaysClientPage({
                   {virtualizationEnabled && (
                     <>
                       <div style={{ height: spacerTop }} aria-hidden="true" />
-                      <div className="sticky top-0 z-10 text-xs bg-sky-50 dark:bg-sky-900/40 text-sky-700 dark:text-sky-300 px-2 py-1 rounded mb-2 inline-flex gap-2 items-center shadow">
+                      <div className="sticky top-0 z-10 text-xs bg-sky-50 text-sky-700 px-2 py-1 rounded mb-2 inline-flex gap-2 items-center shadow">
                         Virtualized • {flatLogs.length} plays
                       </div>
                     </>
@@ -997,34 +1042,34 @@ export default function PlaysClientPage({
                                       ? itemRef(flatIndex)
                                       : undefined
                                   }
-                                  className={`group relative border rounded-xl bg-white dark:bg-gray-900 px-5 py-4 shadow-sm transition hover:shadow-md hover:-translate-y-0.5 border-gray-200 dark:border-gray-800 flex gap-4 ${highlightId === l.id ? 'ring-2 ring-sky-400 animate-fade-slide' : ''}`}
+                                  className={`group relative border rounded-xl bg-white px-5 py-4 shadow-sm transition hover:shadow-md hover:-translate-y-0.5 border-gray-200 flex gap-4 ${highlightId === l.id ? 'ring-2 ring-sky-400 animate-fade-slide' : ''}`}
                                 >
                                   <div className="flex-shrink-0 mt-1">
                                     {meta && meta.thumb ? (
                                       <img
                                         src={meta.thumb}
                                         alt=""
-                                        className="w-20 h-20 rounded-lg object-cover shadow ring-1 ring-gray-200 dark:ring-gray-700"
+                                        className="w-20 h-20 rounded-lg object-cover shadow ring-1 ring-gray-200"
                                       />
                                     ) : (
-                                      <div className="w-20 h-20 rounded-lg bg-gray-200 dark:bg-gray-700 animate-pulse" />
+                                      <div className="w-20 h-20 rounded-lg bg-gray-200 animate-pulse" />
                                     )}
                                   </div>
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-start justify-between gap-4">
                                       <div className="min-w-0">
-                                        <span className="font-semibold text-gray-900 dark:text-gray-100 text-base block truncate max-w-[28rem]">
+                                        <span className="font-semibold text-gray-900 text-base block truncate max-w-[28rem]">
                                           {meta ? meta.name : 'Loading…'}
                                         </span>
                                         {isOwner && (
-                                          <div className="mt-1 flex items-center gap-3 sm:h-0 sm:mt-0 sm:overflow-hidden sm:transition-all sm:duration-200 sm:opacity-0 sm:group-hover:opacity-100 sm:group-hover:h-5 sm:group-hover:mt-1">
+                                          <div className="h-0 mt-0 flex items-center gap-2 overflow-hidden transition-all duration-200 opacity-0 group-hover:opacity-100 group-hover:h-6 group-hover:mt-1.5">
                                             <button
                                               type="button"
                                               onClick={() => {
                                                 setEditingLog(l)
                                                 setShowEditModal(true)
                                               }}
-                                              className="text-xs font-medium text-sky-600 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 rounded"
+                                              className="text-xs font-medium px-2.5 py-1 rounded-full bg-sky-50 text-sky-700 hover:bg-sky-100 border border-sky-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 transition-colors"
                                               aria-label="Edit this log"
                                             >
                                               Edit
@@ -1032,8 +1077,7 @@ export default function PlaysClientPage({
                                             <button
                                               type="button"
                                               onClick={() => handleDuplicate(l)}
-                                              className="text-xs font-medium text-emerald-600 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 rounded"
-                                              aria-label="Duplicate this log"
+                                              className="text-xs font-medium px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 transition-colors"
                                             >
                                               Duplicate
                                             </button>
@@ -1042,14 +1086,13 @@ export default function PlaysClientPage({
                                               onClick={() =>
                                                 handleDeleteInline(l)
                                               }
-                                              className="text-xs font-medium text-red-600 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 rounded"
-                                              aria-label="Delete this log"
+                                              className="text-xs font-medium px-2.5 py-1 rounded-full bg-red-50 text-red-700 hover:bg-red-100 border border-red-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 transition-colors"
                                             >
                                               Delete
                                             </button>
                                           </div>
                                         )}
-                                        <div className="mt-1 text-[12px] text-gray-600 dark:text-gray-400 flex items-center gap-4 flex-wrap">
+                                        <div className="mt-1 text-[12px] text-gray-600 flex items-center gap-4 flex-wrap">
                                           {l.player_count && (
                                             <span>{l.player_count}p</span>
                                           )}
@@ -1121,7 +1164,7 @@ export default function PlaysClientPage({
                                         )}
                                         <div className="flex items-center">
                                           <span
-                                            className={`inline-flex items-center justify-center w-11 h-11 rounded-full text-sm font-semibold shadow-inner ring-2 ring-sky-100 dark:ring-sky-800/40 ${ratingColor(ratingDisplay)}`}
+                                            className={`inline-flex items-center justify-center w-11 h-11 rounded-full text-sm font-semibold shadow-inner ring-2 ring-sky-100 ${ratingColor(ratingDisplay)}`}
                                             title={
                                               overallRanking
                                                 ? `Your rating: ${overallRanking}`
@@ -1146,7 +1189,7 @@ export default function PlaysClientPage({
                                                 prev === t ? null : t
                                               )
                                             }
-                                            className={`px-1.5 py-0.5 rounded text-xs transition border focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 ${tagFilter === t ? 'bg-sky-600 text-white border-sky-600 dark:bg-sky-500 dark:border-sky-500' : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 border-transparent hover:bg-emerald-100 dark:hover:bg-emerald-800/40'}`}
+                                            className={`px-1.5 py-0.5 rounded text-xs transition border focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 ${tagFilter === t ? 'bg-sky-600 text-white border-sky-600' : 'bg-emerald-50 text-emerald-700 border-transparent hover:bg-emerald-100'}`}
                                             aria-pressed={tagFilter === t}
                                           >
                                             {t}
@@ -1156,7 +1199,7 @@ export default function PlaysClientPage({
                                     )}
                                     {fullNotes && (
                                       <div className="mt-3">
-                                        <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap text-[13px] leading-snug">
+                                        <p className="text-gray-700 whitespace-pre-wrap text-[13px] leading-snug">
                                           {displayNotes}
                                         </p>
                                         {collapsed && (
@@ -1215,13 +1258,13 @@ export default function PlaysClientPage({
                     }}
                   >
                     <div
-                      className="bg-white dark:bg-gray-900 w-full sm:max-w-xl rounded-t-2xl sm:rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[90vh]"
+                      className="bg-white w-full sm:max-w-xl rounded-t-2xl sm:rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[90vh]"
                       onClick={(e) => e.stopPropagation()}
                     >
                       {/* Header */}
-                      <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+                      <div className="flex items-center justify-between p-6 border-b border-gray-200">
                         <div className="flex items-center gap-3">
-                          <div className="w-11 h-11 rounded-xl bg-gray-100 dark:bg-gray-800 overflow-hidden flex items-center justify-center">
+                          <div className="w-11 h-11 rounded-xl bg-gray-100 overflow-hidden flex items-center justify-center">
                             {gameMeta[editingLog.game_id]?.thumb ? (
                               <img
                                 src={gameMeta[editingLog.game_id]?.thumb || ''}
@@ -1229,16 +1272,16 @@ export default function PlaysClientPage({
                                 className="w-full h-full object-cover"
                               />
                             ) : (
-                              <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">
+                              <div className="text-xs font-semibold text-gray-500">
                                 JE
                               </div>
                             )}
                           </div>
                           <div>
-                            <div className="text-xs uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">
+                            <div className="text-xs uppercase tracking-[0.2em] text-gray-500">
                               Journal Entry
                             </div>
-                            <div className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                            <div className="text-lg font-semibold text-gray-900">
                               {gameMeta[editingLog.game_id]?.name || 'Game'}
                             </div>
                           </div>
@@ -1248,7 +1291,7 @@ export default function PlaysClientPage({
                             setShowEditModal(false)
                             setEditingLog(null)
                           }}
-                          className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
+                          className="p-2 rounded-md hover:bg-gray-100"
                           aria-label="Close"
                         >
                           <XMarkIcon className="w-6 h-6 text-gray-500" />
@@ -1313,15 +1356,15 @@ export default function PlaysClientPage({
             onClick={() => setShowPlayLogModal(false)}
           >
             <div
-              className="bg-white dark:bg-gray-900 w-full sm:max-w-2xl rounded-t-2xl sm:rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[80vh]"
+              className="bg-white w-full sm:max-w-2xl rounded-t-2xl sm:rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[80vh]"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header */}
-              <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+              <div className="flex items-center justify-between p-6 border-b border-gray-200">
                 <h3 className="text-lg font-semibold">Log Your Play</h3>
                 <button
                   onClick={() => setShowPlayLogModal(false)}
-                  className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
+                  className="p-2 rounded-md hover:bg-gray-100"
                   aria-label="Close"
                 >
                   <XMarkIcon className="w-6 h-6 text-gray-500" />

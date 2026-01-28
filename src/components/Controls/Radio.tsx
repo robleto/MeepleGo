@@ -1,6 +1,6 @@
 'use client'
 
-import React, { forwardRef } from 'react'
+import React, { forwardRef, useId } from 'react'
 import { cn } from '@/utils/helpers'
 
 export interface RadioProps
@@ -48,11 +48,11 @@ const Radio = forwardRef<HTMLInputElement, RadioProps>(
 
     const stateClasses = {
       default:
-        'border-gray-300 dark:border-gray-600 text-sky-600 focus:ring-sky-500',
+        'border-gray-300 text-sky-600 focus:ring-sky-500',
       error:
-        'border-red-300 dark:border-red-600 text-red-600 focus:ring-red-500',
+        'border-red-300 text-red-600 focus:ring-red-500',
       success:
-        'border-green-300 dark:border-green-600 text-green-600 focus:ring-green-500',
+        'border-green-300 text-green-600 focus:ring-green-500',
     }
 
     const labelSize = {
@@ -67,8 +67,8 @@ const Radio = forwardRef<HTMLInputElement, RadioProps>(
       lg: 'text-sm',
     }
 
-    // Generate ID if not provided
-    const radioId = id || `radio-${Math.random().toString(36).substr(2, 9)}`
+    const generatedId = useId()
+    const radioId = id || `radio-${generatedId}`
 
     return (
       <div className={cn('flex items-start', className)}>
@@ -79,7 +79,7 @@ const Radio = forwardRef<HTMLInputElement, RadioProps>(
             type="radio"
             className={cn(
               // Base styles
-              'border bg-white dark:bg-gray-700 focus:ring-2 focus:ring-offset-0 transition-colors cursor-pointer',
+              'border bg-white focus:ring-2 focus:ring-offset-0 transition-colors cursor-pointer',
 
               // Size styles
               sizeClasses[size],
@@ -101,7 +101,7 @@ const Radio = forwardRef<HTMLInputElement, RadioProps>(
               <label
                 htmlFor={radioId}
                 className={cn(
-                  'font-medium text-gray-900 dark:text-white cursor-pointer',
+                  'font-medium text-gray-900 cursor-pointer',
                   labelSize[size],
                   disabled && 'opacity-50 cursor-not-allowed'
                 )}
@@ -112,7 +112,7 @@ const Radio = forwardRef<HTMLInputElement, RadioProps>(
             {description && (
               <p
                 className={cn(
-                  'text-gray-500 dark:text-gray-400',
+                  'text-gray-500',
                   descriptionSize[size],
                   disabled && 'opacity-50'
                 )}

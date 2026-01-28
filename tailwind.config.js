@@ -5,7 +5,9 @@ module.exports = {
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
-  darkMode: 'class',
+  // TODO: Re-enable dark mode - see GitHub issue #27
+  // darkMode: 'class',
+  darkMode: false,
   safelist: [
     // Ensure NEW rating colors are never purged - Notion-inspired color scheme
     // Solid variant (for buttons, overlays)

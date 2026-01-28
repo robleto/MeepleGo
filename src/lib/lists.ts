@@ -4,13 +4,20 @@ import { captureError } from '@/lib/errorTracking'
 export type DefaultLists = { library?: string; wishlist?: string }
 export type MembershipSets = { library: Set<string>; wishlist: Set<string> }
 
-// Fetch (and lazily create) default list ids for current user
-export async function getOrCreateDefaultLists(): Promise<DefaultLists | null> {
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
-  if (!session) return null
-  const userId = session.user.id
+// Fetch (and lazily create) default list ids for current user or specified userId
+export async function getOrCreateDefaultLists(forcedUserId?: string): Promise<DefaultLists | null> {
+  let userId: string
+  
+  if (forcedUserId) {
+    userId = forcedUserId
+  } else {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
+    if (!session) return null
+    userId = session.user.id
+  }
+  
   // Fetch existing
   const { data: existing } = await supabase
     .from('game_lists')
@@ -22,44 +29,49 @@ export async function getOrCreateDefaultLists(): Promise<DefaultLists | null> {
     if (l.list_type === 'library') lists.library = l.id
     if (l.list_type === 'wishlist') lists.wishlist = l.id
   })
-  // Ensure both exist
-  const missing: {
-    list_type: 'library' | 'wishlist'
-    name: string
-    description: string
-  }[] = []
-  if (!lists.library)
-    missing.push({
-      list_type: 'library',
-      name: 'Library',
-      description: 'All games you own or track',
-    })
-  if (!lists.wishlist)
-    missing.push({
-      list_type: 'wishlist',
-      name: 'Wishlist',
-      description: 'Games you want to acquire',
-    })
-  if (missing.length) {
-    const { data: inserted, error } = await supabase
-      .from('game_lists')
-      .insert(
-        missing.map((m) => ({
-          user_id: userId,
-          name: m.name,
-          description: m.description,
-          list_type: m.list_type,
-          is_public: false,
-        }))
-      )
-      .select('id,list_type')
-    if (!error && inserted) {
-      inserted.forEach((l) => {
-        if (l.list_type === 'library') lists.library = l.id
-        if (l.list_type === 'wishlist') lists.wishlist = l.id
+  
+  // Only create missing lists if not viewing another user (i.e., no forcedUserId)
+  if (!forcedUserId) {
+    // Ensure both exist
+    const missing: {
+      list_type: 'library' | 'wishlist'
+      name: string
+      description: string
+    }[] = []
+    if (!lists.library)
+      missing.push({
+        list_type: 'library',
+        name: 'Library',
+        description: 'All games you own or track',
       })
+    if (!lists.wishlist)
+      missing.push({
+        list_type: 'wishlist',
+        name: 'Wishlist',
+        description: 'Games you want to acquire',
+      })
+    if (missing.length) {
+      const { data: inserted, error } = await supabase
+        .from('game_lists')
+        .insert(
+          missing.map((m) => ({
+            user_id: userId,
+            name: m.name,
+            description: m.description,
+            list_type: m.list_type,
+            is_public: false,
+          }))
+        )
+        .select('id,list_type')
+      if (!error && inserted) {
+        inserted.forEach((l) => {
+          if (l.list_type === 'library') lists.library = l.id
+          if (l.list_type === 'wishlist') lists.wishlist = l.id
+        })
+      }
     }
   }
+  
   return lists
 }
 

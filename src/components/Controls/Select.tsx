@@ -34,11 +34,11 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
     }
     const stateClasses = {
       default:
-        'border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-sky-500 focus:border-sky-500',
+        'border-gray-300 focus:ring-2 focus:ring-sky-500 focus:border-sky-500',
       error:
-        'border-red-300 dark:border-red-600 focus:ring-2 focus:ring-red-500 focus:border-red-500',
+        'border-red-300 focus:ring-2 focus:ring-red-500 focus:border-red-500',
       success:
-        'border-green-300 dark:border-green-600 focus:ring-2 focus:ring-green-500 focus:border-green-500',
+        'border-green-300 focus:ring-2 focus:ring-green-500 focus:border-green-500',
     }
     const iconPadding = {
       sm: leftIcon ? 'pl-8' : '',
@@ -63,13 +63,13 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
         <select
           ref={ref}
           className={cn(
-            'w-full border rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors focus:outline-none appearance-none cursor-pointer',
+            'w-full border rounded-md shadow-sm bg-white text-gray-900 transition-colors focus:outline-none appearance-none cursor-pointer',
             sizeClasses[size],
             iconPadding[size],
             'pr-8',
             stateClasses[state],
             disabled &&
-              'opacity-50 cursor-not-allowed bg-gray-50 dark:bg-gray-800',
+              'opacity-50 cursor-not-allowed bg-gray-50',
             className
           )}
           disabled={disabled}

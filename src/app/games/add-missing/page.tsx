@@ -99,7 +99,7 @@ export default function AddMissingGamePage() {
               </button>
               <a
                 href="/plays/new"
-                className="text-sm text-sky-700 hover:text-sky-800 underline dark:text-sky-400 dark:hover:text-sky-300"
+                className="text-sm text-sky-700 hover:text-sky-800 underline"
               >
                 Log a play instead
               </a>
@@ -121,7 +121,7 @@ export default function AddMissingGamePage() {
             <div className="mt-4 flex gap-3">
               <a
                 href="/plays/new"
-                className="text-sm text-sky-700 hover:text-sky-800 hover:underline dark:text-sky-400 dark:hover:text-sky-300"
+                className="text-sm text-sky-700 hover:text-sky-800 hover:underline"
               >
                 Log a play
               </a>

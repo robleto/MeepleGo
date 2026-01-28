@@ -141,7 +141,7 @@ export default function DateTimePicker({ id, label, value, onChange, className, 
   return (
     <div className={cn('w-full', className)} ref={rootRef}>
       {label && (
-        <label htmlFor={id} className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+        <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1">
           {label}
           {required && <span className="text-red-500 ml-0.5" aria-hidden>*</span>}
         </label>
@@ -150,11 +150,13 @@ export default function DateTimePicker({ id, label, value, onChange, className, 
         id={id}
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="relative w-full text-left pr-10 pl-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white"
+        className="relative w-full text-left pr-10 pl-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
         aria-haspopup="dialog"
         aria-expanded={open}
       >
-        <span className="block truncate">{formatDisplay(selected)}</span>
+        <span className="block truncate" suppressHydrationWarning>
+          {formatDisplay(selected)}
+        </span>
         <CalendarIcon className="h-5 w-5 absolute right-2 top-1/2 -translate-y-1/2 text-gray-500" aria-hidden="true" />
       </button>
 
@@ -162,25 +164,25 @@ export default function DateTimePicker({ id, label, value, onChange, className, 
         <div
           role="dialog"
           aria-modal="true"
-          className="absolute z-50 mt-2 w-full max-w-sm rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-xl p-3"
+          className="absolute z-50 mt-2 w-full max-w-sm rounded-xl border border-gray-200 bg-white shadow-xl p-3"
         >
           {/* Header: month nav */}
           <div className="flex items-center justify-between px-2 py-1">
             <button
               type="button"
               onClick={() => setViewMonth((m) => addMonths(m, -1))}
-              className="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
+              className="p-1 rounded-md hover:bg-gray-100"
               aria-label="Previous month"
             >
               <ChevronLeftIcon className="h-5 w-5" />
             </button>
-            <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+            <div className="text-sm font-semibold text-gray-900" suppressHydrationWarning>
               {new Intl.DateTimeFormat(undefined, { month: 'long', year: 'numeric' }).format(viewMonth)}
             </div>
             <button
               type="button"
               onClick={() => setViewMonth((m) => addMonths(m, 1))}
-              className="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
+              className="p-1 rounded-md hover:bg-gray-100"
               aria-label="Next month"
             >
               <ChevronRightIcon className="h-5 w-5" />
@@ -190,7 +192,7 @@ export default function DateTimePicker({ id, label, value, onChange, className, 
           {/* Weekday headers */}
           <div className="grid grid-cols-7 gap-1 px-2 mt-1">
             {["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map((d) => (
-              <div key={d} className="text-[10px] uppercase tracking-wide text-gray-400 dark:text-gray-500 text-center">
+              <div key={d} className="text-[10px] uppercase tracking-wide text-gray-400 text-center">
                 {d}
               </div>
             ))}
@@ -208,10 +210,10 @@ export default function DateTimePicker({ id, label, value, onChange, className, 
                   onClick={() => selectDay(d)}
                   className={cn(
                     'h-8 rounded-md text-sm flex items-center justify-center transition',
-                    inMonth ? 'text-gray-900 dark:text-gray-100' : 'text-gray-400 dark:text-gray-600',
+                    inMonth ? 'text-gray-900' : 'text-gray-400',
                     isSelected
                       ? 'bg-primary-600 text-white hover:bg-primary-600'
-                      : 'hover:bg-gray-100 dark:hover:bg-gray-800',
+                      : 'hover:bg-gray-100',
                     isToday && !isSelected && 'ring-1 ring-primary-400/70'
                   )}
                   aria-label={d.toDateString()}
@@ -224,7 +226,7 @@ export default function DateTimePicker({ id, label, value, onChange, className, 
 
           {/* Time inputs */}
           <div className="px-2 pt-3 flex items-center gap-2">
-            <div className="text-[11px] text-gray-500 dark:text-gray-400">Time</div>
+            <div className="text-[11px] text-gray-500">Time</div>
             <input
               type="number"
               min={0}
@@ -236,9 +238,9 @@ export default function DateTimePicker({ id, label, value, onChange, className, 
                 const next = fromLocalParts(selected.getFullYear(), selected.getMonth() + 1, selected.getDate(), v, minutes)
                 onChange(formatLocal(next))
               }}
-              className="w-14 px-2 py-1 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800"
+              className="w-14 px-2 py-1 border border-gray-300 rounded-md bg-white"
             />
-            <span className="text-gray-500 dark:text-gray-400">:</span>
+            <span className="text-gray-500">:</span>
             <input
               type="number"
               min={0}
@@ -250,7 +252,7 @@ export default function DateTimePicker({ id, label, value, onChange, className, 
                 const next = fromLocalParts(selected.getFullYear(), selected.getMonth() + 1, selected.getDate(), hours, v)
                 onChange(formatLocal(next))
               }}
-              className="w-14 px-2 py-1 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800"
+              className="w-14 px-2 py-1 border border-gray-300 rounded-md bg-white"
             />
             <div className="flex-1" />
             <button

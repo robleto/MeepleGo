@@ -32,6 +32,7 @@ import {
   formatPlayingTime,
   getGameUrl,
 } from '@/utils/helpers'
+import GameOnboardingSteps from './GameOnboardingSteps'
 
 const PlayLogEditor = dynamic(() => import('./PlayLogEditor'), { ssr: false })
 
@@ -88,6 +89,7 @@ export default function GameDetailModal({
   const [activeSection, setActiveSection] = useState<
     'overview' | 'ratings' | 'mygames' | 'awards' | 'tags' | 'lists'
   >('overview')
+  const stackSections = variant === 'page'
   // Shared rating popup state (position + open) used everywhere
   const [ratingOpen, setRatingOpen] = useState(false)
   const [ratingAnchor, setRatingAnchor] = useState<{
@@ -173,7 +175,7 @@ export default function GameDetailModal({
   // Lazy load lists only when Lists tab first viewed
   const listsLoadedRef = useRef(false)
   useEffect(() => {
-    if (activeSection !== 'lists') return
+    if (!stackSections && activeSection !== 'lists') return
     if (listsLoadedRef.current) return
     listsLoadedRef.current = true
     const fetchLists = async () => {
@@ -247,7 +249,7 @@ export default function GameDetailModal({
       }
     }
     fetchLists()
-  }, [activeSection, game.id])
+  }, [activeSection, game.id, stackSections])
 
   // (List popover outside-click handler removed)
 
@@ -528,7 +530,7 @@ export default function GameDetailModal({
   const outerProps =
     variant === 'modal'
       ? {
-          className: `fixed inset-0 z-[200] transition-opacity duration-150 pointer-events-auto opacity-100 flex ${modalClasses} justify-center p-4 sm:p-8`,
+          className: `fixed inset-0 z-[200] transition-opacity duration-150 pointer-events-auto opacity-100 flex ${modalClasses} justify-center md:p-8 p-0`,
           onMouseDown: (e: any) => {
             if (e.target === e.currentTarget) onClose?.()
           },
@@ -536,7 +538,7 @@ export default function GameDetailModal({
       : { className: 'w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 max-w-6xl' }
   const panelClasses =
     variant === 'modal'
-      ? 'relative w-full max-w-3xl h-[calc(100vh-6rem)] rounded-2xl shadow-xl ring-1 ring-black/5 border border-gray-100 bg-white/95 backdrop-blur-sm text-gray-900 focus:outline-none overflow-hidden flex flex-col z-10'
+      ? 'relative w-full max-w-3xl md:h-[calc(100vh-6rem)] h-[100dvh] md:rounded-2xl rounded-none shadow-xl ring-1 ring-black/5 border border-gray-100 bg-white/95 backdrop-blur-sm text-gray-900 focus:outline-none overflow-hidden flex flex-col z-10'
       : 'relative w-full rounded-2xl bg-white text-gray-900 flex flex-col shadow-sm border border-gray-100'
 
   return (
@@ -560,7 +562,14 @@ export default function GameDetailModal({
         onClick={(e) => variant === 'modal' && e.stopPropagation()}
       >
         {/* Header simplified for readability */}
-        <div className="px-8 pt-8 pb-4 border-b border-gray-200 relative flex-shrink-0">
+        <div className="px-4 pt-4 pb-3 sm:px-8 sm:pt-8 sm:pb-4 border-b border-gray-200 relative flex-shrink-0">
+          {variant === 'page' && (
+            <div className="mb-3">
+              <span className="inline-flex items-center rounded-full bg-emerald-50 text-emerald-700 px-2.5 py-1 text-[11px] font-semibold ring-1 ring-emerald-100">
+                Live Game Page
+              </span>
+            </div>
+          )}
           {/* Window controls only for modal variant */}
           {variant === 'modal' && (
             <div className="absolute top-4 right-4 flex items-center gap-1">
@@ -593,9 +602,9 @@ export default function GameDetailModal({
               </button>
             </div>
           )}
-          <div className="flex items-start gap-6">
-            <div className="w-32 flex-shrink-0">
-              <div className="w-32 h-32 rounded-lg overflow-hidden shadow-sm ring-1 ring-gray-200 bg-gradient-to-b from-gray-300 to-gray-200">
+          <div className="grid gap-4 sm:gap-6 sm:grid-cols-[128px,1fr]">
+            <div className="w-28 sm:w-32 flex-shrink-0">
+              <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-lg overflow-hidden shadow-sm ring-1 ring-gray-200 bg-gradient-to-b from-gray-300 to-gray-200">
                 <Image
                   src={
                     EG.image_url || EG.thumbnail_url || '/placeholder-game.svg'
@@ -610,7 +619,7 @@ export default function GameDetailModal({
                 {/* Played / Log Play moved to actions row */}
               </div>
             </div>
-            <div className="flex-1 min-w-0 flex flex-col gap-3">
+            <div className="min-w-0 flex flex-col gap-3">
                   <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-2 flex-wrap mr-20">
                       <h1
@@ -672,76 +681,6 @@ export default function GameDetailModal({
                       </button>
                     </div>
                   </div>
-
-                  {/* Key metadata chips row */}
-                  {(EG.year_published ||
-                    EG.weight ||
-                    (EG.min_players && EG.max_players) ||
-                    EG.playtime_minutes) && (
-                    <div className="flex items-center gap-2 flex-wrap">
-                      {EG.year_published && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            router.push(`/games?year=${EG.year_published}`)
-                            if (variant === 'modal') onClose?.()
-                          }}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-50 hover:bg-gray-100 text-gray-600 hover:text-gray-700 text-xs font-medium ring-1 ring-gray-200 transition-colors"
-                        >
-                          <CalendarIcon className="w-3 h-3" />
-                          {EG.year_published}
-                        </button>
-                      )}
-                      {EG.weight &&
-                        (() => {
-                          let w = Number(EG.weight)
-                          if (isNaN(w)) return null
-                          if (w < 1) w = 1
-                          if (w > 5) w = 5
-                          return (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                router.push(`/games?weight=${w.toFixed(2)}`)
-                                if (variant === 'modal') onClose?.()
-                              }}
-                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-50 hover:bg-gray-100 text-gray-600 hover:text-gray-700 text-xs font-medium ring-1 ring-gray-200 transition-colors"
-                            >
-                              <ChartBarIcon className="w-3 h-3" />
-                              {w.toFixed(2)}
-                            </button>
-                          )
-                        })()}
-                      {EG.min_players && EG.max_players && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            router.push(`/games?players=${EG.max_players}`)
-                            if (variant === 'modal') onClose?.()
-                          }}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-50 hover:bg-gray-100 text-gray-600 hover:text-gray-700 text-xs font-medium ring-1 ring-gray-200 transition-colors"
-                        >
-                          <UsersIcon className="w-3 h-3" />
-                          {formatPlayerCount(EG.min_players, EG.max_players)}
-                        </button>
-                      )}
-                      {EG.playtime_minutes && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            router.push(
-                              `/games?playtime=${EG.playtime_minutes}`
-                            )
-                            if (variant === 'modal') onClose?.()
-                          }}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-50 hover:bg-gray-100 text-gray-600 hover:text-gray-700 text-xs font-medium ring-1 ring-gray-200 transition-colors"
-                        >
-                          <TimeIcon className="w-3 h-3" />
-                          {formatPlayingTime(EG.playtime_minutes)}
-                        </button>
-                      )}
-                    </div>
-                  )}
                   {(tagline || summary || description) && (
                     <p className="text-sm text-gray-600 leading-snug">
                       {tagline ||
@@ -754,25 +693,108 @@ export default function GameDetailModal({
                     </p>
                   )}
                 </div>
+                {/* Key metadata chips row */}
+                {(EG.year_published ||
+                  EG.weight ||
+                  (EG.min_players && EG.max_players) ||
+                  EG.playtime_minutes) && (
+                  <div className="col-span-full sm:col-start-2 sm:col-span-1 flex items-center gap-2 flex-wrap">
+                    {EG.year_published && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          router.push(`/games?year=${EG.year_published}`)
+                          if (variant === 'modal') onClose?.()
+                        }}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-50 hover:bg-gray-100 text-gray-600 hover:text-gray-700 text-xs font-medium ring-1 ring-gray-200 transition-colors"
+                      >
+                        <CalendarIcon className="w-3 h-3" />
+                        {EG.year_published}
+                      </button>
+                    )}
+                    {EG.weight &&
+                      (() => {
+                        let w = Number(EG.weight)
+                        if (isNaN(w)) return null
+                        if (w < 1) w = 1
+                        if (w > 5) w = 5
+                        return (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              router.push(`/games?weight=${w.toFixed(2)}`)
+                              if (variant === 'modal') onClose?.()
+                            }}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-50 hover:bg-gray-100 text-gray-600 hover:text-gray-700 text-xs font-medium ring-1 ring-gray-200 transition-colors"
+                          >
+                            <ChartBarIcon className="w-3 h-3" />
+                            {w.toFixed(2)}
+                          </button>
+                        )
+                      })()}
+                    {EG.min_players && EG.max_players && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          router.push(`/games?players=${EG.max_players}`)
+                          if (variant === 'modal') onClose?.()
+                        }}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-50 hover:bg-gray-100 text-gray-600 hover:text-gray-700 text-xs font-medium ring-1 ring-gray-200 transition-colors"
+                      >
+                        <UsersIcon className="w-3 h-3" />
+                        {formatPlayerCount(EG.min_players, EG.max_players)}
+                      </button>
+                    )}
+                    {EG.playtime_minutes && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          router.push(`/games?playtime=${EG.playtime_minutes}`)
+                          if (variant === 'modal') onClose?.()
+                        }}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-50 hover:bg-gray-100 text-gray-600 hover:text-gray-700 text-xs font-medium ring-1 ring-gray-200 transition-colors"
+                      >
+                        <TimeIcon className="w-3 h-3" />
+                        {formatPlayingTime(EG.playtime_minutes)}
+                      </button>
+                    )}
+                  </div>
+                )}
             </div>
           </div>
         {/* end header */}
+        
+        {/* Inline onboarding steps for new/guest users */}
+        <div className="px-4 sm:px-8 pt-6">
+          <GameOnboardingSteps
+            game={{ id: game.id, name: game.name }}
+            initialPlayedIt={localRanking?.played_it ?? false}
+            initialInLibrary={membership.library}
+            initialInWishlist={membership.wishlist}
+            initialRating={ratingValue}
+            autoCollapse={true}
+          />
+        </div>
+        
         {/* Main content area with nav + sections */}
-        <div className="flex-1 overflow-y-auto px-8 pb-8 pt-6">
+        <div className="flex-1 overflow-y-auto px-4 pt-4 pb-6 sm:px-8 sm:pt-6 sm:pb-8">
           <div className="md:flex md:items-start md:gap-10">
-            <nav className="md:w-48 flex-shrink-0 mb-8 md:mb-0">
-              <ul className="space-y-1">
-                {allSections.map((id) => {
-                  const labelMap: Record<typeof activeSection, string> = {
-                    overview: 'Overview',
-                    ratings: 'Rating',
-                    mygames: 'My Games',
-                    awards: 'Awards',
-                    tags: 'Classifications',
-                    lists: 'Lists',
-                  }
-                  const iconMap: Record<typeof activeSection, React.ReactNode> =
-                    {
+            {!stackSections && (
+              <nav className="md:w-48 flex-shrink-0 mb-8 md:mb-0">
+                <ul className="space-y-1">
+                  {allSections.map((id) => {
+                    const labelMap: Record<typeof activeSection, string> = {
+                      overview: 'Overview',
+                      ratings: 'Rating',
+                      mygames: 'My Games',
+                      awards: 'Awards',
+                      tags: 'Classifications',
+                      lists: 'Lists',
+                    }
+                    const iconMap: Record<
+                      typeof activeSection,
+                      React.ReactNode
+                    > = {
                       overview: (
                         <AdjustmentsHorizontalIcon className="w-4 h-4" />
                       ),
@@ -782,64 +804,69 @@ export default function GameDetailModal({
                       tags: <TagIcon className="w-4 h-4" />,
                       lists: <ListBulletIcon className="w-4 h-4" />,
                     }
-                  const active = activeSection === id
-                  return (
-                    <li key={id}>
-                      <button
-                        onClick={() => setActiveSection(id)}
-                        className={`w-full flex items-center gap-3 text-left px-4 py-3 rounded-2xl transition font-medium ${active ? 'text-gray-900' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}
-                        style={
-                          active
-                            ? { backgroundColor: 'rgba(229,231,235,0.75)' }
-                            : undefined
-                        }
-                      >
-                        {iconMap[id]}
-                        <span>{labelMap[id]}</span>
-                      </button>
-                    </li>
-                  )
-                })}
-              </ul>
-              {isAdmin && game.bgg_id && (
-                <div className="mt-6 pt-4 border-t border-gray-200">
-                  <button
-                    onClick={async () => {
-                      try {
-                        setRefreshingBgg(true)
-                        const res = await fetch('/api/import-bgg', {
-                          method: 'POST',
-                          headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({ bggId: game.bgg_id }),
-                        })
-                        if (res.ok) {
-                          const json = await res.json()
-                          const updated = json.game
-                          if (updated) {
-                            setFamilyCodes(
-                              Array.isArray(updated.rank_families)
-                                ? updated.rank_families
-                                : []
-                            )
+                    const active = activeSection === id
+                    return (
+                      <li key={id}>
+                        <button
+                          onClick={() => setActiveSection(id)}
+                          className={`w-full flex items-center gap-3 text-left px-4 py-3 rounded-2xl transition font-medium ${active ? 'text-gray-900' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}
+                          style={
+                            active
+                              ? { backgroundColor: 'rgba(229,231,235,0.75)' }
+                              : undefined
                           }
+                        >
+                          {iconMap[id]}
+                          <span>{labelMap[id]}</span>
+                        </button>
+                      </li>
+                    )
+                  })}
+                </ul>
+                {isAdmin && game.bgg_id && (
+                  <div className="mt-6 pt-4 border-t border-gray-200">
+                    <button
+                      onClick={async () => {
+                        try {
+                          setRefreshingBgg(true)
+                          const res = await fetch('/api/import-bgg', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ bggId: game.bgg_id }),
+                          })
+                          if (res.ok) {
+                            const json = await res.json()
+                            const updated = json.game
+                            if (updated) {
+                              setFamilyCodes(
+                                Array.isArray(updated.rank_families)
+                                  ? updated.rank_families
+                                  : []
+                              )
+                            }
+                          }
+                        } finally {
+                          setRefreshingBgg(false)
                         }
-                      } finally {
-                        setRefreshingBgg(false)
-                      }
-                    }}
-                    className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 text-xs font-medium shadow-sm disabled:opacity-50"
-                    disabled={refreshingBgg}
-                  >
-                    {refreshingBgg ? 'Refreshing…' : 'Refresh BGG'}
-                  </button>
-                </div>
-              )}
-            </nav>
+                      }}
+                      className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 text-xs font-medium shadow-sm disabled:opacity-50"
+                      disabled={refreshingBgg}
+                    >
+                      {refreshingBgg ? 'Refreshing…' : 'Refresh BGG'}
+                    </button>
+                  </div>
+                )}
+              </nav>
+            )}
             {/* Right content (tabbed) */}
-            <div className="flex-1 space-y-12 md:pl-4 md:border-l md:border-gray-200">
+            <div
+              className={`flex-1 space-y-12 ${
+                stackSections ? '' : 'md:pl-4 md:border-l md:border-gray-200'
+              }`}
+            >
               {/* Radial rating component replaces popup */}
 
-              {activeSection === 'overview' && (
+              {(stackSections || activeSection === 'overview') && (
                 <section id="gd-overview" className="space-y-8">
                   <h3 className="text-2xl font-medium text-gray-900 tracking-tight flex items-center gap-3">
                     <AdjustmentsHorizontalIcon className="w-6 h-6 text-gray-400" />{' '}
@@ -848,7 +875,7 @@ export default function GameDetailModal({
                   <div className="space-y-8">
                     {/* Block: Game Details */}
                     <div className="pb-6 border-b border-gray-200">
-                      <h4 className="heading-display text-xl font-normal tracking-wide text-gray-700 dark:text-gray-300 mb-4 flex items-center gap-2">
+                      <h4 className="heading-display text-xl font-normal tracking-wide text-gray-700 mb-4 flex items-center gap-2">
                         <AdjustmentsHorizontalIcon className="w-5 h-5 text-gray-400" />{' '}
                         Game Details
                       </h4>
@@ -899,7 +926,7 @@ export default function GameDetailModal({
                     )}
                     {/* Block: Game Credits */}
                     <div className="pb-2">
-                      <h4 className="heading-display text-xl font-normal tracking-wide text-gray-700 dark:text-gray-300 mb-4">
+                      <h4 className="heading-display text-xl font-normal tracking-wide text-gray-700 mb-4">
                         Game Credits
                       </h4>
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-sm">
@@ -989,7 +1016,7 @@ export default function GameDetailModal({
                       <div className="space-y-8">
                         {parentGame && (
                           <div>
-                            <h5 className="heading-display text-xl font-normal tracking-wide text-gray-700 dark:text-gray-300 mb-2">
+                            <h5 className="heading-display text-xl font-normal tracking-wide text-gray-700 mb-2">
                               Parent Game
                             </h5>
                             <RelationGrid
@@ -1000,7 +1027,7 @@ export default function GameDetailModal({
                         )}
                         {expansions && expansions.length > 0 && (
                           <div>
-                            <h5 className="heading-display text-xl font-normal tracking-wide text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                            <h5 className="heading-display text-xl font-normal tracking-wide text-gray-700 mb-2 flex items-center gap-2">
                               Expansions{' '}
                               <span className="text-sm text-gray-400 font-normal">
                                 {expansions.length}
@@ -1014,7 +1041,7 @@ export default function GameDetailModal({
                         )}
                         {integrations && integrations.length > 0 && (
                           <div>
-                            <h5 className="heading-display text-xl font-normal tracking-wide text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                            <h5 className="heading-display text-xl font-normal tracking-wide text-gray-700 mb-2 flex items-center gap-2">
                               Integrates With{' '}
                               <span className="text-sm text-gray-400 font-normal">
                                 {integrations.length}
@@ -1037,7 +1064,7 @@ export default function GameDetailModal({
                 </section>
               )}
               {/* Categories & Mechanics */}
-              {activeSection === 'tags' && (
+              {(stackSections || activeSection === 'tags') && (
                 <section className="space-y-8">
                   <h3 className="text-lg font-medium text-gray-900 flex items-center gap-2">
                     <TagIcon className="w-5 h-5 text-gray-400" />{' '}
@@ -1174,7 +1201,7 @@ export default function GameDetailModal({
                 </section>
               )}
 
-              {hasAnyAwards && activeSection === 'awards' && (
+              {hasAnyAwards && (stackSections || activeSection === 'awards') && (
                 <section id="gd-awards" className="space-y-8">
                   <h3 className="text-lg font-medium text-gray-900 mb-3 flex items-center gap-2">
                     <TrophyIcon className="h-5 w-5 text-amber-500" />
@@ -1296,14 +1323,14 @@ export default function GameDetailModal({
                   )}
                 </section>
               )}
-              {activeSection === 'ratings' && (
+              {(stackSections || activeSection === 'ratings') && (
                 <section id="gd-ratings" className="space-y-8">
                   <h3 className="text-2xl font-medium text-gray-900 tracking-tight flex items-center gap-3">
                     <ChartBarIcon className="w-6 h-6 text-gray-400" /> Rating
                   </h3>
                   {/* BGG Rating Block */}
                   <div className="pb-6 border-b border-gray-200">
-                    <h4 className="heading-display text-xl font-normal tracking-wide text-gray-700 dark:text-gray-300 mb-4">
+                    <h4 className="heading-display text-xl font-normal tracking-wide text-gray-700 mb-4">
                       BGG Rating
                     </h4>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm">
@@ -1375,7 +1402,7 @@ export default function GameDetailModal({
                   {/* Your Rating Block */}
                   <div className="pb-6 border-b border-gray-200">
                     <div className="flex items-center gap-3 mb-4">
-                      <h4 className="heading-display text-xl font-normal tracking-wide text-gray-700 dark:text-gray-300">
+                      <h4 className="heading-display text-xl font-normal tracking-wide text-gray-700">
                         Your Rating
                       </h4>
                       <button
@@ -1461,7 +1488,7 @@ export default function GameDetailModal({
                   )}
                   {/* Community ratings with notes */}
                   <div>
-                    <h4 className="heading-display text-xl font-normal tracking-wide text-gray-700 dark:text-gray-300 mb-3">
+                    <h4 className="heading-display text-xl font-normal tracking-wide text-gray-700 mb-3">
                       Community Ratings & Notes
                     </h4>
                     <p className="text-xs text-gray-500">
@@ -1470,7 +1497,7 @@ export default function GameDetailModal({
                   </div>
                 </section>
               )}
-              {activeSection === 'mygames' && (
+              {(stackSections || activeSection === 'mygames') && (
                 <section id="gd-mygames" className="space-y-5">
                   <h3 className="text-2xl font-medium text-gray-900 tracking-tight flex items-center gap-3">
                     <BookOpenIcon className="w-6 h-6 text-gray-400" /> My Games
@@ -1526,7 +1553,7 @@ export default function GameDetailModal({
                   )}
                 </section>
               )}
-              {activeSection === 'lists' && (
+              {(stackSections || activeSection === 'lists') && (
                 <section className="space-y-8" id="gd-lists">
                   <h3 className="text-lg font-medium text-gray-900 flex items-center gap-2">
                     <ListBulletIcon className="w-5 h-5 text-gray-400" /> Lists
@@ -1572,7 +1599,7 @@ export default function GameDetailModal({
                   </div>
                   {/* Public lists */}
                   <div className="pt-4 border-t border-gray-200 space-y-3">
-                    <h2 className="heading-display text-2xl font-normal tracking-wide text-gray-700 dark:text-gray-300 mb-1">
+                    <h2 className="heading-display text-2xl font-normal tracking-wide text-gray-700 mb-1">
                       Public Lists
                     </h2>
                     {loadingLists && (

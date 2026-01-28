@@ -42,7 +42,7 @@ type Story = StoryObj<typeof Navigation>
 
 export const Default: Story = {
   render: () => (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-0 m-0">
+    <div className="min-h-screen bg-gray-50 p-0 m-0">
       <Navigation />
     </div>
   ),
@@ -53,7 +53,7 @@ export const DarkMode: Story = {
     backgrounds: { default: 'dark' },
   },
   render: () => (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-0 m-0">
+    <div className="min-h-screen bg-gray-50 p-0 m-0">
       <Navigation />
     </div>
   ),

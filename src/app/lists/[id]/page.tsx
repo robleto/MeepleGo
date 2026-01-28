@@ -10,6 +10,10 @@ import { GameListWithItems } from '@/types/supabase'
 import SearchDropdown from '@/components/Elements/SearchDropdown'
 import Portal from '@/components/Elements/Portal'
 import { XMarkIcon } from '@heroicons/react/24/outline'
+import SaveProgressModal from '@/components/Components/SaveProgressModal'
+import { getGuestActivityCount, getOnboardingState, saveOnboardingState } from '@/lib/guestSession'
+import GameOnboardingModal from '@/components/Components/GameOnboardingModal'
+import type { SuggestionGame } from '@/components/Components/GameSearchSelect'
 
 interface GameListItemWithGame {
   id: string
@@ -56,6 +60,11 @@ export default function ListDetailPage() {
   const [customOrder, setCustomOrder] = useState<boolean>(false)
   const [savingOrder, setSavingOrder] = useState<'idle' | 'saving' | 'saved'>('idle')
   const [lastOrderSnapshot, setLastOrderSnapshot] = useState<string[] | null>(null)
+  const [showSaveModal, setShowSaveModal] = useState(false)
+  const [guestDismissCount, setGuestDismissCount] = useState(0)
+  const [guestActionsSincePrompt, setGuestActionsSincePrompt] = useState(0)
+  const [selectedGameForGuest, setSelectedGameForGuest] = useState<SuggestionGame | null>(null)
+  const [showGameModal, setShowGameModal] = useState(false)
 
   useEffect(() => {
     if (!listId) return
@@ -65,7 +74,7 @@ export default function ListDetailPage() {
       setNotFound(false)
       const { data, error } = await supabase
         .from('game_lists')
-        .select(`*, custom_order_enabled, game_list_items(*, game:games(*))`)
+        .select(`*, game_list_items(*, game:games(*))`)
         .eq('id', listId)
         .maybeSingle()
       if (!cancelled) {
@@ -201,7 +210,7 @@ export default function ListDetailPage() {
   if (!listId) {
     return (
       <PageLayout>
-        <div className="py-16 text-center text-gray-500 dark:text-gray-400">
+        <div className="py-16 text-center text-gray-500">
           Invalid list id.
         </div>
       </PageLayout>
@@ -211,7 +220,7 @@ export default function ListDetailPage() {
   if (loading) {
     return (
       <PageLayout>
-        <div className="py-16 text-center text-gray-500 dark:text-gray-400">
+        <div className="py-16 text-center text-gray-500">
           Loading list…
         </div>
       </PageLayout>
@@ -225,7 +234,7 @@ export default function ListDetailPage() {
           <Heading as="h1" size="lg" className="mb-4">
             List Not Found
           </Heading>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">
+          <p className="text-gray-600 mb-6">
             The list you are looking for doesn&apos;t exist or you don&apos;t
             have access.
           </p>
@@ -238,23 +247,6 @@ export default function ListDetailPage() {
         </div>
       </PageLayout>
     )
-  }
-
-  const isBgg = [
-    'bgg_bestsellers',
-    'bgg_hotness',
-    'bgg_trendingplays',
-    'bgg_mostplayed',
-  ].includes(list.list_type as string)
-  const bggDefaultDescriptions: Record<string, string> = {
-    bgg_bestsellers:
-      'Top-selling board games across major retailers (BoardGameGeek aggregated). Updated periodically.',
-    bgg_hotness:
-      'Real-time Hotness: games trending on BoardGameGeek based on recent activity & interest.',
-    bgg_trendingplays:
-      'Trending Plays: titles with surging play counts logged by the BGG community.',
-    bgg_mostplayed:
-      'Most Played: games with the highest total logged plays recently among BGG users.',
   }
 
   // Map sorted list items to GameWithRanking-like objects for explorer
@@ -442,6 +434,62 @@ export default function ListDetailPage() {
       }, 0)
     }
   }
+
+  const handleMembershipChange = (
+    gameId: string,
+    change: { library?: boolean; wishlist?: boolean }
+  ) => {
+    // If user is not logged in, open game detail modal instead
+    if (!sessionUserId) {
+      // Find the game from the list
+      const game = explorerGames.find((g: any) => g.id === gameId)
+      if (game) {
+        setSelectedGameForGuest({
+          id: game.id,
+          name: game.name,
+          yearPublished: game.year_published,
+          imageUrl: game.image_url,
+        })
+        setShowGameModal(true)
+      }
+      return
+    }
+
+    // Optimistic update for authenticated users
+    setUserEnrichment((prev) => {
+      const existing = prev.membership[gameId] || { library: false, wishlist: false }
+      return {
+        ...prev,
+        membership: {
+          ...prev.membership,
+          [gameId]: {
+            library: change.library !== undefined ? change.library : existing.library,
+            wishlist: change.wishlist !== undefined ? change.wishlist : existing.wishlist,
+          },
+        },
+      }
+    })
+  }
+
+  const handleGameModalComplete = () => {
+    setShowGameModal(false)
+    // After guest interacts with game, increment action count
+    setGuestActionsSincePrompt((prev) => prev + 1)
+    
+    const newActionCount = guestActionsSincePrompt + 1
+    
+    // Check threshold to show save modal
+    let threshold = 3
+    if (guestDismissCount === 1) threshold = 5
+    else if (guestDismissCount === 2) threshold = 3
+    else if (guestDismissCount >= 3) threshold = 2
+    
+    if (newActionCount >= threshold) {
+      setShowSaveModal(true)
+      setGuestActionsSincePrompt(0)
+    }
+  }
+
   const header = (
     <div>
       <div className="flex items-start justify-between gap-4 flex-wrap">
@@ -472,11 +520,11 @@ export default function ListDetailPage() {
       </div>
       {(list.description ||
         (isBgg && bggDefaultDescriptions[list.list_type as string])) && (
-        <p className="text-gray-700 text-sm dark:text-gray-300 max-w-3xl">
+        <p className="text-gray-700 text-sm max-w-3xl">
           {list.description || bggDefaultDescriptions[list.list_type as string]}
           <br />
           {(list.updated_at || list.created_at) && (
-            <span className="text-gray-400">
+            <span className="text-gray-400" suppressHydrationWarning>
               Updated{' '}
               {new Date(
                 (list.updated_at || list.created_at) as string
@@ -607,6 +655,7 @@ export default function ListDetailPage() {
           showListRanking={editing ? customOrder : customOrderDefault}
           hasExplicitOrder={editing ? customOrder : customOrderDefault}
           onRankingUpdate={handleRankingUpdate}
+          onMembershipChange={handleMembershipChange}
           defaultViewMode="list"
           storageKeyPrefix={list?.id ? `list-${list.id}` : 'list-detail'}
           getListItemControls={
@@ -667,18 +716,18 @@ export default function ListDetailPage() {
             }}
           >
             <div
-              className="bg-white dark:bg-gray-900 w-full sm:max-w-xl rounded-t-2xl sm:rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[80vh]"
+              className="bg-white w-full sm:max-w-xl rounded-t-2xl sm:rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[80vh]"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header */}
-              <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+              <div className="flex items-center justify-between p-6 border-b border-gray-200">
                 <h3 className="text-lg font-semibold">Add a Game to this List</h3>
                 <button
                   onClick={() => {
                     setShowAddModal(false)
                     setSelectedGameForAdd(null)
                   }}
-                  className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
+                  className="p-2 rounded-md hover:bg-gray-100"
                   aria-label="Close"
                 >
                   <XMarkIcon className="w-6 h-6 text-gray-500" />
@@ -714,6 +763,66 @@ export default function ListDetailPage() {
             </div>
           </div>
         </Portal>
+      )}
+
+      {/* Save Progress Modal for logged-out users */}
+      <SaveProgressModal
+        visible={showSaveModal}
+        dismissCount={guestDismissCount}
+        onClose={() => {
+          setShowSaveModal(false)
+          setGuestDismissCount((prev) => prev + 1)
+        }}
+        onAuthSuccess={() => {
+          setShowSaveModal(false)
+          // Refresh user enrichment after authentication
+          const refreshEnrichment = async () => {
+            const { data: { session } } = await supabase.auth.getSession()
+            if (session) {
+              setSessionUserId(session.user.id)
+              // Re-fetch user-specific data
+              setEnriching(true)
+              const gameIds = (list?.game_list_items || []).map((item: any) => item.game_id)
+              if (gameIds.length) {
+                const [{ data: rankData }, { data: membershipData }] = await Promise.all([
+                  supabase
+                    .from('rankings')
+                    .select('game_id, ranking, played_it')
+                    .eq('user_id', session.user.id)
+                    .in('game_id', gameIds),
+                  supabase.rpc('get_default_memberships', {
+                    p_user_id: session.user.id,
+                    p_game_ids: gameIds,
+                  }),
+                ])
+                const rankings: Record<string, { ranking: number | null; played_it: boolean }> = {}
+                const membership: Record<string, { library: boolean; wishlist: boolean }> = {}
+                rankData?.forEach((r: any) => {
+                  rankings[r.game_id] = { ranking: r.ranking, played_it: r.played_it }
+                })
+                membershipData?.forEach((m: any) => {
+                  membership[m.game_id] = { library: m.in_library, wishlist: m.in_wishlist }
+                })
+                setUserEnrichment({ rankings, membership })
+              }
+              setEnriching(false)
+            }
+          }
+          refreshEnrichment()
+        }}
+      />
+
+      {/* Game Onboarding Modal for logged-out users */}
+      {selectedGameForGuest && (
+        <GameOnboardingModal
+          game={selectedGameForGuest}
+          visible={showGameModal}
+          onClose={() => {
+            setShowGameModal(false)
+            setSelectedGameForGuest(null)
+          }}
+          onComplete={handleGameModalComplete}
+        />
       )}
     </PageLayout>
   )

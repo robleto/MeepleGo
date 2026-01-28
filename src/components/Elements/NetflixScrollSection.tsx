@@ -113,10 +113,10 @@ export default function NetflixScrollSection({
 
       {/* Gradient overlays for visual scroll indication */}
       {canScrollLeft && (
-        <div className="absolute left-0 top-0 bottom-4 w-8 bg-gradient-to-r from-white dark:from-gray-900 to-transparent pointer-events-none z-[5] hidden lg:block" />
+        <div className="absolute left-0 top-0 bottom-4 w-8 bg-gradient-to-r from-white to-transparent pointer-events-none z-[5] hidden lg:block" />
       )}
       {canScrollRight && (
-        <div className="absolute right-0 top-0 bottom-4 w-8 bg-gradient-to-l from-white dark:from-gray-900 to-transparent pointer-events-none z-[5] hidden lg:block" />
+        <div className="absolute right-0 top-0 bottom-4 w-8 bg-gradient-to-l from-white to-transparent pointer-events-none z-[5] hidden lg:block" />
       )}
     </div>
   )

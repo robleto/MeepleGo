@@ -355,11 +355,11 @@ export const MediumStatusChips: Story = {
         </div>
       </div>
 
-      <div className="mt-8 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-        <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">
+      <div className="mt-8 p-4 bg-blue-50 rounded-lg">
+        <h4 className="font-semibold text-blue-900 mb-2">
           Color Strategy
         </h4>
-        <div className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
+        <div className="text-sm text-blue-800 space-y-1">
           <div>
             <strong>Play Status:</strong> Green (played), Gray (unplayed),
             Yellow (in progress)
@@ -454,11 +454,11 @@ export const SmallStatusChips: Story = {
         </div>
       </div>
 
-      <div className="mt-8 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-        <h4 className="font-semibold text-green-900 dark:text-green-100 mb-2">
+      <div className="mt-8 p-4 bg-green-50 rounded-lg">
+        <h4 className="font-semibold text-green-900 mb-2">
           Updated Design Treatment
         </h4>
-        <div className="text-sm text-green-800 dark:text-green-200 space-y-1">
+        <div className="text-sm text-green-800 space-y-1">
           <div>
             <strong>Inactive:</strong> White background with gray text/icons
           </div>

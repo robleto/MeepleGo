@@ -204,112 +204,105 @@ export default function ProfileLayout({
     <div className="space-y-3">
       {/* Profile Header - Ultra-Compact Mobile */}
       <div className="bg-white sm:rounded-2xl sm:shadow-sm sm:border sm:border-gray-100 sm:dark:border-gray-800 p-3 sm:p-4">
-        <div className="flex items-center gap-3 mb-3">
-          <Link
-            href={isOwnProfile ? '/settings' : '#'}
-            className={`group relative h-12 w-12 sm:h-16 sm:w-16 rounded-xl sm:rounded-2xl overflow-hidden bg-gray-200 flex items-center justify-center flex-shrink-0 ${
-              isOwnProfile ? 'cursor-pointer' : 'cursor-default'
-            }`}
-            aria-label={isOwnProfile ? 'Edit profile photo' : 'Profile photo'}
-          >
-            {profile.avatar_url ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={profile.avatar_url}
-                alt="Profile"
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white text-lg sm:text-xl font-semibold">
-                {(
-                  profile.username ||
-                  profile.full_name ||
-                  profile.email ||
-                  'U'
-                )
-                  .charAt(0)
-                  .toUpperCase()}
-              </div>
-            )}
-            {isOwnProfile && (
-              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-xs font-medium text-white">
-                Edit
-              </div>
-            )}
-          </Link>
-          <div className="flex-1 min-w-0">
-            <Heading as="h1" size="lg" className="font-semibold truncate text-lg sm:text-2xl">
-              {profile.username || profile.full_name || 'User Profile'}
-            </Heading>
-            {profile.full_name && (
-              <p className="text-xs sm:text-sm text-gray-600 mt-0.5 truncate">
-                {profile.full_name}
-              </p>
-            )}
-            {profile.bio && (
-              <p className="hidden sm:block text-sm text-gray-600 mt-2 line-clamp-2">
-                {profile.bio}
-              </p>
-            )}
-            {!profile.bio && isOwnProfile && (
+        {/* Desktop: Side-by-side layout | Mobile: Stacked */}
+        <div className="sm:flex sm:items-center sm:gap-6">
+          {/* Left Side: Avatar and Name */}
+          <div className="sm:flex-1 sm:min-w-0">
+            <div className="flex items-center gap-3">
               <Link
-                href="/settings"
-                className="hidden sm:inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-primary-600 mt-2 transition-colors"
+                href={isOwnProfile ? '/settings' : '#'}
+                className={`group relative h-12 w-12 sm:h-12 sm:w-12 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center flex-shrink-0 ${
+                  isOwnProfile ? 'cursor-pointer' : 'cursor-default'
+                }`}
+                aria-label={isOwnProfile ? 'Edit profile photo' : 'Profile photo'}
               >
-                <PencilSquareIcon className="h-4 w-4" />
-                Add bio
+                {profile.avatar_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={profile.avatar_url}
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white text-lg sm:text-xl font-semibold">
+                    {(
+                      profile.username ||
+                      profile.full_name ||
+                      profile.email ||
+                      'U'
+                    )
+                      .charAt(0)
+                      .toUpperCase()}
+                  </div>
+                )}
+                {isOwnProfile && (
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-xs font-medium text-white">
+                    Edit
+                  </div>
+                )}
               </Link>
-            )}
-          </div>
-        </div>
-
-        {/* Stats Grid - Ultra-Compact Mobile */}
-        <div className="grid grid-cols-4 sm:grid-cols-2 gap-2 sm:gap-3">
-          {[
-            {
-              iconBg: 'bg-blue-500',
-              Icon: BookmarkIcon,
-              label: 'Owned',
-              value: stats.gamesOwned,
-            },
-            {
-              iconBg: 'bg-green-500',
-              Icon: CubeIcon,
-              label: 'Played',
-              value: stats.gamesPlayed,
-            },
-            {
-              iconBg: 'bg-yellow-500',
-              Icon: StarIcon,
-              label: 'Avg Rating',
-              value: stats.avgRating || '—',
-            },
-            {
-              iconBg: 'bg-purple-500',
-              Icon: ListBulletIcon,
-              label: 'Lists',
-              value: stats.listsCreated,
-            },
-          ].map((item) => (
-            <div
-              key={item.label}
-              className="text-center sm:bg-gray-50 sm:dark:bg-gray-800/50 sm:rounded-xl sm:p-3 sm:flex sm:items-center sm:gap-3 sm:text-left"
-            >
-              <div
-                className={`hidden sm:flex items-center justify-center w-10 h-10 rounded-lg ${item.iconBg} flex-shrink-0`}
-              >
-                <item.Icon className="w-5 h-5 text-white" />
-              </div>
-              <div className="sm:min-w-0 sm:flex-1">
-                <div className="text-xl sm:text-lg font-bold text-gray-900 truncate">
-                  {item.value}
-                </div>
-                <div className="text-[10px] sm:text-xs font-medium text-gray-500 uppercase sm:normal-case truncate mt-0.5">
-                  {item.label}
-                </div>
+              <div className="flex-1 min-w-0">
+                <Heading as="h1" size="lg" className="font-medium truncate text-lg sm:text-2xl">
+                  {profile.username || profile.full_name || 'User Profile'}
+                </Heading>
+                {profile.full_name && (
+                  <p className="text-xs sm:text-sm text-gray-600 mt-0.5 truncate">
+                    {profile.full_name}
+                  </p>
+                )}
               </div>
             </div>
-          ))}
+
+          </div>
+
+          {/* Right Side (Desktop) / Below (Mobile): Stats - Single Row */}
+          <div className="mt-3 sm:mt-0 grid grid-cols-4 gap-2 sm:flex sm:flex-wrap lg:flex-nowrap sm:gap-2 sm:flex-shrink-0">
+            {[
+              {
+                iconBg: 'bg-blue-500',
+                Icon: BookmarkIcon,
+                label: 'Owned',
+                value: stats.gamesOwned,
+              },
+              {
+                iconBg: 'bg-green-500',
+                Icon: CubeIcon,
+                label: 'Played',
+                value: stats.gamesPlayed,
+              },
+              {
+                iconBg: 'bg-yellow-500',
+                Icon: StarIcon,
+                label: 'Avg Rating',
+                value: stats.avgRating || '—',
+              },
+              {
+                iconBg: 'bg-purple-500',
+                Icon: ListBulletIcon,
+                label: 'Lists',
+                value: stats.listsCreated,
+              },
+            ].map((item) => (
+              <div
+                key={item.label}
+                className="text-center sm:bg-gray-50 sm:dark:bg-gray-800/50 sm:rounded-lg sm:p-2 sm:flex sm:items-center sm:gap-2 sm:text-left sm:min-w-[110px] lg:min-w-[120px]"
+              >
+                <div
+                  className={`hidden sm:flex items-center justify-center w-8 h-8 rounded-lg ${item.iconBg} flex-shrink-0`}
+                >
+                  <item.Icon className="w-4 h-4 text-white" />
+                </div>
+                <div className="sm:min-w-0 sm:flex-1">
+                  <div className="text-lg sm:text-base font-medium text-gray-900 truncate">
+                    {item.value}
+                  </div>
+                  <div className="text-[10px] sm:text-xs font-medium text-gray-500 uppercase sm:normal-case truncate mt-0.5 sm:mt-0">
+                    {item.label}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 

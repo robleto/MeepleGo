@@ -39,7 +39,7 @@ export const Default: Story = {
     return (
       <div className="w-[320px]">
         <DateTimePicker {...args} value={value} onChange={setValue} label={args.label ?? 'Date & Time'} />
-        <div className="mt-3 text-xs text-gray-500 dark:text-gray-400">Value: {value}</div>
+        <div className="mt-3 text-xs text-gray-500">Value: {value}</div>
       </div>
     )
   },

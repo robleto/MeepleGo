@@ -54,7 +54,7 @@ export function Heading({
       string
     > = {
       section:
-        'heading-display text-2xl font-normal tracking-wide text-gray-700 dark:text-gray-300',
+        'heading-display text-2xl font-normal tracking-wide text-gray-700',
     }
     return (
       <Comp className={clsx(variantClasses[variant], className)}>
@@ -76,10 +76,10 @@ export function Heading({
       ? 'font-semibold md:font-semibold lg:font-semibold'
       : 'font-semibold'
   const color = gradient
-    ? 'bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-400 dark:from-amber-300 dark:via-amber-400 dark:to-yellow-200 bg-clip-text text-transparent'
+    ? 'bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-400 bg-clip-text text-transparent'
     : subtle
-      ? 'text-gray-600 dark:text-gray-300'
-      : 'text-gray-900 dark:text-gray-50'
+      ? 'text-gray-600'
+      : 'text-gray-900'
   const alignment =
     align === 'center' ? 'text-center' : align === 'right' ? 'text-right' : ''
   const transform = uppercase ? 'uppercase tracking-wide' : ''

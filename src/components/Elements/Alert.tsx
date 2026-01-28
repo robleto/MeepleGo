@@ -52,25 +52,25 @@ export interface AlertProps {
 const variants = {
   success: {
     container:
-      'bg-green-50 border-green-200 text-green-800 dark:bg-green-900/20 dark:border-green-800 dark:text-green-300',
+      'bg-green-50 border-green-200 text-green-800',
     icon: CheckCircleIcon,
     iconColor: 'text-green-400',
   },
   error: {
     container:
-      'bg-red-50 border-red-200 text-red-800 dark:bg-red-900/20 dark:border-red-800 dark:text-red-300',
+      'bg-red-50 border-red-200 text-red-800',
     icon: XCircleIcon,
     iconColor: 'text-red-400',
   },
   warning: {
     container:
-      'bg-yellow-50 border-yellow-200 text-yellow-800 dark:bg-yellow-900/20 dark:border-yellow-800 dark:text-yellow-300',
+      'bg-yellow-50 border-yellow-200 text-yellow-800',
     icon: ExclamationTriangleIcon,
     iconColor: 'text-yellow-400',
   },
   info: {
     container:
-      'bg-blue-50 border-blue-200 text-blue-800 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-300',
+      'bg-blue-50 border-blue-200 text-blue-800',
     icon: InformationCircleIcon,
     iconColor: 'text-blue-400',
   },
@@ -138,7 +138,7 @@ export function Alert({
               <button
                 type="button"
                 onClick={onDismiss}
-                className={`inline-flex rounded-md p-1.5 focus:outline-none focus:ring-2 focus:ring-offset-2 hover:bg-black/5 dark:hover:bg-white/5 ${variantConfig.iconColor}`}
+                className={`inline-flex rounded-md p-1.5 focus:outline-none focus:ring-2 focus:ring-offset-2 hover:bg-black/5 ${variantConfig.iconColor}`}
               >
                 <span className="sr-only">Dismiss</span>
                 <XMarkIcon className={sizeConfig.close} />

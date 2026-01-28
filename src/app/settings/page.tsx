@@ -221,10 +221,10 @@ export default function SettingsPage() {
           </div>
         )}
 
-        <div className="bg-white dark:bg-gray-900 rounded-lg shadow p-6">
+        <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center justify-between gap-6 flex-wrap">
             <div className="flex items-center space-x-6">
-              <div className="h-20 w-20 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+              <div className="h-20 w-20 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
                 {profile.avatar_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -241,13 +241,13 @@ export default function SettingsPage() {
                 )}
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                <h1 className="text-2xl font-bold text-gray-900">
                   Account Settings
                 </h1>
-                <p className="text-gray-600 dark:text-gray-400">
+                <p className="text-gray-600">
                   {profile.email}
                 </p>
-                <p className="text-gray-500 dark:text-gray-500 text-sm mt-1">
+                <p className="text-gray-500 text-sm mt-1">
                   Update your profile details and security preferences
                 </p>
               </div>
@@ -262,15 +262,15 @@ export default function SettingsPage() {
           <div className="lg:col-span-2 space-y-6">
             <form
               onSubmit={handleSaveProfile}
-              className="bg-white dark:bg-gray-900 rounded-lg shadow p-6"
+              className="bg-white rounded-lg shadow p-6"
             >
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 <UserIcon className="h-5 w-5" />
                 Profile Information
               </h2>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Username
                   </label>
                   <input
@@ -283,11 +283,11 @@ export default function SettingsPage() {
                       }))
                     }
                     placeholder="Choose a username"
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Full Name
                   </label>
                   <input
@@ -300,11 +300,11 @@ export default function SettingsPage() {
                       }))
                     }
                     placeholder="Your full name"
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Avatar URL
                   </label>
                   <input
@@ -317,11 +317,11 @@ export default function SettingsPage() {
                       }))
                     }
                     placeholder="https://example.com/avatar.jpg"
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Bio
                   </label>
                   <textarea
@@ -331,7 +331,7 @@ export default function SettingsPage() {
                       setFormData((prev) => ({ ...prev, bio: e.target.value }))
                     }
                     placeholder="Tell us about yourself and your gaming interests..."
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                   />
                 </div>
               </div>
@@ -346,9 +346,9 @@ export default function SettingsPage() {
               </div>
             </form>
 
-            <div className="bg-white dark:bg-gray-900 rounded-lg shadow p-6">
+            <div className="bg-white rounded-lg shadow p-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
                   <KeyIcon className="h-5 w-5" />
                   Password & Security
                 </h2>
@@ -363,7 +363,7 @@ export default function SettingsPage() {
               {showPasswordForm && (
                 <form onSubmit={handleChangePassword} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
                       New Password
                     </label>
                     <input
@@ -376,12 +376,12 @@ export default function SettingsPage() {
                         }))
                       }
                       placeholder="Enter new password"
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
                       Confirm New Password
                     </label>
                     <input
@@ -394,7 +394,7 @@ export default function SettingsPage() {
                         }))
                       }
                       placeholder="Confirm new password"
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                       required
                     />
                   </div>
@@ -413,34 +413,34 @@ export default function SettingsPage() {
           </div>
 
           <div className="space-y-6">
-            <div className="bg-white dark:bg-gray-900 rounded-lg shadow p-6">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            <div className="bg-white rounded-lg shadow p-6">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">
                 Account
               </h2>
               <div className="space-y-3 text-sm">
                 <div>
-                  <div className="text-gray-500 dark:text-gray-400">Email</div>
-                  <div className="font-medium text-gray-900 dark:text-white">
+                  <div className="text-gray-500">Email</div>
+                  <div className="font-medium text-gray-900">
                     {profile.email}
                   </div>
                 </div>
                 <div>
-                  <div className="text-gray-500 dark:text-gray-400">Username</div>
-                  <div className="font-medium text-gray-900 dark:text-white">
+                  <div className="text-gray-500">Username</div>
+                  <div className="font-medium text-gray-900">
                     {profile.username || '—'}
                   </div>
                 </div>
                 <div>
-                  <div className="text-gray-500 dark:text-gray-400">Full name</div>
-                  <div className="font-medium text-gray-900 dark:text-white">
+                  <div className="text-gray-500">Full name</div>
+                  <div className="font-medium text-gray-900">
                     {profile.full_name || '—'}
                   </div>
                 </div>
               </div>
             </div>
 
-            <section className="bg-white dark:bg-gray-900 rounded-lg shadow p-6 space-y-4">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+            <section className="bg-white rounded-lg shadow p-6 space-y-4">
+              <h2 className="text-lg font-semibold text-gray-900">
                 List Density
               </h2>
               <p className="text-xs text-gray-500 max-w-prose">

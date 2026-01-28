@@ -93,10 +93,10 @@ export default function GameSearchInput(props: GameSearchInputProps) {
   // Variant styles
   const containerStyles = {
     default:
-      'group flex items-center bg-white dark:bg-gray-900 rounded-full border border-gray-300 dark:border-gray-700 transition shadow-sm px-3 h-11',
+      'group flex items-center bg-white rounded-full border border-gray-300 transition shadow-sm px-3 h-11',
     modal:
-      'group flex items-center bg-white dark:bg-gray-900 rounded-xl border border-gray-300 dark:border-gray-700 transition shadow-sm px-4 py-3',
-    pill: 'group flex items-center bg-white/90 dark:bg-gray-900/70 backdrop-blur-sm transition shadow-sm hover:shadow-md focus-within:ring-2 focus-within:ring-sky-500 rounded-full border border-gray-200 dark:border-gray-700 px-4 py-1.5',
+      'group flex items-center bg-white rounded-xl border border-gray-300 transition shadow-sm px-4 py-3',
+    pill: 'group flex items-center bg-white/90 backdrop-blur-sm transition shadow-sm hover:shadow-md focus-within:ring-2 focus-within:ring-sky-500 rounded-full border border-gray-200 px-4 py-1.5',
   }
 
   const inputStyles = {
@@ -104,7 +104,7 @@ export default function GameSearchInput(props: GameSearchInputProps) {
       'flex-1 bg-transparent outline-none px-2 text-sm placeholder:text-gray-400',
     modal:
       'flex-1 bg-transparent outline-none px-2 text-sm placeholder:text-gray-400',
-    pill: 'flex-1 bg-transparent placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none text-sm leading-tight',
+    pill: 'flex-1 bg-transparent placeholder-gray-400 focus:outline-none text-sm leading-tight',
   }
 
   const buttonStyles = {

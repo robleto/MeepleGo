@@ -17,14 +17,14 @@ import type {
   ComebackGame,
 } from '@/types'
 import awardsData from '@/data/awards.json'
+import OnboardingModal from '@/components/Components/OnboardingModal'
+import SignupPrompt from '@/components/Components/SignupPrompt'
+import { shouldPromptSignup, getOnboardingState } from '@/lib/guestSession'
 
 // Module-level cache for React Strict Mode stability
 let cachedFeaturedGames: Game[] | null = null
 let cachedIndustryAwards: any[] | null = null
 let cachedPublicLists: any[] | null = null
-let cachedBggMostPlayed: Game[] | null = null
-let cachedBggHotness: Game[] | null = null
-let cachedBggBestsellers: Game[] | null = null
 
 // Initialize awards immediately
 const INDUSTRY_AWARDS = (awardsData as any).categories.map((c: any) => ({
@@ -122,19 +122,6 @@ export default function HomepageContent() {
     cachedIndustryAwards || INDUSTRY_AWARDS
   )
   const [publicLists, setPublicLists] = useState<any[]>(cachedPublicLists || [])
-  const [bggMostPlayed, setBggMostPlayed] = useState<Game[]>(
-    cachedBggMostPlayed || []
-  )
-  const [bggHotness, setBggHotness] = useState<Game[]>(cachedBggHotness || [])
-  const [bggBestsellers, setBggBestsellers] = useState<Game[]>(
-    cachedBggBestsellers || []
-  )
-  const [bggListIds, setBggListIds] = useState<{
-    trendingplays?: string
-    hotness?: string
-    mostplayed?: string
-    bestsellers?: string
-  }>({})
   
   // Discovery lists state
   const [discoveryLists, setDiscoveryLists] = useState<{
@@ -152,63 +139,32 @@ export default function HomepageContent() {
   })
   const [discoveryLoading, setDiscoveryLoading] = useState(false)
 
+  // Onboarding state
+  const [showOnboarding, setShowOnboarding] = useState(false)
+  const [showSignupPrompt, setShowSignupPrompt] = useState(false)
+
+  // Check if we should show onboarding or signup prompt
+  useEffect(() => {
+    const onboardingState = getOnboardingState()
+    
+    // Only show onboarding for truly new users (not logged in, no welcome state, AND no existing data)
+    // Skip for logged-in users or users with stats (indicating they already have data)
+    if (!onboardingState.welcomed && !user && !userStats) {
+      setShowOnboarding(true)
+    }
+
+    // Check if we should prompt for signup (guest with activity)
+    if (!user && shouldPromptSignup()) {
+      // Delay prompt slightly so it doesn't interrupt browsing
+      const timer = setTimeout(() => {
+        setShowSignupPrompt(true)
+      }, 2000)
+      return () => clearTimeout(timer)
+    }
+  }, [user, userStats])
+
   useEffect(() => {
     let cancelled = false
-
-    // Helper function to fetch BGG list games
-    async function fetchBggList(listType: string): Promise<Game[]> {
-      try {
-        const { data: list, error: listErr } = await supabase
-          .from('game_lists')
-          .select('id')
-          .eq('list_type', listType)
-          .limit(1)
-
-        if (!listErr && list && list.length === 1) {
-          const listId = list[0].id
-
-          // Store the list ID for linking
-          if (listType === 'bgg_mostplayed') {
-            setBggListIds((prev) => ({ ...prev, mostplayed: listId }))
-          } else if (listType === 'bgg_hotness') {
-            setBggListIds((prev) => ({ ...prev, hotness: listId }))
-          } else if (listType === 'bgg_bestsellers') {
-            setBggListIds((prev) => ({ ...prev, bestsellers: listId }))
-          } else if (listType === 'bgg_trendingplays') {
-            setBggListIds((prev) => ({ ...prev, trendingplays: listId }))
-          }
-
-          const { data: listItems, error: itemsErr } = await supabase
-            .from('game_list_items')
-            .select(
-              `
-              games (
-                id,
-                name,
-                year_published,
-                image_url,
-                thumbnail_url,
-                rating,
-                categories,
-                min_players,
-                max_players,
-                playtime_minutes
-              )
-            `
-            )
-            .eq('list_id', listId)
-            .order('ranking', { ascending: true })
-            .limit(20)
-
-          if (!itemsErr && listItems && listItems.length) {
-            return listItems.map((item) => item.games).filter(Boolean) as any[]
-          }
-        }
-      } catch (err) {
-        console.error(`Error fetching ${listType}:`, err)
-      }
-      return []
-    }
 
     async function loadData() {
       try {
@@ -218,53 +174,8 @@ export default function HomepageContent() {
         if (cancelled) return
         setUser(session?.user || null)
 
-        // Trending games simple load: trendingplays -> API -> mock
+        // Featured games: API -> mock
         let gotGames = false
-        try {
-          const { data: trendingPlays, error: trendingErr } = await supabase
-            .from('game_lists')
-            .select('id')
-            .eq('list_type', 'bgg_trendingplays')
-            .limit(1)
-          if (!trendingErr && trendingPlays && trendingPlays.length === 1) {
-            const trendingId = trendingPlays[0].id
-            setBggListIds((prev) => ({ ...prev, trendingplays: trendingId }))
-
-            const { data: listItems, error: itemsErr } = await supabase
-              .from('game_list_items')
-              .select(
-                `
-                games (
-                  id,
-                  name,
-                  year_published,
-                  image_url,
-                  thumbnail_url,
-                  rating,
-                  categories,
-                  min_players,
-                  max_players,
-                  playtime_minutes
-                )
-              `
-              )
-              .eq('list_id', trendingId)
-              .order('ranking', { ascending: true })
-              .limit(20)
-            if (!itemsErr && listItems && listItems.length) {
-              const games = listItems
-                .map((i) => (i as any).games)
-                .filter(Boolean) as unknown as Game[]
-              if (!cancelled) {
-                cachedFeaturedGames = games
-                setFeaturedGames(games)
-              }
-              gotGames = true
-            }
-          }
-        } catch (error) {
-          // Ignore fetch errors, fall back to alternative data sources
-        }
         if (!gotGames) {
           try {
             const res = await fetch('/api/games?limit=20&sort=rank&orderBy=asc')
@@ -511,31 +422,8 @@ export default function HomepageContent() {
             if (!cancelled) setDiscoveryLoading(false)
           }
         }
-
-        // Load BGG lists
-        try {
-          const [mostPlayedGames, hotnessGames, bestsellersGames] =
-            await Promise.all([
-              fetchBggList('bgg_mostplayed'),
-              fetchBggList('bgg_hotness'),
-              fetchBggList('bgg_bestsellers'),
-            ])
-
-          if (!cancelled) {
-            cachedBggMostPlayed = mostPlayedGames
-            setBggMostPlayed(mostPlayedGames)
-
-            cachedBggHotness = hotnessGames
-            setBggHotness(hotnessGames)
-
-            cachedBggBestsellers = bestsellersGames
-            setBggBestsellers(bestsellersGames)
-          }
-        } catch {
-          // BGG lists are optional, continue without them
-        }
-      } catch {
-        // Continue with cached/fallback data
+      } catch (e) {
+        if (!cancelled) console.error('Error loading homepage data:', e)
       } finally {
         if (!cancelled) setLoading(false)
       }
@@ -547,19 +435,30 @@ export default function HomepageContent() {
   }, [])
 
   return (
-    <HomepageView
-      user={user}
-      loading={loading}
-      featuredGames={featuredGames}
-      userStats={userStats}
-      industryAwards={industryAwards}
-      publicLists={publicLists}
-      bggMostPlayed={bggMostPlayed}
-      bggHotness={bggHotness}
-      bggBestsellers={bggBestsellers}
-      bggListIds={bggListIds}
-      discoveryLists={discoveryLists}
-      discoveryLoading={discoveryLoading}
-    />
+    <>
+      <HomepageView
+        user={user}
+        loading={loading}
+        featuredGames={featuredGames}
+        userStats={userStats}
+        industryAwards={industryAwards}
+        publicLists={publicLists}
+        discoveryLists={discoveryLists}
+        discoveryLoading={discoveryLoading}
+      />
+      
+      {/* Onboarding for new users */}
+      <OnboardingModal
+        visible={showOnboarding}
+        onClose={() => setShowOnboarding(false)}
+        onComplete={() => setShowOnboarding(false)}
+      />
+
+      {/* Signup prompt for active guests */}
+      <SignupPrompt
+        visible={showSignupPrompt}
+        onClose={() => setShowSignupPrompt(false)}
+      />
+    </>
   )
 }

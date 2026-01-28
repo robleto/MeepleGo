@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { trackEvent } from '@/lib/analytics'
 import { captureError } from '@/lib/errorTracking'
+import { migrateGuestSession } from '@/lib/migrateGuestSession'
 
 function HandleInner() {
   const router = useRouter()
@@ -126,6 +127,37 @@ function HandleInner() {
         trackEvent('callback_success', {
           type: type || 'login',
         })
+        
+        // Migrate guest session data if this is a new user signup
+        if (type !== 'recovery' && !isE2E) {
+          try {
+            const { data: { user } } = await supabase.auth.getUser()
+            if (user) {
+              const migrationResult = await migrateGuestSession(user.id)
+              
+              if (migrationResult.ratingsCreated > 0 || migrationResult.listItemsCreated > 0) {
+                trackEvent('guest_migration_completed', {
+                  userId: user.id,
+                  ratingsCreated: migrationResult.ratingsCreated,
+                  listItemsCreated: migrationResult.listItemsCreated,
+                  hasErrors: migrationResult.errors.length > 0,
+                })
+              }
+              
+              if (migrationResult.errors.length > 0) {
+                console.warn('Guest migration had errors:', migrationResult.errors)
+              }
+            }
+          } catch (migrationErr) {
+            // Don't block auth flow if migration fails
+            console.error('Guest migration error:', migrationErr)
+            captureError(
+              migrationErr instanceof Error ? migrationErr : new Error('Migration failed'),
+              { context: 'auth_callback_migration' }
+            )
+          }
+        }
+        
         if (type === 'recovery') {
           router.replace('/update-password')
           return
