@@ -117,7 +117,7 @@ function FloatingCard({
       <img
         src={imageSrc}
         alt=""
-        className="w-full h-full object-cover"
+        className="object-cover w-full h-full"
         loading="eager"
         onLoad={(e) => {
           const img = e.currentTarget
@@ -142,13 +142,13 @@ function FeatureItem({
   description: string
 }) {
   return (
-    <div className="flex gap-4 items-start">
-      <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
+    <div className="flex items-start gap-4">
+      <div className="flex items-center justify-center flex-shrink-0 w-10 h-10 bg-gray-100 rounded-full">
         <Icon className="w-5 h-5 text-gray-600" />
       </div>
       <div>
-        <h3 className="heading-display text-base font-medium text-gray-900 mb-1">{title}</h3>
-        <p className="text-sm text-gray-500 leading-relaxed">{description}</p>
+        <h3 className="mb-1 text-base font-medium text-gray-900 heading-display">{title}</h3>
+        <p className="text-sm leading-relaxed text-gray-500">{description}</p>
       </div>
     </div>
   )
@@ -330,8 +330,8 @@ export default function OnboardingLanding({ onComplete }: OnboardingLandingProps
 
   // Schedule a card to fade out and be replaced
   const scheduleCardRotation = useCallback((cardId: string) => {
-    // Random duration between 6-12 seconds
-    const duration = 6000 + Math.random() * 6000
+    // Random duration between 15-25 seconds (slowed down for a calmer feel)
+    const duration = 15000 + Math.random() * 10000
 
     const timer = setTimeout(() => {
       setFloatingCards(prev => {
@@ -421,14 +421,14 @@ export default function OnboardingLanding({ onComplete }: OnboardingLandingProps
 
   if (!mounted) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600" />
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="w-8 h-8 border-b-2 rounded-full animate-spin border-primary-600" />
       </div>
     )
   }
 
   return (
-    <div className="relative">
+    <div className="relative -mt-16">
       {/* Custom keyframes */}
       <style jsx global>{`
         @keyframes floatCard {
@@ -483,19 +483,46 @@ export default function OnboardingLanding({ onComplete }: OnboardingLandingProps
           0%, 100% { transform: translateY(0); }
           50% { transform: translateY(6px); }
         }
+        @keyframes morphGradient3 {
+          0%, 100% {
+            transform: translate(0, 0) scale(1) rotate(0deg);
+            opacity: 0.25;
+          }
+          33% {
+            transform: translate(20%, -10%) scale(1.2) rotate(5deg);
+            opacity: 0.35;
+          }
+          66% {
+            transform: translate(-15%, 15%) scale(0.85) rotate(-5deg);
+            opacity: 0.2;
+          }
+        }
+        @keyframes colorShift {
+          0%, 100% { filter: hue-rotate(0deg); }
+          50% { filter: hue-rotate(30deg); }
+        }
+        @keyframes float-orb {
+          0%, 100% { transform: translateY(0) translateX(0); }
+          25% { transform: translateY(-20px) translateX(10px); }
+          50% { transform: translateY(-10px) translateX(-15px); }
+          75% { transform: translateY(-30px) translateX(5px); }
+        }
         @media (prefers-reduced-motion: reduce) {
           @keyframes floatCard { 0%, 100% { transform: none; } }
           @keyframes fadeSlideUp { from, to { opacity: 1; transform: none; } }
           @keyframes morphGradient { 0%, 100% { transform: none; opacity: 0.4; } }
           @keyframes morphGradient2 { 0%, 100% { transform: none; opacity: 0.3; } }
+          @keyframes morphGradient3 { 0%, 100% { transform: none; opacity: 0.25; } }
           @keyframes shimmer { 0%, 100% { background-position: 0 0; } }
           @keyframes pulse-slow { 0%, 100% { opacity: 0.2; } }
           @keyframes bounce-arrow { 0%, 100% { transform: none; } }
+          @keyframes colorShift { 0%, 100% { filter: none; } }
+          @keyframes float-orb { 0%, 100% { transform: none; } }
         }
       `}</style>
 
       {/* Hero Section - Full viewport */}
-      <section className="relative min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-primary-700 via-primary-800 to-slate-950 pt-8 pb-20">
+      <section className="relative flex flex-col items-center justify-center min-h-screen pb-20 bg-gradient-to-b from-primary-700 via-primary-800 to-slate-950">
         {/* Animated morphing gradient blobs */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           {/* Large morphing blob top-right */}
@@ -512,6 +539,24 @@ export default function OnboardingLanding({ onComplete }: OnboardingLandingProps
           <div
             className="absolute top-1/3 left-1/4 w-[300px] h-[300px] bg-gradient-to-r from-violet-500/20 to-fuchsia-500/15 rounded-full blur-3xl"
             style={{ animation: 'morphGradient 18s ease-in-out infinite reverse' }}
+          />
+          {/* Additional color-shifting blob top-center */}
+          <div
+            className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[400px] h-[400px] bg-gradient-to-br from-teal-400/25 to-emerald-500/20 rounded-full blur-3xl"
+            style={{ animation: 'morphGradient3 22s ease-in-out infinite, colorShift 30s ease-in-out infinite' }}
+          />
+          {/* Small floating orbs for depth */}
+          <div
+            className="absolute top-[20%] left-[15%] w-24 h-24 bg-gradient-to-br from-sky-300/30 to-blue-400/20 rounded-full blur-2xl"
+            style={{ animation: 'float-orb 12s ease-in-out infinite' }}
+          />
+          <div
+            className="absolute top-[60%] right-[20%] w-32 h-32 bg-gradient-to-br from-purple-400/25 to-pink-400/20 rounded-full blur-2xl"
+            style={{ animation: 'float-orb 15s ease-in-out infinite 3s' }}
+          />
+          <div
+            className="absolute top-[40%] right-[10%] w-20 h-20 bg-gradient-to-br from-cyan-300/30 to-teal-400/20 rounded-full blur-xl"
+            style={{ animation: 'float-orb 10s ease-in-out infinite 1.5s' }}
           />
           {/* Subtle shimmer overlay */}
           <div
@@ -535,7 +580,7 @@ export default function OnboardingLanding({ onComplete }: OnboardingLandingProps
 
         {/* Floating game cards - decorative */}
         {floatingCards.length > 0 && (
-          <div className="absolute inset-0 pointer-events-none hidden lg:block">
+          <div className="absolute inset-0 hidden pointer-events-none lg:block">
             {floatingCards.map((card) => (
               <FloatingCard
                 key={card.id}
@@ -551,21 +596,21 @@ export default function OnboardingLanding({ onComplete }: OnboardingLandingProps
         )}
 
         {/* Hero Content */}
-        <div className="relative z-10 max-w-3xl mx-auto px-6 text-center flex-1 flex flex-col justify-center">
+        <div className="relative z-10 flex flex-col justify-center flex-1 max-w-3xl px-6 mx-auto text-center">
           {/* Headline - using display font */}
           <h1
             className="heading-display text-4xl sm:text-5xl lg:text-6xl font-medium text-white mb-5 tracking-tight leading-[1.08] opacity-0"
             style={{ animation: 'fadeSlideUp 0.5s ease-out 0.1s forwards' }}
           >
             Your Personal
-            <span className="block bg-gradient-to-r from-white to-sky-200 bg-clip-text text-transparent">
+            <span className="block text-transparent bg-gradient-to-r from-white to-sky-200 bg-clip-text">
               Board Game Universe
             </span>
           </h1>
 
           {/* Subheadline */}
           <p
-            className="text-base sm:text-lg text-sky-100/90 mb-8 max-w-xl mx-auto leading-relaxed opacity-0"
+            className="max-w-xl mx-auto mb-8 text-base leading-relaxed opacity-0 sm:text-lg text-sky-100/90"
             style={{ animation: 'fadeSlideUp 0.5s ease-out 0.2s forwards' }}
           >
             Track your collection, rate your experiences, and discover your next favorite game.
@@ -574,7 +619,7 @@ export default function OnboardingLanding({ onComplete }: OnboardingLandingProps
           {/* Primary CTA - Find your first game */}
           <div
             ref={searchRef}
-            className="max-w-md mx-auto mb-10 opacity-0"
+            className="max-w-3xl mx-auto mb-10 opacity-0"
             style={{ animation: 'fadeSlideUp 0.5s ease-out 0.3s forwards' }}
           >
             <GameSearchSelect
@@ -592,13 +637,13 @@ export default function OnboardingLanding({ onComplete }: OnboardingLandingProps
 
         {/* Scroll indicator at bottom */}
         <div
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 opacity-0"
+          className="absolute -translate-x-1/2 opacity-0 bottom-8 left-1/2"
           style={{ animation: 'fadeSlideUp 0.5s ease-out 0.6s forwards' }}
         >
           <button
             type="button"
             onClick={scrollToNext}
-            className="flex flex-col items-center gap-2 text-white/70 hover:text-white/90 transition-colors group"
+            className="flex flex-col items-center gap-2 transition-colors text-white/70 hover:text-white/90 group"
             aria-label="Scroll to explore"
           >
             <span className="text-xs font-medium tracking-wide uppercase">Explore</span>
@@ -611,24 +656,24 @@ export default function OnboardingLanding({ onComplete }: OnboardingLandingProps
       </section>
 
       {/* BGG Lists Section */}
-      <section ref={nextSectionRef} className="py-12 px-6 bg-white border-t border-gray-100">
+      <section ref={nextSectionRef} className="px-6 py-12 bg-white border-t border-gray-100">
         <div className="max-w-6xl mx-auto">
           <div className="mb-6">
-            <h2 className="heading-display text-xl sm:text-2xl font-medium text-gray-900">
+            <h2 className="text-xl font-medium text-gray-900 heading-display sm:text-2xl">
               Explore popular collections
             </h2>
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="mt-1 text-sm text-gray-500">
               Curated lists from BoardGameGeek
             </p>
           </div>
-          <div className="overflow-x-auto scrollbar-hide -mx-6 px-6">
+          <div className="px-6 -mx-6 overflow-x-auto scrollbar-hide">
             <div className="flex gap-4 pb-2" style={{ width: 'max-content' }}>
               {(bggLoading ? Array.from({ length: 4 }) : bggLists).map((list, index) => (
                 <div key={(list as GameListWithItems)?.id || `bgg-skel-${index}`} className="flex-shrink-0 w-64">
                   {list ? (
                     <ListCard list={list as GameListWithItems} isPublic />
                   ) : (
-                    <div className="h-44 rounded-2xl bg-gray-100 animate-pulse" />
+                    <div className="bg-gray-100 h-44 rounded-2xl animate-pulse" />
                   )}
                 </div>
               ))}
@@ -638,18 +683,18 @@ export default function OnboardingLanding({ onComplete }: OnboardingLandingProps
       </section>
 
       {/* Features Section - Airbnb-style minimal */}
-      <section className="py-16 px-6 bg-gray-50/50">
+      <section className="px-6 py-16 bg-gray-50/50">
         <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="heading-display text-2xl sm:text-3xl font-medium text-gray-900 mb-3">
+          <div className="mb-12 text-center">
+            <h2 className="mb-3 text-2xl font-medium text-gray-900 heading-display sm:text-3xl">
               Everything you need for your hobby
             </h2>
-            <p className="text-base text-gray-500 max-w-lg mx-auto">
+            <p className="max-w-lg mx-auto text-base text-gray-500">
               MeepleGo helps you get more out of every game night.
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 gap-8 max-w-3xl mx-auto">
+          <div className="grid max-w-3xl gap-8 mx-auto sm:grid-cols-2">
             <FeatureItem
               icon={MagnifyingGlassIcon}
               title="Discover games"
@@ -668,7 +713,7 @@ export default function OnboardingLanding({ onComplete }: OnboardingLandingProps
             <FeatureItem
               icon={TrophyIcon}
               title="Create awards"
-              description="Celebrate your year in gaming with personal awards. Auto-generated or custom categories."
+              description="Celebrate your gaming experience with personal awards. Auto-generated or custom categories."
             />
             <FeatureItem
               icon={ListBulletIcon}
@@ -685,10 +730,10 @@ export default function OnboardingLanding({ onComplete }: OnboardingLandingProps
       </section>
 
       {/* How it Works - Simple steps */}
-      <section className="py-16 px-6 bg-white">
+      <section className="px-6 py-16 bg-white">
         <div className="max-w-3xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="heading-display text-2xl sm:text-3xl font-medium text-gray-900 mb-3">
+          <div className="mb-12 text-center">
+            <h2 className="mb-3 text-2xl font-medium text-gray-900 heading-display sm:text-3xl">
               Get started in seconds
             </h2>
             <p className="text-base text-gray-500">
@@ -696,17 +741,17 @@ export default function OnboardingLanding({ onComplete }: OnboardingLandingProps
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-8 sm:gap-4 justify-center">
+          <div className="flex flex-col justify-center gap-8 sm:flex-row sm:gap-4">
             {[
               { step: '1', title: 'Search', description: 'Find any board game' },
               { step: '2', title: 'Interact', description: 'Rate, own, or wishlist it' },
               { step: '3', title: 'Save', description: 'Create an account anytime' },
             ].map((item, i) => (
               <div key={item.step} className="flex-1 text-center max-w-[200px] mx-auto">
-                <div className="w-10 h-10 rounded-full bg-gray-900 text-white text-sm font-semibold flex items-center justify-center mx-auto mb-3">
+                <div className="flex items-center justify-center w-10 h-10 mx-auto mb-3 text-sm font-semibold text-white bg-gray-900 rounded-full">
                   {item.step}
                 </div>
-                <h3 className="heading-display text-base font-medium text-gray-900 mb-1">{item.title}</h3>
+                <h3 className="mb-1 text-base font-medium text-gray-900 heading-display">{item.title}</h3>
                 <p className="text-sm text-gray-500">{item.description}</p>
               </div>
             ))}
@@ -716,7 +761,7 @@ export default function OnboardingLanding({ onComplete }: OnboardingLandingProps
           <div className="mt-12 text-center">
             <button
               onClick={scrollToSearch}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-gray-900 text-white text-sm font-medium rounded-full shadow-sm hover:bg-gray-800 transition"
+              className="inline-flex items-center gap-2 px-6 py-3 text-sm font-medium text-white transition bg-gray-900 rounded-full shadow-sm hover:bg-gray-800"
             >
               <MagnifyingGlassIcon className="w-4 h-4" />
               Start searching

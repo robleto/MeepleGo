@@ -9,7 +9,7 @@ import { supabase } from '@/lib/supabase'
 import NavItem from '../Elements/NavItem'
 import { cn, getGameUrl } from '@/utils/helpers'
 import { Button } from '../Elements/Button'
-import Logo from '../Foundations/Logo'
+import { Logo } from '../Foundations/Logo'
 import dynamic from 'next/dynamic'
 import {
   TrophyIcon,
@@ -28,6 +28,10 @@ import {
   HeartIcon,
   XMarkIcon,
   PlusIcon,
+  UserGroupIcon,
+  CogIcon,
+  ComputerDesktopIcon,
+  BookOpenIcon,
 } from '@heroicons/react/24/outline'
 
 // Dynamic imports for heavy components
@@ -102,7 +106,7 @@ function SuggestionItem({
         parts.push(
           <span
             key={i}
-            className="bg-yellow-200 dark:bg-yellow-600/40 rounded px-0.5"
+            className="bg-yellow-200 rounded px-0.5"
           >
             {match}
           </span>
@@ -127,8 +131,8 @@ function SuggestionItem({
       className={cn(
         'w-full flex items-center gap-4 px-6 py-3 text-left transition-colors',
         active
-          ? 'bg-primary-50 dark:bg-primary-900/30'
-          : 'hover:bg-gray-50 dark:hover:bg-gray-800/60'
+          ? 'bg-primary-50'
+          : 'hover:bg-gray-50'
       )}
     >
         {game.thumbnail_url ? (
@@ -136,18 +140,18 @@ function SuggestionItem({
           <img
             src={game.thumbnail_url}
             alt=""
-            className="w-10 h-10 rounded-lg object-cover ring-1 ring-gray-200 dark:ring-gray-700"
+            className="w-10 h-10 rounded-lg object-cover ring-1 ring-gray-200"
           />
         ) : (
-          <div className="w-10 h-10 rounded-lg bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-[10px] font-semibold text-gray-600 dark:text-gray-300">
+          <div className="w-10 h-10 rounded-lg bg-gray-200 flex items-center justify-center text-[10px] font-semibold text-gray-600">
             {game.name.slice(0, 2).toUpperCase()}
           </div>
         )}
         <div className="min-w-0 flex-1">
-          <div className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+          <div className="text-sm font-medium text-gray-900 truncate">
             {highlight(game.name)}
           </div>
-          <div className="text-[11px] text-gray-500 dark:text-gray-400 flex items-center gap-2">
+          <div className="text-[11px] text-gray-500 flex items-center gap-2">
             {game.year_published && <span>{game.year_published}</span>}
             {game.rating != null && (
               <span className="font-mono text-gray-400">
@@ -164,6 +168,7 @@ function Navigation() {
   // Always call hooks unconditionally.
   const pathname = usePathname() || '/'
   const router = useRouter()
+  const [isMounted, setIsMounted] = useState(false)
   const [session, setSession] = useState<
     import('@supabase/supabase-js').Session | null
   >(null)
@@ -173,12 +178,7 @@ function Navigation() {
     avatar_url?: string
   } | null>(null)
   const [isDarkMode, setIsDarkMode] = useState(false)
-  const [themeMode, setThemeMode] = useState<'system' | 'light' | 'dark'>(
-    () => {
-      if (typeof window === 'undefined') return 'system'
-      return (localStorage.getItem('themeMode') as any) || 'system'
-    }
-  )
+  const [themeMode, setThemeMode] = useState<'system' | 'light' | 'dark'>('system')
   const [showUserMenu, setShowUserMenu] = useState(false)
   const [showAddMenu, setShowAddMenu] = useState(false)
   // Refs for outside click detection of dropdown menus
@@ -186,6 +186,16 @@ function Navigation() {
   const addButtonRef = useRef<HTMLButtonElement | null>(null)
   const userMenuRef = useRef<HTMLDivElement | null>(null)
   const userButtonRef = useRef<HTMLButtonElement | null>(null)
+  const mobileUserMenuRef = useRef<HTMLDivElement | null>(null)
+
+  const userInitials = (
+    profile?.username ||
+    profile?.full_name ||
+    session?.user?.email ||
+    'U'
+  )
+    .charAt(0)
+    .toUpperCase()
 
   // Modal states
   const [showPlayLogModal, setShowPlayLogModal] = useState(false)
@@ -362,6 +372,20 @@ function Navigation() {
     }
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
+  // Mount guard
+  useEffect(() => {
+    setIsMounted(true)
+    const savedTheme = localStorage.getItem('themeMode') as any
+    if (savedTheme) setThemeMode(savedTheme)
+  }, [])
+
+  // Mount guard and theme init
+  useEffect(() => {
+    setIsMounted(true)
+    const savedTheme = localStorage.getItem('themeMode') as any
+    if (savedTheme) setThemeMode(savedTheme)
   }, [])
 
   // Dark mode init
@@ -554,12 +578,15 @@ function Navigation() {
         }
       }
       if (showUserMenu) {
-        if (
-          userMenuRef.current &&
-          !userMenuRef.current.contains(target) &&
-          userButtonRef.current &&
-          !userButtonRef.current.contains(target)
-        ) {
+        const clickedDesktopMenu =
+          userMenuRef.current && userMenuRef.current.contains(target)
+        const clickedMobileMenu =
+          mobileUserMenuRef.current &&
+          mobileUserMenuRef.current.contains(target)
+        const clickedButton =
+          userButtonRef.current && userButtonRef.current.contains(target)
+
+        if (!clickedDesktopMenu && !clickedMobileMenu && !clickedButton) {
           setShowUserMenu(false)
         }
       }
@@ -586,21 +613,27 @@ function Navigation() {
   }, [searchOpen])
 
   return (
-    <nav
-      aria-label="Primary navigation"
-      className={cn(
-        'fixed inset-x-0 top-0 z-50 transition-[transform] duration-300',
-        visible ? 'translate-y-0' : '-translate-y-full'
-      )}
-    >
+    <>
+      <nav
+        aria-label="Primary navigation"
+        className={cn(
+          'fixed inset-x-0 top-0 z-50 transition-[transform] duration-300',
+          visible ? 'translate-y-0' : '-translate-y-full'
+        )}
+      >
       {/* Background layer to ensure sticky nav has a visible backdrop over content */}
+      {/* On home page (landing), nav is transparent to show hero behind it */}
       <div
         aria-hidden
         className={cn(
-          'absolute inset-0 pointer-events-none border-b z-0',
-          'backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:supports-[backdrop-filter]:bg-gray-900/60',
-          'bg-white/90 dark:bg-gray-900/90',
-          'border-gray-200/70 dark:border-white/10'
+          'absolute inset-0 pointer-events-none border-b z-0 transition-all duration-300',
+          pathname === '/'
+            ? 'bg-transparent border-transparent'
+            : [
+                'backdrop-blur supports-[backdrop-filter]:bg-white/70',
+                'bg-white/90',
+                'border-gray-200/70'
+              ]
         )}
       />
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -611,7 +644,12 @@ function Navigation() {
           <div className="hidden md:block min-w-0">
             <div
               ref={navContainerRef}
-              className="relative rounded-2xl px-2 backdrop-blur-xl shadow-[0_6px_30px_rgba(0,0,0,0.06)] border bg-white/60 dark:bg-black/30 border-gray-200/60 dark:border-white/10"
+              className={cn(
+                "relative rounded-2xl px-2 backdrop-blur-xl shadow-[0_6px_30px_rgba(0,0,0,0.06)] border transition-all duration-300",
+                pathname === '/'
+                  ? 'bg-white/20 border-white/20'
+                  : 'bg-white/60 border-gray-200/60'
+              )}
               onMouseLeave={() => {
                 const active = linkRefs.current[pathname] || null
                 moveHighlighterTo(active)
@@ -627,9 +665,11 @@ function Navigation() {
                   opacity: 0,
                   width: 0,
                   transform: 'translate3d(0,0,0)',
-                  backgroundColor: 'rgba(224, 242, 254, 0.7)', // sky-100 with subtle opacity
-                  borderColor: 'rgba(186, 230, 253, 0.6)', // sky-200 border for definition
-                  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.6), 0 6px 12px rgba(0,0,0,0.06)'
+                  backgroundColor: pathname === '/' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(224, 242, 254, 0.7)',
+                  borderColor: pathname === '/' ? 'rgba(255, 255, 255, 0.25)' : 'rgba(186, 230, 253, 0.6)',
+                  boxShadow: pathname === '/'
+                    ? 'inset 0 1px 0 rgba(255,255,255,0.2), 0 6px 12px rgba(0,0,0,0.1)'
+                    : 'inset 0 1px 0 rgba(255,255,255,0.6), 0 6px 12px rgba(0,0,0,0.06)'
                 }}
                 aria-hidden="true"
               />
@@ -645,9 +685,13 @@ function Navigation() {
                         onMouseEnter={(e) => moveHighlighterTo(e.currentTarget)}
                         className={cn(
                           'block px-4 py-2.5 relative transition-colors duration-200 rounded-lg text-center',
-                          active
-                            ? 'text-gray-900 dark:text-gray-100'
-                            : 'text-black dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+                          pathname === '/'
+                            ? active
+                              ? 'text-white'
+                              : 'text-white/80 hover:text-white'
+                            : active
+                              ? 'text-gray-900'
+                              : 'text-black hover:text-gray-900'
                         )}
                         href={item.href}
                       >
@@ -660,10 +704,10 @@ function Navigation() {
             </div>
           </div>
 
-          <div className="flex-1 hidden md:block" />
+          <div className="flex-1" />
           {/* Search (Airbnb-style pill, compact) - TEMPORARILY COMMENTED OUT 
           <div className="hidden md:flex relative w-full max-w-lg">
-            <div className="flex w-full items-center gap-2 rounded-full border border-gray-200 dark:border-gray-700 bg-white/85 dark:bg-gray-900/70 px-4 py-1.5 shadow-sm hover:shadow-md backdrop-blur-sm transition focus-within:ring-2 focus-within:ring-primary-500">
+            <div className="flex w-full items-center gap-2 rounded-full border border-gray-200 bg-white/85 px-4 py-1.5 shadow-sm hover:shadow-md backdrop-blur-sm transition focus-within:ring-2 focus-within:ring-primary-500">
               <input
                 ref={inputRef}
                 type="text"
@@ -672,7 +716,7 @@ function Navigation() {
                 onKeyDown={onKey}
                 onFocus={()=>{ if (flat.length) setShow(true) }}
                 placeholder="Start for games"
-                className="flex-1 bg-transparent placeholder-gray-400 dark:placeholder-gray-500 text-sm leading-tight focus:outline-none"
+                className="flex-1 bg-transparent placeholder-gray-400 text-sm leading-tight focus:outline-none"
                 role="combobox"
                 aria-autocomplete="list"
                 aria-expanded={show}
@@ -689,41 +733,41 @@ function Navigation() {
               </button>
             </div>
             {show && (
-              <div ref={dropdownRef} id="nav-suggestions" role="listbox" className="absolute left-0 right-0 top-full mt-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-xl overflow-hidden max-h-[400px] overflow-y-auto z-50 text-sm">
-                {loading && <div className="px-6 py-4 text-gray-500 dark:text-gray-400">Searching…</div>}
+              <div ref={dropdownRef} id="nav-suggestions" role="listbox" className="absolute left-0 right-0 top-full mt-2 bg-white border border-gray-200 rounded-2xl shadow-xl overflow-hidden max-h-[400px] overflow-y-auto z-50 text-sm">
+                {loading && <div className="px-6 py-4 text-gray-500">Searching…</div>}
                 {!loading && !flat.length && (
                   <div className="px-6 py-6 text-center">
-                    <div className="w-10 h-10 mx-auto mb-2 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center"><MagnifyingGlassIcon className="w-5 h-5 text-gray-400" /></div>
-                    <div className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">No games found</div>
-                    <div className="text-[11px] text-gray-400 dark:text-gray-500">Try another search term</div>
+                    <div className="w-10 h-10 mx-auto mb-2 rounded-full bg-gray-100 flex items-center justify-center"><MagnifyingGlassIcon className="w-5 h-5 text-gray-400" /></div>
+                    <div className="text-gray-500 text-sm font-medium mb-1">No games found</div>
+                    <div className="text-[11px] text-gray-400">Try another search term</div>
                   </div>
                 )}
                 {!loading && flat.length > 0 && (
                   <>
                     {grouped.exactMatches.length > 0 && (
-                      <div className="border-b border-gray-100 dark:border-gray-800">
-                        <div className="px-6 py-2 bg-gray-50 dark:bg-gray-800/50 text-[11px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Exact Match</div>
+                      <div className="border-b border-gray-100">
+                        <div className="px-6 py-2 bg-gray-50 text-[11px] font-semibold uppercase tracking-wide text-gray-500">Exact Match</div>
                         {grouped.exactMatches.map((g,i)=> <SuggestionItem key={`e-${g.id}`} game={g} active={activeIndex===i} index={i} query={query} onSelect={selectGame} onHover={()=>setActiveIndex(i)} />)}
                       </div>
                     )}
                     {grouped.popular.length > 0 && (
-                      <div className="border-b border-gray-100 dark:border-gray-800">
-                        <div className="px-6 py-2 bg-gray-50 dark:bg-gray-800/50 text-[11px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 flex items-center gap-2"><TrophyIcon className="w-3.5 h-3.5" /> Popular</div>
+                      <div className="border-b border-gray-100">
+                        <div className="px-6 py-2 bg-gray-50 text-[11px] font-semibold uppercase tracking-wide text-gray-500 flex items-center gap-2"><TrophyIcon className="w-3.5 h-3.5" /> Popular</div>
                         {grouped.popular.map((g,i)=>{ const idx = grouped.exactMatches.length + i; return <SuggestionItem key={`p-${g.id}`} game={g} active={activeIndex===idx} index={idx} query={query} onSelect={selectGame} onHover={()=>setActiveIndex(idx)} /> })}
                       </div>
                     )}
                     {grouped.other.length > 0 && (
                       <div>
-                        <div className="px-6 py-2 bg-gray-50 dark:bg-gray-800/50 text-[11px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 flex items-center gap-2"><CubeIcon className="w-3.5 h-3.5" /> Other</div>
+                        <div className="px-6 py-2 bg-gray-50 text-[11px] font-semibold uppercase tracking-wide text-gray-500 flex items-center gap-2"><CubeIcon className="w-3.5 h-3.5" /> Other</div>
                         {grouped.other.map((g,i)=>{ const idx = grouped.exactMatches.length + grouped.popular.length + i; return <SuggestionItem key={`o-${g.id}`} game={g} active={activeIndex===idx} index={idx} query={query} onSelect={selectGame} onHover={()=>setActiveIndex(idx)} /> })}
                       </div>
                     )}
                   </>
                 )}
-                <div className="border-t border-gray-100 dark:border-gray-800">
-                  <div className="px-6 py-2 text-[11px] text-gray-400 dark:text-gray-500">Press Enter to search • ↑↓ navigate</div>
+                <div className="border-t border-gray-100">
+                  <div className="px-6 py-2 text-[11px] text-gray-400">Press Enter to search • ↑↓ navigate</div>
                   <div className="px-6 py-2 text-center">
-                    <Link href="/add" onClick={()=>{ setShow(false); setQuery('') }} className="text-xs text-gray-400 dark:text-gray-500 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Can't find your game? Add it here</Link>
+                    <Link href="/add" onClick={()=>{ setShow(false); setQuery('') }} className="text-xs text-gray-400 hover:text-primary-600 transition-colors">Can't find your game? Add it here</Link>
                   </div>
                 </div>
               </div>
@@ -732,6 +776,7 @@ function Navigation() {
           */}
 
           {/* Actions */}
+          {isMounted && (
           <div className="flex items-center gap-2 relative" ref={addMenuRef}>
             <Button
               ref={addButtonRef}
@@ -747,7 +792,7 @@ function Navigation() {
             <div className="relative">
               <div
                 className={cn(
-                  'flex items-center gap-2 rounded-full border border-gray-200 dark:border-gray-700 bg-white/90 dark:bg-gray-900/70 shadow-sm backdrop-blur-sm transition-all duration-200 overflow-hidden',
+                  'flex items-center gap-2 rounded-full border border-gray-200 bg-white/90 shadow-sm backdrop-blur-sm transition-all duration-200 overflow-hidden',
                   searchOpen
                     ? 'w-72 pl-2 pr-2 py-1.5'
                     : 'w-9 h-9 justify-center p-0'
@@ -767,9 +812,9 @@ function Navigation() {
                   }
                   aria-label="Search"
                   className={cn(
-                    'shrink-0 flex items-center justify-center rounded-full text-gray-600 dark:text-gray-300',
+                    'shrink-0 flex items-center justify-center rounded-full text-gray-600',
                     searchOpen
-                      ? 'h-7 w-7 hover:bg-gray-100 dark:hover:bg-gray-800'
+                      ? 'h-7 w-7 hover:bg-gray-100'
                       : 'h-9 w-9'
                   )}
                 >
@@ -789,7 +834,7 @@ function Navigation() {
                   }}
                   placeholder="Search games"
                   className={cn(
-                    'bg-transparent text-sm placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none transition-all duration-200',
+                    'bg-transparent text-sm placeholder-gray-400 focus:outline-none transition-all duration-200',
                     searchOpen ? 'w-full opacity-100' : 'w-0 opacity-0 pointer-events-none'
                   )}
                   role="combobox"
@@ -808,22 +853,22 @@ function Navigation() {
                   ref={dropdownRef}
                   id="nav-suggestions"
                   role="listbox"
-                  className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-xl overflow-hidden max-h-[400px] overflow-y-auto z-50 text-sm"
+                  className="absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-2xl shadow-xl overflow-hidden max-h-[400px] overflow-y-auto z-50 text-sm"
                 >
                   {loading && (
-                    <div className="px-6 py-4 text-gray-500 dark:text-gray-400">
+                    <div className="px-6 py-4 text-gray-500">
                       Searching…
                     </div>
                   )}
                   {!loading && !flat.length && (
                     <div className="px-6 py-6 text-center">
-                      <div className="w-10 h-10 mx-auto mb-2 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                      <div className="w-10 h-10 mx-auto mb-2 rounded-full bg-gray-100 flex items-center justify-center">
                         <MagnifyingGlassIcon className="w-5 h-5 text-gray-400" />
                       </div>
-                      <div className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">
+                      <div className="text-gray-500 text-sm font-medium mb-1">
                         No games found
                       </div>
-                      <div className="text-[11px] text-gray-400 dark:text-gray-500">
+                      <div className="text-[11px] text-gray-400">
                         Try another search term
                       </div>
                     </div>
@@ -831,8 +876,8 @@ function Navigation() {
                   {!loading && flat.length > 0 && (
                     <>
                       {grouped.exactMatches.length > 0 && (
-                        <div className="border-b border-gray-100 dark:border-gray-800">
-                          <div className="px-6 py-2 bg-gray-50 dark:bg-gray-800/50 text-[11px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                        <div className="border-b border-gray-100">
+                          <div className="px-6 py-2 bg-gray-50 text-[11px] font-semibold uppercase tracking-wide text-gray-500">
                             Exact Match
                           </div>
                           {grouped.exactMatches.map((g, i) => (
@@ -849,8 +894,8 @@ function Navigation() {
                         </div>
                       )}
                       {grouped.popular.length > 0 && (
-                        <div className="border-b border-gray-100 dark:border-gray-800">
-                          <div className="px-6 py-2 bg-gray-50 dark:bg-gray-800/50 text-[11px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                        <div className="border-b border-gray-100">
+                          <div className="px-6 py-2 bg-gray-50 text-[11px] font-semibold uppercase tracking-wide text-gray-500 flex items-center gap-2">
                             <TrophyIcon className="w-3.5 h-3.5" /> Popular
                           </div>
                           {grouped.popular.map((g, i) => {
@@ -871,7 +916,7 @@ function Navigation() {
                       )}
                       {grouped.other.length > 0 && (
                         <div>
-                          <div className="px-6 py-2 bg-gray-50 dark:bg-gray-800/50 text-[11px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                          <div className="px-6 py-2 bg-gray-50 text-[11px] font-semibold uppercase tracking-wide text-gray-500 flex items-center gap-2">
                             <CubeIcon className="w-3.5 h-3.5" /> Other
                           </div>
                           {grouped.other.map((g, i) => {
@@ -895,8 +940,8 @@ function Navigation() {
                       )}
                     </>
                   )}
-                  <div className="border-t border-gray-100 dark:border-gray-800">
-                    <div className="px-6 py-2 text-[11px] text-gray-400 dark:text-gray-500">
+                  <div className="border-t border-gray-100">
+                    <div className="px-6 py-2 text-[11px] text-gray-400">
                       Press Enter to search • ↑↓ navigate
                     </div>
                     <div className="px-6 py-2 text-center">
@@ -907,7 +952,7 @@ function Navigation() {
                           setQuery('')
                           setSearchOpen(false)
                         }}
-                        className="text-xs text-gray-400 dark:text-gray-500 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                        className="text-xs text-gray-400 hover:text-primary-600 transition-colors"
                       >
                         Can't find your game? Add it here
                       </Link>
@@ -918,10 +963,10 @@ function Navigation() {
             </div>
             {showAddMenu && (
               <div
-                className="absolute right-full mr-2 top-0 mt-10 w-60 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-xl p-2 z-50"
+                className="absolute right-full mr-2 top-0 mt-10 w-60 rounded-xl border border-gray-200 bg-white shadow-xl p-2 z-50"
                 role="menu"
               >
-                <div className="text-[11px] uppercase tracking-wide font-semibold text-gray-500 dark:text-gray-400 px-2 pb-1">
+                <div className="text-[11px] uppercase tracking-wide font-semibold text-gray-500 px-2 pb-1">
                   Quick Add
                 </div>
                 <button
@@ -929,7 +974,7 @@ function Navigation() {
                     setShowAddMenu(false)
                     setShowPlayLogModal(true)
                   }}
-                  className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition"
+                  className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm hover:bg-gray-50 transition"
                 >
                   <PlayIcon className="w-4 h-4 text-gray-400" /> Log a Play
                 </button>
@@ -938,7 +983,7 @@ function Navigation() {
                     setShowAddMenu(false)
                     setShowCreateListModal(true)
                   }}
-                  className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition"
+                  className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm hover:bg-gray-50 transition"
                 >
                   <ListBulletIcon className="w-4 h-4 text-gray-400" /> New List
                 </button>
@@ -947,7 +992,7 @@ function Navigation() {
                     setShowAddGameModal(true)
                     setShowAddMenu(false)
                   }}
-                  className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition"
+                  className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm hover:bg-gray-50 transition"
                 >
                   <CubeIcon className="w-4 h-4 text-gray-400" /> Missing Game
                 </button>
@@ -961,7 +1006,7 @@ function Navigation() {
                     onClick={() => setShowUserMenu((v) => !v)}
                     aria-haspopup="menu"
                     aria-expanded={showUserMenu}
-                    className="flex items-center gap-2 rounded-full p-1 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                    className="flex items-center gap-2 rounded-full p-1 hover:bg-gray-100 transition-colors"
                     title={
                       profile?.username ||
                       profile?.full_name ||
@@ -974,10 +1019,10 @@ function Navigation() {
                       <img
                         src={profile.avatar_url}
                         alt="Profile"
-                        className="w-7 h-7 rounded-full object-cover ring-2 ring-gray-200 dark:ring-gray-700"
+                        className="w-7 h-7 rounded-full object-cover ring-2 ring-gray-200"
                       />
                     ) : (
-                      <div className="w-7 h-7 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white text-[12px] font-medium ring-2 ring-gray-200 dark:ring-gray-700">
+                      <div className="w-7 h-7 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white text-[12px] font-medium ring-2 ring-gray-200">
                         {(
                           profile?.username ||
                           profile?.full_name ||
@@ -988,101 +1033,99 @@ function Navigation() {
                           .toUpperCase()}
                       </div>
                     )}
-                    <span className="hidden sm:block text-sm font-medium text-gray-700 dark:text-gray-300 max-w-24 truncate">
+                    <span className="hidden sm:block text-sm font-medium text-gray-700 max-w-24 truncate">
                       {profile?.username || profile?.full_name || 'Profile'}
                     </span>
                   </button>
+                  
+                  {/* Desktop User Menu Dropdown - Hidden on mobile */}
                   {showUserMenu && (
-                    <div
-                      ref={userMenuRef}
-                      className="absolute right-0 mt-2 w-64 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-xl py-2 text-sm z-50"
-                      role="menu"
-                    >
-                      <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800">
-                        <div className="font-medium text-gray-900 dark:text-white truncate">
-                          {profile?.username || profile?.full_name || 'User'}
+                    <>
+                      <div
+                        ref={userMenuRef}
+                        className="hidden sm:block absolute right-0 mt-2 w-64 rounded-2xl border border-gray-200 bg-white shadow-xl py-2 text-sm z-50"
+                        role="menu"
+                      >
+                        <div className="px-4 py-3 border-b border-gray-100">
+                          <div className="font-medium text-gray-900 truncate">
+                            {profile?.username || profile?.full_name || 'User'}
+                          </div>
+                          <div className="text-gray-500 truncate text-xs">
+                            {session?.user.email}
+                          </div>
                         </div>
-                        <div className="text-gray-500 dark:text-gray-400 truncate text-xs">
-                          {session?.user.email}
-                        </div>
-                      </div>
-                      <div className="px-2 py-2">
+                        <div className="px-2 py-2">
                         {[
                           {
                             label: 'Overview',
-                            href: '/profile?tab=overview',
+                            href: '/profile',
                             Icon: UserCircleIcon,
                           },
                           {
                             label: 'Library',
-                            href: '/profile?tab=games',
+                            href: '/profile/library',
                             Icon: BookmarkIcon,
                           },
                           {
-                            label: 'Watchlist',
-                            href: '/profile?tab=watchlist',
+                            label: 'Wishlist',
+                            href: '/profile/wishlist',
                             Icon: HeartIcon,
                           },
                           {
-                            label: 'Collections',
-                            href: '/profile?tab=collections',
-                            Icon: CubeIcon,
-                          },
-                          {
-                            label: 'Awards',
-                            href: '/profile?tab=awards',
-                            Icon: TrophyIcon,
-                          },
-                          {
                             label: 'Rankings',
-                            href: '/profile?tab=rankings',
+                            href: '/profile/rankings',
                             Icon: ChartBarIcon,
                           },
                           {
                             label: 'Lists',
-                            href: '/profile?tab=lists',
+                            href: '/profile/lists',
                             Icon: ListBulletIcon,
                           },
                           {
+                            label: 'Awards',
+                            href: '/awards',
+                            Icon: TrophyIcon,
+                          },
+                          {
                             label: 'Journal',
-                            href: '/profile?tab=journal',
+                            href: '/profile/plays',
                             Icon: PencilSquareIcon,
                           },
                           {
-                            label: 'Stats',
-                            href: '/profile?tab=stats',
-                            Icon: ChartBarIcon,
+                            label: 'Friends',
+                            href: '/profile/friends',
+                            Icon: UserGroupIcon,
                           },
                         ].map(({ label, href, Icon }) => (
                           <Link
                             key={label}
                             href={href}
-                            className="flex items-center gap-2 px-3 py-1.5 rounded-md text-xs hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                            className="flex items-center gap-2 px-3 py-1.5 rounded-md text-xs hover:bg-gray-50 transition-colors"
                           >
                             <Icon className="h-3.5 w-3.5 text-gray-400" />
-                            <span className="text-gray-700 dark:text-gray-200">
+                            <span className="text-gray-700">
                               {label}
                             </span>
                           </Link>
                         ))}
-                      </div>
-                      <hr className="my-1 border-gray-100 dark:border-gray-800" />
-                      <Link
+                        </div>
+                        <hr className="my-1 border-gray-100" />
+                        <Link
                         href="/settings"
-                        className="flex items-center gap-2 px-4 py-2 text-xs hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                        className="flex items-center gap-2 px-4 py-2 text-xs hover:bg-gray-50 transition-colors"
                       >
                         <ListBulletIcon className="h-3.5 w-3.5 text-gray-400" />
                         Settings
                       </Link>
                       <button
                         onClick={signOut}
-                        className="w-full flex items-center gap-2 px-4 py-2 text-xs hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-red-600 dark:text-red-400"
+                        className="w-full flex items-center gap-2 px-4 py-2 text-xs hover:bg-gray-50 transition-colors text-red-600"
                       >
                         <ArrowRightOnRectangleIcon className="h-3.5 w-3.5" />
                         Sign out
                       </button>
                       <div className="px-4 pt-3 pb-2">
-                        <div className="text-[10px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2">
+                        <div className="text-[10px] font-semibold uppercase tracking-wide text-gray-500 mb-2">
                           Theme
                         </div>
                         <div className="grid grid-cols-3 gap-2">
@@ -1090,7 +1133,7 @@ function Navigation() {
                             <button
                               key={m}
                               onClick={() => setTheme(m)}
-                              className={`flex items-center justify-center gap-1 px-2 py-1.5 rounded-md text-[11px] font-medium border transition ${themeMode === m ? 'border-primary-500 text-primary-600 bg-primary-50' : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300'}`}
+                              className={`flex items-center justify-center gap-1 px-2 py-1.5 rounded-md text-[11px] font-medium border transition ${themeMode === m ? 'border-primary-500 text-primary-600 bg-primary-50' : 'border-gray-200 hover:bg-gray-50 text-gray-600'}`}
                             >
                               {m === 'system' ? (
                                 <span className="flex items-center gap-1">
@@ -1106,7 +1149,134 @@ function Navigation() {
                           ))}
                         </div>
                       </div>
-                    </div>
+                      </div>
+
+                      {/* Mobile Full-Screen User Menu */}
+                      <Portal>
+                        <Overlay
+                          visible={showUserMenu}
+                          variant="blur"
+                          clickToClose={true}
+                          zIndex={200}
+                          className="sm:hidden"
+                          onClick={() => setShowUserMenu(false)}
+                        >
+                        <div
+                          ref={mobileUserMenuRef}
+                          className="fixed inset-y-0 right-0 w-full bg-white shadow-2xl flex flex-col overflow-y-auto"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {/* Header with Close Button */}
+                          <div className="flex items-center justify-between p-4 border-b border-gray-200">
+                            <div className="flex items-center gap-3">
+                              <div className="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-orange-400 to-orange-500 text-white font-semibold text-lg">
+                                {userInitials}
+                              </div>
+                              <div>
+                                <div className="font-semibold text-base">
+                                  {session?.user?.user_metadata?.preferred_username ||
+                                    session?.user?.user_metadata?.name ||
+                                    session?.user?.email?.split('@')[0] ||
+                                    'User'}
+                                </div>
+                                <div className="text-xs text-gray-600">
+                                  {session?.user?.email}
+                                </div>
+                              </div>
+                            </div>
+                            <button
+                              onClick={() => setShowUserMenu(false)}
+                              className="p-2 rounded-lg hover:bg-gray-100"
+                              aria-label="Close menu"
+                            >
+                              <XMarkIcon className="w-6 h-6" />
+                            </button>
+                          </div>
+
+                          {/* Navigation Links */}
+                          <div className="flex-1 py-4">
+                            <div className="space-y-1 px-2">
+                              {[
+                                { name: 'Overview', href: '/profile', icon: UserCircleIcon },
+                                { name: 'Library', href: '/profile/library', icon: BookmarkIcon },
+                                { name: 'Wishlist', href: '/profile/wishlist', icon: HeartIcon },
+                                { name: 'Rankings', href: '/profile/rankings', icon: ChartBarIcon },
+                                { name: 'Lists', href: '/profile/lists', icon: ListBulletIcon },
+                                { name: 'Awards', href: '/awards', icon: TrophyIcon },
+                                { name: 'Journal', href: '/profile/plays', icon: BookOpenIcon },
+                                { name: 'Friends', href: '/profile/friends', icon: UserGroupIcon },
+                              ].map((item) => {
+                                const Icon = item.icon
+                                return (
+                                  <Link
+                                    key={item.name}
+                                    href={item.href}
+                                    onClick={() => setShowUserMenu(false)}
+                                    className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-100 text-base font-medium"
+                                  >
+                                    <Icon className="w-6 h-6 text-gray-500" />
+                                    {item.name}
+                                  </Link>
+                                )
+                              })}
+                            </div>
+
+                            {/* Settings */}
+                            <div className="mt-6 pt-4 border-t border-gray-200 px-2">
+                              <Link
+                                href="/settings"
+                                onClick={() => setShowUserMenu(false)}
+                                className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-100 text-base font-medium"
+                              >
+                                <CogIcon className="w-6 h-6 text-gray-500" />
+                                Settings
+                              </Link>
+                            </div>
+
+                            {/* Theme Switcher */}
+                            <div className="mt-4 px-2">
+                              <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                Theme
+                              </div>
+                              <div className="flex gap-2 px-4 py-2">
+                                {(['system', 'light', 'dark'] as const).map((themeOption) => (
+                                  <button
+                                    key={themeOption}
+                                    onClick={() => setTheme(themeOption)}
+                                    className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-medium transition-colors ${
+                                      themeMode === themeOption
+                                        ? 'bg-orange-500 text-white'
+                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                    }`}
+                                  >
+                                    {themeOption === 'system' ? (
+                                      <ComputerDesktopIcon className="w-5 h-5" />
+                                    ) : themeOption === 'light' ? (
+                                      <SunIcon className="w-5 h-5" />
+                                    ) : (
+                                      <MoonIcon className="w-5 h-5" />
+                                    )}
+                                    <span className="capitalize">{themeOption}</span>
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Sign Out Button */}
+                          <div className="p-4 border-t border-gray-200">
+                            <button
+                              onClick={signOut}
+                              className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-red-500 hover:bg-red-600 text-white font-medium text-base"
+                            >
+                              <ArrowRightOnRectangleIcon className="w-5 h-5" />
+                              Sign Out
+                            </button>
+                          </div>
+                        </div>
+                      </Overlay>
+                    </Portal>
+                    </>
                   )}
                 </>
               ) : (
@@ -1118,6 +1288,7 @@ function Navigation() {
               )}
             </div>
           </div>
+          )}
         </div>
       </div>
 
@@ -1136,15 +1307,15 @@ function Navigation() {
           }}
         >
           <div
-            className="bg-white dark:bg-gray-900 w-full sm:max-w-2xl rounded-t-2xl sm:rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[80vh]"
+            className="bg-white w-full sm:max-w-2xl rounded-t-2xl sm:rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[80vh]"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
               <h3 className="text-lg font-semibold">Log Your Play</h3>
               <button
                 onClick={() => setShowPlayLogModal(false)}
-                className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
+                className="p-2 rounded-md hover:bg-gray-100"
                 aria-label="Close"
               >
                 <XMarkIcon className="w-6 h-6 text-gray-500" />
@@ -1171,7 +1342,7 @@ function Navigation() {
                   <input
                     type="text"
                     placeholder="Search for a game..."
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white text-gray-900"
                     autoFocus
                   />
                   <div className="flex justify-end pt-4">
@@ -1205,18 +1376,18 @@ function Navigation() {
           }}
         >
           <div
-            className="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-2xl shadow-xl"
+            className="relative w-full max-w-md bg-white rounded-2xl shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-6">
               {/* Header */}
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                <h3 className="text-lg font-medium text-gray-900">
                   Create New List
                 </h3>
                 <button
                   onClick={() => setShowCreateListModal(false)}
-                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                  className="text-gray-400 hover:text-gray-600"
                 >
                   <XMarkIcon className="w-6 h-6" />
                 </button>
@@ -1227,7 +1398,7 @@ function Navigation() {
                 <div>
                   <label
                     htmlFor="listName"
-                    className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                    className="block text-sm font-medium text-gray-700 mb-1"
                   >
                     List Name
                   </label>
@@ -1237,7 +1408,7 @@ function Navigation() {
                     value={listName}
                     onChange={(e) => setListName(e.target.value)}
                     placeholder="My Awesome Games"
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white text-gray-900"
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
                         handleCreateList()
@@ -1253,7 +1424,7 @@ function Navigation() {
                       setShowCreateListModal(false)
                       setListName('')
                     }}
-                    className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                    className="px-4 py-2 text-gray-700 hover:text-gray-900"
                     disabled={isCreatingList}
                   >
                     Cancel
@@ -1291,13 +1462,13 @@ function Navigation() {
           }}
         >
           <div
-            className="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-2xl shadow-xl"
+            className="relative w-full max-w-md bg-white rounded-2xl shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-6">
               {/* Header */}
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                <h3 className="text-lg font-medium text-gray-900">
                   Add Missing Game
                 </h3>
                 <button
@@ -1308,7 +1479,7 @@ function Navigation() {
                     setGamePublisher('')
                     setGameSubmitted(false)
                   }}
-                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                  className="text-gray-400 hover:text-gray-600"
                 >
                   <XMarkIcon className="w-6 h-6" />
                 </button>
@@ -1320,7 +1491,7 @@ function Navigation() {
                   <div>
                     <label
                       htmlFor="gameName"
-                      className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                      className="block text-sm font-medium text-gray-700 mb-1"
                     >
                       Game Name
                     </label>
@@ -1330,7 +1501,7 @@ function Navigation() {
                       value={gameName}
                       onChange={(e) => setGameName(e.target.value)}
                       placeholder="Game title"
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white text-gray-900"
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') {
                           handleAddGame()
@@ -1344,7 +1515,7 @@ function Navigation() {
                     <div>
                       <label
                         htmlFor="gameYear"
-                        className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                        className="block text-sm font-medium text-gray-700 mb-1"
                       >
                         Year
                       </label>
@@ -1354,14 +1525,14 @@ function Navigation() {
                         value={gameYear}
                         onChange={(e) => setGameYear(e.target.value)}
                         placeholder="2024"
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white text-gray-900"
                       />
                     </div>
 
                     <div>
                       <label
                         htmlFor="gamePublisher"
-                        className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                        className="block text-sm font-medium text-gray-700 mb-1"
                       >
                         Publisher
                       </label>
@@ -1371,7 +1542,7 @@ function Navigation() {
                         value={gamePublisher}
                         onChange={(e) => setGamePublisher(e.target.value)}
                         placeholder="Publisher"
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white text-gray-900"
                       />
                     </div>
                   </div>
@@ -1385,7 +1556,7 @@ function Navigation() {
                         setGamePublisher('')
                         setGameSubmitted(false)
                       }}
-                      className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                      className="px-4 py-2 text-gray-700 hover:text-gray-900"
                       disabled={isSubmittingGame}
                     >
                       Cancel
@@ -1409,6 +1580,71 @@ function Navigation() {
         </Overlay>
       </Portal>
     </nav>
+
+      {/* Mobile Bottom Navigation - Only render on client to avoid hydration mismatch */}
+      {isMounted && (
+        <div className="fixed bottom-0 left-0 right-0 md:hidden z-50 bg-white border-t border-gray-200">
+          <div className="flex items-center justify-around h-16 px-2">
+          {NAV_ITEMS.map((item) => {
+            const active = pathname === item.href
+            const Icon = item.icon
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  'flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-lg transition-colors min-w-[60px]',
+                  active
+                    ? 'text-primary-600'
+                    : 'text-gray-600 hover:text-gray-900'
+                )}
+              >
+                <Icon className="w-6 h-6" />
+                <span className="text-[10px] font-medium">{item.name}</span>
+              </Link>
+            )
+          })}
+          {session ? (
+            <button
+              onClick={() => setShowUserMenu((v) => !v)}
+              className={cn(
+                'flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-lg transition-colors min-w-[60px]',
+                showUserMenu ? 'text-primary-600' : 'text-gray-600'
+              )}
+            >
+              {profile?.avatar_url ? (
+                <img
+                  src={profile.avatar_url}
+                  alt="Profile"
+                  className="w-6 h-6 rounded-full object-cover ring-2 ring-gray-200"
+                />
+              ) : (
+                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white text-[10px] font-medium ring-2 ring-gray-200">
+                  {(
+                    profile?.username ||
+                    profile?.full_name ||
+                    session.user.email ||
+                    'U'
+                  )
+                    .charAt(0)
+                    .toUpperCase()}
+                </div>
+              )}
+              <span className="text-[10px] font-medium">Profile</span>
+            </button>
+          ) : (
+            <Link
+              href="/login"
+              className="flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-lg transition-colors text-gray-600 hover:text-gray-900 min-w-[60px]"
+            >
+              <UserCircleIcon className="w-6 h-6" />
+              <span className="text-[10px] font-medium">Sign In</span>
+            </Link>
+          )}
+        </div>
+      </div>
+      )}
+    </>
   )
 }
 
