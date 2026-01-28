@@ -337,7 +337,7 @@ function decodeHtmlEntities(text = '') {
     })
 }
 
-async function inlineImport(bggId, retryAttempt = 0) {
+async function inlineImport(bggId) {
   if (
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||
     !process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -349,21 +349,8 @@ async function inlineImport(bggId, retryAttempt = 0) {
     process.env.SUPABASE_SERVICE_ROLE_KEY
   )
   const url = `https://boardgamegeek.com/xmlapi2/thing?id=${bggId}&stats=1`
-  const resp = await fetch(url, {
-    headers: {
-      'User-Agent': 'MeepleGo/1.0 (https://github.com/robleto/MeepleGo; boardgame sync bot)',
-    },
-  })
-  if (!resp.ok) {
-    // Handle rate limiting and auth errors with retry logic
-    if ((resp.status === 429 || resp.status === 401) && retryAttempt < 3) {
-      const delay = Math.pow(2, retryAttempt) * 1000 // Exponential backoff: 1s, 2s, 4s
-      console.warn(`BGG API ${resp.status} for ID ${bggId}, retrying in ${delay}ms (attempt ${retryAttempt + 1}/3)`)
-      await new Promise((r) => setTimeout(r, delay))
-      return inlineImport(bggId, retryAttempt + 1)
-    }
-    throw new Error(`BGG API returned ${resp.status} for ID ${bggId}. ${resp.status === 401 ? 'Authentication failed - check User-Agent header.' : resp.status === 429 ? 'Rate limit exceeded.' : 'Request failed.'}`)
-  }
+  const resp = await fetch(url)
+  if (!resp.ok) throw new Error(`BGG ${resp.status}`)
   const xml = await resp.text()
   const parser = new XMLParser({
     ignoreAttributes: false,
@@ -580,8 +567,7 @@ async function main() {
         failed++
         console.log(`❌ ${id} ${e.message}`)
       }
-      // Delay between requests to avoid rate limiting
-      await new Promise((r) => setTimeout(r, 500))
+      await new Promise((r) => setTimeout(r, 300))
     }
   }
   await Promise.all(
