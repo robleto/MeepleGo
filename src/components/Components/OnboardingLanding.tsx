@@ -8,7 +8,7 @@
  */
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   MagnifyingGlassIcon,
@@ -17,6 +17,7 @@ import {
   TrophyIcon,
   ChartBarIcon,
   ListBulletIcon,
+  ChevronDownIcon,
 } from '@heroicons/react/24/outline'
 import GameSearchSelect, { SuggestionGame } from './GameSearchSelect'
 import GameOnboardingModal from './GameOnboardingModal'
@@ -26,44 +27,90 @@ import { supabase } from '@/lib/supabase'
 import ListCard from '@/components/Components/ListCard'
 import type { GameListWithItems } from '@/types/supabase'
 
-// Popular board game images for floating cards (verified working URLs)
-const FLOATING_GAME_IMAGES = [
-  'https://cf.geekdo-images.com/sZYp_3BTDGjh2unaZfZmuA__itemrep/img/siPRXZkLWKVrOrYP7_cNPxTQlC0=/fit-in/246x300/filters:strip_icc()/pic2437871.jpg', // Pandemic
-  'https://cf.geekdo-images.com/7SrPNGBKg9IIsP4UQpOi8g__itemrep/img/WXHcSQyTT_bWWMbZm_NMtj2Se4Y=/fit-in/246x300/filters:strip_icc()/pic4325841.jpg', // Wingspan
-  'https://cf.geekdo-images.com/x3zxjr-Vw5iU4yDPg70Jgw__itemrep/img/-rSPJGO1YX9lL3y6VgMuoJhfCXg=/fit-in/246x300/filters:strip_icc()/pic3490053.jpg', // Ticket to Ride
-  'https://cf.geekdo-images.com/yLZJCVLlIx4c7eJEWUNJ7w__itemrep/img/VblBgSuoZH75b0UEaQdH1Qze_p0=/fit-in/246x300/filters:strip_icc()/pic2419375.jpg', // Codenames
-  'https://cf.geekdo-images.com/wg9oOLcsKvDesSUdZQ4rxw__itemrep/img/FS35ntPTVjJo0VgC5AmxBbB_kDo=/fit-in/246x300/filters:strip_icc()/pic2649952.jpg', // 7 Wonders Duel
-  'https://cf.geekdo-images.com/ImPgGag98W6gpV1KV812aA__itemrep/img/SqDsbOFw2U8iZNjRYFKl7D-b5UY=/fit-in/246x300/filters:strip_icc()/pic1534148.jpg', // Azul
+// 12 floating card positions spread across the hero
+const FLOATING_CARD_POSITIONS = [
+  // Left side
+  { position: { top: '8%', left: '3%' }, baseDelay: 0 },
+  { position: { top: '28%', left: '5%' }, baseDelay: 1.5 },
+  { position: { top: '48%', left: '2%' }, baseDelay: 0.8 },
+  { position: { top: '68%', left: '6%' }, baseDelay: 2.2 },
+  // Right side
+  { position: { top: '12%', right: '4%' }, baseDelay: 0.5 },
+  { position: { top: '32%', right: '2%' }, baseDelay: 1.8 },
+  { position: { top: '52%', right: '5%' }, baseDelay: 1.2 },
+  { position: { top: '72%', right: '3%' }, baseDelay: 2.5 },
+  // Inner positions (closer to center but still in margins)
+  { position: { top: '18%', left: '12%' }, baseDelay: 0.3 },
+  { position: { top: '58%', left: '10%' }, baseDelay: 1.0 },
+  { position: { top: '22%', right: '11%' }, baseDelay: 0.7 },
+  { position: { top: '62%', right: '9%' }, baseDelay: 1.4 },
 ]
 
-// Floating game card component for hero animation
+interface FloatingCardData {
+  id: string
+  imageSrc: string
+  position: { top?: string; bottom?: string; left?: string; right?: string }
+  floatDuration: number
+  floatDelay: number
+  visible: boolean
+  entering: boolean
+}
+
+// Floating game card component with natural aspect ratio
 function FloatingCard({
   imageSrc,
-  delay = 0,
-  size = 'md',
-  floatDuration = 6,
+  visible,
+  entering,
+  floatDuration,
+  floatDelay,
   position,
 }: {
   imageSrc: string
-  delay?: number
-  size?: 'sm' | 'md' | 'lg'
-  floatDuration?: number
+  visible: boolean
+  entering: boolean
+  floatDuration: number
+  floatDelay: number
   position: { top?: string; bottom?: string; left?: string; right?: string }
 }) {
-  const sizeClasses = {
-    sm: 'w-14 h-18 sm:w-16 sm:h-20',
-    md: 'w-18 h-22 sm:w-20 sm:h-26',
-    lg: 'w-22 h-28 sm:w-26 sm:h-34',
+  const [imageLoaded, setImageLoaded] = useState(false)
+  const [aspectRatio, setAspectRatio] = useState<number | null>(null)
+
+  // Calculate size based on natural aspect ratio
+  const getCardStyle = () => {
+    const baseWidth = 80 // pixels
+    const maxHeight = 120
+
+    if (aspectRatio) {
+      const height = Math.min(baseWidth / aspectRatio, maxHeight)
+      const width = height * aspectRatio
+      return {
+        width: `${width}px`,
+        height: `${height}px`,
+      }
+    }
+    // Default before image loads
+    return {
+      width: '70px',
+      height: '95px',
+    }
   }
 
   return (
     <div
-      className={`absolute ${sizeClasses[size]} rounded-lg overflow-hidden shadow-xl ring-1 ring-black/5`}
+      className={`absolute rounded-lg overflow-hidden shadow-2xl ring-1 ring-white/30 transition-all duration-[1500ms] ease-[cubic-bezier(0.22,1,0.36,1)] ${
+        visible && imageLoaded
+          ? entering
+            ? 'opacity-0 scale-90 translate-y-4'
+            : 'opacity-90 scale-100 translate-y-0'
+          : 'opacity-0 scale-75 translate-y-6'
+      }`}
       style={{
         ...position,
-        opacity: 0.8,
-        animation: `floatCard ${floatDuration}s ease-in-out infinite`,
-        animationDelay: `${delay}s`,
+        ...getCardStyle(),
+        animation: visible && imageLoaded && !entering
+          ? `floatCard ${floatDuration}s ease-in-out infinite`
+          : 'none',
+        animationDelay: `${floatDelay}s`,
       }}
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -72,6 +119,13 @@ function FloatingCard({
         alt=""
         className="w-full h-full object-cover"
         loading="eager"
+        onLoad={(e) => {
+          const img = e.currentTarget
+          if (img.naturalWidth && img.naturalHeight) {
+            setAspectRatio(img.naturalWidth / img.naturalHeight)
+          }
+          setImageLoaded(true)
+        }}
       />
     </div>
   )
@@ -93,7 +147,7 @@ function FeatureItem({
         <Icon className="w-5 h-5 text-gray-600" />
       </div>
       <div>
-        <h3 className="text-base font-semibold text-gray-900 mb-1">{title}</h3>
+        <h3 className="heading-display text-base font-medium text-gray-900 mb-1">{title}</h3>
         <p className="text-sm text-gray-500 leading-relaxed">{description}</p>
       </div>
     </div>
@@ -113,8 +167,11 @@ export default function OnboardingLanding({ onComplete }: OnboardingLandingProps
   const [mounted, setMounted] = useState(false)
   const [bggLists, setBggLists] = useState<GameListWithItems[]>([])
   const [bggLoading, setBggLoading] = useState(false)
+  const [availableImages, setAvailableImages] = useState<string[]>([])
+  const [floatingCards, setFloatingCards] = useState<FloatingCardData[]>([])
   const searchRef = useRef<HTMLDivElement>(null)
   const nextSectionRef = useRef<HTMLDivElement>(null)
+  const cardTimersRef = useRef<Map<string, NodeJS.Timeout>>(new Map())
 
   useEffect(() => {
     setMounted(true)
@@ -171,6 +228,7 @@ export default function OnboardingLanding({ onComplete }: OnboardingLandingProps
     nextSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
+  // Fetch BGG lists
   useEffect(() => {
     let active = true
     const fetchBggLists = async () => {
@@ -214,6 +272,153 @@ export default function OnboardingLanding({ onComplete }: OnboardingLandingProps
     }
   }, [])
 
+  // Hydrate floating images from BGG lists or fallback query
+  useEffect(() => {
+    let active = true
+
+    const hydrateFloatingImages = async () => {
+      const listTypes = ['bgg_mostplayed', 'bgg_bestsellers', 'bgg_hotness']
+
+      const listImages = bggLists
+        .filter((list) => listTypes.includes(list.list_type || ''))
+        .flatMap((list) => list.game_list_items || [])
+        .map((item) => item.game?.image_url || item.game?.thumbnail_url)
+        .filter((src): src is string => !!src)
+
+      if (listImages.length >= 20) {
+        const unique = Array.from(new Set(listImages))
+        if (active) setAvailableImages(unique)
+        return
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('games')
+          .select('image_url, thumbnail_url, num_ratings')
+          .or('image_url.not.is.null,thumbnail_url.not.is.null')
+          .order('num_ratings', { ascending: false })
+          .limit(60)
+
+        if (!active) return
+
+        if (!error && data && data.length) {
+          const urls = data
+            .map((row) => row.image_url || row.thumbnail_url)
+            .filter((src): src is string => !!src)
+          const unique = Array.from(new Set([...listImages, ...urls]))
+          setAvailableImages(unique)
+        } else {
+          setAvailableImages([])
+        }
+      } catch {
+        if (active) setAvailableImages([])
+      }
+    }
+
+    hydrateFloatingImages()
+    return () => {
+      active = false
+    }
+  }, [bggLists])
+
+  // Get a random image that's not currently in use
+  const getRandomImage = useCallback((excludeIds: Set<string>) => {
+    const available = availableImages.filter(img => !excludeIds.has(img))
+    if (available.length === 0) return availableImages[Math.floor(Math.random() * availableImages.length)]
+    return available[Math.floor(Math.random() * available.length)]
+  }, [availableImages])
+
+  // Schedule a card to fade out and be replaced
+  const scheduleCardRotation = useCallback((cardId: string) => {
+    // Random duration between 6-12 seconds
+    const duration = 6000 + Math.random() * 6000
+
+    const timer = setTimeout(() => {
+      setFloatingCards(prev => {
+        const card = prev.find(c => c.id === cardId)
+        if (!card) return prev
+
+        // Start fade out
+        return prev.map(c =>
+          c.id === cardId ? { ...c, visible: false } : c
+        )
+      })
+
+      // After fade out, swap image and fade back in
+      setTimeout(() => {
+        setFloatingCards(prev => {
+          const currentImages = new Set(prev.map(c => c.imageSrc))
+          const newImage = getRandomImage(currentImages)
+
+          return prev.map(c =>
+            c.id === cardId
+              ? { ...c, imageSrc: newImage, visible: true, entering: true }
+              : c
+          )
+        })
+
+        // Remove entering state after animation
+        setTimeout(() => {
+          setFloatingCards(prev =>
+            prev.map(c => c.id === cardId ? { ...c, entering: false } : c)
+          )
+          // Schedule next rotation
+          scheduleCardRotation(cardId)
+        }, 100)
+      }, 1500)
+    }, duration)
+
+    cardTimersRef.current.set(cardId, timer)
+  }, [getRandomImage])
+
+  // Initialize floating cards when images are available
+  useEffect(() => {
+    if (availableImages.length < FLOATING_CARD_POSITIONS.length) return
+
+    // Clear any existing timers
+    cardTimersRef.current.forEach(timer => clearTimeout(timer))
+    cardTimersRef.current.clear()
+
+    // Shuffle and pick initial images
+    const shuffled = [...availableImages].sort(() => 0.5 - Math.random())
+
+    // Create initial cards with staggered entrance
+    const initialCards: FloatingCardData[] = FLOATING_CARD_POSITIONS.map((pos, index) => ({
+      id: `card-${index}`,
+      imageSrc: shuffled[index],
+      position: pos.position,
+      floatDuration: 5 + Math.random() * 4, // 5-9 seconds
+      floatDelay: pos.baseDelay,
+      visible: false,
+      entering: true,
+    }))
+
+    setFloatingCards(initialCards)
+
+    // Stagger entrance animations
+    initialCards.forEach((card, index) => {
+      setTimeout(() => {
+        setFloatingCards(prev =>
+          prev.map(c => c.id === card.id ? { ...c, visible: true } : c)
+        )
+
+        // Remove entering state after entrance animation
+        setTimeout(() => {
+          setFloatingCards(prev =>
+            prev.map(c => c.id === card.id ? { ...c, entering: false } : c)
+          )
+          // Start rotation cycle for this card
+          scheduleCardRotation(card.id)
+        }, 1600)
+      }, index * 200 + card.floatDelay * 1000)
+    })
+
+    return () => {
+      cardTimersRef.current.forEach(timer => clearTimeout(timer))
+      cardTimersRef.current.clear()
+    }
+  }, [availableImages, scheduleCardRotation])
+
   if (!mounted) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -227,89 +432,140 @@ export default function OnboardingLanding({ onComplete }: OnboardingLandingProps
       {/* Custom keyframes */}
       <style jsx global>{`
         @keyframes floatCard {
-          0%, 100% { transform: translateY(0) rotate(-1deg); }
-          50% { transform: translateY(-8px) rotate(1deg); }
+          0%, 100% { transform: translateY(0) rotate(-0.5deg); }
+          50% { transform: translateY(-12px) rotate(0.5deg); }
         }
         @keyframes fadeSlideUp {
           from { opacity: 0; transform: translateY(16px); }
           to { opacity: 1; transform: translateY(0); }
         }
+        @keyframes morphGradient {
+          0%, 100% {
+            transform: translate(0, 0) scale(1);
+            opacity: 0.4;
+          }
+          25% {
+            transform: translate(10%, 5%) scale(1.1);
+            opacity: 0.5;
+          }
+          50% {
+            transform: translate(-5%, 10%) scale(0.95);
+            opacity: 0.35;
+          }
+          75% {
+            transform: translate(-10%, -5%) scale(1.05);
+            opacity: 0.45;
+          }
+        }
+        @keyframes morphGradient2 {
+          0%, 100% {
+            transform: translate(0, 0) scale(1);
+            opacity: 0.3;
+          }
+          33% {
+            transform: translate(-15%, 10%) scale(1.15);
+            opacity: 0.4;
+          }
+          66% {
+            transform: translate(10%, -5%) scale(0.9);
+            opacity: 0.25;
+          }
+        }
+        @keyframes shimmer {
+          0% { background-position: -200% 0; }
+          100% { background-position: 200% 0; }
+        }
+        @keyframes pulse-slow {
+          0%, 100% { opacity: 0.15; }
+          50% { opacity: 0.25; }
+        }
+        @keyframes bounce-arrow {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(6px); }
+        }
         @media (prefers-reduced-motion: reduce) {
           @keyframes floatCard { 0%, 100% { transform: none; } }
           @keyframes fadeSlideUp { from, to { opacity: 1; transform: none; } }
+          @keyframes morphGradient { 0%, 100% { transform: none; opacity: 0.4; } }
+          @keyframes morphGradient2 { 0%, 100% { transform: none; opacity: 0.3; } }
+          @keyframes shimmer { 0%, 100% { background-position: 0 0; } }
+          @keyframes pulse-slow { 0%, 100% { opacity: 0.2; } }
+          @keyframes bounce-arrow { 0%, 100% { transform: none; } }
         }
       `}</style>
 
-      {/* Hero Section */}
-      <section className="relative min-h-[75vh] flex items-center justify-center bg-gradient-to-b from-sky-50 via-white to-white pt-8 pb-16">
-        {/* Animated background gradient */}
+      {/* Hero Section - Full viewport */}
+      <section className="relative min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-primary-700 via-primary-800 to-slate-950 pt-8 pb-20">
+        {/* Animated morphing gradient blobs */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute -top-40 -right-40 w-80 h-80 bg-sky-100/60 rounded-full blur-3xl" />
-          <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-purple-100/40 rounded-full blur-3xl" />
+          {/* Large morphing blob top-right */}
+          <div
+            className="absolute -top-32 -right-32 w-[500px] h-[500px] bg-gradient-to-br from-sky-400/40 to-cyan-500/30 rounded-full blur-3xl"
+            style={{ animation: 'morphGradient 20s ease-in-out infinite' }}
+          />
+          {/* Medium morphing blob bottom-left */}
+          <div
+            className="absolute -bottom-40 -left-40 w-[600px] h-[600px] bg-gradient-to-tr from-indigo-500/30 to-purple-600/20 rounded-full blur-3xl"
+            style={{ animation: 'morphGradient2 25s ease-in-out infinite' }}
+          />
+          {/* Smaller accent blob center-left */}
+          <div
+            className="absolute top-1/3 left-1/4 w-[300px] h-[300px] bg-gradient-to-r from-violet-500/20 to-fuchsia-500/15 rounded-full blur-3xl"
+            style={{ animation: 'morphGradient 18s ease-in-out infinite reverse' }}
+          />
+          {/* Subtle shimmer overlay */}
+          <div
+            className="absolute inset-0 opacity-[0.03]"
+            style={{
+              background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%)',
+              backgroundSize: '200% 100%',
+              animation: 'shimmer 8s linear infinite',
+            }}
+          />
+          {/* Subtle grid pattern */}
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: `radial-gradient(circle at 1px 1px, rgba(255,255,255,0.08) 1px, transparent 0)`,
+              backgroundSize: '40px 40px',
+              animation: 'pulse-slow 4s ease-in-out infinite',
+            }}
+          />
         </div>
 
-        {/* Floating game cards - decorative (outside overflow-hidden) */}
-        <div className="absolute inset-0 pointer-events-none hidden lg:block">
-          <FloatingCard
-            imageSrc={FLOATING_GAME_IMAGES[0]}
-            position={{ top: '18%', left: '6%' }}
-            size="md"
-            delay={0}
-            floatDuration={7}
-          />
-          <FloatingCard
-            imageSrc={FLOATING_GAME_IMAGES[1]}
-            position={{ top: '22%', right: '8%' }}
-            size="lg"
-            delay={0.5}
-            floatDuration={8}
-          />
-          <FloatingCard
-            imageSrc={FLOATING_GAME_IMAGES[2]}
-            position={{ bottom: '28%', left: '10%' }}
-            size="sm"
-            delay={1}
-            floatDuration={6}
-          />
-          <FloatingCard
-            imageSrc={FLOATING_GAME_IMAGES[3]}
-            position={{ bottom: '22%', right: '6%' }}
-            size="md"
-            delay={1.5}
-            floatDuration={7.5}
-          />
-          <FloatingCard
-            imageSrc={FLOATING_GAME_IMAGES[4]}
-            position={{ top: '50%', right: '14%' }}
-            size="sm"
-            delay={2}
-            floatDuration={9}
-          />
-          <FloatingCard
-            imageSrc={FLOATING_GAME_IMAGES[5]}
-            position={{ top: '12%', left: '18%' }}
-            size="sm"
-            delay={2.5}
-            floatDuration={8.5}
-          />
-        </div>
+        {/* Floating game cards - decorative */}
+        {floatingCards.length > 0 && (
+          <div className="absolute inset-0 pointer-events-none hidden lg:block">
+            {floatingCards.map((card) => (
+              <FloatingCard
+                key={card.id}
+                imageSrc={card.imageSrc}
+                visible={card.visible}
+                entering={card.entering}
+                position={card.position}
+                floatDuration={card.floatDuration}
+                floatDelay={card.floatDelay}
+              />
+            ))}
+          </div>
+        )}
 
         {/* Hero Content */}
-        <div className="relative z-10 max-w-3xl mx-auto px-6 text-center">
+        <div className="relative z-10 max-w-3xl mx-auto px-6 text-center flex-1 flex flex-col justify-center">
           {/* Headline - using display font */}
           <h1
-            className="heading-display text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-5 tracking-tight leading-[1.08] opacity-0"
+            className="heading-display text-4xl sm:text-5xl lg:text-6xl font-medium text-white mb-5 tracking-tight leading-[1.08] opacity-0"
             style={{ animation: 'fadeSlideUp 0.5s ease-out 0.1s forwards' }}
           >
             Your Personal
-            <span className="block bg-gradient-to-r from-sky-600 to-purple-600 bg-clip-text text-transparent">
+            <span className="block bg-gradient-to-r from-white to-sky-200 bg-clip-text text-transparent">
               Board Game Universe
             </span>
           </h1>
 
           {/* Subheadline */}
           <p
-            className="text-base sm:text-lg text-gray-600 mb-8 max-w-xl mx-auto leading-relaxed opacity-0"
+            className="text-base sm:text-lg text-sky-100/90 mb-8 max-w-xl mx-auto leading-relaxed opacity-0"
             style={{ animation: 'fadeSlideUp 0.5s ease-out 0.2s forwards' }}
           >
             Track your collection, rate your experiences, and discover your next favorite game.
@@ -328,22 +584,28 @@ export default function OnboardingLanding({ onComplete }: OnboardingLandingProps
               variant="landing"
               className="relative z-50"
             />
-            <p className="mt-3 text-xs text-gray-400">
+            <p className="mt-3 text-xs text-sky-200/80">
               Type to search thousands of games
             </p>
           </div>
+        </div>
 
-          {/* Scroll indicator */}
+        {/* Scroll indicator at bottom */}
+        <div
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 opacity-0"
+          style={{ animation: 'fadeSlideUp 0.5s ease-out 0.6s forwards' }}
+        >
           <button
             type="button"
             onClick={scrollToNext}
-            className="inline-flex flex-col items-center gap-1 text-gray-400 hover:text-gray-500 transition opacity-0"
-            style={{ animation: 'fadeSlideUp 0.5s ease-out 0.5s forwards' }}
+            className="flex flex-col items-center gap-2 text-white/70 hover:text-white/90 transition-colors group"
+            aria-label="Scroll to explore"
           >
-            <span className="text-xs tracking-wide">Explore</span>
-            <svg className="w-4 h-4 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-            </svg>
+            <span className="text-xs font-medium tracking-wide uppercase">Explore</span>
+            <ChevronDownIcon
+              className="w-5 h-5"
+              style={{ animation: 'bounce-arrow 2s ease-in-out infinite' }}
+            />
           </button>
         </div>
       </section>
@@ -352,7 +614,7 @@ export default function OnboardingLanding({ onComplete }: OnboardingLandingProps
       <section ref={nextSectionRef} className="py-12 px-6 bg-white border-t border-gray-100">
         <div className="max-w-6xl mx-auto">
           <div className="mb-6">
-            <h2 className="heading-display text-xl sm:text-2xl font-semibold text-gray-900">
+            <h2 className="heading-display text-xl sm:text-2xl font-medium text-gray-900">
               Explore popular collections
             </h2>
             <p className="text-sm text-gray-500 mt-1">
@@ -379,7 +641,7 @@ export default function OnboardingLanding({ onComplete }: OnboardingLandingProps
       <section className="py-16 px-6 bg-gray-50/50">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="heading-display text-2xl sm:text-3xl font-semibold text-gray-900 mb-3">
+            <h2 className="heading-display text-2xl sm:text-3xl font-medium text-gray-900 mb-3">
               Everything you need for your hobby
             </h2>
             <p className="text-base text-gray-500 max-w-lg mx-auto">
@@ -426,7 +688,7 @@ export default function OnboardingLanding({ onComplete }: OnboardingLandingProps
       <section className="py-16 px-6 bg-white">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="heading-display text-2xl sm:text-3xl font-semibold text-gray-900 mb-3">
+            <h2 className="heading-display text-2xl sm:text-3xl font-medium text-gray-900 mb-3">
               Get started in seconds
             </h2>
             <p className="text-base text-gray-500">
@@ -444,7 +706,7 @@ export default function OnboardingLanding({ onComplete }: OnboardingLandingProps
                 <div className="w-10 h-10 rounded-full bg-gray-900 text-white text-sm font-semibold flex items-center justify-center mx-auto mb-3">
                   {item.step}
                 </div>
-                <h3 className="text-base font-semibold text-gray-900 mb-1">{item.title}</h3>
+                <h3 className="heading-display text-base font-medium text-gray-900 mb-1">{item.title}</h3>
                 <p className="text-sm text-gray-500">{item.description}</p>
               </div>
             ))}
