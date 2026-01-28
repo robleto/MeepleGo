@@ -20,6 +20,14 @@ import {
   FlagIcon,
 } from '@heroicons/react/24/outline'
 import type { Game } from '@/types/supabase'
+import type {
+  MostAwardedGame,
+  HighestRankedGame,
+  SleeperHitGame,
+  HotTakeGame,
+  ComebackGame,
+} from '@/types'
+import DiscoveryCard from './DiscoveryCard'
 
 export interface UserStats {
   totalPlays: number
@@ -60,6 +68,14 @@ export interface HomepageViewProps {
     mostplayed?: string
     bestsellers?: string
   }
+  discoveryLists?: {
+    mostAwarded: MostAwardedGame[]
+    highestRanked: HighestRankedGame[]
+    sleeperHits: SleeperHitGame[]
+    hotTakes: HotTakeGame[]
+    comebackGames: ComebackGame[]
+  }
+  discoveryLoading?: boolean
 }
 
 const features = [
@@ -108,6 +124,14 @@ export function HomepageView({
   bggHotness = [],
   bggBestsellers = [],
   bggListIds = {},
+  discoveryLists = {
+    mostAwarded: [],
+    highestRanked: [],
+    sleeperHits: [],
+    hotTakes: [],
+    comebackGames: [],
+  },
+  discoveryLoading = false,
 }: HomepageViewProps) {
   // Guest experience
   if (!user) {
@@ -622,6 +646,83 @@ export function HomepageView({
             />
           </div>
         )}
+      </section>
+
+      {/* Discovery Lists Section */}
+      <section className="space-y-8">
+        <div>
+          <Heading as="h2" size="lg" className="text-gray-900 dark:text-white">
+            Personalized Discoveries
+          </Heading>
+          <p className="mt-2 text-lg text-gray-600 dark:text-gray-300">
+            Insights based on your gaming activity and preferences
+          </p>
+        </div>
+
+        {/* Most Awarded This Year */}
+        <DiscoveryCard
+          title="Most Awarded This Year"
+          icon="🏆"
+          games={discoveryLists.mostAwarded}
+          loading={discoveryLoading}
+          emptyMessage="Award some games this year to see them here!"
+          renderSubtitle={(game: MostAwardedGame) =>
+            `${game.total_points} pts · ${game.award_count} award${game.award_count !== 1 ? 's' : ''}`
+          }
+        />
+
+        {/* Highest Ranked by You */}
+        <DiscoveryCard
+          title="Highest Ranked by You"
+          icon="⭐"
+          games={discoveryLists.highestRanked}
+          loading={discoveryLoading}
+          emptyMessage="Rate some games to build your personal top 10!"
+          renderSubtitle={(game: HighestRankedGame) => {
+            const plays =
+              game.plays_12mo > 0
+                ? ` · played ${game.plays_12mo}x this year`
+                : ''
+            return `${game.user_ranking}/10${plays}`
+          }}
+        />
+
+        {/* Sleeper Hits */}
+        <DiscoveryCard
+          title="Your Sleeper Hits"
+          icon="💎"
+          games={discoveryLists.sleeperHits}
+          loading={discoveryLoading}
+          emptyMessage="Rate some lesser-known games to discover hidden gems!"
+          renderSubtitle={(game: SleeperHitGame) =>
+            `Rated ${game.user_ranking}/10 · only ${game.game_num_ratings?.toLocaleString()} ratings`
+          }
+        />
+
+        {/* Hot Takes */}
+        <DiscoveryCard
+          title="Your Hot Takes"
+          icon="🔥"
+          games={discoveryLists.hotTakes}
+          loading={discoveryLoading}
+          emptyMessage="Rate games to see where you differ from the community!"
+          renderSubtitle={(game: HotTakeGame) => {
+            const sign = game.delta > 0 ? '+' : ''
+            return `You: ${game.user_ranking}/10 · BGG: ${game.bgg_rating.toFixed(1)} · ${sign}${game.delta.toFixed(1)}`
+          }}
+        />
+
+        {/* Games You Keep Coming Back To */}
+        <DiscoveryCard
+          title="Games You Keep Coming Back To"
+          icon="🔄"
+          games={discoveryLists.comebackGames}
+          loading={discoveryLoading}
+          emptyMessage="Log plays to see your most consistent favorites!"
+          renderSubtitle={(game: ComebackGame) =>
+            `${game.months_played_12mo} of 12 months · ${game.total_plays_12mo} plays`
+          }
+        />
       </section>
 
       {/* Industry Awards Preview */}
