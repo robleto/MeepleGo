@@ -13,6 +13,7 @@ import { searchGamesFallback } from '@/utils/databaseSearch'
 import { Squares2X2Icon } from '@heroicons/react/24/outline'
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import { getMembershipSets } from '@/lib/lists'
+import { GameCardSkeleton } from '@/components/Components/LoadingSkeletons'
 
 function GamesPageContent() {
   const [games, setGames] = useState<GameWithRanking[]>([])
@@ -743,15 +744,15 @@ function GamesPageContent() {
 
         {/* Filter Title - shown when filtering via URL params */}
         {filterTitle && (
-          <div className="border-b border-gray-200 dark:border-gray-700 pb-4">
+          <div className="border-b border-gray-200 pb-4">
             <Heading
               as="h2"
               size="lg"
-              className="text-gray-900 dark:text-gray-100"
+              className="text-gray-900"
             >
               {filterTitle}
             </Heading>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            <p className="text-sm text-gray-600 mt-1">
               {games.length} {games.length === 1 ? 'game' : 'games'} found
             </p>
           </div>
@@ -759,9 +760,13 @@ function GamesPageContent() {
 
         {/* Loading State */}
         {loading && (
-          <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-            <span className="ml-2 text-gray-600">Loading games...</span>
+          <div className={viewMode === 'grid' 
+            ? 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4' 
+            : 'space-y-4'
+          }>
+            {Array.from({ length: 12 }).map((_, i) => (
+              <GameCardSkeleton key={i} viewMode={viewMode} variant={cardVariant} />
+            ))}
           </div>
         )}
 
@@ -780,10 +785,10 @@ function GamesPageContent() {
                 {/* Group header - only show if we have multiple groups */}
                 {groupedGames.length > 1 && (
                   <div className="mb-4">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                    <h3 className="text-lg font-semibold text-gray-900">
                       {group.key}
                     </h3>
-                    <div className="text-sm text-gray-500 dark:text-gray-400">
+                    <div className="text-sm text-gray-500">
                       {group.games.length}{' '}
                       {group.games.length === 1 ? 'game' : 'games'}
                     </div>
@@ -815,7 +820,7 @@ function GamesPageContent() {
                     ))}
                   </div>
                 ) : (
-                  <div className="divide-y divide-gray-100 dark:divide-gray-800 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
+                  <div className="divide-y divide-gray-100 rounded-lg border border-gray-200 bg-white">
                     {group.games.map((game, idx) => (
                       <GameCard
                         key={game.id}

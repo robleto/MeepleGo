@@ -74,7 +74,7 @@ export default function Hero({
   const renderCta = () => {
     if (!cta) return null
     const baseClasses =
-      'mt-8 inline-flex h-11 items-center gap-2 rounded-full bg-brand px-6 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-ring focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:bg-brand-light dark:text-slate-950 dark:hover:bg-brand dark:focus-visible:ring-offset-slate-900'
+      'mt-8 inline-flex h-11 items-center gap-2 rounded-full bg-brand px-6 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-ring focus-visible:ring-offset-2 focus-visible:ring-offset-white'
 
     if (cta.isExternal) {
       return (
@@ -99,7 +99,7 @@ export default function Hero({
   return (
     <section
       className={clsx(
-        'relative mb-14 flex flex-col gap-10 rounded-2xl border border-slate-200/80 bg-white/95 p-8 shadow-sm backdrop-blur-sm transition-colors md:mb-20 md:flex-row md:items-start md:gap-20 md:p-12 dark:border-slate-700/60 dark:bg-slate-900/70',
+        'relative mb-14 flex flex-col gap-10 rounded-2xl border border-slate-200/80 bg-white/95 p-8 shadow-sm backdrop-blur-sm transition-colors md:mb-20 md:flex-row md:items-start md:gap-20 md:p-12',
         className
       )}
     >
@@ -116,7 +116,7 @@ export default function Hero({
           </Heading>
         )}
         {heroSubtitle && (
-          <p className="max-w-xl text-lg leading-snug text-gray-600 md:text-xl dark:text-gray-300">
+          <p className="max-w-xl text-lg leading-snug text-gray-600 md:text-xl">
             {heroSubtitle}
           </p>
         )}
@@ -129,17 +129,17 @@ export default function Hero({
         >
           {heroSteps.map((step, idx) => (
             <li key={step.heading} className="flex items-start gap-5">
-              <div className="mt-1 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-semibold text-blue-700 dark:bg-blue-500/20 dark:text-blue-200">
+              <div className="mt-1 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-semibold text-blue-700">
                 {idx + 1}
               </div>
-              <div className="flex-1 border-b border-slate-200 pb-6 last:border-b-0 last:pb-0 dark:border-slate-700/60">
+              <div className="flex-1 border-b border-slate-200 pb-6 last:border-b-0 last:pb-0">
                 <div className="mb-2 flex items-center gap-2">
                   {step.icon}
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  <h3 className="text-lg font-semibold text-gray-900">
                     {step.heading}
                   </h3>
                 </div>
-                <p className="max-w-md text-sm leading-snug text-gray-500 dark:text-gray-400">
+                <p className="max-w-md text-sm leading-snug text-gray-500">
                   {step.text}
                 </p>
               </div>

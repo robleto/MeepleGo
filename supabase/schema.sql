@@ -207,9 +207,10 @@ CREATE POLICY "Users can update own profile" ON profiles
 CREATE POLICY "Users can insert own profile" ON profiles
   FOR INSERT WITH CHECK (auth.uid() = id);
 
--- Rankings: Users can only see and edit their own rankings
-CREATE POLICY "Users can view own rankings" ON rankings
-  FOR SELECT USING (user_id = auth.uid());
+-- Rankings: Allow viewing all rankings (for viewing other users' rankings)
+-- But only allow modifying own rankings
+CREATE POLICY "Users can view all rankings" ON rankings
+  FOR SELECT USING (true);
 
 CREATE POLICY "Users can insert own rankings" ON rankings
   FOR INSERT WITH CHECK (user_id = auth.uid());
@@ -230,9 +231,9 @@ CREATE POLICY "User can follow others" ON user_follows
 CREATE POLICY "User can unfollow" ON user_follows
   FOR DELETE USING (follower_id = auth.uid());
 
--- Game Lists: Users can see public lists and their own lists
-CREATE POLICY "Users can view public lists and own lists" ON game_lists
-  FOR SELECT USING (is_public = true OR user_id = auth.uid());
+-- Game Lists: Allow viewing all lists for social features
+CREATE POLICY "Users can view all lists" ON game_lists
+  FOR SELECT USING (true);
 
 CREATE POLICY "Users can insert own lists" ON game_lists
   FOR INSERT WITH CHECK (user_id = auth.uid());
@@ -243,15 +244,9 @@ CREATE POLICY "Users can update own lists" ON game_lists
 CREATE POLICY "Users can delete own lists" ON game_lists
   FOR DELETE USING (user_id = auth.uid());
 
--- Game List Items: Users can see items in public lists and their own lists
-CREATE POLICY "Users can view list items" ON game_list_items
-  FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM game_lists 
-      WHERE game_lists.id = game_list_items.list_id 
-      AND (game_lists.is_public = true OR game_lists.user_id = auth.uid())
-    )
-  );
+-- Game List Items: Allow viewing all list items
+CREATE POLICY "Users can view all list items" ON game_list_items
+  FOR SELECT USING (true);
 
 CREATE POLICY "Users can manage own list items" ON game_list_items
   FOR ALL USING (

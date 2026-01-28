@@ -33,7 +33,7 @@ export const Headings: StoryObj = {
 export const Subhead: StoryObj = {
   render: () => (
     <div className="space-y-2">
-      <h2 className="text-2xl font-normal tracking-wide text-gray-700 dark:text-gray-300">
+      <h2 className="text-2xl font-normal tracking-wide text-gray-700">
         Subhead Example
       </h2>
       <p className="text-sm text-gray-600 max-w-md">

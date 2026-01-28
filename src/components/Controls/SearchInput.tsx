@@ -44,7 +44,7 @@ export function SearchInput({
   return (
     <div
       className={cn(
-        'flex w-full items-center gap-2 rounded-full border border-gray-200 dark:border-gray-700 bg-white/85 dark:bg-gray-900/70 px-4 py-1.5 shadow-sm hover:shadow-md backdrop-blur-sm transition focus-within:ring-2 focus-within:ring-primary-500',
+        'flex w-full items-center gap-2 rounded-full border border-gray-200 bg-white/85 px-4 py-1.5 shadow-sm hover:shadow-md backdrop-blur-sm transition focus-within:ring-2 focus-within:ring-primary-500',
         disabled && 'opacity-50 cursor-not-allowed',
         className
       )}
@@ -58,7 +58,7 @@ export function SearchInput({
         onKeyDown={onKeyDown}
         onFocus={onFocus}
         disabled={disabled}
-        className="flex-1 bg-transparent placeholder-gray-400 dark:placeholder-gray-500 text-sm leading-tight focus:outline-none disabled:cursor-not-allowed"
+        className="flex-1 bg-transparent placeholder-gray-400 text-sm leading-tight focus:outline-none disabled:cursor-not-allowed"
         role="combobox"
         aria-autocomplete={autoComplete}
         aria-expanded={ariaExpanded}

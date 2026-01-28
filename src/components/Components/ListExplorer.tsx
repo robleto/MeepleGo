@@ -276,18 +276,18 @@ export default function ListExplorer({
           <div
             className={
               stickyHeader
-                ? `sticky top-0 z-20 py-3 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 backdrop-blur transition-colors duration-200 ${
+                ? `sticky top-0 z-20 py-2 sm:py-3 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 backdrop-blur transition-colors duration-200 ${
                     isHeaderStuck
-                      ? 'bg-gray-50/96 dark:bg-gray-900/96 border-b border-gray-200/70 dark:border-white/10'
+                      ? 'bg-gray-50/96 border-b border-gray-200/70'
                       : 'bg-transparent border-b border-transparent'
                   }`
                 : ''
             }
           >
-            <div className="flex items-start justify-between gap-4 flex-wrap">
+            <div className="flex flex-col gap-2 sm:gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div className="min-w-0 flex-1">{header}</div>
               {(searchInHeader || headerActions) && (
-                <div className="flex items-center gap-3 flex-wrap justify-end">
+                <div className="flex items-center gap-2 sm:gap-3 flex-wrap sm:justify-end w-full sm:w-auto">
                   {searchInHeader && (
                     <SearchandFilters
                       value={searchTerm}
@@ -351,7 +351,7 @@ export default function ListExplorer({
                 })}
               </div>
             ) : (
-              <div className="divide-y divide-gray-100 dark:divide-gray-800 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 overflow-hidden">
+              <div className="divide-y divide-gray-100 bg-white overflow-hidden sm:rounded-lg sm:border sm:border-gray-200 sm:dark:border-gray-800">
                 {getListItemControls && hasExplicitListOrder && onReorder ? (
                   <DndContext
                     sensors={sensors}
@@ -453,7 +453,7 @@ export default function ListExplorer({
             {emptyMessage?.title || 'No games found'}
           </h3>
           {emptyMessage?.body && (
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+            <p className="text-sm text-gray-600">
               {emptyMessage.body}
             </p>
           )}

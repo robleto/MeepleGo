@@ -29,21 +29,20 @@ import type { GameListWithItems } from '@/types/supabase'
 
 // 12 floating card positions spread across the hero
 const FLOATING_CARD_POSITIONS = [
-  // Left side
-  { position: { top: '8%', left: '3%' }, baseDelay: 0 },
-  { position: { top: '28%', left: '5%' }, baseDelay: 1.5 },
-  { position: { top: '48%', left: '2%' }, baseDelay: 0.8 },
-  { position: { top: '68%', left: '6%' }, baseDelay: 2.2 },
-  // Right side
-  { position: { top: '12%', right: '4%' }, baseDelay: 0.5 },
-  { position: { top: '32%', right: '2%' }, baseDelay: 1.8 },
-  { position: { top: '52%', right: '5%' }, baseDelay: 1.2 },
-  { position: { top: '72%', right: '3%' }, baseDelay: 2.5 },
-  // Inner positions (closer to center but still in margins)
-  { position: { top: '18%', left: '12%' }, baseDelay: 0.3 },
-  { position: { top: '58%', left: '10%' }, baseDelay: 1.0 },
-  { position: { top: '22%', right: '11%' }, baseDelay: 0.7 },
-  { position: { top: '62%', right: '9%' }, baseDelay: 1.4 },
+  // Left side - distributed across full height
+  { position: { top: '5%', left: '3%' }, baseDelay: 0 },
+  { position: { top: '20%', left: '5%' }, baseDelay: 1.5 },
+  { position: { top: '35%', left: '2%' }, baseDelay: 0.8 },
+  { position: { top: '50%', left: '6%' }, baseDelay: 2.2 },
+  { position: { top: '65%', left: '4%' }, baseDelay: 1.0 },
+  { position: { top: '80%', left: '3%' }, baseDelay: 2.5 },
+  // Right side - distributed across full height
+  { position: { top: '10%', right: '4%' }, baseDelay: 0.5 },
+  { position: { top: '25%', right: '2%' }, baseDelay: 1.8 },
+  { position: { top: '40%', right: '5%' }, baseDelay: 1.2 },
+  { position: { top: '55%', right: '3%' }, baseDelay: 0.3 },
+  { position: { top: '70%', right: '6%' }, baseDelay: 0.7 },
+  { position: { top: '85%', right: '4%' }, baseDelay: 1.4 },
 ]
 
 interface FloatingCardData {
@@ -77,8 +76,8 @@ function FloatingCard({
 
   // Calculate size based on natural aspect ratio
   const getCardStyle = () => {
-    const baseWidth = 80 // pixels
-    const maxHeight = 120
+    const baseWidth = 150 // pixels
+    const maxHeight = 210 // pixels
 
     if (aspectRatio) {
       const height = Math.min(baseWidth / aspectRatio, maxHeight)
@@ -90,9 +89,20 @@ function FloatingCard({
     }
     // Default before image loads
     return {
-      width: '70px',
-      height: '95px',
+      width: '132px',
+      height: '180px',
     }
+  }
+
+  // Add negative margin to make cards bleed off edges
+  const getBleedStyle = () => {
+    if (position.left) {
+      return { marginLeft: '-50px' }
+    }
+    if (position.right) {
+      return { marginRight: '-50px' }
+    }
+    return {}
   }
 
   return (
@@ -107,10 +117,7 @@ function FloatingCard({
       style={{
         ...position,
         ...getCardStyle(),
-        animation: visible && imageLoaded && !entering
-          ? `floatCard ${floatDuration}s ease-in-out infinite`
-          : 'none',
-        animationDelay: `${floatDelay}s`,
+        ...getBleedStyle(),
       }}
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -165,8 +172,6 @@ export default function OnboardingLanding({ onComplete }: OnboardingLandingProps
   const [showGameModal, setShowGameModal] = useState(false)
   const [showSaveModal, setShowSaveModal] = useState(false)
   const [mounted, setMounted] = useState(false)
-  const [bggLists, setBggLists] = useState<GameListWithItems[]>([])
-  const [bggLoading, setBggLoading] = useState(false)
   const [availableImages, setAvailableImages] = useState<string[]>([])
   const [floatingCards, setFloatingCards] = useState<FloatingCardData[]>([])
   const searchRef = useRef<HTMLDivElement>(null)
@@ -228,69 +233,11 @@ export default function OnboardingLanding({ onComplete }: OnboardingLandingProps
     nextSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
-  // Fetch BGG lists
-  useEffect(() => {
-    let active = true
-    const fetchBggLists = async () => {
-      setBggLoading(true)
-      try {
-        const listTypes = [
-          'bgg_trendingplays',
-          'bgg_hotness',
-          'bgg_mostplayed',
-          'bgg_bestsellers',
-        ]
-        const { data, error } = await supabase
-          .from('game_lists')
-          .select(
-            `
-            *,
-            game_list_items(
-              *,
-              game:games(*)
-            )
-          `
-          )
-          .in('list_type', listTypes)
-
-        if (!error && data && active) {
-          const order = new Map(listTypes.map((t, i) => [t, i]))
-          const sorted = [...data].sort((a, b) => {
-            const aIndex = order.get(a.list_type || '') ?? 99
-            const bIndex = order.get(b.list_type || '') ?? 99
-            return aIndex - bIndex
-          })
-          setBggLists(sorted as GameListWithItems[])
-        }
-      } finally {
-        if (active) setBggLoading(false)
-      }
-    }
-    fetchBggLists()
-    return () => {
-      active = false
-    }
-  }, [])
-
-  // Hydrate floating images from BGG lists or fallback query
+  // Hydrate floating images from database
   useEffect(() => {
     let active = true
 
     const hydrateFloatingImages = async () => {
-      const listTypes = ['bgg_mostplayed', 'bgg_bestsellers', 'bgg_hotness']
-
-      const listImages = bggLists
-        .filter((list) => listTypes.includes(list.list_type || ''))
-        .flatMap((list) => list.game_list_items || [])
-        .map((item) => item.game?.image_url || item.game?.thumbnail_url)
-        .filter((src): src is string => !!src)
-
-      if (listImages.length >= 20) {
-        const unique = Array.from(new Set(listImages))
-        if (active) setAvailableImages(unique)
-        return
-      }
-
       try {
         const { data, error } = await supabase
           .from('games')
@@ -305,7 +252,7 @@ export default function OnboardingLanding({ onComplete }: OnboardingLandingProps
           const urls = data
             .map((row) => row.image_url || row.thumbnail_url)
             .filter((src): src is string => !!src)
-          const unique = Array.from(new Set([...listImages, ...urls]))
+          const unique = Array.from(new Set(urls))
           setAvailableImages(unique)
         } else {
           setAvailableImages([])
@@ -319,7 +266,7 @@ export default function OnboardingLanding({ onComplete }: OnboardingLandingProps
     return () => {
       active = false
     }
-  }, [bggLists])
+  }, [])
 
   // Get a random image that's not currently in use
   const getRandomImage = useCallback((excludeIds: Set<string>) => {
@@ -522,7 +469,7 @@ export default function OnboardingLanding({ onComplete }: OnboardingLandingProps
       `}</style>
 
       {/* Hero Section - Full viewport */}
-      <section className="relative flex flex-col items-center justify-center min-h-screen pb-20 bg-gradient-to-b from-primary-700 via-primary-800 to-slate-950">
+      <section className="relative flex flex-col items-center justify-center min-h-screen pb-20 bg-gradient-to-b from-primary-700 via-primary-800 to-slate-950 overflow-hidden">
         {/* Animated morphing gradient blobs */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           {/* Large morphing blob top-right */}
@@ -538,25 +485,38 @@ export default function OnboardingLanding({ onComplete }: OnboardingLandingProps
           {/* Smaller accent blob center-left */}
           <div
             className="absolute top-1/3 left-1/4 w-[300px] h-[300px] bg-gradient-to-r from-violet-500/20 to-fuchsia-500/15 rounded-full blur-3xl"
-            style={{ animation: 'morphGradient 18s ease-in-out infinite reverse' }}
+            style={{ 
+              animation: 'morphGradient 18s ease-in-out infinite',
+              animationDirection: 'reverse'
+            }}
           />
           {/* Additional color-shifting blob top-center */}
           <div
             className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[400px] h-[400px] bg-gradient-to-br from-teal-400/25 to-emerald-500/20 rounded-full blur-3xl"
-            style={{ animation: 'morphGradient3 22s ease-in-out infinite, colorShift 30s ease-in-out infinite' }}
+            style={{ 
+              animation: 'morphGradient3 22s ease-in-out infinite',
+            }}
           />
           {/* Small floating orbs for depth */}
           <div
             className="absolute top-[20%] left-[15%] w-24 h-24 bg-gradient-to-br from-sky-300/30 to-blue-400/20 rounded-full blur-2xl"
-            style={{ animation: 'float-orb 12s ease-in-out infinite' }}
+            style={{ 
+              animation: 'float-orb 12s ease-in-out infinite'
+            }}
           />
           <div
             className="absolute top-[60%] right-[20%] w-32 h-32 bg-gradient-to-br from-purple-400/25 to-pink-400/20 rounded-full blur-2xl"
-            style={{ animation: 'float-orb 15s ease-in-out infinite 3s' }}
+            style={{ 
+              animation: 'float-orb 15s ease-in-out infinite',
+              animationDelay: '3s'
+            }}
           />
           <div
             className="absolute top-[40%] right-[10%] w-20 h-20 bg-gradient-to-br from-cyan-300/30 to-teal-400/20 rounded-full blur-xl"
-            style={{ animation: 'float-orb 10s ease-in-out infinite 1.5s' }}
+            style={{ 
+              animation: 'float-orb 10s ease-in-out infinite',
+              animationDelay: '1.5s'
+            }}
           />
           {/* Subtle shimmer overlay */}
           <div
@@ -600,7 +560,11 @@ export default function OnboardingLanding({ onComplete }: OnboardingLandingProps
           {/* Headline - using display font */}
           <h1
             className="heading-display text-4xl sm:text-5xl lg:text-6xl font-medium text-white mb-5 tracking-tight leading-[1.08] opacity-0"
-            style={{ animation: 'fadeSlideUp 0.5s ease-out 0.1s forwards' }}
+            style={{ 
+              animation: 'fadeSlideUp 0.5s ease-out',
+              animationDelay: '0.1s',
+              animationFillMode: 'forwards'
+            }}
           >
             Your Personal
             <span className="block text-transparent bg-gradient-to-r from-white to-sky-200 bg-clip-text">
@@ -611,7 +575,11 @@ export default function OnboardingLanding({ onComplete }: OnboardingLandingProps
           {/* Subheadline */}
           <p
             className="max-w-xl mx-auto mb-8 text-base leading-relaxed opacity-0 sm:text-lg text-sky-100/90"
-            style={{ animation: 'fadeSlideUp 0.5s ease-out 0.2s forwards' }}
+            style={{ 
+              animation: 'fadeSlideUp 0.5s ease-out',
+              animationDelay: '0.2s',
+              animationFillMode: 'forwards'
+            }}
           >
             Track your collection, rate your experiences, and discover your next favorite game.
           </p>
@@ -620,7 +588,11 @@ export default function OnboardingLanding({ onComplete }: OnboardingLandingProps
           <div
             ref={searchRef}
             className="max-w-3xl mx-auto mb-10 opacity-0"
-            style={{ animation: 'fadeSlideUp 0.5s ease-out 0.3s forwards' }}
+            style={{ 
+              animation: 'fadeSlideUp 0.5s ease-out',
+              animationDelay: '0.3s',
+              animationFillMode: 'forwards'
+            }}
           >
             <GameSearchSelect
               onSelect={handleGameSelect}
@@ -637,8 +609,12 @@ export default function OnboardingLanding({ onComplete }: OnboardingLandingProps
 
         {/* Scroll indicator at bottom */}
         <div
-          className="absolute -translate-x-1/2 opacity-0 bottom-8 left-1/2"
-          style={{ animation: 'fadeSlideUp 0.5s ease-out 0.6s forwards' }}
+          className="absolute left-1/2 -translate-x-1/2 bottom-8 opacity-0"
+          style={{ 
+            animation: 'fadeSlideUp 0.5s ease-out',
+            animationDelay: '0.6s',
+            animationFillMode: 'forwards'
+          }}
         >
           <button
             type="button"
@@ -646,39 +622,12 @@ export default function OnboardingLanding({ onComplete }: OnboardingLandingProps
             className="flex flex-col items-center gap-2 transition-colors text-white/70 hover:text-white/90 group"
             aria-label="Scroll to explore"
           >
-            <span className="text-xs font-medium tracking-wide uppercase">Explore</span>
+            <span className="text-xs font-medium tracking-wide uppercase text-center">Explore</span>
             <ChevronDownIcon
               className="w-5 h-5"
               style={{ animation: 'bounce-arrow 2s ease-in-out infinite' }}
             />
           </button>
-        </div>
-      </section>
-
-      {/* BGG Lists Section */}
-      <section ref={nextSectionRef} className="px-6 py-12 bg-white border-t border-gray-100">
-        <div className="max-w-6xl mx-auto">
-          <div className="mb-6">
-            <h2 className="text-xl font-medium text-gray-900 heading-display sm:text-2xl">
-              Explore popular collections
-            </h2>
-            <p className="mt-1 text-sm text-gray-500">
-              Curated lists from BoardGameGeek
-            </p>
-          </div>
-          <div className="px-6 -mx-6 overflow-x-auto scrollbar-hide">
-            <div className="flex gap-4 pb-2" style={{ width: 'max-content' }}>
-              {(bggLoading ? Array.from({ length: 4 }) : bggLists).map((list, index) => (
-                <div key={(list as GameListWithItems)?.id || `bgg-skel-${index}`} className="flex-shrink-0 w-64">
-                  {list ? (
-                    <ListCard list={list as GameListWithItems} isPublic />
-                  ) : (
-                    <div className="bg-gray-100 h-44 rounded-2xl animate-pulse" />
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
       </section>
 
@@ -690,7 +639,7 @@ export default function OnboardingLanding({ onComplete }: OnboardingLandingProps
               Everything you need for your hobby
             </h2>
             <p className="max-w-lg mx-auto text-base text-gray-500">
-              MeepleGo helps you get more out of every game night.
+              Rank, award, and reflect on the board games that matter most to you.
             </p>
           </div>
 

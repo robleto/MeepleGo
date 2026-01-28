@@ -147,202 +147,214 @@ export function HomepageView({
         </section>
 
         {/* BGG Trending (Trending Plays) */}
-        <section className="space-y-6">
-          <div className="flex items-center justify-between">
-            <div>
+        <section className="space-y-4">
+          <div>
+            <div className="flex items-center justify-between gap-4">
               <Heading
                 as="h2"
-                size="lg"
-                className="text-gray-900 dark:text-white"
+                size="md"
+                className="text-gray-900"
               >
                 Trending Games
               </Heading>
-              <p className="mt-2 text-lg text-gray-600 dark:text-gray-300">
-                Discover what's popular in the board game community
-              </p>
+              <Link
+                href={
+                  bggListIds.trendingplays
+                    ? `/lists/${bggListIds.trendingplays}`
+                    : '/games'
+                }
+                className="text-xs sm:text-sm text-primary-600 hover:text-primary-500 font-medium whitespace-nowrap"
+              >
+                View all →
+              </Link>
             </div>
-            <Link
-              href={
-                bggListIds.trendingplays
-                  ? `/lists/${bggListIds.trendingplays}`
-                  : '/games'
-              }
-              className="text-primary-600 hover:text-primary-500 font-medium"
-            >
-              View all →
-            </Link>
+            <p className="mt-0.5 text-sm sm:text-base text-gray-600">
+              Discover what's popular in the board game community
+            </p>
           </div>
           {loading ? (
             <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4">
               {Array.from({ length: 8 }).map((_, i) => (
                 <div
                   key={i}
-                  className="flex-shrink-0 w-48 h-64 bg-gray-200 dark:bg-gray-700 animate-pulse rounded-lg"
+                  className="flex-shrink-0 w-48 h-64 bg-gray-200 animate-pulse rounded-lg"
                 />
               ))}
             </div>
           ) : (
-            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 -mx-4 px-4">
-              {featuredGames.map((game) => (
-                <div key={game.id} className="flex-shrink-0 w-48">
+            <div className="-mx-4 sm:-mx-6 lg:-mx-8">
+              <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 px-4 sm:px-6 lg:px-8">
+                {featuredGames.map((game) => (
+                  <div key={game.id} className="flex-shrink-0 w-48">
                   <GameCard
                     game={game as any}
                     viewMode="grid"
                     variant="balanced"
+                    imageFit="contain"
                     className="h-full flex flex-col"
                   />
-                </div>
-              ))}
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </section>
 
         {/* BGG Hotness */}
         {bggHotness.length > 0 && (
-          <section className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
+          <section className="space-y-4">
+            <div>
+              <div className="flex items-center justify-between gap-4">
                 <Heading
                   as="h2"
-                  size="lg"
-                  className="text-gray-900 dark:text-white"
+                  size="md"
+                  className="text-gray-900"
                 >
                   BGG Hotness
                 </Heading>
-                <p className="mt-2 text-lg text-gray-600 dark:text-gray-300">
-                  What's trending hot on BoardGameGeek right now
-                </p>
+                <Link
+                  href={
+                    bggListIds.hotness ? `/lists/${bggListIds.hotness}` : '/lists'
+                  }
+                  className="text-xs sm:text-sm text-primary-600 hover:text-primary-500 font-medium whitespace-nowrap"
+                >
+                  View all →
+                </Link>
               </div>
-              <Link
-                href={
-                  bggListIds.hotness ? `/lists/${bggListIds.hotness}` : '/lists'
-                }
-                className="text-primary-600 hover:text-primary-500 font-medium"
-              >
-                View all →
-              </Link>
+              <p className="mt-0.5 text-sm sm:text-base text-gray-600">
+                What's trending hot on BoardGameGeek right now
+              </p>
             </div>
-            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 -mx-4 px-4">
-              {bggHotness.map((game) => (
-                <div key={game.id} className="flex-shrink-0 w-48">
+            <div className="-mx-4 sm:-mx-6 lg:-mx-8">
+              <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 px-4 sm:px-6 lg:px-8">
+                {bggHotness.map((game) => (
+                  <div key={game.id} className="flex-shrink-0 w-48">
                   <GameCard
                     game={game as any}
                     viewMode="grid"
                     variant="balanced"
+                    imageFit="contain"
                     className="h-full flex flex-col"
                   />
                 </div>
               ))}
+              </div>
             </div>
           </section>
         )}
 
         {/* BGG Most Played */}
         {bggMostPlayed.length > 0 && (
-          <section className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
+          <section className="space-y-4">
+            <div>
+              <div className="flex items-center justify-between gap-4">
                 <Heading
                   as="h2"
-                  size="lg"
-                  className="text-gray-900 dark:text-white"
+                  size="md"
+                  className="text-gray-900"
                 >
                   BGG Most Played
                 </Heading>
-                <p className="mt-2 text-lg text-gray-600 dark:text-gray-300">
-                  Games getting the most plays right now
-                </p>
+                <Link
+                  href={
+                    bggListIds.mostplayed
+                      ? `/lists/${bggListIds.mostplayed}`
+                      : '/lists'
+                  }
+                  className="text-xs sm:text-sm text-primary-600 hover:text-primary-500 font-medium whitespace-nowrap"
+                >
+                  View all →
+                </Link>
               </div>
-              <Link
-                href={
-                  bggListIds.mostplayed
-                    ? `/lists/${bggListIds.mostplayed}`
-                    : '/lists'
-                }
-                className="text-primary-600 hover:text-primary-500 font-medium"
-              >
-                View all →
-              </Link>
+              <p className="mt-0.5 text-sm sm:text-base text-gray-600">
+                Games getting the most plays right now
+              </p>
             </div>
-            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 -mx-4 px-4">
-              {bggMostPlayed.map((game) => (
-                <div key={game.id} className="flex-shrink-0 w-48">
-                  <GameCard
-                    game={game as any}
-                    viewMode="grid"
-                    variant="balanced"
-                    className="h-full flex flex-col"
-                  />
-                </div>
-              ))}
+            <div className="-mx-4 sm:-mx-6 lg:-mx-8">
+              <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 px-4 sm:px-6 lg:px-8">
+                {bggMostPlayed.map((game) => (
+                  <div key={game.id} className="flex-shrink-0 w-48">
+                    <GameCard
+                      game={game as any}
+                      viewMode="grid"
+                      variant="balanced"
+                      imageFit="contain"
+                      className="h-full flex flex-col"
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
           </section>
         )}
 
         {/* BGG Bestsellers */}
         {bggBestsellers.length > 0 && (
-          <section className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
+          <section className="space-y-4">
+            <div>
+              <div className="flex items-center justify-between gap-4">
                 <Heading
                   as="h2"
-                  size="lg"
-                  className="text-gray-900 dark:text-white"
+                  size="md"
+                  className="text-gray-900"
                 >
                   BGG Bestsellers
                 </Heading>
-                <p className="mt-2 text-lg text-gray-600 dark:text-gray-300">
-                  Top-selling games on BoardGameGeek
-                </p>
+                <Link
+                  href={
+                    bggListIds.bestsellers
+                      ? `/lists/${bggListIds.bestsellers}`
+                      : '/lists'
+                  }
+                  className="text-xs sm:text-sm text-primary-600 hover:text-primary-500 font-medium whitespace-nowrap"
+                >
+                  View all →
+                </Link>
               </div>
-              <Link
-                href={
-                  bggListIds.bestsellers
-                    ? `/lists/${bggListIds.bestsellers}`
-                    : '/lists'
-                }
-                className="text-primary-600 hover:text-primary-500 font-medium"
-              >
-                View all →
-              </Link>
+              <p className="mt-0.5 text-sm sm:text-base text-gray-600">
+                Top-selling games on BoardGameGeek
+              </p>
             </div>
-            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 -mx-4 px-4">
-              {bggBestsellers.map((game) => (
-                <div key={game.id} className="flex-shrink-0 w-48">
-                  <GameCard
-                    game={game as any}
-                    viewMode="grid"
-                    variant="balanced"
-                    className="h-full flex flex-col"
-                  />
-                </div>
-              ))}
+            <div className="-mx-4 sm:-mx-6 lg:-mx-8">
+              <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 px-4 sm:px-6 lg:px-8">
+                {bggBestsellers.map((game) => (
+                  <div key={game.id} className="flex-shrink-0 w-48">
+                    <GameCard
+                      game={game as any}
+                      viewMode="grid"
+                      variant="balanced"
+                      imageFit="contain"
+                      className="h-full flex flex-col"
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
           </section>
         )}
 
         {/* Industry Awards */}
         {industryAwards.length > 0 && (
-          <section className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
+          <section className="space-y-4">
+            <div>
+              <div className="flex items-center justify-between gap-4">
                 <Heading
                   as="h2"
-                  size="lg"
-                  className="text-gray-900 dark:text-white"
+                  size="md"
+                  className="text-gray-900"
                 >
                   Industry Awards
                 </Heading>
-                <p className="mt-2 text-lg text-gray-600 dark:text-gray-300">
-                  Prestigious board game honors and recognition
-                </p>
+                <Link
+                  href="/awards"
+                  className="text-xs sm:text-sm text-primary-600 hover:text-primary-500 font-medium whitespace-nowrap"
+                >
+                  Explore all →
+                </Link>
               </div>
-              <Link
-                href="/awards"
-                className="text-primary-600 hover:text-primary-500 font-medium"
-              >
-                Explore all →
-              </Link>
+              <p className="mt-0.5 text-sm sm:text-base text-gray-600">
+                Prestigious board game honors and recognition
+              </p>
             </div>
             <NetflixScrollSection itemWidth="w-72" showCount={4}>
               {industryAwards.map((award: any) => (
@@ -368,26 +380,26 @@ export function HomepageView({
         )}
 
         {/* Public Lists */}
-        <section className="space-y-6">
-          <div className="flex items-center justify-between">
-            <div>
+        <section className="space-y-4">
+          <div>
+            <div className="flex items-center justify-between gap-4">
               <Heading
                 as="h2"
-                size="lg"
-                className="text-gray-900 dark:text-white"
+                size="md"
+                className="text-gray-900"
               >
                 Public Lists
               </Heading>
-              <p className="mt-2 text-lg text-gray-600 dark:text-gray-300">
-                Community-curated game collections ({publicLists.length} found)
-              </p>
+              <Link
+                href="/lists"
+                className="text-xs sm:text-sm text-primary-600 hover:text-primary-500 font-medium whitespace-nowrap"
+              >
+                Browse lists →
+              </Link>
             </div>
-            <Link
-              href="/lists"
-              className="text-primary-600 hover:text-primary-500 font-medium"
-            >
-              Browse lists →
-            </Link>
+            <p className="mt-0.5 text-sm sm:text-base text-gray-600">
+              Community-curated game collections ({publicLists.length} found)
+            </p>
           </div>
           {publicLists.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -409,201 +421,211 @@ export function HomepageView({
   return (
     <div className="space-y-12" id="games-section">
       {/* Trending Games Section */}
-      <section className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
+      <section className="space-y-4">
+        <div>
+          <div className="flex items-center justify-between gap-4">
             <Heading
               as="h2"
-              size="lg"
-              className="text-gray-900 dark:text-white"
+              size="md"
+              className="text-gray-900"
             >
               Trending Games
             </Heading>
-            <p className="mt-2 text-lg text-gray-600 dark:text-gray-300">
-              Discover what's popular in the board game community
-            </p>
+            <Link
+              href={
+                bggListIds.trendingplays
+                  ? `/lists/${bggListIds.trendingplays}`
+                  : '/games'
+              }
+              className="text-xs sm:text-sm text-primary-600 hover:text-primary-500 font-medium whitespace-nowrap"
+            >
+              View all →
+            </Link>
           </div>
-          <Link
-            href={
-              bggListIds.trendingplays
-                ? `/lists/${bggListIds.trendingplays}`
-                : '/games'
-            }
-            className="text-primary-600 hover:text-primary-500 font-medium"
-          >
-            View all games →
-          </Link>
+          <p className="mt-0.5 text-sm sm:text-base text-gray-600">
+            Discover what's popular in the board game community
+          </p>
         </div>
         {loading ? (
           <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4">
             {Array.from({ length: 8 }).map((_, i) => (
               <div
                 key={i}
-                className="flex-shrink-0 w-48 h-64 bg-gray-200 dark:bg-gray-700 animate-pulse rounded-lg"
+                className="flex-shrink-0 w-48 h-64 bg-gray-200 animate-pulse rounded-lg"
               />
             ))}
           </div>
         ) : (
-          <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 -mx-4 px-4">
-            {featuredGames.map((game) => (
-              <div key={game.id} className="flex-shrink-0 w-48">
-                <GameCard
-                  game={game as any}
-                  viewMode="grid"
-                  variant="balanced"
-                  className="h-full flex flex-col"
-                />
-              </div>
-            ))}
+          <div className="-mx-4 sm:-mx-6 lg:-mx-8">
+            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 px-4 sm:px-6 lg:px-8">
+              {featuredGames.map((game) => (
+                <div key={game.id} className="flex-shrink-0 w-48">
+                  <GameCard
+                    game={game as any}
+                    viewMode="grid"
+                    variant="balanced"
+                    imageFit="contain"
+                    className="h-full flex flex-col"
+                  />
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </section>
 
       {/* BGG Hotness */}
       {bggHotness.length > 0 && (
-        <section className="space-y-6">
-          <div className="flex items-center justify-between">
-            <div>
+        <section className="space-y-4">
+          <div>
+            <div className="flex items-center justify-between gap-4">
               <Heading
                 as="h2"
-                size="lg"
-                className="text-gray-900 dark:text-white"
+                size="md"
+                className="text-gray-900"
               >
                 BGG Hotness
               </Heading>
-              <p className="mt-2 text-lg text-gray-600 dark:text-gray-300">
-                What's trending hot on BoardGameGeek right now
-              </p>
+              <Link
+                href={
+                  bggListIds.hotness ? `/lists/${bggListIds.hotness}` : '/lists'
+                }
+                className="text-xs sm:text-sm text-primary-600 hover:text-primary-500 font-medium whitespace-nowrap"
+              >
+                View all →
+              </Link>
             </div>
-            <Link
-              href={
-                bggListIds.hotness ? `/lists/${bggListIds.hotness}` : '/lists'
-              }
-              className="text-primary-600 hover:text-primary-500 font-medium"
-            >
-              View all →
-            </Link>
+            <p className="mt-0.5 text-sm sm:text-base text-gray-600">
+              What's trending hot on BoardGameGeek right now
+            </p>
           </div>
-          <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 -mx-4 px-4">
-            {bggHotness.map((game) => (
-              <div key={game.id} className="flex-shrink-0 w-48">
-                <GameCard
-                  game={game as any}
-                  viewMode="grid"
-                  variant="balanced"
-                  className="h-full flex flex-col"
-                />
-              </div>
-            ))}
+          <div className="-mx-4 sm:-mx-6 lg:-mx-8">
+            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 px-4 sm:px-6 lg:px-8">
+              {bggHotness.map((game) => (
+                <div key={game.id} className="flex-shrink-0 w-48">
+                  <GameCard
+                    game={game as any}
+                    viewMode="grid"
+                    variant="balanced"
+                    imageFit="contain"
+                    className="h-full flex flex-col"
+                  />
+                </div>
+              ))}
+            </div>
           </div>
         </section>
       )}
 
       {/* BGG Most Played */}
       {bggMostPlayed.length > 0 && (
-        <section className="space-y-6">
-          <div className="flex items-center justify-between">
-            <div>
+        <section className="space-y-4">
+          <div>
+            <div className="flex items-center justify-between gap-4">
               <Heading
                 as="h2"
-                size="lg"
-                className="text-gray-900 dark:text-white"
+                size="md"
+                className="text-gray-900"
               >
                 BGG Most Played
               </Heading>
-              <p className="mt-2 text-lg text-gray-600 dark:text-gray-300">
-                Games getting the most plays right now
-              </p>
+              <Link
+                href={
+                  bggListIds.mostplayed
+                    ? `/lists/${bggListIds.mostplayed}`
+                    : '/lists'
+                }
+                className="text-xs sm:text-sm text-primary-600 hover:text-primary-500 font-medium whitespace-nowrap"
+              >
+                View all →
+              </Link>
             </div>
-            <Link
-              href={
-                bggListIds.mostplayed
-                  ? `/lists/${bggListIds.mostplayed}`
-                  : '/lists'
-              }
-              className="text-primary-600 hover:text-primary-500 font-medium"
-            >
-              View all →
-            </Link>
+            <p className="mt-0.5 text-sm sm:text-base text-gray-600">
+              Games getting the most plays right now
+            </p>
           </div>
-          <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 -mx-4 px-4">
-            {bggMostPlayed.map((game) => (
-              <div key={game.id} className="flex-shrink-0 w-48">
-                <GameCard
-                  game={game as any}
-                  viewMode="grid"
-                  variant="balanced"
-                  className="h-full flex flex-col"
-                />
-              </div>
-            ))}
+          <div className="-mx-4 sm:-mx-6 lg:-mx-8">
+            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 px-4 sm:px-6 lg:px-8">
+              {bggMostPlayed.map((game) => (
+                <div key={game.id} className="flex-shrink-0 w-48">
+                  <GameCard
+                    game={game as any}
+                    viewMode="grid"
+                    variant="balanced"
+                    imageFit="contain"
+                    className="h-full flex flex-col"
+                  />
+                </div>
+              ))}
+            </div>
           </div>
         </section>
       )}
 
       {/* BGG Bestsellers */}
       {bggBestsellers.length > 0 && (
-        <section className="space-y-6">
-          <div className="flex items-center justify-between">
-            <div>
+        <section className="space-y-4">
+          <div>
+            <div className="flex items-center justify-between gap-4">
               <Heading
                 as="h2"
-                size="lg"
-                className="text-gray-900 dark:text-white"
+                size="md"
+                className="text-gray-900"
               >
                 BGG Bestsellers
               </Heading>
-              <p className="mt-2 text-lg text-gray-600 dark:text-gray-300">
-                Top-selling games on BoardGameGeek
-              </p>
+              <Link
+                href={
+                  bggListIds.bestsellers
+                    ? `/lists/${bggListIds.bestsellers}`
+                    : '/lists'
+                }
+                className="text-xs sm:text-sm text-primary-600 hover:text-primary-500 font-medium whitespace-nowrap"
+              >
+                View all →
+              </Link>
             </div>
-            <Link
-              href={
-                bggListIds.bestsellers
-                  ? `/lists/${bggListIds.bestsellers}`
-                  : '/lists'
-              }
-              className="text-primary-600 hover:text-primary-500 font-medium"
-            >
-              View all →
-            </Link>
+            <p className="mt-0.5 text-sm sm:text-base text-gray-600">
+              Top-selling games on BoardGameGeek
+            </p>
           </div>
-          <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 -mx-4 px-4">
-            {bggBestsellers.map((game) => (
-              <div key={game.id} className="flex-shrink-0 w-48">
-                <GameCard
-                  game={game as any}
-                  viewMode="grid"
-                  variant="balanced"
-                  className="h-full flex flex-col"
-                />
-              </div>
-            ))}
+          <div className="-mx-4 sm:-mx-6 lg:-mx-8">
+            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 px-4 sm:px-6 lg:px-8">
+              {bggBestsellers.map((game) => (
+                <div key={game.id} className="flex-shrink-0 w-48">
+                  <GameCard
+                    game={game as any}
+                    viewMode="grid"
+                    variant="balanced"
+                    imageFit="contain"
+                    className="h-full flex flex-col"
+                  />
+                </div>
+              ))}
+            </div>
           </div>
         </section>
       )}
 
-      <section className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <Heading
-              as="h2"
-              size="lg"
-              className="text-gray-900 dark:text-white"
-            >
-              Your Gaming at a Glance
-            </Heading>
-            <p className="mt-2 text-lg text-gray-600 dark:text-gray-300">
-              Track your progress and discover insights about your gaming habits
-            </p>
-          </div>
+      <section className="space-y-4">
+        <div>
+          <Heading
+            as="h2"
+            size="md"
+            className="text-gray-900"
+          >
+            Your Gaming at a Glance
+          </Heading>
+          <p className="mt-0.5 text-sm sm:text-base text-gray-600">
+            Track your progress and discover insights about your gaming habits
+          </p>
         </div>
         {loading ? (
           <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
             {Array.from({ length: 5 }).map((_, i) => (
               <div
                 key={i}
-                className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 animate-pulse rounded-2xl h-[120px]"
+                className="bg-white border border-gray-200 animate-pulse rounded-2xl h-[120px]"
               />
             ))}
           </div>
@@ -727,26 +749,26 @@ export function HomepageView({
 
       {/* Industry Awards Preview */}
       {industryAwards.length > 0 && (
-        <section className="space-y-6">
-          <div className="flex items-center justify-between">
-            <div>
+        <section className="space-y-4">
+          <div>
+            <div className="flex items-center justify-between gap-4">
               <Heading
                 as="h2"
-                size="lg"
-                className="text-gray-900 dark:text-white"
+                size="md"
+                className="text-gray-900"
               >
                 Industry Awards
               </Heading>
-              <p className="mt-2 text-lg text-gray-600 dark:text-gray-300">
-                Prestigious board game honors and recognition
-              </p>
+              <Link
+                href="/awards"
+                className="text-xs sm:text-sm text-primary-600 hover:text-primary-500 font-medium whitespace-nowrap"
+              >
+                Explore all →
+              </Link>
             </div>
-            <Link
-              href="/awards"
-              className="text-primary-600 hover:text-primary-500 font-medium"
-            >
-              Explore all →
-            </Link>
+            <p className="mt-0.5 text-sm sm:text-base text-gray-600">
+              Prestigious board game honors and recognition
+            </p>
           </div>
 
           {/* Netflix-style horizontal scrolling */}
@@ -774,26 +796,26 @@ export function HomepageView({
       )}
 
       {/* Public Lists */}
-      <section className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
+      <section className="space-y-4">
+        <div>
+          <div className="flex items-center justify-between gap-4">
             <Heading
               as="h2"
-              size="lg"
-              className="text-gray-900 dark:text-white"
+              size="md"
+              className="text-gray-900"
             >
               Public Lists
             </Heading>
-            <p className="mt-2 text-lg text-gray-600 dark:text-gray-300">
-              Community-curated game collections ({publicLists.length} found)
-            </p>
+            <Link
+              href="/lists"
+              className="text-xs sm:text-sm text-primary-600 hover:text-primary-500 font-medium whitespace-nowrap"
+            >
+              Browse lists →
+            </Link>
           </div>
-          <Link
-            href="/lists"
-            className="text-primary-600 hover:text-primary-500 font-medium"
-          >
-            Browse lists →
-          </Link>
+          <p className="mt-0.5 text-sm sm:text-base text-gray-600">
+            Community-curated game collections ({publicLists.length} found)
+          </p>
         </div>
         {publicLists.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

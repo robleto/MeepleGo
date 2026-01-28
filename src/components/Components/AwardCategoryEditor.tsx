@@ -73,10 +73,10 @@ function NomineeItem({
     <div
       ref={setNodeRef}
       style={style}
-      className={`group relative flex items-center gap-3 px-3 py-3 rounded-lg border bg-white dark:bg-gray-800 cursor-grab active:cursor-grabbing transition-shadow hover:shadow-md ${
+      className={`group relative flex items-center gap-3 px-3 py-3 rounded-lg border bg-white cursor-grab active:cursor-grabbing transition-shadow hover:shadow-md ${
         isWinner 
-          ? 'border-amber-400 shadow-amber-100 dark:shadow-amber-900/20' 
-          : 'border-gray-200 dark:border-gray-700'
+          ? 'border-amber-400 shadow-amber-100' 
+          : 'border-gray-200'
       }`}
       {...attributes}
       {...listeners}
@@ -90,11 +90,11 @@ function NomineeItem({
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2 mb-1">
           {typeof index === 'number' && (
-            <span className="shrink-0 inline-flex items-center justify-center w-5 h-5 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-[10px] font-semibold">
+            <span className="shrink-0 inline-flex items-center justify-center w-5 h-5 rounded-full bg-gray-200 text-gray-700 text-[10px] font-semibold">
               {index + 1}
             </span>
           )}
-          <span className="truncate font-medium text-[14px] text-gray-900 dark:text-gray-100">{name}</span>
+          <span className="truncate font-medium text-[14px] text-gray-900">{name}</span>
         </div>
         <div className="flex items-center gap-1.5">
           {rating && (
@@ -103,7 +103,7 @@ function NomineeItem({
             </span>
           )}
           {isWinner && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-[10px] font-semibold">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-semibold">
               <TrophyIcon className="w-3 h-3" />
               Winner
             </span>
@@ -235,7 +235,7 @@ export default function AwardCategoryEditor({
         ref={setNodeRef}
         {...attributes}
         {...listeners}
-        className={`flex items-center justify-between p-3 bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 last:border-b-0 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors cursor-grab active:cursor-grabbing ${
+        className={`flex items-center justify-between p-3 bg-white border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition-colors cursor-grab active:cursor-grabbing ${
           isDragging ? 'opacity-50' : ''
         }`}
       >
@@ -243,7 +243,7 @@ export default function AwardCategoryEditor({
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={thumb} alt="" className="w-14 h-14 object-cover rounded shadow-sm" />
           <div className="min-w-0 flex-1">
-            <div className="truncate font-medium text-[13px] text-gray-900 dark:text-gray-100 mb-1">{g.name}</div>
+            <div className="truncate font-medium text-[13px] text-gray-900 mb-1">{g.name}</div>
             {g.rating && (
               <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-bold ${ratingClass}`}>
                 {g.rating}
@@ -268,7 +268,7 @@ export default function AwardCategoryEditor({
       <div
         ref={setNodeRef}
         className={`flex items-center justify-center h-9 text-[10px] rounded border border-dashed ${
-          isOver ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-gray-300'
+          isOver ? 'border-primary-500 bg-primary-50' : 'border-gray-300'
         }`}
       >
         <span className="text-gray-400">Slot {index + 1}</span>
@@ -506,14 +506,14 @@ export default function AwardCategoryEditor({
         <div className="lg:col-span-2 space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <h3 className="text-[15px] font-semibold text-gray-900 dark:text-gray-100">
+              <h3 className="text-[15px] font-semibold text-gray-900">
                 Nominees
               </h3>
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-[11px] font-medium text-gray-600 dark:text-gray-400">
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-gray-100 text-[11px] font-medium text-gray-600">
                 {nominees.length}/{effectiveMax}
               </span>
               {winnerId && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-[11px] font-medium">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[11px] font-medium">
                   <TrophyIcon className="w-3 h-3" />
                   Winner: {internalGameMap[winnerId]?.name || `#${winnerId}`}
                 </span>
@@ -522,14 +522,14 @@ export default function AwardCategoryEditor({
             <div className="flex items-center gap-2">
               <button
                 onClick={resetAll}
-                className="text-[12px] px-3 py-1.5 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-750 text-gray-700 dark:text-gray-300 font-medium transition-colors"
+                className="text-[12px] px-3 py-1.5 rounded-md border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 font-medium transition-colors"
                 title="Reset nominees & winner"
               >
                 Reset
               </button>
               <button
                 onClick={cancel}
-                className="text-[12px] px-3 py-1.5 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-750 text-gray-700 dark:text-gray-300 font-medium transition-colors"
+                className="text-[12px] px-3 py-1.5 rounded-md border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 font-medium transition-colors"
               >
                 Cancel
               </button>
@@ -539,7 +539,7 @@ export default function AwardCategoryEditor({
               >
                 Save
               </button>
-              {info && <span className="text-[11px] text-green-600 dark:text-green-400 font-medium">{info}</span>}
+              {info && <span className="text-[11px] text-green-600 font-medium">{info}</span>}
               {saving && <span className="text-[11px] text-gray-500">Saving…</span>}
             </div>
           </div>
@@ -563,7 +563,7 @@ export default function AwardCategoryEditor({
                           <div className="absolute top-2 right-2 flex gap-2 items-center">
                             <button
                               onClick={() => setWinner(id)}
-                              className="p-1.5 rounded-md bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm hover:bg-white dark:hover:bg-gray-800 transition-colors shadow-sm"
+                              className="p-1.5 rounded-md bg-white/90 backdrop-blur-sm hover:bg-white transition-colors shadow-sm"
                               title="Set winner"
                               aria-label="Set winner"
                             >
@@ -574,7 +574,7 @@ export default function AwardCategoryEditor({
                             </button>
                             <button
                               onClick={() => removeNominee(id)}
-                              className="p-1.5 rounded-md bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm hover:bg-white dark:hover:bg-gray-800 transition-colors shadow-sm"
+                              className="p-1.5 rounded-md bg-white/90 backdrop-blur-sm hover:bg-white transition-colors shadow-sm"
                               title="Remove nominee"
                               aria-label="Remove nominee"
                             >
@@ -583,7 +583,7 @@ export default function AwardCategoryEditor({
                           </div>
                         </div>
                       ) : (
-                        <div className="rounded-lg border-2 border-dashed border-gray-200 dark:border-gray-700 text-[11px] text-gray-400 dark:text-gray-500 h-20 flex items-center justify-center bg-gray-50/50 dark:bg-gray-800/50">
+                        <div className="rounded-lg border-2 border-dashed border-gray-200 text-[11px] text-gray-400 h-20 flex items-center justify-center bg-gray-50/50">
                           Empty slot
                         </div>
                       )}
@@ -593,16 +593,16 @@ export default function AwardCategoryEditor({
               </ul>
             </SortableContext>
           </NomineesDropZone>
-          {error && <div className="mt-2 text-[12px] text-red-600 dark:text-red-400 font-medium">{error}</div>}
+          {error && <div className="mt-2 text-[12px] text-red-600 font-medium">{error}</div>}
         </div>
 
         {/* Right (1/3): Available pool with independent scroll */}
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-[15px] font-semibold text-gray-900 dark:text-gray-100">
+            <h3 className="text-[15px] font-semibold text-gray-900">
               Available Games
             </h3>
-            <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400">
+            <span className="text-[11px] font-medium text-gray-500">
               {search
                 ? `${results.filter((g) => !nominees.includes(g.id)).length} matches`
                 : `${defaultOptions.length} options`}
@@ -613,9 +613,9 @@ export default function AwardCategoryEditor({
             onChange={(e) => setSearch(e.target.value)}
             type="text"
             placeholder="Search games…"
-            className="w-full text-[13px] px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-shadow"
+            className="w-full text-[13px] px-3 py-2 rounded-md border border-gray-300 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow"
           />
-          <div className="rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden bg-white dark:bg-gray-800 shadow-sm max-h-[600px] overflow-y-auto">{search ? (
+          <div className="rounded-lg border border-gray-200 overflow-hidden bg-white shadow-sm max-h-[600px] overflow-y-auto">{search ? (
               <>
                 {searching && <div className="p-4 text-[12px] text-gray-500 text-center">Searching…</div>}
                 {!searching && results.filter((g) => !nominees.includes(g.id)).length === 0 && (

@@ -56,7 +56,7 @@ export function GameImage({
   if (!src || showFallback || imageState === 'error') {
     return (
       <div
-        className={`relative flex items-center justify-center bg-gradient-to-br from-gray-200 via-gray-100 to-gray-300 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 text-gray-700 dark:text-gray-200 select-none rounded ${
+        className={`relative flex items-center justify-center bg-gradient-to-br from-gray-200 via-gray-100 to-gray-300 text-gray-700 select-none rounded ${
           variant === 'thumb' ? 'w-20 h-20' : 'w-full h-full'
         } ${className}`}
         aria-label={`${name} (no image available)`}
@@ -75,14 +75,14 @@ export function GameImage({
           <polygon points="50,20 78,34 50,48 22,34" fill="#e5e7eb" />
         </svg>
         <span
-          className="relative z-10 font-bold tracking-wide drop-shadow text-gray-700 dark:text-gray-100"
+          className="relative z-10 font-bold tracking-wide drop-shadow text-gray-700"
           style={{ fontSize }}
         >
           {initials}
         </span>
         {/* Optional small name footer for larger square variant */}
         {variant === 'square' && (
-          <div className="absolute bottom-0 left-0 right-0 text-[11px] font-medium px-1 py-0.5 bg-white/70 dark:bg-black/40 backdrop-blur line-clamp-1 text-center">
+          <div className="absolute bottom-0 left-0 right-0 text-[11px] font-medium px-1 py-0.5 bg-white/70 backdrop-blur line-clamp-1 text-center">
             {name}
           </div>
         )}
@@ -94,7 +94,7 @@ export function GameImage({
   return (
     <div className={`relative w-full h-full ${className}`}>
       {imageState === 'loading' && (
-        <div className="absolute inset-0 bg-gray-200 dark:bg-gray-700 animate-pulse rounded" />
+        <div className="absolute inset-0 bg-gray-200 animate-pulse rounded" />
       )}
       <Image
         src={src}

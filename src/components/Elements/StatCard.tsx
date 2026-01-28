@@ -36,7 +36,7 @@ export default function StatCard({
   size = 'default',
 }: StatCardProps) {
   const baseClasses =
-    'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl flex flex-col justify-between transition-all duration-200'
+    'bg-white border border-gray-200 rounded-2xl flex flex-col justify-between transition-all duration-200'
   const sizeClasses =
     size === 'mini'
       ? 'p-2 min-h-[56px]'
@@ -72,7 +72,7 @@ export default function StatCard({
           <Icon className={`${iconInnerSizeClasses} ${iconColor}`} />
         </div>
         <div
-          className={`${valueClasses} font-bold text-gray-900 dark:text-white`}
+          className={`${valueClasses} font-bold text-gray-900`}
         >
           {value}
         </div>
@@ -80,7 +80,7 @@ export default function StatCard({
 
       {/* Label */}
       <div
-        className={`${labelClasses} font-medium text-gray-600 dark:text-gray-300`}
+        className={`${labelClasses} font-medium text-gray-600`}
       >
         {label}
       </div>

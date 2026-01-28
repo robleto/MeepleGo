@@ -35,7 +35,7 @@ export const GameCardDisplay: React.FC<GameCardDisplayProps> = ({
 
   if (viewMode === 'list') {
     return (
-      <div className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-sm transition-shadow flex items-center gap-4 w-full max-w-3xl">
+      <div className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow flex items-center gap-4 w-full max-w-3xl p-4">
         <div className="flex-shrink-0 w-20 h-20 rounded-md overflow-hidden bg-gray-100 flex items-center justify-center text-gray-400 text-xs">
           {imageUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -81,7 +81,7 @@ export const GameCardDisplay: React.FC<GameCardDisplayProps> = ({
   }
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 hover:shadow-md transition-shadow group relative w-56">
+    <div className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow group relative w-56">
       <div className="aspect-square relative w-full rounded-t-lg overflow-hidden bg-gray-100 flex items-center justify-center text-gray-400 text-xs">
         {imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element

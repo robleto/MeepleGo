@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import dynamic from 'next/dynamic'
 import Image from 'next/image'
 import { GameImage } from '../Elements/GameImage'
@@ -14,6 +14,9 @@ import {
   truncate,
 } from '@/utils/helpers'
 import {
+  getRatingSubtleClass,
+} from '@/components/Foundations/ratingColors'
+import {
   PlayIcon,
   EyeIcon,
   ClockIcon,
@@ -24,6 +27,7 @@ import {
   TrophyIcon,
   StarIcon,
   XMarkIcon,
+  CheckIcon,
 } from '@heroicons/react/24/outline'
 import { Button } from '../Elements/Button'
 import { Chip } from '../Elements/Chip'
@@ -96,6 +100,8 @@ export default function GameCard({
   const [showAddMenu, setShowAddMenu] = useState(false) // legacy; can remove later
   const [showAddModal, setShowAddModal] = useState(false)
   const [showListPicker, setShowListPicker] = useState(false)
+  const [listPickerAlign, setListPickerAlign] = useState<'left' | 'right'>('right')
+  const [listMembershipIds, setListMembershipIds] = useState<string[]>([])
   const [listPickerPos, setListPickerPos] = useState<{
     x: number
     y: number
@@ -242,11 +248,13 @@ export default function GameCard({
     'bg-white rounded-lg shadow hover:shadow-lg transition-all group relative ' +
     (className || '')
 
+  const listButtonRef = useRef<HTMLButtonElement | null>(null)
+
   if (viewMode === 'list') {
     return (
       <div
-        className={`bg-white rounded-lg shadow hover:shadow-md transition-shadow cursor-pointer relative ${
-          variant === 'compact' ? 'p-2 sm:p-3' : 'p-3 sm:p-4'
+        className={`bg-white hover:bg-gray-50 transition-colors cursor-pointer relative ${
+          variant === 'compact' ? 'p-3' : 'p-3 sm:p-4'
         }`}
         onClick={() => setShowModal(true)}
       >
@@ -262,7 +270,7 @@ export default function GameCard({
           </div>
         )}
         <div
-          className={`flex items-center ${variant === 'compact' ? 'space-x-2 sm:space-x-3' : 'space-x-3 sm:space-x-4'}`}
+          className={`flex items-center ${variant === 'compact' ? 'gap-2 sm:gap-3' : 'gap-3 sm:gap-4'}`}
           style={{ fontSize: '0.875rem' }}
         >
           {listRank != null && (
@@ -297,10 +305,10 @@ export default function GameCard({
             </div>
           )}
           <div
-            className={`flex-shrink-0 rounded-md overflow-hidden flex items-center justify-center border border-gray-200 bg-gray-100 dark:bg-gray-700 ${
+            className={`flex-shrink-0 rounded-lg overflow-hidden flex items-center justify-center border border-gray-200 bg-gray-100 ${
               variant === 'compact'
-                ? 'w-12 h-12 sm:w-16 sm:h-16'
-                : 'w-16 h-16 sm:w-20 sm:h-20'
+                ? 'w-14 h-14 sm:w-16 sm:h-16'
+                : 'w-14 h-14 sm:w-20 sm:h-20'
             }`}
           >
             {game.thumbnail_url ? (
@@ -321,10 +329,10 @@ export default function GameCard({
           </div>
           <div className="flex-1 min-w-0">
             <h3
-              className={`font-bold text-gray-900 truncate flex items-center gap-1 ${
+              className={`font-semibold text-gray-900 line-clamp-1 flex items-center gap-1 ${
                   variant === 'compact'
-                    ? 'text-[0.72rem] sm:text-[0.8rem]'
-                    : 'text-[0.8rem] sm:text-[0.9rem]'
+                    ? 'text-sm'
+                    : 'text-sm sm:text-base'
                 }`}
             >
               {game.name}
@@ -338,21 +346,21 @@ export default function GameCard({
                 )}
             </h3>
 
-            {/* Tagline - only show for detailed variant */}
+            {/* Tagline - only show for detailed variant on desktop */}
             {variant === 'detailed' && (game as any).tagline && (
-              <p className="text-xs text-gray-600 dark:text-gray-400 truncate mb-1">
+              <p className="hidden sm:block text-xs text-gray-600 truncate mb-1">
                 {game.tagline}
               </p>
             )}
 
             {/* Metadata - show for balanced and detailed variants */}
             {(variant === 'balanced' || variant === 'detailed') && showMeta && (
-              <div className="flex items-center space-x-2 sm:space-x-4 text-[0.7rem] sm:text-[0.8rem] text-gray-500">
-                <span>{formatYear(game.year_published)}</span>
+              <div className="flex items-center gap-2 sm:gap-4 text-xs text-gray-500 mt-0.5">
+                <span className="tabular-nums">{formatYear(game.year_published)}</span>
                 <span className="hidden sm:inline">
                   {formatPlayerCount(game.min_players, game.max_players)}
                 </span>
-                <span className="hidden sm:inline">
+                <span className="hidden md:inline">
                   {formatPlayingTime(game.playtime_minutes)}
                 </span>
               </div>
@@ -360,81 +368,18 @@ export default function GameCard({
 
             {/* Compact variant shows only year inline */}
             {variant === 'compact' && (
-              <div className="text-[0.7rem] text-gray-500 tabular-nums">
+              <div className="text-xs text-gray-500 tabular-nums mt-0.5">
                 {formatYear(game.year_published)}
               </div>
             )}
           </div>
 
-          {/* Right side actions - standardized layout */}
-          <div
-            className={`flex items-center ${variant === 'compact' ? 'space-x-0.5 sm:space-x-1' : 'space-x-1 sm:space-x-2'}`}
-          >
-            {/* Played It Chip */}
-            <Chip
-              size="sm"
-              color={localRanking?.played_it ? 'green' : 'gray'}
-              variant={localRanking?.played_it ? 'subtle' : 'outline'}
-              interactive
-              onClick={(e) => {
-                e.stopPropagation()
-                handlePlayedToggle()
-              }}
-            >
-              <div className="flex items-center gap-1.5">
-                <PlayIcon className="w-4 h-4" />
-                <span className="hidden sm:inline">Played</span>
-              </div>
-            </Chip>
-
-            {/* Own It Chip */}
-            <Chip
-              size="sm"
-              color="blue"
-              variant={membership.library ? 'subtle' : 'outline'}
-              interactive
-              onClick={(e) => {
-                e.stopPropagation()
-                if (onMembershipChange) {
-                  onMembershipChange(game.id, { library: !membership.library })
-                }
-              }}
-            >
-              <div className="flex items-center gap-1.5">
-                <BookmarkIcon className="w-4 h-4" />
-                <span className="hidden sm:inline">Own It</span>
-              </div>
-            </Chip>
-
-            {/* Wishlist Chip */}
-            <Chip
-              size="sm"
-              color="pink"
-              variant={membership.wishlist ? 'subtle' : 'outline'}
-              interactive
-              onClick={(e) => {
-                e.stopPropagation()
-                if (onMembershipChange) {
-                  onMembershipChange(game.id, {
-                    wishlist: !membership.wishlist,
-                  })
-                }
-              }}
-            >
-              <div className="flex items-center gap-1.5">
-                <HeartIcon className="w-4 h-4" />
-                <span className="hidden sm:inline">Wishlist</span>
-              </div>
-            </Chip>
-
-            {/* Rating Chip or Rate Button */}
+          {/* Right side actions - show only rating on mobile, full set on desktop */}
+          <div className="flex items-center gap-1.5 flex-shrink-0">
+            {/* Rating Chip or Rate Button - Always visible */}
             {ratingValue ? (
-              <RatingChip
-                value={ratingValue}
-                size={variant === 'compact' ? 'xs' : 'sm'}
-                variant="subtle"
-                interactive
-                className={`${saving ? 'opacity-70' : ''} ml-1`}
+              <button
+                className={`px-2.5 h-9 rounded-full flex items-center justify-center gap-1 transition-all ${getRatingSubtleClass(ratingValue)} ${saving ? 'opacity-70' : ''}`}
                 onClick={(event) => {
                   event.stopPropagation()
                   const rect = event.currentTarget.getBoundingClientRect()
@@ -444,10 +389,16 @@ export default function GameCard({
                   })
                   setIsRating(true)
                 }}
-              />
+                title={`Rating: ${ratingValue}/10`}
+                aria-label={`Rating: ${ratingValue}/10`}
+              >
+                <span className="font-bold text-sm">
+                  {ratingValue}
+                </span>
+              </button>
             ) : (
               <button
-                className={`${variant === 'compact' ? 'w-6 h-6' : 'w-8 h-8'} rounded-full border border-gray-300 hover:border-gray-400 bg-gray-50 hover:bg-gray-100 flex items-center justify-center transition-colors ml-1`}
+                className="hidden sm:flex w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 items-center justify-center transition-colors"
                 onClick={(event) => {
                   event.stopPropagation()
                   const rect = event.currentTarget.getBoundingClientRect()
@@ -458,12 +409,68 @@ export default function GameCard({
                   setIsRating(true)
                 }}
                 title="Rate this game"
+                aria-label="Rate this game"
               >
-                <StarIcon
-                  className={`${variant === 'compact' ? 'h-3 w-3' : 'h-4 w-4'} text-gray-400`}
-                />
+                <StarIcon className="h-5 w-5 text-gray-400" />
               </button>
             )}
+
+            {/* Played It Chip - Desktop only */}
+            <button
+              className={`hidden sm:flex w-9 h-9 rounded-full items-center justify-center transition-all ${
+                localRanking?.played_it
+                  ? 'bg-green-100 text-green-700 ring-1 ring-green-200'
+                  : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
+              }`}
+              onClick={(e) => {
+                e.stopPropagation()
+                handlePlayedToggle()
+              }}
+              title={localRanking?.played_it ? 'Mark as not played' : 'Mark as played'}
+              aria-label={localRanking?.played_it ? 'Mark as not played' : 'Mark as played'}
+            >
+              <PlayIcon className="w-5 h-5" />
+            </button>
+
+            {/* Own It Chip - Desktop only */}
+            <button
+              className={`hidden sm:flex w-9 h-9 rounded-full items-center justify-center transition-all ${
+                membership.library
+                  ? 'bg-blue-100 text-blue-700 ring-1 ring-blue-200'
+                  : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
+              }`}
+              onClick={(e) => {
+                e.stopPropagation()
+                if (onMembershipChange) {
+                  onMembershipChange(game.id, { library: !membership.library })
+                }
+              }}
+              title={membership.library ? 'Remove from library' : 'Add to library'}
+              aria-label={membership.library ? 'Remove from library' : 'Add to library'}
+            >
+              <BookmarkIcon className="w-5 h-5" />
+            </button>
+
+            {/* Wishlist Chip - Desktop only */}
+            <button
+              className={`hidden sm:flex w-9 h-9 rounded-full items-center justify-center transition-all ${
+                membership.wishlist
+                  ? 'bg-pink-100 text-pink-700 ring-1 ring-pink-200'
+                  : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
+              }`}
+              onClick={(e) => {
+                e.stopPropagation()
+                if (onMembershipChange) {
+                  onMembershipChange(game.id, {
+                    wishlist: !membership.wishlist,
+                  })
+                }
+              }}
+              title={membership.wishlist ? 'Remove from wishlist' : 'Add to wishlist'}
+              aria-label={membership.wishlist ? 'Remove from wishlist' : 'Add to wishlist'}
+            >
+              <HeartIcon className="w-5 h-5" />
+            </button>
 
             {/* Remove from current list */}
             {onRemoveFromCurrentList && (
@@ -473,11 +480,11 @@ export default function GameCard({
                   e.stopPropagation()
                   onRemoveFromCurrentList()
                 }}
-                className="ml-1 w-8 h-8 rounded-full border border-gray-300 hover:border-red-400 bg-gray-50 hover:bg-red-50 flex items-center justify-center transition-colors"
+                className="hidden sm:flex w-9 h-9 rounded-full bg-gray-100 hover:bg-red-50 items-center justify-center transition-colors"
                 title="Remove from this list"
                 aria-label="Remove from this list"
               >
-                <XMarkIcon className="w-4 h-4 text-gray-400 hover:text-red-600" />
+                <XMarkIcon className="w-5 h-5 text-gray-400 hover:text-red-600" />
               </button>
             )}
           </div>
@@ -533,24 +540,26 @@ export default function GameCard({
 
       {/* Game Image */}
       <div
-        className={`aspect-square relative w-full mx-auto rounded-t-lg overflow-hidden border border-gray-200 dark:border-gray-700 ${variant === 'compact' ? 'bg-gradient-to-b from-gray-200 to-gray-100 dark:from-gray-800 dark:to-gray-900' : 'bg-gradient-to-b from-gray-300 to-gray-200 dark:from-gray-800 dark:to-gray-700'}`}
+        className={`aspect-square relative w-full mx-auto rounded-t-lg overflow-visible border border-gray-200 ${variant === 'compact' ? 'bg-gradient-to-b from-gray-200 to-gray-100' : 'bg-gradient-to-b from-gray-300 to-gray-200'}`}
       >
-        {game.image_url || game.thumbnail_url ? (
-          <Image
-            src={(game.image_url || game.thumbnail_url) as string}
-            alt={game.name}
-            fill
-            className={imageFit === 'contain' ? 'object-contain p-1' : 'object-cover'}
-            sizes="(max-width: 640px) 150px, (max-width: 768px) 150px, (max-width: 1024px) 150px, 150px"
-          />
-        ) : (
-          <GameImage
-            src={null}
-            alt={game.name}
-            name={game.name}
-            variant="square"
-          />
-        )}
+        <div className="absolute inset-0 overflow-hidden rounded-t-lg">
+          {game.image_url || game.thumbnail_url ? (
+            <Image
+              src={(game.image_url || game.thumbnail_url) as string}
+              alt={game.name}
+              fill
+              className={imageFit === 'contain' ? 'object-contain p-1' : 'object-cover'}
+              sizes="(max-width: 640px) 150px, (max-width: 768px) 150px, (max-width: 1024px) 150px, 150px"
+            />
+          ) : (
+            <GameImage
+              src={null}
+              alt={game.name}
+              name={game.name}
+              variant="square"
+            />
+          )}
+        </div>
 
         {/* Grid view rank badge (top-left), if provided */}
         {listRank != null && (
@@ -570,22 +579,53 @@ export default function GameCard({
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation()
-                  setShowListPicker((v) => !v)
-                  if (!userLists) {
+                  const next = !showListPicker
+                  if (next) {
+                    const rect = listButtonRef.current?.getBoundingClientRect()
+                    if (rect) {
+                      const dropdownWidth = 224
+                      const gutter = 16
+                      setListPickerAlign(
+                        rect.left < dropdownWidth + gutter ? 'left' : 'right'
+                      )
+                    }
+                  }
+                  setShowListPicker(next)
+                  if (next) {
                     setLoadingListsQuick(true)
                     supabase.auth
                       .getSession()
                       .then(async ({ data: { session } }) => {
                         if (!session) {
                           setUserLists([])
+                          setListMembershipIds([])
                           setLoadingListsQuick(false)
                           return
                         }
-                        const { data, error } = await supabase
-                          .from('game_lists')
-                          .select('id,name,icon')
-                          .eq('user_id', session.user.id)
-                        if (!error) setUserLists(data || [])
+                        let lists = userLists
+                        if (!lists) {
+                          const { data, error } = await supabase
+                            .from('game_lists')
+                            .select('id,name,icon')
+                            .eq('user_id', session.user.id)
+                          if (!error) {
+                            lists = data || []
+                            setUserLists(lists)
+                          }
+                        }
+                        const listIds = (lists || []).map((l) => l.id)
+                        if (listIds.length > 0) {
+                          const { data: membership } = await supabase
+                            .from('game_list_items')
+                            .select('list_id')
+                            .eq('game_id', game.id)
+                            .in('list_id', listIds)
+                          setListMembershipIds(
+                            (membership || []).map((m: any) => m.list_id)
+                          )
+                        } else {
+                          setListMembershipIds([])
+                        }
                         setLoadingListsQuick(false)
                       })
                   }
@@ -608,6 +648,7 @@ export default function GameCard({
                         ? 'bg-pink-500 text-white hover:bg-pink-600'
                         : 'bg-white/90 text-gray-600 hover:text-gray-800 hover:bg-white'
                   }`}
+                ref={listButtonRef}
               >
                 <BookmarkIcon className="h-4 w-4" />
               </button>
@@ -672,7 +713,9 @@ export default function GameCard({
             {/* List picker dropdown positioned relative to bookmark */}
             {showListPicker && (
               <div
-                className="absolute top-12 right-2 w-56 max-h-80 overflow-y-auto bg-white/95 backdrop-blur shadow-xl rounded-md border border-gray-200 p-2 space-y-1 z-40"
+                className={`absolute top-12 ${
+                  listPickerAlign === 'left' ? 'left-2' : 'right-2'
+                } w-56 max-h-80 overflow-y-auto bg-white/95 backdrop-blur shadow-xl rounded-md border border-gray-200 p-2 space-y-1 z-40`}
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="flex items-center justify-between mb-1">
@@ -696,7 +739,13 @@ export default function GameCard({
                   <span className="w-5 h-5 rounded bg-green-600 text-white flex items-center justify-center">
                     <BookOpenIcon className="w-4 h-4" />
                   </span>
-                  <span>Library</span>
+                  <span className="flex-1 text-left">Library</span>
+                  {membership.library && (
+                    <span className="text-[10px] uppercase tracking-wide text-green-600 font-semibold inline-flex items-center gap-1">
+                      <CheckIcon className="h-3 w-3" />
+                      In
+                    </span>
+                  )}
                 </button>
                 <button
                   className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-sm ${membership.wishlist ? 'bg-pink-50 text-pink-700 ring-1 ring-pink-200' : 'hover:bg-pink-50 text-gray-700'}`}
@@ -708,7 +757,13 @@ export default function GameCard({
                   <span className="w-5 h-5 rounded bg-pink-500 text-white flex items-center justify-center">
                     <HeartIcon className="w-4 h-4" />
                   </span>
-                  <span>Wishlist</span>
+                  <span className="flex-1 text-left">Wishlist</span>
+                  {membership.wishlist && (
+                    <span className="text-[10px] uppercase tracking-wide text-pink-600 font-semibold inline-flex items-center gap-1">
+                      <CheckIcon className="h-3 w-3" />
+                      In
+                    </span>
+                  )}
                 </button>
                 <div className="h-px bg-gray-200 my-1" />
                 {loadingListsQuick && (
@@ -725,7 +780,11 @@ export default function GameCard({
                     .map((l) => (
                       <button
                         key={l.id}
-                        className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-sm hover:bg-gray-50 text-gray-700"
+                        className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-sm ${
+                          listMembershipIds.includes(l.id)
+                            ? 'bg-sky-50 text-sky-700 ring-1 ring-sky-200'
+                            : 'hover:bg-gray-50 text-gray-700'
+                        }`}
                         onClick={async () => {
                           // add game to list bottom
                           setShowListPicker(false)
@@ -746,6 +805,12 @@ export default function GameCard({
                         <span className="truncate flex-1 text-left">
                           {l.name}
                         </span>
+                        {listMembershipIds.includes(l.id) && (
+                          <span className="text-[10px] uppercase tracking-wide text-sky-600 font-semibold inline-flex items-center gap-1">
+                            <CheckIcon className="h-3 w-3" />
+                            In
+                          </span>
+                        )}
                       </button>
                     ))}
                 {!loadingListsQuick &&
@@ -787,7 +852,7 @@ export default function GameCard({
 
           {/* Description/tagline - only show for non-compact variants */}
           {variant === 'detailed' && (game as any).tagline && (
-            <p className="mt-0.5 text-[0.8rem] leading-snug text-gray-600 dark:text-gray-400 line-clamp-2 min-h-[1.2rem]">
+            <p className="mt-0.5 text-[0.8rem] leading-snug text-gray-600 line-clamp-2 min-h-[1.2rem]">
               {truncate(game.tagline || '', 90)}
             </p>
           )}
@@ -860,17 +925,17 @@ export default function GameCard({
           onClick={() => setShowPlayLog(false)}
         >
           <div
-            className="bg-white dark:bg-gray-900 w-full sm:max-w-xl rounded-t-2xl sm:rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[90vh]"
+            className="bg-white w-full sm:max-w-xl rounded-t-2xl sm:rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[90vh]"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
               <h3 className="text-lg font-semibold">
                 Log Your Play – {game.name}
               </h3>
               <button
                 onClick={() => setShowPlayLog(false)}
-                className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
+                className="p-2 rounded-md hover:bg-gray-100"
                 aria-label="Close"
               >
                 <XMarkIcon className="w-6 h-6 text-gray-500" />

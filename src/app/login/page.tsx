@@ -195,7 +195,7 @@ function LoginForm() {
           Protected by Supabase Auth •{' '}
           <a
             href="/reset-password"
-            className="underline hover:text-gray-700 dark:hover:text-gray-300"
+            className="underline hover:text-gray-700"
           >
             Reset password
           </a>
@@ -204,7 +204,7 @@ function LoginForm() {
     >
       <form onSubmit={onSubmit} className="space-y-5" noValidate>
         <div className="space-y-1">
-          <label className="block text-xs font-medium uppercase tracking-wide text-gray-600 dark:text-gray-400">
+          <label className="block text-xs font-medium uppercase tracking-wide text-gray-600">
             Email or Username
           </label>
           <input
@@ -213,14 +213,14 @@ function LoginForm() {
             onChange={(e) => setEmail(e.target.value)}
             required
             autoComplete="username"
-            className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+            className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
             aria-describedby={
               error ? 'auth-error' : info ? 'auth-info' : undefined
             }
           />
         </div>
         <div className="space-y-1">
-          <label className="block text-xs font-medium uppercase tracking-wide text-gray-600 dark:text-gray-400">
+          <label className="block text-xs font-medium uppercase tracking-wide text-gray-600">
             Password
           </label>
           <div className="relative">
@@ -230,13 +230,13 @@ function LoginForm() {
               onChange={(e) => setPassword(e.target.value)}
               required
               autoComplete="current-password"
-              className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
               aria-describedby={error ? 'auth-error' : undefined}
             />
             <button
               type="button"
               onClick={() => setShowPassword((p) => !p)}
-              className="absolute inset-y-0 right-0 px-3 flex items-center text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 rounded"
+              className="absolute inset-y-0 right-0 px-3 flex items-center text-xs text-gray-500 hover:text-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 rounded"
               aria-label={showPassword ? 'Hide password' : 'Show password'}
             >
               <span className="sr-only">
@@ -290,7 +290,7 @@ function LoginForm() {
           {info && (
             <p
               id="auth-info"
-              className="text-[11px] leading-snug text-gray-600 dark:text-gray-400 whitespace-pre-line"
+              className="text-[11px] leading-snug text-gray-600 whitespace-pre-line"
             >
               {info}
             </p>
@@ -357,22 +357,22 @@ function LoginForm() {
             user may not exist in this project or SMTP settings may be off.
           </Alert>
         )}
-        <div className="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400 pt-1">
+        <div className="flex items-center justify-between text-xs text-gray-600 pt-1">
           <a
             href="/signup"
-            className="font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
+            className="font-medium text-primary-600 hover:text-primary-500"
           >
             Create account
           </a>
           <a
             href="/reset-password"
-            className="hover:text-gray-800 dark:hover:text-gray-200"
+            className="hover:text-gray-800"
           >
             Forgot password?
           </a>
         </div>
         {process.env.NODE_ENV === 'development' && (
-          <div className="mt-4 rounded bg-gray-50 dark:bg-gray-900/40 p-2 border border-dashed border-gray-300 dark:border-gray-700 text-[10px] text-gray-500 dark:text-gray-400">
+          <div className="mt-4 rounded bg-gray-50 p-2 border border-dashed border-gray-300 text-[10px] text-gray-500">
             Dev: Supabase URL host →{' '}
             {(() => {
               try {

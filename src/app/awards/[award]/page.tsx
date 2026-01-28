@@ -804,7 +804,7 @@ function YearSection({
             {/* Rotated year positioned southwest of dot */}
             <span
               aria-hidden="true"
-              className="hidden md:block absolute top-2 md:top-2 left-1/2 -translate-x-1/2 translate-y-1/2 -rotate-90 origin-center text-4xl font-extrabold text-gray-300 dark:text-gray-600 tracking-tight select-none pointer-events-none pr-6"
+              className="hidden md:block absolute top-2 md:top-2 left-1/2 -translate-x-1/2 translate-y-1/2 -rotate-90 origin-center text-4xl font-extrabold text-gray-300 tracking-tight select-none pointer-events-none pr-6"
               style={{ transform: 'translate(-67%, 100%) rotate(-90deg)' }}
             >
               {yearData.year}

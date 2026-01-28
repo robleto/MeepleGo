@@ -204,10 +204,6 @@ export interface Database {
             | 'library'
             | 'wishlist'
             | 'custom'
-            | 'bgg_bestsellers'
-            | 'bgg_hotness'
-            | 'bgg_trendingplays'
-            | 'bgg_mostplayed'
         }
         Insert: {
           id?: string

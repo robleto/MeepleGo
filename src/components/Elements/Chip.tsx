@@ -71,69 +71,69 @@ interface ChipProps {
 const colorVariants = {
   gray: {
     subtle:
-      'bg-gray-50/90 text-gray-700 border border-gray-200/60 dark:bg-gray-700/40 dark:text-gray-300 dark:border-gray-600/50',
-    solid: 'bg-gray-600 text-white border border-gray-600 dark:bg-gray-500',
+      'bg-gray-50/90 text-gray-700 border border-gray-200/60',
+    solid: 'bg-gray-600 text-white border border-gray-600',
     outline:
-      'bg-white text-gray-400 border border-gray-300 dark:bg-gray-800 dark:text-gray-500 dark:border-gray-600',
+      'bg-white text-gray-400 border border-gray-300',
     overlay: 'bg-gray-900/70 text-white backdrop-blur-sm',
   },
   blue: {
     subtle:
-      'bg-blue-50/90 text-blue-700 border border-blue-200/60 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-700/50',
-    solid: 'bg-blue-600 text-white border border-blue-600 dark:bg-blue-500',
+      'bg-blue-50/90 text-blue-700 border border-blue-200/60',
+    solid: 'bg-blue-600 text-white border border-blue-600',
     outline:
-      'bg-white text-gray-400 border border-gray-300 dark:bg-gray-800 dark:text-gray-500 dark:border-gray-600',
+      'bg-white text-gray-400 border border-gray-300',
     overlay: 'bg-blue-900/70 text-white backdrop-blur-sm',
   },
   green: {
     subtle:
-      'bg-green-50/90 text-green-700 border border-green-200/60 dark:bg-green-900/30 dark:text-green-300 dark:border-green-700/50',
-    solid: 'bg-green-600 text-white border border-green-600 dark:bg-green-500',
+      'bg-green-50/90 text-green-700 border border-green-200/60',
+    solid: 'bg-green-600 text-white border border-green-600',
     outline:
-      'bg-white text-gray-400 border border-gray-300 dark:bg-gray-800 dark:text-gray-500 dark:border-gray-600',
+      'bg-white text-gray-400 border border-gray-300',
     overlay: 'bg-green-900/70 text-white backdrop-blur-sm',
   },
   yellow: {
     subtle:
-      'bg-yellow-50/90 text-yellow-700 border border-yellow-200/60 dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-700/50',
+      'bg-yellow-50/90 text-yellow-700 border border-yellow-200/60',
     solid:
-      'bg-yellow-600 text-white border border-yellow-600 dark:bg-yellow-500',
+      'bg-yellow-600 text-white border border-yellow-600',
     outline:
-      'bg-white text-gray-400 border border-gray-300 dark:bg-gray-800 dark:text-gray-500 dark:border-gray-600',
+      'bg-white text-gray-400 border border-gray-300',
     overlay: 'bg-yellow-900/70 text-white backdrop-blur-sm',
   },
   red: {
     subtle:
-      'bg-red-50/90 text-red-700 border border-red-200/60 dark:bg-red-900/30 dark:text-red-300 dark:border-red-700/50',
-    solid: 'bg-red-600 text-white border border-red-600 dark:bg-red-500',
+      'bg-red-50/90 text-red-700 border border-red-200/60',
+    solid: 'bg-red-600 text-white border border-red-600',
     outline:
-      'bg-white text-gray-400 border border-gray-300 dark:bg-gray-800 dark:text-gray-500 dark:border-gray-600',
+      'bg-white text-gray-400 border border-gray-300',
     overlay: 'bg-red-900/70 text-white backdrop-blur-sm',
   },
   purple: {
     subtle:
-      'bg-purple-50/90 text-purple-700 border border-purple-200/60 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-700/50',
+      'bg-purple-50/90 text-purple-700 border border-purple-200/60',
     solid:
-      'bg-purple-600 text-white border border-purple-600 dark:bg-purple-500',
+      'bg-purple-600 text-white border border-purple-600',
     outline:
-      'bg-white text-gray-400 border border-gray-300 dark:bg-gray-800 dark:text-gray-500 dark:border-gray-600',
+      'bg-white text-gray-400 border border-gray-300',
     overlay: 'bg-purple-900/70 text-white backdrop-blur-sm',
   },
   pink: {
     subtle:
-      'bg-pink-50/90 text-pink-700 border border-pink-200/60 dark:bg-pink-900/30 dark:text-pink-300 dark:border-pink-700/50',
-    solid: 'bg-pink-600 text-white border border-pink-600 dark:bg-pink-500',
+      'bg-pink-50/90 text-pink-700 border border-pink-200/60',
+    solid: 'bg-pink-600 text-white border border-pink-600',
     outline:
-      'bg-white text-gray-400 border border-gray-300 dark:bg-gray-800 dark:text-gray-500 dark:border-gray-600',
+      'bg-white text-gray-400 border border-gray-300',
     overlay: 'bg-pink-900/70 text-white backdrop-blur-sm',
   },
   orange: {
     subtle:
-      'bg-orange-50/90 text-orange-700 border border-orange-200/60 dark:bg-orange-900/30 dark:text-orange-300 dark:border-orange-700/50',
+      'bg-orange-50/90 text-orange-700 border border-orange-200/60',
     solid:
-      'bg-orange-600 text-white border border-orange-600 dark:bg-orange-500',
+      'bg-orange-600 text-white border border-orange-600',
     outline:
-      'bg-white text-gray-400 border border-gray-300 dark:bg-gray-800 dark:text-gray-500 dark:border-gray-600',
+      'bg-white text-gray-400 border border-gray-300',
     overlay: 'bg-orange-900/70 text-white backdrop-blur-sm',
   },
 }
@@ -144,7 +144,7 @@ function getRatingColorClasses(
   variant: ChipProps['variant']
 ) {
   if (!value) {
-    return 'bg-gray-100/80 text-gray-600 border border-gray-200/60 dark:bg-gray-700/40 dark:text-gray-300 dark:border-gray-600/50'
+    return 'bg-gray-100/80 text-gray-600 border border-gray-200/60'
   }
 
   switch (variant) {

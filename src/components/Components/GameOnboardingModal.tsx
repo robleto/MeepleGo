@@ -278,11 +278,9 @@ export default function GameOnboardingModal({
               {/* Game image */}
               <div className="w-20 h-24 rounded-xl overflow-hidden shadow-lg ring-1 ring-gray-200 bg-gray-100 flex-shrink-0">
                 {(game.image_url || game.thumbnail_url) ? (
-                  <Image
+                  <img
                     src={game.image_url || game.thumbnail_url || ''}
                     alt={game.name}
-                    width={80}
-                    height={96}
                     className="object-cover w-full h-full"
                   />
                 ) : (
@@ -482,56 +480,124 @@ export default function GameOnboardingModal({
 
             {currentStep === 'rate' && (
               <div className="text-center">
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                  Rate this game
-                </h3>
-                <p className="text-sm text-gray-600 mb-6">
-                  How would you rate {game.name}? Your ratings help build your personal rankings.
-                </p>
+                {/* Star icon that fills with rating color */}
                 <div className="mb-6">
-                  <button
-                    onClick={handleRatingClick}
-                    className="mx-auto flex items-center justify-center focus:outline-none"
-                  >
+                  <div className="w-32 h-32 mx-auto relative">
                     {rating ? (
-                      <RatingChip
-                        value={rating}
-                        size="xl"
-                        variant="default"
-                        className="w-24 h-24 text-3xl font-bold"
-                      />
-                    ) : (
-                      <div className="w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors">
-                        <StarIcon className="w-12 h-12 text-gray-400" />
+                      <div className={`w-full h-full flex items-center justify-center ${
+                        rating === 1 ? 'text-red-600' :
+                        rating === 2 ? 'text-orange-600' :
+                        rating === 3 ? 'text-amber-600' :
+                        rating === 4 ? 'text-yellow-600' :
+                        rating === 5 ? 'text-lime-600' :
+                        rating === 6 ? 'text-green-600' :
+                        rating === 7 ? 'text-emerald-600' :
+                        rating === 8 ? 'text-teal-600' :
+                        rating === 9 ? 'text-cyan-600' :
+                        'text-sky-600'
+                      }`}>
+                        <div className="relative">
+                          <StarIcon className="w-32 h-32" />
+                          <span className="absolute inset-0 flex items-center justify-center text-4xl font-bold text-white">
+                            {rating}
+                          </span>
+                        </div>
                       </div>
+                    ) : (
+                      <StarIcon className="w-32 h-32 text-gray-300" />
                     )}
-                  </button>
-                  <p className="text-sm text-gray-500 mt-3">
-                    {rating ? `You rated it ${rating}/10` : 'Click to rate 1-10'}
-                  </p>
+                  </div>
                 </div>
-                <div className="flex flex-col gap-3">
+
+                {/* Rating descriptor or "RATE THIS" */}
+                <div className="text-xs font-bold tracking-widest uppercase mb-3 h-4">
                   {rating ? (
-                    <Button
-                      onClick={() => setCurrentStep('complete')}
-                      variant="primary"
-                      size="lg"
-                      className="w-full"
-                    >
-                      <CheckIcon className="w-5 h-5" />
-                      Done!
-                    </Button>
+                    <span className={`${
+                      rating === 1 ? 'text-red-600' :
+                      rating === 2 ? 'text-orange-600' :
+                      rating === 3 ? 'text-amber-600' :
+                      rating === 4 ? 'text-yellow-600' :
+                      rating === 5 ? 'text-lime-600' :
+                      rating === 6 ? 'text-green-600' :
+                      rating === 7 ? 'text-emerald-600' :
+                      rating === 8 ? 'text-teal-600' :
+                      rating === 9 ? 'text-cyan-600' :
+                      'text-sky-600'
+                    }`}>
+                      {rating === 1 ? 'Awful' :
+                       rating === 2 ? 'Bad' :
+                       rating === 3 ? 'Poor' :
+                       rating === 4 ? 'Below Average' :
+                       rating === 5 ? 'Average' :
+                       rating === 6 ? 'Above Average' :
+                       rating === 7 ? 'Good' :
+                       rating === 8 ? 'Very Good' :
+                       rating === 9 ? 'Great' :
+                       'Masterpiece'}
+                    </span>
                   ) : (
-                    <Button
-                      onClick={handleAdvanceStep}
-                      variant="ghost"
-                      size="md"
-                      className="w-full"
-                    >
-                      Skip for now
-                      <ArrowRightIcon className="w-4 h-4" />
-                    </Button>
+                    <span className="text-gray-400">Rate This</span>
                   )}
+                </div>
+
+                {/* Game title */}
+                <h3 className="heading-display text-2xl font-medium text-gray-900 mb-8 px-4">
+                  {game.name}
+                </h3>
+
+                {/* Rating numbers (1-10) */}
+                <div className="flex items-center justify-center gap-1.5 mb-6 px-4">
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
+                    <button
+                      key={num}
+                      onClick={() => setRating(num)}
+                      className={`px-3 py-2 rounded-lg font-semibold transition-all duration-200 ${
+                        rating === num
+                          ? num === 1 ? 'bg-red-600 text-white shadow-lg' :
+                            num === 2 ? 'bg-orange-600 text-white shadow-lg' :
+                            num === 3 ? 'bg-amber-600 text-white shadow-lg' :
+                            num === 4 ? 'bg-yellow-600 text-white shadow-lg' :
+                            num === 5 ? 'bg-lime-600 text-white shadow-lg' :
+                            num === 6 ? 'bg-green-600 text-white shadow-lg' :
+                            num === 7 ? 'bg-emerald-600 text-white shadow-lg' :
+                            num === 8 ? 'bg-teal-600 text-white shadow-lg' :
+                            num === 9 ? 'bg-cyan-600 text-white shadow-lg' :
+                            'bg-sky-600 text-white shadow-lg'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                      aria-label={`Rate ${num}`}
+                    >
+                      {num}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Action buttons */}
+                <div className="flex flex-col gap-3 mt-8">
+                  <Button
+                    onClick={() => {
+                      if (rating) {
+                        handleRatingChange(rating)
+                        setCurrentStep('complete')
+                      }
+                    }}
+                    variant="primary"
+                    size="lg"
+                    className="w-full"
+                    disabled={!rating}
+                  >
+                    Continue
+                    <ArrowRightIcon className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    onClick={handleAdvanceStep}
+                    variant="ghost"
+                    size="md"
+                    className="w-full"
+                  >
+                    Skip for now
+                    <ArrowRightIcon className="w-4 h-4" />
+                  </Button>
                 </div>
               </div>
             )}

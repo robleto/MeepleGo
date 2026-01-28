@@ -245,7 +245,7 @@ export default function SearchDropdown({
         parts.push(
           <span
             key={i}
-            className="bg-yellow-200 dark:bg-yellow-600/40 rounded px-0.5"
+            className="bg-yellow-200 rounded px-0.5"
           >
             {match}
           </span>
@@ -311,7 +311,7 @@ export default function SearchDropdown({
         id="game-suggestions"
         role="listbox"
         className={cn(
-          'bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-xl overflow-hidden max-h-[400px] overflow-y-auto text-sm',
+          'bg-white border border-gray-200 rounded-2xl shadow-xl overflow-hidden max-h-[400px] overflow-y-auto text-sm',
           usePortal
             ? 'fixed z-[250]' // Higher than modal z-index
             : 'absolute left-0 right-0 top-full mt-2 z-50'
@@ -327,19 +327,19 @@ export default function SearchDropdown({
         }
       >
         {loading && (
-          <div className="px-6 py-4 text-gray-500 dark:text-gray-400">
+          <div className="px-6 py-4 text-gray-500">
             Searching…
           </div>
         )}
         {!loading && !flat.length && query.length >= 2 && (
           <div className="px-6 py-6 text-center">
-            <div className="w-10 h-10 mx-auto mb-2 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+            <div className="w-10 h-10 mx-auto mb-2 rounded-full bg-gray-100 flex items-center justify-center">
               <MagnifyingGlassIcon className="w-5 h-5 text-gray-400" />
             </div>
-            <div className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">
+            <div className="text-gray-500 text-sm font-medium mb-1">
               No games found
             </div>
-            <div className="text-[11px] text-gray-400 dark:text-gray-500">
+            <div className="text-[11px] text-gray-400">
               Try another search term
             </div>
           </div>
@@ -347,8 +347,8 @@ export default function SearchDropdown({
         {!loading && flat.length > 0 && (
           <>
             {grouped.exactMatches.length > 0 && (
-              <div className="border-b border-gray-100 dark:border-gray-800">
-                <div className="px-6 py-2 bg-gray-50 dark:bg-gray-800/50 text-[11px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+              <div className="border-b border-gray-100">
+                <div className="px-6 py-2 bg-gray-50 text-[11px] font-semibold uppercase tracking-wide text-gray-500">
                   Exact Match
                 </div>
                 {grouped.exactMatches.map((g, i) => (
@@ -366,8 +366,8 @@ export default function SearchDropdown({
               </div>
             )}
             {grouped.popular.length > 0 && (
-              <div className="border-b border-gray-100 dark:border-gray-800">
-                <div className="px-6 py-2 bg-gray-50 dark:bg-gray-800/50 text-[11px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+              <div className="border-b border-gray-100">
+                <div className="px-6 py-2 bg-gray-50 text-[11px] font-semibold uppercase tracking-wide text-gray-500">
                   Popular Games
                 </div>
                 {grouped.popular.map((g, i) => {
@@ -389,7 +389,7 @@ export default function SearchDropdown({
             )}
             {grouped.other.length > 0 && (
               <div>
-                <div className="px-6 py-2 bg-gray-50 dark:bg-gray-800/50 text-[11px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                <div className="px-6 py-2 bg-gray-50 text-[11px] font-semibold uppercase tracking-wide text-gray-500">
                   Other Results
                 </div>
                 {grouped.other.map((g, i) => {
@@ -442,8 +442,8 @@ function SuggestionRow({
     <button
       type="button"
       className={cn(
-        'w-full px-6 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-800 focus:bg-gray-50 dark:focus:bg-gray-800 focus:outline-none transition-colors flex items-center gap-4',
-        active && 'bg-gray-50 dark:bg-gray-800'
+        'w-full px-6 py-3 text-left hover:bg-gray-50 focus:bg-gray-50 focus:outline-none transition-colors flex items-center gap-4',
+        active && 'bg-gray-50'
       )}
       onClick={() => onSelect(game)}
       onMouseEnter={onHover}
@@ -451,7 +451,7 @@ function SuggestionRow({
       aria-selected={active}
     >
       {/* Game thumbnail */}
-      <div className="w-10 h-10 rounded border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 flex-shrink-0 overflow-hidden">
+      <div className="w-10 h-10 rounded border border-gray-200 bg-gray-100 flex-shrink-0 overflow-hidden">
         {game.thumbnail_url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -468,11 +468,11 @@ function SuggestionRow({
 
       {/* Game details */}
       <div className="flex-1 min-w-0">
-        <div className="font-medium text-gray-900 dark:text-white truncate">
+        <div className="font-medium text-gray-900 truncate">
           {highlight(game.name)}
         </div>
         {game.year_published && (
-          <div className="text-xs text-gray-500 dark:text-gray-400">
+          <div className="text-xs text-gray-500">
             {game.year_published}
           </div>
         )}

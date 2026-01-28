@@ -622,13 +622,13 @@ function Navigation() {
         )}
       >
       {/* Background layer to ensure sticky nav has a visible backdrop over content */}
-      {/* On home page (landing), nav is transparent to show hero behind it */}
+      {/* On home page (landing), nav has full white background for contrast */}
       <div
         aria-hidden
         className={cn(
           'absolute inset-0 pointer-events-none border-b z-0 transition-all duration-300',
           pathname === '/'
-            ? 'bg-transparent border-transparent'
+            ? 'bg-white border-gray-200/70'
             : [
                 'backdrop-blur supports-[backdrop-filter]:bg-white/70',
                 'bg-white/90',
@@ -646,9 +646,7 @@ function Navigation() {
               ref={navContainerRef}
               className={cn(
                 "relative rounded-2xl px-2 backdrop-blur-xl shadow-[0_6px_30px_rgba(0,0,0,0.06)] border transition-all duration-300",
-                pathname === '/'
-                  ? 'bg-white/20 border-white/20'
-                  : 'bg-white/60 border-gray-200/60'
+                'bg-white/60 border-gray-200/60'
               )}
               onMouseLeave={() => {
                 const active = linkRefs.current[pathname] || null
@@ -665,11 +663,9 @@ function Navigation() {
                   opacity: 0,
                   width: 0,
                   transform: 'translate3d(0,0,0)',
-                  backgroundColor: pathname === '/' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(224, 242, 254, 0.7)',
-                  borderColor: pathname === '/' ? 'rgba(255, 255, 255, 0.25)' : 'rgba(186, 230, 253, 0.6)',
-                  boxShadow: pathname === '/'
-                    ? 'inset 0 1px 0 rgba(255,255,255,0.2), 0 6px 12px rgba(0,0,0,0.1)'
-                    : 'inset 0 1px 0 rgba(255,255,255,0.6), 0 6px 12px rgba(0,0,0,0.06)'
+                  backgroundColor: 'rgba(224, 242, 254, 0.7)',
+                  borderColor: 'rgba(186, 230, 253, 0.6)',
+                  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.6), 0 6px 12px rgba(0,0,0,0.06)'
                 }}
                 aria-hidden="true"
               />
@@ -685,13 +681,9 @@ function Navigation() {
                         onMouseEnter={(e) => moveHighlighterTo(e.currentTarget)}
                         className={cn(
                           'block px-4 py-2.5 relative transition-colors duration-200 rounded-lg text-center',
-                          pathname === '/'
-                            ? active
-                              ? 'text-white'
-                              : 'text-white/80 hover:text-white'
-                            : active
-                              ? 'text-gray-900'
-                              : 'text-black hover:text-gray-900'
+                          active
+                            ? 'text-gray-900'
+                            : 'text-black hover:text-gray-900'
                         )}
                         href={item.href}
                       >

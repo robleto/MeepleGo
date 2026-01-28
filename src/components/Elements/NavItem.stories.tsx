@@ -82,9 +82,9 @@ export const Hover: Story = {
 
 // Story showcasing all states in a grid
 export const AllStates = () => (
-  <div className="flex gap-4 p-8 bg-gray-50 dark:bg-gray-900 min-h-screen">
+  <div className="flex gap-4 p-8 bg-gray-50 min-h-screen">
     <div className="space-y-4">
-      <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400">
+      <h3 className="text-sm font-semibold text-gray-600">
         Default State
       </h3>
       <NavItem name="Games" href="/games" icon={CubeIcon} isActive={false} />
@@ -97,7 +97,7 @@ export const AllStates = () => (
     </div>
 
     <div className="space-y-4">
-      <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400">
+      <h3 className="text-sm font-semibold text-gray-600">
         Active State
       </h3>
       <NavItem name="Games" href="/games" icon={CubeIcon} isActive={true} />
@@ -110,7 +110,7 @@ export const AllStates = () => (
     </div>
 
     <div className="space-y-4">
-      <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400">
+      <h3 className="text-sm font-semibold text-gray-600">
         Hover State (hover over items)
       </h3>
       <NavItem name="Games" href="/games" icon={CubeIcon} isActive={false} />

@@ -193,19 +193,19 @@ export default function AwardShowcase({
   return (
     <section
       id={`award-${id}`}
-      className={`bg-white dark:bg-gray-900/60 border border-gray-200 dark:border-gray-800 rounded-lg p-5 shadow-sm ${className}`}
+      className={`bg-white border border-gray-200 rounded-lg p-5 shadow-sm ${className}`}
     >
       {/* Header */}
       <div className="flex items-start justify-between mb-6">
         <div>
           <Heading as="h3" size="md" className="mb-2 flex items-center gap-2">
             <span>{title}</span>
-            <span className="text-xs font-normal text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-full">
+            <span className="text-xs font-normal text-gray-400 bg-gray-100 px-2 py-1 rounded-full">
               Top {games.length}
             </span>
           </Heading>
           {description && (
-            <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed max-w-lg">
+            <p className="text-sm text-gray-600 leading-relaxed max-w-lg">
               {description}
             </p>
           )}
@@ -214,7 +214,7 @@ export default function AwardShowcase({
           <div className="flex items-center gap-2">
             <button
               onClick={() => setShowEditor((s) => !s)}
-              className="text-[11px] inline-flex items-center gap-1 px-2 py-1 rounded border bg-white hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700"
+              className="text-[11px] inline-flex items-center gap-1 px-2 py-1 rounded border bg-white hover:bg-gray-50"
             >
               {showEditor ? 'Close' : editLabel}
             </button>
@@ -223,7 +223,7 @@ export default function AwardShowcase({
           editHref && (
             <a
               href={editHref}
-              className="text-[11px] inline-flex items-center gap-1 px-2 py-1 rounded border bg-white hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700"
+              className="text-[11px] inline-flex items-center gap-1 px-2 py-1 rounded border bg-white hover:bg-gray-50"
             >
               {editLabel}
             </a>
@@ -234,7 +234,7 @@ export default function AwardShowcase({
       {/* Winner and Nominees or Inline Editor */}
       <div className="space-y-6">
         {inlineEditable && showEditor && row ? (
-          <div className="border rounded p-3 bg-white dark:bg-gray-900">
+          <div className="border rounded p-3 bg-white">
             <AwardCategoryEditor
               year={currentYear}
               row={row}

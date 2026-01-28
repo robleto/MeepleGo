@@ -12,7 +12,7 @@ export default function SessionFallback({ year }: { year: number }) {
   if (hasSession === null) return null
   if (hasSession) return null
   return (
-    <div className="mb-6 p-4 rounded border bg-gray-50 text-sm text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300">
+    <div className="mb-6 p-4 rounded border bg-gray-50 text-sm text-gray-700">
       Log in to generate and edit your personalized {year} awards.{' '}
       <a href={`/login?next=/awards/my/${year}`} className="underline">
         Sign in

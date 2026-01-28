@@ -22,7 +22,7 @@ export default function AwardYearSelect({
     <select
       name="year"
       defaultValue={currentYear}
-      className="text-sm border rounded px-2 py-1 bg-white dark:bg-gray-800"
+      className="text-sm border rounded px-2 py-1 bg-white"
       onChange={(e) => {
         const y = e.target.value
         if (y) router.push(`/awards/my/${y}`)

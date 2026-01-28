@@ -242,7 +242,7 @@ export default async function MyAwardsYearPage({
             return (
               <div
                 key={cfg.id}
-                className="border rounded p-4 bg-white dark:bg-gray-900"
+                className="border rounded p-4 bg-white"
               >
                 <div className="mb-2 flex items-center justify-between">
                   <h2 className="text-sm font-medium">{cfg.id}</h2>

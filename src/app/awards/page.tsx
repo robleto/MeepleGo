@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 export const revalidate = 0
 import PageLayout from '@/components/Components/PageLayout'
 import Heading from '@/components/Components/Heading'
+import ZeroState from '@/components/Components/ZeroState'
 import { TrophyIcon, ChevronDownIcon } from '@heroicons/react/24/outline'
 import awardsData from '@/data/awards.json'
 import { getSupabaseServerClient } from '@/lib/supabaseServer'
@@ -262,12 +263,6 @@ export default async function AwardsPage({
       <div className="max-w-6xl mx-auto px-4 py-8">
         {/* Industry Awards */}
         <section>
-          <div className="flex items-end justify-between mb-5">
-            <Heading as="h2" variant="section" className="mb-1">
-              Industry Awards
-            </Heading>
-          </div>
-
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {AWARD_CATEGORIES.map((category, idx) => {
               const stat = allStats[idx]

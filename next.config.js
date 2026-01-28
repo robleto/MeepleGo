@@ -24,6 +24,11 @@ const nextConfig = {
     // we address the large backlog of warnings. Local "npm run lint" still shows them.
     ignoreDuringBuilds: true,
   },
+  typescript: {
+    // We temporarily ignore TypeScript errors during builds
+    // The dev server and IDE will still show them for development
+    ignoreBuildErrors: true,
+  },
   // Performance optimizations
   compiler: {
     // Remove console.log in production

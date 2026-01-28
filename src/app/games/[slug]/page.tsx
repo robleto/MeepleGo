@@ -266,7 +266,7 @@ export default async function GamePage({ params }: PageProps) {
   }
 
   return (
-    <PageLayout>
+    <PageLayout fullWidth>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{

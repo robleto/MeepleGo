@@ -58,7 +58,7 @@ export default function AuthStatusPage() {
       <h1 className="text-xl font-semibold">Auth Status</h1>
       {error && <p className="text-red-600">{error}</p>}
       {sessionInfo ? (
-        <pre className="bg-gray-100 dark:bg-gray-900/40 p-3 rounded overflow-x-auto text-xs">
+        <pre className="bg-gray-100 p-3 rounded overflow-x-auto text-xs">
           {JSON.stringify(sessionInfo, null, 2)}
         </pre>
       ) : (
@@ -67,7 +67,7 @@ export default function AuthStatusPage() {
       <div className="flex gap-2">
         <button
           onClick={() => supabase.auth.signOut()}
-          className="px-3 py-1 rounded bg-gray-200 dark:bg-gray-700 text-xs hover:bg-gray-300 dark:hover:bg-gray-600"
+          className="px-3 py-1 rounded bg-gray-200 text-xs hover:bg-gray-300"
         >
           Sign out
         </button>
@@ -83,7 +83,7 @@ export default function AuthStatusPage() {
                 : undefined,
             })
           }}
-          className="px-3 py-1 rounded bg-gray-200 dark:bg-gray-700 text-xs hover:bg-gray-300 dark:hover:bg-gray-600"
+          className="px-3 py-1 rounded bg-gray-200 text-xs hover:bg-gray-300"
         >
           Refresh
         </button>

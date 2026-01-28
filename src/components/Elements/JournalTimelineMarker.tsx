@@ -44,7 +44,7 @@ export default function JournalTimelineMarker({
     >
       {/* Vertical line */}
       <div
-        className={`absolute top-0 ${!isLast ? 'bottom-0' : 'h-1/2'} left-1/2 -translate-x-1/2 w-px bg-gradient-to-b from-sky-300 via-sky-200 to-transparent dark:from-sky-700 dark:via-sky-800/40 pointer-events-none`}
+        className={`absolute top-0 ${!isLast ? 'bottom-0' : 'h-1/2'} left-1/2 -translate-x-1/2 w-px bg-gradient-to-b from-sky-300 via-sky-200 to-transparent pointer-events-none`}
         aria-hidden="true"
       />
 
@@ -52,19 +52,19 @@ export default function JournalTimelineMarker({
       <div className="sticky top-24 flex flex-col items-center">
         <div className="relative w-20 h-16 flex items-center justify-center">
           {/* Dot positioned on the timeline */}
-          <div className="absolute top-6 left-1/2 -translate-x-1/2 w-3.5 h-3.5 rounded-full bg-white border-2 border-sky-500 dark:bg-gray-900 shadow">
+          <div className="absolute top-6 left-1/2 -translate-x-1/2 w-3.5 h-3.5 rounded-full bg-white border-2 border-sky-500 shadow">
             <div className="w-1 h-1 rounded-full bg-sky-500 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
           </div>
         </div>
 
         {/* Date text positioned to the left of the timeline */}
         <div className="text-right pr-4 absolute right-full top-0 w-20">
-          <div className="text-xs font-semibold tracking-wide text-gray-500 dark:text-gray-400">
-            {primary}
+          <div className="text-xs font-semibold tracking-wide text-gray-500">
+            <span suppressHydrationWarning>{primary}</span>
           </div>
           {secondary && (
-            <div className="text-[10px] text-gray-400 dark:text-gray-500">
-              {secondary}
+            <div className="text-[10px] text-gray-400">
+              <span suppressHydrationWarning>{secondary}</span>
             </div>
           )}
         </div>

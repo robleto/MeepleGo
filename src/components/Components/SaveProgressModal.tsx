@@ -23,12 +23,14 @@ export interface SaveProgressModalProps {
   visible: boolean
   onClose: () => void
   onAuthSuccess?: () => void
+  dismissCount?: number // How many times user has dismissed this
 }
 
 export default function SaveProgressModal({
   visible,
   onClose,
   onAuthSuccess,
+  dismissCount = 0,
 }: SaveProgressModalProps) {
   const router = useRouter()
   const activity = getGuestActivityCount()
@@ -62,6 +64,37 @@ export default function SaveProgressModal({
     onClose()
   }
 
+  // Escalating messaging based on dismiss count
+  const getMessaging = () => {
+    if (dismissCount === 0) {
+      return {
+        title: 'Save Your Progress',
+        subtitle: 'Create an account to keep your ratings and collections safe',
+        continueText: 'Continue without saving',
+      }
+    } else if (dismissCount === 1) {
+      return {
+        title: 'Don\'t Lose Your Work',
+        subtitle: 'Your collection is growing! Save it before you lose it',
+        continueText: 'I\'ll risk it',
+      }
+    } else if (dismissCount === 2) {
+      return {
+        title: 'Almost There!',
+        subtitle: 'You have valuable data that will be lost without an account',
+        continueText: 'Continue anyway',
+      }
+    } else {
+      return {
+        title: '⚠️ You Will Lose Everything',
+        subtitle: 'All your ratings and collections will be gone when you close this page',
+        continueText: 'I understand the risk',
+      }
+    }
+  }
+
+  const messaging = getMessaging()
+
   return (
     <Portal>
       <Overlay
@@ -88,10 +121,10 @@ export default function SaveProgressModal({
                 <SparklesIcon className="w-8 h-8 text-white" />
               </div>
               <h2 className="text-2xl font-bold mb-2">
-                Save Your Progress
+                {messaging.title}
               </h2>
               <p className="text-sky-100 text-sm">
-                Create an account to keep your ratings and collections safe
+                {messaging.subtitle}
               </p>
             </div>
 
@@ -186,7 +219,7 @@ export default function SaveProgressModal({
                 onClick={handleContinueAsGuest}
                 className="w-full text-sm text-gray-500 hover:text-gray-700 py-2 transition-colors"
               >
-                Continue without saving
+                {messaging.continueText}
               </button>
             </div>
 

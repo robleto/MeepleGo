@@ -44,7 +44,7 @@ export const SubHead: Story = {
     align: 'left',
     displayFont: false,
     className:
-      'heading-display text-2xl font-normal tracking-wide text-gray-700 dark:text-gray-300 mb-1',
+      'heading-display text-2xl font-normal tracking-wide text-gray-700 mb-1',
     children: 'My Lists',
   },
 }

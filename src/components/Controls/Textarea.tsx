@@ -54,11 +54,11 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
 
     const stateClasses = {
       default:
-        'border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-sky-500 focus:border-sky-500',
+        'border-gray-300 focus:ring-2 focus:ring-sky-500 focus:border-sky-500',
       error:
-        'border-red-300 dark:border-red-600 focus:ring-2 focus:ring-red-500 focus:border-red-500',
+        'border-red-300 focus:ring-2 focus:ring-red-500 focus:border-red-500',
       success:
-        'border-green-300 dark:border-green-600 focus:ring-2 focus:ring-green-500 focus:border-green-500',
+        'border-green-300 focus:ring-2 focus:ring-green-500 focus:border-green-500',
     }
 
     const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -79,7 +79,7 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
         ref={ref}
         className={cn(
           // Base styles
-          'w-full border rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-colors focus:outline-none',
+          'w-full border rounded-md shadow-sm bg-white text-gray-900 placeholder-gray-500 transition-colors focus:outline-none',
 
           // Size styles
           sizeClasses[size],
@@ -92,7 +92,7 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
 
           // Disabled styles
           disabled &&
-            'opacity-50 cursor-not-allowed bg-gray-50 dark:bg-gray-800',
+            'opacity-50 cursor-not-allowed bg-gray-50',
 
           className
         )}

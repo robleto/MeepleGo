@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import GameCard from '@/components/Components/GameCard'
-import { SparklesIcon, ChartBarIcon, TagIcon, ClockIcon } from '@heroicons/react/24/outline'
+import Heading from '@/components/Components/Heading'
+import { ChartBarIcon, TagIcon } from '@heroicons/react/24/outline'
 import ActivityFeed from '@/components/Profile/ActivityFeed'
 
 interface Game {
@@ -298,12 +299,12 @@ export default function ProfileOverviewContent({
       const favCategories = suggestedCategories.slice(0, 3).map((c) => c.name)
       const favMechanics = suggestedMechanics.slice(0, 3).map((m) => m.name)
 
-      // Get BGG hotness games that user doesn't own
+      // Get popular games that user doesn't own
       const { data: hotGames } = await supabase
         .from('games')
         .select('*')
         .not('id', 'in', `(${Array.from(ownedGameIds).join(',') || 'none'})`)
-        .order('bgg_rank', { ascending: true, nullsFirst: false })
+        .order('num_ratings', { ascending: false, nullsFirst: false })
         .limit(100)
 
       if (!hotGames) return
@@ -314,10 +315,10 @@ export default function ProfileOverviewContent({
           let score = 0
           let reasons: string[] = []
 
-          // High BGG rank bonus
-          if (game.bgg_rank && game.bgg_rank <= 100) {
+          // High popularity bonus
+          if (game.num_ratings && game.num_ratings >= 1000) {
             score += 50
-            reasons.push('Top BGG Rank')
+            reasons.push('Highly Rated')
           }
 
           // Category matching
@@ -341,7 +342,7 @@ export default function ProfileOverviewContent({
           return {
             ...game,
             score,
-            reason: reasons[0] || 'Popular on BGG',
+            reason: reasons[0] || 'Popular Game',
             list_membership: membershipMap[game.id] || { library: false, wishlist: false },
           }
         })
@@ -464,29 +465,26 @@ export default function ProfileOverviewContent({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-10">
       {/* Recently Added/Updated Games - Horizontal Carousel */}
       {recentGames.length > 0 && (
-        <div className="rounded-2xl border border-gray-200/70 bg-gradient-to-r from-sky-50/50 to-purple-50/50 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <ClockIcon className="h-5 w-5 text-sky-600" />
-              <h2 className="text-lg font-semibold text-gray-900">
-                {username ? `${username}'s` : 'Your'} Recent Activity
-              </h2>
-            </div>
+        <section className="space-y-4">
+          <div className="flex items-center justify-between gap-4">
+            <Heading as="h2" size="md" className="text-gray-900">
+              {username ? `${username}'s` : 'Your'} Recent Activity
+            </Heading>
             <Link
               href={username ? `/${username}/activity` : '/profile/activity'}
-              className="text-sm text-primary-600 hover:text-primary-700"
+              className="text-xs sm:text-sm text-primary-600 hover:text-primary-500 font-medium whitespace-nowrap"
             >
               View all →
             </Link>
           </div>
-          <p className="text-xs text-gray-500 mb-4">
+          <p className="text-sm sm:text-base text-gray-600">
             Games {username ? 'they\'ve' : 'you\'ve'} recently interacted with
           </p>
-          <div className="overflow-x-auto overflow-y-visible scrollbar-hide -mx-2 px-2 py-4">
-            <div className="flex gap-4 pb-2">
+          <div className="-mx-4 sm:-mx-6 lg:-mx-8">
+            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 px-4 sm:px-6 lg:px-8">
               {recentGames.map((game) => (
                 <div key={game.id} className="flex-shrink-0 w-40">
                   <div className="h-[320px]">
@@ -507,31 +505,28 @@ export default function ProfileOverviewContent({
               ))}
             </div>
           </div>
-        </div>
+        </section>
       )}
 
       {/* Top Ranked Games - Netflix Style */}
       {topGames.length > 0 && (
-        <div className="rounded-2xl border border-gray-200/70 bg-white/80 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <SparklesIcon className="h-5 w-5 text-primary-600" />
-              <h2 className="text-lg font-semibold text-gray-900">
-                {username ? `${username}'s` : 'Your'} Top Rated Games
-              </h2>
-            </div>
+        <section className="space-y-4">
+          <div className="flex items-center justify-between gap-4">
+            <Heading as="h2" size="md" className="text-gray-900">
+              {username ? `${username}'s` : 'Your'} Top Rated Games
+            </Heading>
             <Link
               href={username ? `/${username}/rankings` : '/profile/rankings'}
-              className="text-sm text-primary-600 hover:text-primary-700"
+              className="text-xs sm:text-sm text-primary-600 hover:text-primary-500 font-medium whitespace-nowrap"
             >
               View all →
             </Link>
           </div>
-          <p className="text-xs text-gray-500 mb-4">
+          <p className="text-sm sm:text-base text-gray-600">
             Auto-generated from {username ? 'their' : 'your'} highest-rated games
           </p>
-          <div className="overflow-x-auto overflow-y-visible scrollbar-hide -mx-2 px-2 py-4">
-            <div className="flex gap-4 pb-2">
+          <div className="-mx-4 sm:-mx-6 lg:-mx-8">
+            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 px-4 sm:px-6 lg:px-8">
               {topGames.map((game) => (
                 <div key={game.id} className="flex-shrink-0 w-40 h-[320px]">
                   <GameCard
@@ -545,30 +540,25 @@ export default function ProfileOverviewContent({
               ))}
             </div>
           </div>
-        </div>
+        </section>
       )}
 
       {/* Wishlist - Netflix Style */}
       {wishlistGames.length > 0 && (
-        <div className="rounded-2xl border border-gray-200/70 bg-white/80 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <svg className="h-5 w-5 text-pink-500" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-              </svg>
-              <h2 className="text-lg font-semibold text-gray-900">
-                {username ? `${username}'s` : 'Your'} Wishlist
-              </h2>
-            </div>
+        <section className="space-y-4">
+          <div className="flex items-center justify-between gap-4">
+            <Heading as="h2" size="md" className="text-gray-900">
+              {username ? `${username}'s` : 'Your'} Wishlist
+            </Heading>
             <Link
               href={username ? `/${username}/wishlist` : '/profile/wishlist'}
-              className="text-sm text-primary-600 hover:text-primary-700"
+              className="text-xs sm:text-sm text-primary-600 hover:text-primary-500 font-medium whitespace-nowrap"
             >
               View all →
             </Link>
           </div>
-          <div className="overflow-x-auto overflow-y-visible scrollbar-hide -mx-2 px-2 py-4">
-            <div className="flex gap-4 pb-2">
+          <div className="-mx-4 sm:-mx-6 lg:-mx-8">
+            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 px-4 sm:px-6 lg:px-8">
               {wishlistGames.map((game) => (
                 <div key={game.id} className="flex-shrink-0 w-40 h-[320px]">
                   <GameCard
@@ -582,25 +572,22 @@ export default function ProfileOverviewContent({
               ))}
             </div>
           </div>
-        </div>
+        </section>
       )}
 
       {/* Recommended For You - Netflix Style (own profile only) */}
       {isOwnProfile && recommendedGames.length > 0 && (
-        <div className="rounded-2xl border border-gray-200/70 bg-white/80 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <SparklesIcon className="h-5 w-5 text-emerald-600" />
-              <h2 className="text-lg font-semibold text-gray-900">
-                Recommended For You
-              </h2>
-            </div>
+        <section className="space-y-4">
+          <div className="flex items-center justify-between gap-4">
+            <Heading as="h2" size="md" className="text-gray-900">
+              Recommended For You
+            </Heading>
           </div>
-          <p className="text-xs text-gray-500 mb-4">
-            Based on your favorite categories, mechanics, and BGG hotness
+          <p className="text-sm sm:text-base text-gray-600">
+            Based on your favorite categories, mechanics, and popular games
           </p>
-          <div className="overflow-x-auto overflow-y-visible scrollbar-hide -mx-2 px-2 py-4">
-            <div className="flex gap-4 pb-2">
+          <div className="-mx-4 sm:-mx-6 lg:-mx-8">
+            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 px-4 sm:px-6 lg:px-8">
               {recommendedGames.map((game) => (
                 <div key={game.id} className="flex-shrink-0 w-40">
                   <div className="h-[320px]">
@@ -619,7 +606,7 @@ export default function ProfileOverviewContent({
               ))}
             </div>
           </div>
-        </div>
+        </section>
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

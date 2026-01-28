@@ -203,10 +203,10 @@ export default function GameSearchSelect({
     <div className={cn('relative', className, isLanding && 'group')}>
       <div
         className={cn(
-          'flex w-full items-center gap-3 border bg-white/95 backdrop-blur-sm transition shadow-sm hover:shadow-md focus-within:ring-2 focus-within:ring-sky-500',
+          'flex w-full items-center gap-3 border bg-white/95 backdrop-blur-sm transition shadow-sm hover:shadow-md focus-within:ring-2 focus-within:ring-sky-500 rounded-full',
           isLanding
-            ? 'px-4 sm:px-5 py-3 text-base border-gray-200 rounded-xl shadow-md'
-            : 'px-4 py-1.5 border-gray-200 rounded-full'
+            ? 'pl-4 pr-2 py-2 text-base border-gray-200 shadow-lg'
+            : 'px-4 py-1.5 border-gray-200'
         )}
       >
         <input

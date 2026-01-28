@@ -5,7 +5,7 @@ import { cn } from '@/utils/helpers'
 
 interface LogoProps {
   /** Size variant of the logo */
-  size?: 'sm' | 'md' | 'lg'
+  size?: 'sm' | 'md' | 'lg' | 'xl'
   /** Whether to show the text "MeepleGo" alongside the logo */
   showText?: boolean
   /** Optional href to make the logo a link */
@@ -14,21 +14,33 @@ interface LogoProps {
   className?: string
 }
 
-const sizeStyles = {
+const sizeStyles: Record<
+  'sm' | 'md' | 'lg' | 'xl',
+  { container: string; logo: string; text: string; dimensions: number }
+> = {
   sm: {
     container: 'gap-1.5',
     logo: 'h-6 w-6',
     text: 'text-lg',
+    dimensions: 24,
   },
   md: {
     container: 'gap-2',
     logo: 'h-8 w-8',
     text: 'text-xl',
+    dimensions: 32,
   },
   lg: {
     container: 'gap-1.5',
     logo: 'h-8 w-8',
     text: 'text-xl',
+    dimensions: 32,
+  },
+  xl: {
+    container: 'gap-3',
+    logo: 'h-10 w-10',
+    text: 'text-2xl',
+    dimensions: 40,
   },
 }
 
@@ -38,7 +50,7 @@ export function Logo({
   href,
   className,
 }: LogoProps) {
-  const styles = sizeStyles[size]
+  const styles = sizeStyles[size] ?? sizeStyles.md
 
   const content = (
     <div className={cn('flex items-center', styles.container, className)}>
@@ -47,10 +59,8 @@ export function Logo({
         src="/meeplego.svg"
         alt="MeepleGo"
         className={cn('object-contain', styles.logo)}
-        width={parseInt(styles.logo.split(' ')[0].replace(/[^0-9]/g, '')) || 32}
-        height={
-          parseInt(styles.logo.split(' ')[0].replace(/[^0-9]/g, '')) || 32
-        }
+        width={styles.dimensions}
+        height={styles.dimensions}
         priority={size === 'lg'}
       />
 
@@ -62,8 +72,8 @@ export function Logo({
             styles.text
           )}
         >
-          <span className="text-gray-900 dark:text-gray-100">Meeple</span>
-          <span className="ml-0.5 text-[#096EC2] dark:text-[#2695E2]">Go</span>
+          <span className="text-gray-900">Meeple</span>
+          <span className="ml-0.5 text-[#096EC2]">Go</span>
         </span>
       )}
     </div>
