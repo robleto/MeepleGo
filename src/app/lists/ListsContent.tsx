@@ -34,12 +34,6 @@ export function ListsContent({
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [userId, setUserId] = useState<string | null>(null)
   const [isAdmin, setIsAdmin] = useState(false)
-  const pinnedListTypes = [
-    'bgg_bestsellers',
-    'bgg_hotness',
-    'bgg_trendingplays',
-    'bgg_mostplayed',
-  ]
 
   const fetchProfile = async (uid: string) => {
     const { data, error } = await supabase
@@ -133,6 +127,7 @@ export function ListsContent({
       `
       )
       .eq('is_public', true)
+      .not('list_type', 'in', '(bgg_bestsellers,bgg_hotness,bgg_trendingplays,bgg_mostplayed)')
       .order('updated_at', { ascending: false })
       .limit(20)
 
@@ -141,24 +136,7 @@ export function ListsContent({
       return
     }
 
-    const lists = data || []
-    const sortIndex = (listType?: string | null) =>
-      listType ? pinnedListTypes.indexOf(listType) : -1
-    const sorted = [...lists].sort((a, b) => {
-      const aIndex = sortIndex(a.list_type)
-      const bIndex = sortIndex(b.list_type)
-      const aPinned = aIndex !== -1
-      const bPinned = bIndex !== -1
-      if (aPinned || bPinned) {
-        if (!aPinned) return 1
-        if (!bPinned) return -1
-        return aIndex - bIndex
-      }
-      const aDate = new Date(a.updated_at || a.created_at || '').getTime()
-      const bDate = new Date(b.updated_at || b.created_at || '').getTime()
-      return bDate - aDate
-    })
-    setPublicLists(sorted)
+    setPublicLists(data || [])
   }
 
   const defaultLists = useMemo(() => {
