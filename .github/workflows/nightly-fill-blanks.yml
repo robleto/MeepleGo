@@ -11,18 +11,22 @@ on:
 
 jobs:
   fill-blanks:
+    concurrency:
+      group: nightly-fill-blanks-${{ github.ref }}
+      cancel-in-progress: false
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - name: Enqueue games for enrichment
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: |
+          set -e
           echo "Enqueueing games with fill_blanks run type..."
           
           # Call enqueue_game_enrichment Edge Function
-          RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
+          RESPONSE=$(curl -s -w "\n%{http_code}" --fail --max-time 60 -X POST \
             "${SUPABASE_URL}/functions/v1/enqueue_game_enrichment" \
             -H "Authorization: Bearer ${SUPABASE_SERVICE_ROLE_KEY}" \
             -H "Content-Type: application/json" \
@@ -55,7 +59,7 @@ jobs:
         run: |
           TOTAL_ITERATIONS=20
           LIMIT_PER_ITERATION=50
-          DELAY_SECONDS=5
+          DELAY_SECONDS=10
           
           echo "Starting processing loop: $TOTAL_ITERATIONS iterations with limit=$LIMIT_PER_ITERATION"
           
@@ -64,7 +68,7 @@ jobs:
             echo "Processing iteration $i/$TOTAL_ITERATIONS..."
             
             # Call process_game_enrichment Edge Function
-            RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
+            RESPONSE=$(curl -s -w "\n%{http_code}" --max-time 60 -X POST \
               "${SUPABASE_URL}/functions/v1/process_game_enrichment" \
               -H "Authorization: Bearer ${SUPABASE_SERVICE_ROLE_KEY}" \
               -H "Content-Type: application/json" \

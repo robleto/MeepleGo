@@ -11,8 +11,11 @@ on:
 
 jobs:
   new-games:
+    concurrency:
+      group: weekly-new-games-${{ github.ref }}
+      cancel-in-progress: false
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       # Future: Add step here to fetch new games before enqueuing
       # - name: Fetch new games from source
@@ -24,10 +27,11 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: |
+          set -e
           echo "Enqueueing new games for enrichment..."
           
           # Call enqueue_game_enrichment Edge Function
-          RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
+          RESPONSE=$(curl -s -w "\n%{http_code}" --fail --max-time 60 -X POST \
             "${SUPABASE_URL}/functions/v1/enqueue_game_enrichment" \
             -H "Authorization: Bearer ${SUPABASE_SERVICE_ROLE_KEY}" \
             -H "Content-Type: application/json" \
@@ -60,7 +64,7 @@ jobs:
         run: |
           TOTAL_ITERATIONS=10
           LIMIT_PER_ITERATION=50
-          DELAY_SECONDS=5
+          DELAY_SECONDS=10
           
           echo "Starting processing loop: $TOTAL_ITERATIONS iterations with limit=$LIMIT_PER_ITERATION"
           
@@ -69,7 +73,7 @@ jobs:
             echo "Processing iteration $i/$TOTAL_ITERATIONS..."
             
             # Call process_game_enrichment Edge Function
-            RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
+            RESPONSE=$(curl -s -w "\n%{http_code}" --max-time 60 -X POST \
               "${SUPABASE_URL}/functions/v1/process_game_enrichment" \
               -H "Authorization: Bearer ${SUPABASE_SERVICE_ROLE_KEY}" \
               -H "Content-Type: application/json" \

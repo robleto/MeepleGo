@@ -32,6 +32,9 @@ on:
 
 jobs:
   backfill:
+    concurrency:
+      group: manual-backfill-${{ github.run_id }}
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
@@ -43,11 +46,18 @@ jobs:
           PRIORITY: ${{ github.event.inputs.priority }}
           SOURCE: ${{ github.event.inputs.source }}
         run: |
+          set -e
           echo "Enqueueing games for backfill..."
           echo "Parameters: limit=$LIMIT, priority=$PRIORITY, source=$SOURCE"
           
+          # Validate limit is positive
+          if [ "$LIMIT" -le 0 ]; then
+            echo "::error::Limit must be a positive number (got: $LIMIT)"
+            exit 1
+          fi
+          
           # Call enqueue_game_enrichment Edge Function
-          RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
+          RESPONSE=$(curl -s -w "\n%{http_code}" --fail --max-time 60 -X POST \
             "${SUPABASE_URL}/functions/v1/enqueue_game_enrichment" \
             -H "Authorization: Bearer ${SUPABASE_SERVICE_ROLE_KEY}" \
             -H "Content-Type: application/json" \
@@ -81,7 +91,7 @@ jobs:
           LIMIT: ${{ github.event.inputs.limit }}
         run: |
           LIMIT_PER_ITERATION=50
-          DELAY_SECONDS=5
+          DELAY_SECONDS=10
           
           # Calculate iterations based on limit (rounded up)
           TOTAL_ITERATIONS=$(( ($LIMIT + $LIMIT_PER_ITERATION - 1) / $LIMIT_PER_ITERATION ))
@@ -94,7 +104,7 @@ jobs:
             echo "Processing iteration $i/$TOTAL_ITERATIONS..."
             
             # Call process_game_enrichment Edge Function
-            RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
+            RESPONSE=$(curl -s -w "\n%{http_code}" --max-time 60 -X POST \
               "${SUPABASE_URL}/functions/v1/process_game_enrichment" \
               -H "Authorization: Bearer ${SUPABASE_SERVICE_ROLE_KEY}" \
               -H "Content-Type: application/json" \
