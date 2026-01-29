@@ -1,0 +1,127 @@
+name: Manual Backfill
+
+permissions:
+  contents: read
+  actions: write
+
+on:
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: 'Number of games to backfill'
+        type: number
+        required: false
+        default: 100
+      priority:
+        description: 'Priority level'
+        type: choice
+        required: false
+        default: 'medium'
+        options:
+          - low
+          - medium
+          - high
+      source:
+        description: 'Game source'
+        type: choice
+        required: false
+        default: 'bga'
+        options:
+          - bga
+          - bgg
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Enqueue games for backfill
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          LIMIT: ${{ github.event.inputs.limit }}
+          PRIORITY: ${{ github.event.inputs.priority }}
+          SOURCE: ${{ github.event.inputs.source }}
+        run: |
+          echo "Enqueueing games for backfill..."
+          echo "Parameters: limit=$LIMIT, priority=$PRIORITY, source=$SOURCE"
+          
+          # Call enqueue_game_enrichment Edge Function
+          RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
+            "${SUPABASE_URL}/functions/v1/enqueue_game_enrichment" \
+            -H "Authorization: Bearer ${SUPABASE_SERVICE_ROLE_KEY}" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"run_type\": \"backfill_existing\",
+              \"source\": \"$SOURCE\",
+              \"limit\": $LIMIT,
+              \"priority\": \"$PRIORITY\"
+            }")
+          
+          # Parse response
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+          BODY=$(echo "$RESPONSE" | sed '$d')
+          
+          echo "HTTP Status: $HTTP_CODE"
+          echo "Response Body:"
+          echo "$BODY" | jq '.' 2>/dev/null || echo "$BODY"
+          
+          # Check for success
+          if [ "$HTTP_CODE" -ne 200 ]; then
+            echo "::error::Failed to enqueue games for backfill. HTTP status: $HTTP_CODE"
+            exit 1
+          fi
+          
+          echo "✅ Successfully enqueued games for backfill"
+      
+      - name: Process game enrichment (dynamic iterations)
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          LIMIT: ${{ github.event.inputs.limit }}
+        run: |
+          LIMIT_PER_ITERATION=50
+          DELAY_SECONDS=5
+          
+          # Calculate iterations based on limit (rounded up)
+          TOTAL_ITERATIONS=$(( ($LIMIT + $LIMIT_PER_ITERATION - 1) / $LIMIT_PER_ITERATION ))
+          
+          echo "Starting processing loop: $TOTAL_ITERATIONS iterations with limit=$LIMIT_PER_ITERATION"
+          echo "Total games to process: $LIMIT"
+          
+          for i in $(seq 1 $TOTAL_ITERATIONS); do
+            echo ""
+            echo "Processing iteration $i/$TOTAL_ITERATIONS..."
+            
+            # Call process_game_enrichment Edge Function
+            RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
+              "${SUPABASE_URL}/functions/v1/process_game_enrichment" \
+              -H "Authorization: Bearer ${SUPABASE_SERVICE_ROLE_KEY}" \
+              -H "Content-Type: application/json" \
+              -d "{\"limit\": $LIMIT_PER_ITERATION}")
+            
+            # Parse response
+            HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+            BODY=$(echo "$RESPONSE" | sed '$d')
+            
+            echo "HTTP Status: $HTTP_CODE"
+            echo "Response Body:"
+            echo "$BODY" | jq '.' 2>/dev/null || echo "$BODY"
+            
+            # Check for success but continue on failure
+            if [ "$HTTP_CODE" -ne 200 ]; then
+              echo "::warning::Iteration $i failed with HTTP status: $HTTP_CODE"
+              echo "Continuing to next iteration..."
+            else
+              echo "✅ Iteration $i completed successfully"
+            fi
+            
+            # Delay before next iteration (except on last iteration)
+            if [ $i -lt $TOTAL_ITERATIONS ]; then
+              echo "Waiting ${DELAY_SECONDS}s before next iteration..."
+              sleep $DELAY_SECONDS
+            fi
+          done
+          
+          echo ""
+          echo "✅ Completed all $TOTAL_ITERATIONS iterations"
