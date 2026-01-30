@@ -150,7 +150,7 @@ function FeatureItem({
 }) {
   return (
     <div className="flex items-start gap-4">
-      <div className="flex items-center justify-center flex-shrink-0 w-10 h-10 bg-gray-100 rounded-full">
+      <div className="flex items-center justify-center flex-shrink-0 w-10 h-10 bg-blue-100 rounded-full">
         <Icon className="w-5 h-5 text-gray-600" />
       </div>
       <div>
@@ -469,7 +469,7 @@ export default function OnboardingLanding({ onComplete }: OnboardingLandingProps
       `}</style>
 
       {/* Hero Section - Full viewport */}
-      <section className="relative flex flex-col items-center justify-center min-h-screen pb-20 bg-gradient-to-b from-primary-700 via-primary-800 to-slate-950 overflow-hidden">
+      <section className="relative flex flex-col items-center justify-center min-h-screen pb-20 overflow-hidden bg-gradient-to-b from-primary-700 via-primary-800 to-slate-950">
         {/* Animated morphing gradient blobs */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           {/* Large morphing blob top-right */}
@@ -609,7 +609,7 @@ export default function OnboardingLanding({ onComplete }: OnboardingLandingProps
 
         {/* Scroll indicator at bottom */}
         <div
-          className="absolute left-1/2 -translate-x-1/2 bottom-8 opacity-0"
+          className="absolute -translate-x-1/2 opacity-0 left-1/2 bottom-8"
           style={{ 
             animation: 'fadeSlideUp 0.5s ease-out',
             animationDelay: '0.6s',
@@ -622,7 +622,7 @@ export default function OnboardingLanding({ onComplete }: OnboardingLandingProps
             className="flex flex-col items-center gap-2 transition-colors text-white/70 hover:text-white/90 group"
             aria-label="Scroll to explore"
           >
-            <span className="text-xs font-medium tracking-wide uppercase text-center">Explore</span>
+            <span className="text-xs font-medium tracking-wide text-center uppercase">Explore</span>
             <ChevronDownIcon
               className="w-5 h-5"
               style={{ animation: 'bounce-arrow 2s ease-in-out infinite' }}
@@ -647,7 +647,7 @@ export default function OnboardingLanding({ onComplete }: OnboardingLandingProps
             <FeatureItem
               icon={MagnifyingGlassIcon}
               title="Discover games"
-              description="Search thousands of board games. See ratings, player counts, and details at a glance."
+              description="Explore board games and see how they fit into your tastes, plays, and rankings."
             />
             <FeatureItem
               icon={StarIcon}
@@ -657,7 +657,7 @@ export default function OnboardingLanding({ onComplete }: OnboardingLandingProps
             <FeatureItem
               icon={BookOpenIcon}
               title="Track your collection"
-              description="Add games to your library and wishlist. Always know what you own and what you want."
+              description="Add games to your library and wishlist. Keep track of what you own, what you want, and what's next."
             />
             <FeatureItem
               icon={TrophyIcon}
@@ -667,12 +667,12 @@ export default function OnboardingLanding({ onComplete }: OnboardingLandingProps
             <FeatureItem
               icon={ListBulletIcon}
               title="Build lists"
-              description="Organize games into custom lists. Best 2-player, party favorites, or any theme you like."
+              description="Organize games into custom lists—favorites, hidden gems, or any theme you like."
             />
             <FeatureItem
               icon={ChartBarIcon}
               title="See your stats"
-              description="Log plays and discover patterns. Your gaming journey, beautifully visualized."
+              description="Log plays and discover patterns. Insights into how you play and what you love."
             />
           </div>
         </div>
@@ -697,7 +697,7 @@ export default function OnboardingLanding({ onComplete }: OnboardingLandingProps
               { step: '3', title: 'Save', description: 'Create an account anytime' },
             ].map((item, i) => (
               <div key={item.step} className="flex-1 text-center max-w-[200px] mx-auto">
-                <div className="flex items-center justify-center w-10 h-10 mx-auto mb-3 text-sm font-semibold text-white bg-gray-900 rounded-full">
+                <div className="flex items-center justify-center w-10 h-10 mx-auto mb-3 text-sm font-semibold text-white bg-blue-500 rounded-full">
                   {item.step}
                 </div>
                 <h3 className="mb-1 text-base font-medium text-gray-900 heading-display">{item.title}</h3>

@@ -68,7 +68,7 @@ export default function ProfileLayout({
     { key: 'rankings', label: 'Rankings', href: `${baseUrl}/rankings` },
     { key: 'lists', label: 'Lists', href: `${baseUrl}/lists` },
     { key: 'awards', label: 'Awards', href: `${baseUrl}/awards` },
-    { key: 'plays', label: 'Journal', href: `${baseUrl}/plays` },
+    { key: 'plays', label: 'Plays', href: `${baseUrl}/plays` },
     { key: 'friends', label: 'Friends', href: `${baseUrl}/friends` },
     { key: 'stats', label: 'Stats', href: `${baseUrl}/stats` },
   ]
@@ -211,7 +211,7 @@ export default function ProfileLayout({
             <div className="flex items-center gap-3">
               <Link
                 href={isOwnProfile ? '/settings' : '#'}
-                className={`group relative h-12 w-12 sm:h-12 sm:w-12 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center flex-shrink-0 ${
+                className={`group relative h-12 w-12 sm:h-12 sm:w-12 aspect-square rounded-full overflow-hidden bg-gray-200 flex items-center justify-center flex-shrink-0 ${
                   isOwnProfile ? 'cursor-pointer' : 'cursor-default'
                 }`}
                 aria-label={isOwnProfile ? 'Edit profile photo' : 'Profile photo'}
@@ -221,10 +221,10 @@ export default function ProfileLayout({
                   <img
                     src={profile.avatar_url}
                     alt="Profile"
-                    className="w-full h-full object-cover"
+                    className="w-full h-full aspect-square object-cover"
                   />
                 ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white text-lg sm:text-xl font-semibold">
+                  <div className="w-full h-full aspect-square bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white text-lg sm:text-xl font-semibold">
                     {(
                       profile.username ||
                       profile.full_name ||

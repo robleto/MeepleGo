@@ -11,6 +11,7 @@ import { WishlistContent } from '@/app/wishlist/WishlistContent'
 import PersonalAwardsAuto from '@/components/Components/Awards/PersonalAwardsAuto'
 import { ListsContent } from '@/app/lists/ListsContent'
 import PlaysClientPage from '@/app/plays/playsClient'
+import ForYouOverview from '@/components/Components/ForYouOverview'
 import Heading from '@/components/Components/Heading'
 import {
   BookmarkIcon,
@@ -473,67 +474,11 @@ function ProfilePageContent() {
           </ul>
         </div>
 
-        {activeTab === 'overview' && (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-              <div className="rounded-2xl border border-gray-200/70 dark:border-white/10 bg-white/80 dark:bg-gray-900/70 p-4">
-                <div className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                  Games Rated
-                </div>
-                <div className="mt-2 text-2xl font-semibold text-gray-900 dark:text-white">
-                  {stats.gamesRated}
-                </div>
-              </div>
-              <div className="rounded-2xl border border-gray-200/70 dark:border-white/10 bg-white/80 dark:bg-gray-900/70 p-4">
-                <div className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                  Avg Rating
-                </div>
-                <div className="mt-2 text-2xl font-semibold text-sky-600">
-                  {stats.avgRating || '—'}
-                </div>
-              </div>
-              <div className="rounded-2xl border border-gray-200/70 dark:border-white/10 bg-white/80 dark:bg-gray-900/70 p-4">
-                <div className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                  Games Played
-                </div>
-                <div className="mt-2 text-2xl font-semibold text-emerald-600">
-                  {stats.gamesPlayed}
-                </div>
-              </div>
-              <div className="rounded-2xl border border-gray-200/70 dark:border-white/10 bg-white/80 dark:bg-gray-900/70 p-4">
-                <div className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                  Collections
-                </div>
-                <div className="mt-2 text-2xl font-semibold text-gray-900 dark:text-white">
-                  {stats.gamesOwned}
-                </div>
-              </div>
-              <div className="rounded-2xl border border-gray-200/70 dark:border-white/10 bg-white/80 dark:bg-gray-900/70 p-4">
-                <div className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                  Lists Created
-                </div>
-                <div className="mt-2 text-2xl font-semibold text-purple-600">
-                  {stats.listsCreated}
-                </div>
-              </div>
-            </div>
-
-            <div className="rounded-2xl border border-gray-200/70 dark:border-white/10 bg-white/80 dark:bg-gray-900/70 p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                    Profile overview
-                  </h2>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                    Edit your profile details and security settings in Settings.
-                  </p>
-                </div>
-                <Link href="/settings" className="ui-btn ui-btn-ghost">
-                  Open Settings
-                </Link>
-              </div>
-            </div>
-          </div>
+        {activeTab === 'overview' && userId && (
+          <ForYouOverview
+            userId={userId}
+            username={profile.username}
+          />
         )}
 
         {activeTab === 'rankings' && (
@@ -790,27 +735,31 @@ function ProfilePageContent() {
           </div>
         )}
 
-        {activeTab !== 'overview' &&
-          activeTab !== 'rankings' &&
-          activeTab !== 'games' &&
-          activeTab !== 'watchlist' &&
-          activeTab !== 'awards' &&
-          activeTab !== 'lists' &&
-          activeTab !== 'friends' &&
-          activeTab !== 'journal' && (
-          <div className="rounded-2xl border border-gray-200/70 dark:border-white/10 bg-white/80 dark:bg-gray-900/70 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-              {tabs.find((tab) => tab.key === activeTab)?.label || 'Section'}
-            </h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-              We’re moving this section into the new profile tabs. For now, update
-              your account details in Settings.
-            </p>
-            <div className="mt-4">
-              <Link href="/settings" className="ui-btn ui-btn-primary">
-                Go to Settings
-              </Link>
+        {activeTab === 'collections' && (
+          <div className="rounded-2xl border border-gray-200/70 dark:border-white/10 bg-white/80 dark:bg-gray-900/70 p-8 text-center space-y-3">
+            <div className="text-3xl opacity-40">
+              {'\u{1F4E6}'}
             </div>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+              Collections
+            </h2>
+            <p className="text-sm text-gray-400 dark:text-gray-500 max-w-sm mx-auto">
+              Organize your games into themed collections. Coming soon.
+            </p>
+          </div>
+        )}
+
+        {activeTab === 'stats' && (
+          <div className="rounded-2xl border border-gray-200/70 dark:border-white/10 bg-white/80 dark:bg-gray-900/70 p-8 text-center space-y-3">
+            <div className="text-3xl opacity-40">
+              {'\u{1F4CA}'}
+            </div>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+              Stats
+            </h2>
+            <p className="text-sm text-gray-400 dark:text-gray-500 max-w-sm mx-auto">
+              Deep insights into your gaming habits and history. Coming soon.
+            </p>
           </div>
         )}
       </div>

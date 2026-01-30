@@ -18,6 +18,9 @@ import {
   BookmarkIcon,
   ClockIcon,
   FlagIcon,
+  SparklesIcon,
+  FireIcon,
+  ArrowPathIcon,
 } from '@heroicons/react/24/outline'
 import type { Game } from '@/types/supabase'
 import type {
@@ -402,11 +405,11 @@ export function HomepageView({
             </p>
           </div>
           {publicLists.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {publicLists.slice(0, 3).map((list) => (
+            <NetflixScrollSection itemWidth="w-72" showCount={4}>
+              {publicLists.map((list) => (
                 <ListCard key={list.id} list={list as any} isPublic={true} />
               ))}
-            </div>
+            </NetflixScrollSection>
           ) : (
             <div className="text-center py-8 text-gray-500">
               Loading lists or no public lists found...
@@ -684,19 +687,22 @@ export function HomepageView({
         {/* Most Awarded This Year */}
         <DiscoveryCard
           title="Most Awarded This Year"
-          icon="🏆"
+          icon={<TrophyIcon className="w-5 h-5 text-amber-500" />}
+          subtitle="Awards-based standouts from your collection"
           games={discoveryLists.mostAwarded}
           loading={discoveryLoading}
           emptyMessage="Award some games this year to see them here!"
           renderSubtitle={(game: MostAwardedGame) =>
             `${game.total_points} pts · ${game.award_count} award${game.award_count !== 1 ? 's' : ''}`
           }
+          href="/awards"
         />
 
         {/* Highest Ranked by You */}
         <DiscoveryCard
           title="Highest Ranked by You"
-          icon="⭐"
+          icon={<StarIcon className="w-5 h-5 text-yellow-500" />}
+          subtitle="Your top-rated games, ranked by your scores"
           games={discoveryLists.highestRanked}
           loading={discoveryLoading}
           emptyMessage="Rate some games to build your personal top 10!"
@@ -707,24 +713,28 @@ export function HomepageView({
                 : ''
             return `${game.user_ranking}/10${plays}`
           }}
+          href="/rankings"
         />
 
         {/* Sleeper Hits */}
         <DiscoveryCard
           title="Your Sleeper Hits"
-          icon="💎"
+          icon={<SparklesIcon className="w-5 h-5 text-indigo-500" />}
+          subtitle="Hidden gems you rated highly despite fewer ratings"
           games={discoveryLists.sleeperHits}
           loading={discoveryLoading}
           emptyMessage="Rate some lesser-known games to discover hidden gems!"
           renderSubtitle={(game: SleeperHitGame) =>
             `Rated ${game.user_ranking}/10 · only ${game.game_num_ratings?.toLocaleString()} ratings`
           }
+          href="/rankings"
         />
 
         {/* Hot Takes */}
         <DiscoveryCard
           title="Your Hot Takes"
-          icon="🔥"
+          icon={<FireIcon className="w-5 h-5 text-red-500" />}
+          subtitle="Where your ratings disagree most with the community"
           games={discoveryLists.hotTakes}
           loading={discoveryLoading}
           emptyMessage="Rate games to see where you differ from the community!"
@@ -732,18 +742,21 @@ export function HomepageView({
             const sign = game.delta > 0 ? '+' : ''
             return `You: ${game.user_ranking}/10 · BGG: ${game.bgg_rating.toFixed(1)} · ${sign}${game.delta.toFixed(1)}`
           }}
+          href="/rankings"
         />
 
         {/* Games You Keep Coming Back To */}
         <DiscoveryCard
           title="Games You Keep Coming Back To"
-          icon="🔄"
+          icon={<ArrowPathIcon className="w-5 h-5 text-teal-500" />}
+          subtitle="Consistent favorites based on the last 12 months"
           games={discoveryLists.comebackGames}
           loading={discoveryLoading}
           emptyMessage="Log plays to see your most consistent favorites!"
           renderSubtitle={(game: ComebackGame) =>
             `${game.months_played_12mo} of 12 months · ${game.total_plays_12mo} plays`
           }
+          href="/plays"
         />
       </section>
 
@@ -818,11 +831,11 @@ export function HomepageView({
           </p>
         </div>
         {publicLists.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {publicLists.slice(0, 3).map((list) => (
+          <NetflixScrollSection itemWidth="w-72" showCount={4}>
+            {publicLists.map((list) => (
               <ListCard key={list.id} list={list as any} isPublic={true} />
             ))}
-          </div>
+          </NetflixScrollSection>
         ) : (
           <div className="text-center py-8 text-gray-500">
             Loading lists or no public lists found...

@@ -10,12 +10,14 @@ import {
   HeartIcon,
   ListBulletIcon,
   PlusIcon,
+  PencilIcon,
 } from '@heroicons/react/24/outline'
 
 interface ListCardProps {
   list?: GameListWithItems
   isPublic?: boolean
   onUpdate?: () => void
+  onEdit?: (list: GameListWithItems) => void
   // Create new list variant
   variant?: 'list' | 'create'
   onCreateClick?: () => void
@@ -27,6 +29,7 @@ export default function ListCard({
   list,
   isPublic = false,
   onUpdate,
+  onEdit,
   variant = 'list',
   onCreateClick,
   createTitle = 'Create New List',
@@ -134,118 +137,135 @@ export default function ListCard({
   }
 
   return (
-    <Link
-      href={getListHref()}
-      className="block bg-white rounded-xl shadow hover:shadow-lg transition-shadow duration-200 group overflow-visible"
-    >
-      {/* Fanned Game Images Header */}
-      <div className="relative h-24">
-        {topGames.length > 0 ? (
-          <div className="absolute inset-0 flex items-center justify-center -top-6">
-            {topGames.map((item, index) => {
-              const game = item?.game
-              if (!game?.id) return null
-              
-              const gid = game.id as string
-              const hasError = imageErrors.has(gid)
-              const zIndex = topGames.length - index
-              const center = (topGames.length - 1) / 2
-              const rotation = (index - center) * 8
-              const xOffset = (index - center) * 12
+    <div className="relative">
+      <Link
+        href={getListHref()}
+        className="block bg-white rounded-xl shadow hover:shadow-lg transition-shadow duration-200 group overflow-visible"
+      >
+        {/* Fanned Game Images Header */}
+        <div className="relative h-24">
+          {topGames.length > 0 ? (
+            <div className="absolute inset-0 flex items-center justify-center -top-6">
+              {topGames.map((item, index) => {
+                const game = item?.game
+                if (!game?.id) return null
+                
+                const gid = game.id as string
+                const hasError = imageErrors.has(gid)
+                const zIndex = topGames.length - index
+                const center = (topGames.length - 1) / 2
+                const rotation = (index - center) * 8
+                const xOffset = (index - center) * 12
 
-              return (
-                <div
-                  key={gid}
-                  className="absolute w-16 h-20 rounded-xl shadow-lg transition-transform group-hover:scale-105"
-                  style={{
-                    transform: `rotate(${rotation}deg) translateX(${xOffset}px)`,
-                    zIndex,
-                  }}
-                >
-                  {game.thumbnail_url && !hasError ? (
-                    <img
-                      src={game.thumbnail_url}
-                      alt={game.name}
-                      className="w-full h-full object-cover rounded-xl border-2 border-white"
-                      onError={() => handleImageError(gid)}
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gray-300 rounded-xl border-2 border-white flex items-center justify-center">
-                      <span className="text-xs text-gray-500 font-medium">
-                        {(game.name || '?').substring(0, 3).toUpperCase()}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-        ) : (
-          <div className="absolute inset-0 flex items-center justify-center -top-4">
-            <div
-              className={`w-16 h-16 rounded-xl ${getListColor()} bg-opacity-20 flex items-center justify-center`}
-            >
-              <div className={getListColor()}>{getListIcon()}</div>
+                return (
+                  <div
+                    key={gid}
+                    className="absolute w-16 h-20 rounded-xl shadow-lg transition-transform group-hover:scale-105"
+                    style={{
+                      transform: `rotate(${rotation}deg) translateX(${xOffset}px)`,
+                      zIndex,
+                    }}
+                  >
+                    {game.thumbnail_url && !hasError ? (
+                      <img
+                        src={game.thumbnail_url}
+                        alt={game.name}
+                        className="w-full h-full object-cover rounded-xl border-2 border-white"
+                        onError={() => handleImageError(gid)}
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gray-300 rounded-xl border-2 border-white flex items-center justify-center">
+                        <span className="text-xs text-gray-500 font-medium">
+                          {(game.name || '?').substring(0, 3).toUpperCase()}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
             </div>
-          </div>
-        )}
-      </div>
-
-      {/* Card Content */}
-      <div className="px-4 pb-4">
-        {/* List Title and Type */}
-        <div className="flex items-start justify-between mb-2">
-          <div className="min-w-0 flex-1">
-            <h3 className="font-bold text-gray-900 truncate leading-tight text-[0.9rem] sm:text-[1rem]">
-              {list.name}
-            </h3>
-          </div>
-
-          {/* Privacy Indicator */}
-          <div className="flex items-center gap-1 flex-shrink-0 ml-2">
-            {list.is_public ? (
-              <span className="inline-flex items-center gap-1 rounded-full bg-green-100 text-green-700 px-2.5 py-1 text-xs font-semibold">
-                <EyeIcon className="w-3.5 h-3.5" />
-                Public
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 text-gray-600 px-2.5 py-1 text-xs font-semibold">
-                <LockClosedIcon className="w-3.5 h-3.5" />
-                Private
-              </span>
-            )}
-          </div>
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center -top-4">
+              <div
+                className={`w-16 h-16 rounded-xl ${getListColor()} bg-opacity-20 flex items-center justify-center`}
+              >
+                <div className={getListColor()}>{getListIcon()}</div>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Description */}
-        {list.description && (
-          <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-            {list.description}
-          </p>
-        )}
-
-        <div className="h-px w-full bg-gray-200 mb-4" />
-
-        {/* Metadata */}
-        <div className="grid grid-cols-2 gap-4 text-xs text-gray-500">
-          <div>
-            <div className="uppercase tracking-wider text-[10px] text-gray-400 mb-1">
-              Games
+        {/* Card Content */}
+        <div className="px-4 pb-4">
+          {/* List Title and Type */}
+          <div className="flex items-start justify-between mb-2">
+            <div className="min-w-0 flex-1">
+              <h3 className="font-bold text-gray-900 truncate leading-tight text-[0.9rem] sm:text-[1rem]">
+                {list.name}
+              </h3>
             </div>
-            <div className="text-base font-semibold text-gray-900">
-              {itemCount}
+
+            {/* Privacy Indicator */}
+            <div className="flex items-center gap-1 flex-shrink-0 ml-2">
+              {list.is_public ? (
+                <span className="inline-flex items-center gap-1 rounded-full bg-green-100 text-green-700 px-2.5 py-1 text-xs font-semibold">
+                  <EyeIcon className="w-3.5 h-3.5" />
+                  Public
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 text-gray-600 px-2.5 py-1 text-xs font-semibold">
+                  <LockClosedIcon className="w-3.5 h-3.5" />
+                  Private
+                </span>
+              )}
             </div>
           </div>
-          <div className="text-right">
-            <div className="uppercase tracking-wider text-[10px] text-gray-400 mb-1">
-              Updated
+
+          {/* Description */}
+          {list.description && (
+            <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+              {list.description}
+            </p>
+          )}
+
+          <div className="h-px w-full bg-gray-200 mb-4" />
+
+          {/* Metadata */}
+          <div className="grid grid-cols-2 gap-4 text-xs text-gray-500">
+            <div>
+              <div className="uppercase tracking-wider text-[10px] text-gray-400 mb-1">
+                Games
+              </div>
+              <div className="text-base font-semibold text-gray-900">
+                {itemCount}
+              </div>
             </div>
-            <div className="text-sm font-semibold text-gray-700">
-              {formatTimeAgo(list.updated_at || list.created_at)}
+            <div className="text-right">
+              <div className="uppercase tracking-wider text-[10px] text-gray-400 mb-1">
+                Updated
+              </div>
+              <div className="text-sm font-semibold text-gray-700">
+                {formatTimeAgo(list.updated_at || list.created_at)}
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </Link>
+      </Link>
+
+      {/* Edit Button - Only show for custom lists and if onEdit provided */}
+      {onEdit && list.list_type === 'custom' && (
+        <button
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            onEdit(list)
+          }}
+          className="absolute top-2 right-2 p-2 bg-white/90 hover:bg-white rounded-lg shadow-sm hover:shadow-md transition-all opacity-0 group-hover:opacity-100"
+          title="Edit list"
+        >
+          <PencilIcon className="w-4 h-4 text-gray-600" />
+        </button>
+      )}
+    </div>
   )
 }

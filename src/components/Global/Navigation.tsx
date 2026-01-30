@@ -32,6 +32,7 @@ import {
   CogIcon,
   ComputerDesktopIcon,
   BookOpenIcon,
+  SparklesIcon,
 } from '@heroicons/react/24/outline'
 
 // Dynamic imports for heavy components
@@ -53,6 +54,7 @@ interface NavLinkItem {
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>
 }
 const NAV_ITEMS: NavLinkItem[] = [
+  { name: 'For You', href: '/profile', icon: SparklesIcon },
   { name: 'Games', href: '/games', icon: GamesIcon },
   { name: 'Lists', href: '/lists', icon: ListBulletIcon },
   { name: 'Awards', href: '/awards', icon: TrophyIcon },

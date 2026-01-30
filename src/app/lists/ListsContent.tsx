@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo, useRef, type ReactNode } from 'react'
+import { useState, useEffect, useMemo, type ReactNode } from 'react'
 import PageLayout from '@/components/Components/PageLayout'
 import Heading from '@/components/Components/Heading'
 import SectionHeader from '@/components/Components/SectionHeader'
@@ -10,28 +10,45 @@ import { captureError } from '@/lib/errorTracking'
 import { GameList, GameListWithItems, Profile } from '@/types/supabase'
 import ListCard from '@/components/Components/ListCard'
 import CreateListModal from '@/components/Components/CreateListModal'
+import EditListModal from '@/components/Components/EditListModal'
 
 export function ListsContent({
   embedded = false,
   showDefaults = true,
   showPublic = true,
   publicOnly = false,
+  showDiscoveryLists = false,
 }: {
   embedded?: boolean
   showDefaults?: boolean
   showPublic?: boolean
   publicOnly?: boolean
+  showDiscoveryLists?: boolean
 }) {
   const Wrapper = embedded
     ? (({ children }: { children: ReactNode }) => <>{children}</>)
     : PageLayout
-  const stickySentinelRef = useRef<HTMLDivElement | null>(null)
-  const [isHeaderStuck, setIsHeaderStuck] = useState(false)
   const [userLists, setUserLists] = useState<GameListWithItems[]>([])
   const [publicLists, setPublicLists] = useState<GameListWithItems[]>([])
+  const [discoveryLists, setDiscoveryLists] = useState<{
+    mostAwarded: any[]
+    highestRanked: any[]
+    sleeperHits: any[]
+    hotTakes: any[]
+    comebackGames: any[]
+  }>({
+    mostAwarded: [],
+    highestRanked: [],
+    sleeperHits: [],
+    hotTakes: [],
+    comebackGames: [],
+  })
+  const [discoveryLoading, setDiscoveryLoading] = useState(false)
   const [loading, setLoading] = useState(true)
   const [isGuest, setIsGuest] = useState(false)
   const [showCreateModal, setShowCreateModal] = useState(false)
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [editingList, setEditingList] = useState<GameListWithItems | null>(null)
   const [userId, setUserId] = useState<string | null>(null)
   const [isAdmin, setIsAdmin] = useState(false)
 
@@ -69,6 +86,7 @@ export function ListsContent({
         fetchUserLists(session.user.id),
         fetchPublicLists(),
         fetchProfile(session.user.id),
+        showDiscoveryLists ? fetchDiscoveryLists(session.user.id) : Promise.resolve(),
       ])
     } finally {
       setLoading(false)
@@ -78,18 +96,6 @@ export function ListsContent({
   useEffect(() => {
     fetchLists()
   }, [])
-
-  useEffect(() => {
-    if (!embedded) return
-    const sentinel = stickySentinelRef.current
-    if (!sentinel) return
-    const observer = new IntersectionObserver(
-      ([entry]) => setIsHeaderStuck(entry.intersectionRatio === 0),
-      { threshold: [0, 1] }
-    )
-    observer.observe(sentinel)
-    return () => observer.disconnect()
-  }, [embedded])
 
   const fetchUserLists = async (userId: string) => {
     const { data, error } = await supabase
@@ -139,6 +145,31 @@ export function ListsContent({
     setPublicLists(data || [])
   }
 
+  const fetchDiscoveryLists = async (userId: string) => {
+    setDiscoveryLoading(true)
+    try {
+      const [mostAwarded, highestRanked, sleeperHits, hotTakes, comebackGames] = await Promise.all([
+        supabase.rpc('get_most_awarded_this_year', { user_id_input: userId }),
+        supabase.rpc('get_highest_ranked', { user_id_input: userId }),
+        supabase.rpc('get_sleeper_hits', { user_id_input: userId }),
+        supabase.rpc('get_hot_takes', { user_id_input: userId }),
+        supabase.rpc('get_comeback_games', { user_id_input: userId }),
+      ])
+
+      setDiscoveryLists({
+        mostAwarded: mostAwarded.data || [],
+        highestRanked: highestRanked.data || [],
+        sleeperHits: sleeperHits.data || [],
+        hotTakes: hotTakes.data || [],
+        comebackGames: comebackGames.data || [],
+      })
+    } catch (error) {
+      console.error('Error fetching discovery lists:', error)
+    } finally {
+      setDiscoveryLoading(false)
+    }
+  }
+
   const defaultLists = useMemo(() => {
     return userLists.filter((list) =>
       ['library', 'wishlist'].includes(list.list_type)
@@ -148,6 +179,15 @@ export function ListsContent({
   const customLists = useMemo(() => {
     return userLists.filter((list) => list.list_type === 'custom')
   }, [userLists])
+
+  // Separate private and public custom lists
+  const privateLists = useMemo(() => {
+    return customLists.filter((list) => !list.is_public)
+  }, [customLists])
+
+  const publicUserLists = useMemo(() => {
+    return customLists.filter((list) => list.is_public)
+  }, [customLists])
 
   // If admin, treat public lists as editable (show within "My Lists" as well for convenience)
   const adminEditablePublic = useMemo(() => {
@@ -194,6 +234,19 @@ export function ListsContent({
     setShowCreateModal(false)
   }
 
+  const handleEditList = (list: GameListWithItems) => {
+    setEditingList(list)
+    setShowEditModal(true)
+  }
+
+  const handleEditSuccess = async () => {
+    if (userId) {
+      await fetchUserLists(userId)
+    }
+    setShowEditModal(false)
+    setEditingList(null)
+  }
+
   if (loading) {
     return (
       <Wrapper>
@@ -212,20 +265,7 @@ export function ListsContent({
           <div>
             {!isGuest && (
             <>
-              {embedded && (
-                <div ref={stickySentinelRef} className="h-px" aria-hidden />
-              )}
-              <div
-                className={
-                  embedded
-                    ? `sticky top-0 z-20 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 py-3 ${
-                        isHeaderStuck
-                          ? 'bg-gray-50/95 dark:bg-gray-900/95 backdrop-blur border-b border-gray-200/70 dark:border-white/10'
-                          : 'bg-transparent'
-                      }`
-                    : 'mb-2'
-                }
-              >
+              <div className="mb-2">
                 <SectionHeader title="My Lists" containerClassName="mb-0" />
               </div>
             </>
@@ -318,25 +358,216 @@ export function ListsContent({
               </ol>
             </div>
             ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <>
               {/* Default Lists (Library & Wishlist) */}
-              {showDefaults &&
-                defaultLists.map((list) => (
-                  <ListCard
-                    key={list.id}
-                    list={list}
-                    onUpdate={() => fetchUserLists(userId!)}
-                  />
-                ))}
+              {showDefaults && defaultLists.length > 0 && (
+                <div className="mb-8">
+                  <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">
+                    Collections
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {defaultLists.map((list) => (
+                      <ListCard
+                        key={list.id}
+                        list={list}
+                        onUpdate={() => fetchUserLists(userId!)}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
 
-              {/* Custom Lists */}
-              {customLists.map((list) => (
-                <ListCard
-                  key={list.id}
-                  list={list}
-                  onUpdate={() => fetchUserLists(userId!)}
-                />
-              ))}
+              {/* Discovery Lists (Smart Lists) */}
+              {showDiscoveryLists && !discoveryLoading && (
+                <>
+                  {discoveryLists.mostAwarded.length > 0 && (
+                    <div className="mb-8">
+                      <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">
+                        Discover
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        {discoveryLists.mostAwarded.length > 0 && (
+                          <ListCard
+                            list={{
+                              id: 'discovery-most-awarded',
+                              name: 'Most Awarded This Year',
+                              description: 'Games with the most industry recognition this year',
+                              list_type: 'discovery',
+                              is_public: false,
+                              user_id: userId || '',
+                              created_at: new Date().toISOString(),
+                              updated_at: new Date().toISOString(),
+                              game_list_items: discoveryLists.mostAwarded.slice(0, 5).map((g: any) => ({
+                                id: `discovery-awarded-${g.id}`,
+                                list_id: 'discovery-most-awarded',
+                                game_id: g.id,
+                                position: 0,
+                                created_at: new Date().toISOString(),
+                                game: g,
+                              })),
+                            } as GameListWithItems}
+                          />
+                        )}
+                        {discoveryLists.highestRanked.length > 0 && (
+                          <ListCard
+                            list={{
+                              id: 'discovery-highest-ranked',
+                              name: 'Highest Ranked',
+                              description: 'Your top-rated games across all time',
+                              list_type: 'discovery',
+                              is_public: false,
+                              user_id: userId || '',
+                              created_at: new Date().toISOString(),
+                              updated_at: new Date().toISOString(),
+                              game_list_items: discoveryLists.highestRanked.slice(0, 5).map((g: any) => ({
+                                id: `discovery-highest-${g.id}`,
+                                list_id: 'discovery-highest-ranked',
+                                game_id: g.id,
+                                position: 0,
+                                created_at: new Date().toISOString(),
+                                game: g,
+                              })),
+                            } as GameListWithItems}
+                          />
+                        )}
+                        {discoveryLists.sleeperHits.length > 0 && (
+                          <ListCard
+                            list={{
+                              id: 'discovery-sleeper-hits',
+                              name: 'Sleeper Hits',
+                              description: 'Hidden gems you rated higher than the community',
+                              list_type: 'discovery',
+                              is_public: false,
+                              user_id: userId || '',
+                              created_at: new Date().toISOString(),
+                              updated_at: new Date().toISOString(),
+                              game_list_items: discoveryLists.sleeperHits.slice(0, 5).map((g: any) => ({
+                                id: `discovery-sleeper-${g.id}`,
+                                list_id: 'discovery-sleeper-hits',
+                                game_id: g.id,
+                                position: 0,
+                                created_at: new Date().toISOString(),
+                                game: g,
+                              })),
+                            } as GameListWithItems}
+                          />
+                        )}
+                        {discoveryLists.hotTakes.length > 0 && (
+                          <ListCard
+                            list={{
+                              id: 'discovery-hot-takes',
+                              name: 'Hot Takes',
+                              description: 'Popular games you rated lower than average',
+                              list_type: 'discovery',
+                              is_public: false,
+                              user_id: userId || '',
+                              created_at: new Date().toISOString(),
+                              updated_at: new Date().toISOString(),
+                              game_list_items: discoveryLists.hotTakes.slice(0, 5).map((g: any) => ({
+                                id: `discovery-hottakes-${g.id}`,
+                                list_id: 'discovery-hot-takes',
+                                game_id: g.id,
+                                position: 0,
+                                created_at: new Date().toISOString(),
+                                game: g,
+                              })),
+                            } as GameListWithItems}
+                          />
+                        )}
+                        {discoveryLists.comebackGames.length > 0 && (
+                          <ListCard
+                            list={{
+                              id: 'discovery-comeback',
+                              name: 'Comeback Games',
+                              description: 'Older games making a recent resurgence',
+                              list_type: 'discovery',
+                              is_public: false,
+                              user_id: userId || '',
+                              created_at: new Date().toISOString(),
+                              updated_at: new Date().toISOString(),
+                              game_list_items: discoveryLists.comebackGames.slice(0, 5).map((g: any) => ({
+                                id: `discovery-comeback-${g.id}`,
+                                list_id: 'discovery-comeback',
+                                game_id: g.id,
+                                position: 0,
+                                created_at: new Date().toISOString(),
+                                game: g,
+                              })),
+                            } as GameListWithItems}
+                          />
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* Private Lists */}
+              {privateLists.length > 0 && (
+                <div className="mb-8">
+                  <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">
+                    Private Lists
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {privateLists.map((list) => (
+                      <ListCard
+                        key={list.id}
+                        list={list}
+                        onUpdate={() => fetchUserLists(userId!)}
+                        onEdit={handleEditList}
+                      />
+                    ))}
+                    <ListCard
+                      variant="create"
+                      onCreateClick={() => setShowCreateModal(true)}
+                      createTitle="New Private List"
+                      createDescription="Create a personal collection"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* No private lists - show create card */}
+              {privateLists.length === 0 && (
+                <div className="mb-8">
+                  <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">
+                    Private Lists
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <ListCard
+                      variant="create"
+                      onCreateClick={() => setShowCreateModal(true)}
+                      createTitle="Create Your First List"
+                      createDescription="Organize your games into custom collections"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Public User Lists */}
+              {publicUserLists.length > 0 && (
+                <div className="mb-8">
+                  <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">
+                    Public Lists
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {publicUserLists.map((list) => (
+                      <ListCard
+                        key={list.id}
+                        list={list}
+                        onUpdate={() => fetchUserLists(userId!)}
+                        onEdit={handleEditList}
+                      />
+                    ))}
+                    <ListCard
+                      variant="create"
+                      onCreateClick={() => setShowCreateModal(true)}
+                      createTitle="New Public List"
+                      createDescription="Share your collection with the community"
+                    />
+                  </div>
+                </div>
+              )}
 
               {/* Admin additional editable public lists */}
               {showPublic &&
@@ -348,10 +579,10 @@ export function ListsContent({
                       fetchPublicLists()
                       if (userId) fetchUserLists(userId)
                     }}
+                    onEdit={handleEditList}
                   />
                 ))}
-
-            </div>
+            </>
             )}
           </div>
         )}
@@ -388,6 +619,19 @@ export function ListsContent({
             if (userId) await fetchUserLists(userId)
             setShowCreateModal(false)
           }}
+        />
+      )}
+
+      {/* Edit List Modal */}
+      {showEditModal && editingList && (
+        <EditListModal
+          isOpen={showEditModal}
+          onClose={() => {
+            setShowEditModal(false)
+            setEditingList(null)
+          }}
+          onSuccess={handleEditSuccess}
+          list={editingList}
         />
       )}
     </Wrapper>

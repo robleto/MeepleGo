@@ -5,10 +5,13 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
+import type { ReactNode } from 'react'
+import NetflixScrollSection from '@/components/Elements/NetflixScrollSection'
 
 type DiscoveryCardProps = {
   title: string
-  icon: string
+  icon: ReactNode
+  subtitle: string
   games: any[]
   emptyMessage: string
   loading?: boolean
@@ -19,6 +22,7 @@ type DiscoveryCardProps = {
 export default function DiscoveryCard({
   title,
   icon,
+  subtitle,
   games,
   emptyMessage,
   loading = false,
@@ -26,38 +30,41 @@ export default function DiscoveryCard({
   href,
 }: DiscoveryCardProps) {
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+    <section className="space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <span className="text-2xl" role="img" aria-label={title}>
-            {icon}
-          </span>
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-            {title}
-          </h2>
+      <div>
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <span className="flex items-center text-gray-500">{icon}</span>
+            <h2 className="text-base font-semibold text-gray-900 dark:text-white">
+              {title}
+            </h2>
+          </div>
+          {href && games.length > 0 && (
+            <Link
+              href={href}
+              className="text-xs sm:text-sm text-primary-600 hover:text-primary-500 font-medium whitespace-nowrap"
+            >
+              View all →
+            </Link>
+          )}
         </div>
-        {href && games.length > 0 && (
-          <Link
-            href={href}
-            className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-          >
-            View All →
-          </Link>
-        )}
+        <p className="mt-0.5 text-sm sm:text-base text-gray-600 dark:text-gray-300">
+          {subtitle}
+        </p>
       </div>
 
       {/* Loading State */}
       {loading && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-          {[...Array(5)].map((_, i) => (
+        <NetflixScrollSection itemWidth="w-40" showCount={6}>
+          {[...Array(8)].map((_, i) => (
             <div key={i} className="animate-pulse">
               <div className="bg-gray-200 dark:bg-gray-700 aspect-square rounded-lg mb-2" />
               <div className="bg-gray-200 dark:bg-gray-700 h-4 rounded mb-1" />
               <div className="bg-gray-200 dark:bg-gray-700 h-3 rounded w-3/4" />
             </div>
           ))}
-        </div>
+        </NetflixScrollSection>
       )}
 
       {/* Empty State */}
@@ -69,8 +76,8 @@ export default function DiscoveryCard({
 
       {/* Games Grid */}
       {!loading && games.length > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-          {games.slice(0, 10).map((game) => (
+        <NetflixScrollSection itemWidth="w-40" showCount={6}>
+          {games.slice(0, 12).map((game) => (
             <Link
               key={game.game_id}
               href={`/games/${game.game_id}`}
@@ -91,7 +98,7 @@ export default function DiscoveryCard({
                   </div>
                 )}
               </div>
-              <h3 className="text-sm font-medium text-gray-900 dark:text-white line-clamp-2 mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400">
+              <h3 className="text-sm font-medium text-gray-900 dark:text-white line-clamp-2 mb-1 group-hover:text-primary-600 dark:group-hover:text-primary-400">
                 {game.game_name}
               </h3>
               <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-1">
@@ -99,8 +106,8 @@ export default function DiscoveryCard({
               </p>
             </Link>
           ))}
-        </div>
+        </NetflixScrollSection>
       )}
-    </div>
+    </section>
   )
 }

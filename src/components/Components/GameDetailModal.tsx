@@ -32,7 +32,7 @@ import {
   formatPlayingTime,
   getGameUrl,
 } from '@/utils/helpers'
-import GameOnboardingSteps from './GameOnboardingSteps'
+import GameActions from './GameActions'
 
 const PlayLogEditor = dynamic(() => import('./PlayLogEditor'), { ssr: false })
 
@@ -89,7 +89,7 @@ export default function GameDetailModal({
   const [activeSection, setActiveSection] = useState<
     'overview' | 'ratings' | 'mygames' | 'awards' | 'tags' | 'lists'
   >('overview')
-  const stackSections = variant === 'page'
+  const stackSections = true
   // Shared rating popup state (position + open) used everywhere
   const [ratingOpen, setRatingOpen] = useState(false)
   const [ratingAnchor, setRatingAnchor] = useState<{
@@ -628,57 +628,6 @@ export default function GameDetailModal({
                       >
                         <span>{EG.name}</span>
                       </h1>
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault()
-                          e.stopPropagation()
-                          const rect = e.currentTarget.getBoundingClientRect()
-                          setRatingAnchor({
-                            x: rect.left + rect.width / 2,
-                            y: rect.top,
-                          })
-                          setRatingOpen((o) => !o)
-                        }}
-                        className="focus:outline-none translate-y-[1px] flex-shrink-0"
-                        title={ratingValue ? 'Change rating' : 'Rate this game'}
-                        aria-label={
-                          ratingValue
-                            ? `Rating ${ratingValue}`
-                            : 'Rate this game'
-                        }
-                      >
-                        {ratingValue ? (
-                          <RatingChip
-                            value={ratingValue}
-                            size="lg"
-                            variant="subtle"
-                            className={`ring-0 shadow-none text-[0.9rem] ${saving ? 'opacity-70' : ''}`}
-                          />
-                        ) : (
-                          <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 text-gray-400">
-                            <svg
-                              className="w-5 h-5"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={1.5}
-                                d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
-                              />
-                            </svg>
-                          </span>
-                        )}
-                      </button>
-                      <button
-                        onClick={handlePlayedToggle}
-                        className={`inline-flex items-center gap-1 px-4 py-1.5 rounded-full text-xs font-medium border transition shadow-sm flex-shrink-0 ${localRanking?.played_it ? 'bg-green-600 text-white border-green-600 hover:bg-green-500' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'}`}
-                      >
-                        <PlayIcon className="h-4 w-4" />
-                        {localRanking?.played_it ? 'Played' : 'I Played This'}
-                      </button>
                     </div>
                   </div>
                   {(tagline || summary || description) && (
@@ -692,178 +641,101 @@ export default function GameDetailModal({
                           : '')}
                     </p>
                   )}
+                  {/* Key metadata chips row */}
+                  {(EG.year_published ||
+                    EG.weight ||
+                    (EG.min_players && EG.max_players) ||
+                    EG.playtime_minutes) && (
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {EG.year_published && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            router.push(`/games?year=${EG.year_published}`)
+                            if (variant === 'modal') onClose?.()
+                          }}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-50 hover:bg-gray-100 text-gray-600 hover:text-gray-700 text-xs font-medium ring-1 ring-gray-200 transition-colors"
+                        >
+                          <CalendarIcon className="w-3 h-3" />
+                          {EG.year_published}
+                        </button>
+                      )}
+                      {EG.weight &&
+                        (() => {
+                          let w = Number(EG.weight)
+                          if (isNaN(w)) return null
+                          if (w < 1) w = 1
+                          if (w > 5) w = 5
+                          return (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                router.push(`/games?weight=${w.toFixed(2)}`)
+                                if (variant === 'modal') onClose?.()
+                              }}
+                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-50 hover:bg-gray-100 text-gray-600 hover:text-gray-700 text-xs font-medium ring-1 ring-gray-200 transition-colors"
+                            >
+                              <ChartBarIcon className="w-3 h-3" />
+                              {w.toFixed(2)}
+                            </button>
+                          )
+                        })()}
+                      {EG.min_players && EG.max_players && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            router.push(`/games?players=${EG.max_players}`)
+                            if (variant === 'modal') onClose?.()
+                          }}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-50 hover:bg-gray-100 text-gray-600 hover:text-gray-700 text-xs font-medium ring-1 ring-gray-200 transition-colors"
+                        >
+                          <UsersIcon className="w-3 h-3" />
+                          {formatPlayerCount(EG.min_players, EG.max_players)}
+                        </button>
+                      )}
+                      {EG.playtime_minutes && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            router.push(`/games?playtime=${EG.playtime_minutes}`)
+                            if (variant === 'modal') onClose?.()
+                          }}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-50 hover:bg-gray-100 text-gray-600 hover:text-gray-700 text-xs font-medium ring-1 ring-gray-200 transition-colors"
+                        >
+                          <TimeIcon className="w-3 h-3" />
+                          {formatPlayingTime(EG.playtime_minutes)}
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
-                {/* Key metadata chips row */}
-                {(EG.year_published ||
-                  EG.weight ||
-                  (EG.min_players && EG.max_players) ||
-                  EG.playtime_minutes) && (
-                  <div className="col-span-full sm:col-start-2 sm:col-span-1 flex items-center gap-2 flex-wrap">
-                    {EG.year_published && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          router.push(`/games?year=${EG.year_published}`)
-                          if (variant === 'modal') onClose?.()
-                        }}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-50 hover:bg-gray-100 text-gray-600 hover:text-gray-700 text-xs font-medium ring-1 ring-gray-200 transition-colors"
-                      >
-                        <CalendarIcon className="w-3 h-3" />
-                        {EG.year_published}
-                      </button>
-                    )}
-                    {EG.weight &&
-                      (() => {
-                        let w = Number(EG.weight)
-                        if (isNaN(w)) return null
-                        if (w < 1) w = 1
-                        if (w > 5) w = 5
-                        return (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              router.push(`/games?weight=${w.toFixed(2)}`)
-                              if (variant === 'modal') onClose?.()
-                            }}
-                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-50 hover:bg-gray-100 text-gray-600 hover:text-gray-700 text-xs font-medium ring-1 ring-gray-200 transition-colors"
-                          >
-                            <ChartBarIcon className="w-3 h-3" />
-                            {w.toFixed(2)}
-                          </button>
-                        )
-                      })()}
-                    {EG.min_players && EG.max_players && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          router.push(`/games?players=${EG.max_players}`)
-                          if (variant === 'modal') onClose?.()
-                        }}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-50 hover:bg-gray-100 text-gray-600 hover:text-gray-700 text-xs font-medium ring-1 ring-gray-200 transition-colors"
-                      >
-                        <UsersIcon className="w-3 h-3" />
-                        {formatPlayerCount(EG.min_players, EG.max_players)}
-                      </button>
-                    )}
-                    {EG.playtime_minutes && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          router.push(`/games?playtime=${EG.playtime_minutes}`)
-                          if (variant === 'modal') onClose?.()
-                        }}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-50 hover:bg-gray-100 text-gray-600 hover:text-gray-700 text-xs font-medium ring-1 ring-gray-200 transition-colors"
-                      >
-                        <TimeIcon className="w-3 h-3" />
-                        {formatPlayingTime(EG.playtime_minutes)}
-                      </button>
-                    )}
-                  </div>
-                )}
             </div>
           </div>
         {/* end header */}
         
-        {/* Inline onboarding steps for new/guest users */}
-        <div className="px-4 sm:px-8 pt-6">
-          <GameOnboardingSteps
+        {/* Game Actions Panel */}
+        <div className="px-4 sm:px-8">
+          <GameActions
             game={{ id: game.id, name: game.name }}
             initialPlayedIt={localRanking?.played_it ?? false}
             initialInLibrary={membership.library}
             initialInWishlist={membership.wishlist}
             initialRating={ratingValue}
-            autoCollapse={true}
+            onRatingClick={(e) => {
+              const rect = e.currentTarget.getBoundingClientRect()
+              setRatingAnchor({
+                x: rect.left + rect.width / 2,
+                y: rect.top,
+              })
+              setRatingOpen((o) => !o)
+            }}
+            onMembershipChange={onMembershipChange}
           />
         </div>
         
-        {/* Main content area with nav + sections */}
+        {/* Main content area (stacked sections) */}
         <div className="flex-1 overflow-y-auto px-4 pt-4 pb-6 sm:px-8 sm:pt-6 sm:pb-8">
-          <div className="md:flex md:items-start md:gap-10">
-            {!stackSections && (
-              <nav className="md:w-48 flex-shrink-0 mb-8 md:mb-0">
-                <ul className="space-y-1">
-                  {allSections.map((id) => {
-                    const labelMap: Record<typeof activeSection, string> = {
-                      overview: 'Overview',
-                      ratings: 'Rating',
-                      mygames: 'My Games',
-                      awards: 'Awards',
-                      tags: 'Classifications',
-                      lists: 'Lists',
-                    }
-                    const iconMap: Record<
-                      typeof activeSection,
-                      React.ReactNode
-                    > = {
-                      overview: (
-                        <AdjustmentsHorizontalIcon className="w-4 h-4" />
-                      ),
-                      ratings: <ChartBarIcon className="w-4 h-4" />,
-                      mygames: <BookOpenIcon className="w-4 h-4" />,
-                      awards: <TrophyIcon className="w-4 h-4" />,
-                      tags: <TagIcon className="w-4 h-4" />,
-                      lists: <ListBulletIcon className="w-4 h-4" />,
-                    }
-                    const active = activeSection === id
-                    return (
-                      <li key={id}>
-                        <button
-                          onClick={() => setActiveSection(id)}
-                          className={`w-full flex items-center gap-3 text-left px-4 py-3 rounded-2xl transition font-medium ${active ? 'text-gray-900' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'}`}
-                          style={
-                            active
-                              ? { backgroundColor: 'rgba(229,231,235,0.75)' }
-                              : undefined
-                          }
-                        >
-                          {iconMap[id]}
-                          <span>{labelMap[id]}</span>
-                        </button>
-                      </li>
-                    )
-                  })}
-                </ul>
-                {isAdmin && game.bgg_id && (
-                  <div className="mt-6 pt-4 border-t border-gray-200">
-                    <button
-                      onClick={async () => {
-                        try {
-                          setRefreshingBgg(true)
-                          const res = await fetch('/api/import-bgg', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ bggId: game.bgg_id }),
-                          })
-                          if (res.ok) {
-                            const json = await res.json()
-                            const updated = json.game
-                            if (updated) {
-                              setFamilyCodes(
-                                Array.isArray(updated.rank_families)
-                                  ? updated.rank_families
-                                  : []
-                              )
-                            }
-                          }
-                        } finally {
-                          setRefreshingBgg(false)
-                        }
-                      }}
-                      className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 text-xs font-medium shadow-sm disabled:opacity-50"
-                      disabled={refreshingBgg}
-                    >
-                      {refreshingBgg ? 'Refreshing…' : 'Refresh BGG'}
-                    </button>
-                  </div>
-                )}
-              </nav>
-            )}
-            {/* Right content (tabbed) */}
-            <div
-              className={`flex-1 space-y-12 ${
-                stackSections ? '' : 'md:pl-4 md:border-l md:border-gray-200'
-              }`}
-            >
+          <div className="space-y-12">
               {/* Radial rating component replaces popup */}
 
               {(stackSections || activeSection === 'overview') && (
@@ -873,141 +745,58 @@ export default function GameDetailModal({
                     Overview
                   </h3>
                   <div className="space-y-8">
-                    {/* Block: Game Details */}
-                    <div className="pb-6 border-b border-gray-200">
-                      <h4 className="heading-display text-xl font-normal tracking-wide text-gray-700 mb-4 flex items-center gap-2">
-                        <AdjustmentsHorizontalIcon className="w-5 h-5 text-gray-400" />{' '}
-                        Game Details
-                      </h4>
-                      {/* Key game details now shown in header chips - this section can be used for additional metadata */}
-                      <div className="text-sm text-gray-500">
-                        <p>
-                          Key game information is now displayed in the header
-                          above. This section can be expanded with additional
-                          game details like designer, publisher, age range, and
-                          other metadata as needed.
-                        </p>
-                      </div>
-                    </div>
-                    {/* Description */}
-                    {/* Block: Description (no heading, inline toggle) */}
-                    {description && (
-                      <div className="pb-6 border-b border-gray-200">
-                        <div className="text-gray-700 text-sm leading-relaxed">
-                          {isLongDescription ? (
-                            !expandedDescription ? (
-                              <p>
-                                {description.substring(0, 300)}…{' '}
-                                <button
-                                  onClick={() => setExpandedDescription(true)}
-                                  className="text-xs font-medium text-primary-600 hover:text-primary-700"
-                                >
-                                  Show more
-                                </button>
-                              </p>
-                            ) : (
-                              <>
-                                <p className="whitespace-pre-line">
-                                  {description}
-                                </p>
-                                <button
-                                  onClick={() => setExpandedDescription(false)}
-                                  className="mt-2 text-xs font-medium text-primary-600 hover:text-primary-700"
-                                >
-                                  Show less
-                                </button>
-                              </>
-                            )
-                          ) : (
-                            <p className="whitespace-pre-line">{description}</p>
-                          )}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm">
+                      {((Array.isArray(EG.designers) && EG.designers.length) ||
+                        EG.designer) && (
+                        <div className="flex items-start gap-3 sm:col-span-1 col-span-full">
+                          <div className="w-7 h-7 rounded-md bg-gray-100 flex items-center justify-center">
+                            <UserIcon className="w-4 h-4 text-gray-500" />
+                          </div>
+                          <div>
+                            <div className="text-gray-500">Designer</div>
+                            <div className="font-medium text-gray-900 space-y-0.5">
+                              {(Array.isArray(EG.designers) && EG.designers.length
+                                ? EG.designers
+                                : [EG.designer]
+                              )
+                                .filter(Boolean)
+                                .map((d: string, i: number) => (
+                                  <div key={i}>{d}</div>
+                                ))}
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    )}
-                    {/* Block: Game Credits */}
-                    <div className="pb-2">
-                      <h4 className="heading-display text-xl font-normal tracking-wide text-gray-700 mb-4">
-                        Game Credits
-                      </h4>
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-sm">
-                        {(EG.publisher ||
-                          (Array.isArray(EG.publishers) &&
-                            EG.publishers.length)) && (
-                          <div className="flex items-start gap-3">
-                            <div className="w-7 h-7 rounded-md bg-gray-100 flex items-center justify-center">
-                              <BuildingOfficeIcon className="w-4 h-4 text-gray-500" />
+                      )}
+                      {((Array.isArray(EG.artists) && EG.artists.length > 0) ||
+                        EG.artist) && (
+                        <div className="flex items-start gap-3 sm:col-span-1 col-span-full">
+                          <div className="w-7 h-7 rounded-md bg-gray-100 flex items-center justify-center">
+                            <PaintBrushIcon className="w-4 h-4 text-gray-500" />
+                          </div>
+                          <div>
+                            <div className="text-gray-500">
+                              Artist
+                              {EG.artists && EG.artists.length > 1 ? 's' : ''}
                             </div>
-                            <div>
-                              <div className="text-gray-500">Publisher</div>
-                              <div className="font-medium text-gray-900 space-y-0.5">
-                                {(Array.isArray(EG.publishers) &&
-                                EG.publishers.length
-                                  ? EG.publishers
-                                  : [EG.publisher]
-                                )
-                                  .filter(Boolean)
-                                  .map((p: string, i: number) => (
-                                    <div key={i}>{p}</div>
-                                  ))}
-                              </div>
+                            <div
+                              className="font-medium text-gray-900 space-y-0.5"
+                              title={(Array.isArray(EG.artists)
+                                ? EG.artists
+                                : [EG.artist]
+                              ).join(', ')}
+                            >
+                              {(Array.isArray(EG.artists) && EG.artists.length
+                                ? EG.artists
+                                : [EG.artist]
+                              )
+                                .filter(Boolean)
+                                .map((a: string, i: number) => (
+                                  <div key={i}>{a}</div>
+                                ))}
                             </div>
                           </div>
-                        )}
-                        {(EG.designer ||
-                          (Array.isArray(EG.designers) &&
-                            EG.designers.length)) && (
-                          <div className="flex items-start gap-3">
-                            <div className="w-7 h-7 rounded-md bg-gray-100 flex items-center justify-center">
-                              <CubeIcon className="w-4 h-4 text-gray-500" />
-                            </div>
-                            <div>
-                              <div className="text-gray-500">Designer</div>
-                              <div className="font-medium text-gray-900 space-y-0.5">
-                                {(Array.isArray(EG.designers) &&
-                                EG.designers.length
-                                  ? EG.designers
-                                  : [EG.designer]
-                                )
-                                  .filter(Boolean)
-                                  .map((d: string, i: number) => (
-                                    <div key={i}>{d}</div>
-                                  ))}
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                        {((Array.isArray(EG.artists) &&
-                          EG.artists.length > 0) ||
-                          EG.artist) && (
-                          <div className="flex items-start gap-3 sm:col-span-1 col-span-full">
-                            <div className="w-7 h-7 rounded-md bg-gray-100 flex items-center justify-center">
-                              <PaintBrushIcon className="w-4 h-4 text-gray-500" />
-                            </div>
-                            <div>
-                              <div className="text-gray-500">
-                                Artist
-                                {EG.artists && EG.artists.length > 1 ? 's' : ''}
-                              </div>
-                              <div
-                                className="font-medium text-gray-900 space-y-0.5"
-                                title={(Array.isArray(EG.artists)
-                                  ? EG.artists
-                                  : [EG.artist]
-                                ).join(', ')}
-                              >
-                                {(Array.isArray(EG.artists) && EG.artists.length
-                                  ? EG.artists
-                                  : [EG.artist]
-                                )
-                                  .filter(Boolean)
-                                  .map((a: string, i: number) => (
-                                    <div key={i}>{a}</div>
-                                  ))}
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                      </div>
+                        </div>
+                      )}
                     </div>
                     {/* Related expansions / integrations */}
                     {(parentGame ||
@@ -1401,36 +1190,29 @@ export default function GameDetailModal({
                   </div>
                   {/* Your Rating Block */}
                   <div className="pb-6 border-b border-gray-200">
-                    <div className="flex items-center gap-3 mb-4">
-                      <h4 className="heading-display text-xl font-normal tracking-wide text-gray-700">
-                        Your Rating
-                      </h4>
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault()
-                          const rect = e.currentTarget.getBoundingClientRect()
-                          setRatingAnchor({
-                            x: rect.left + rect.width / 2,
-                            y: rect.top,
-                          })
-                          setRatingOpen(true)
-                        }}
-                        title={ratingValue ? 'Change rating' : 'Rate this game'}
-                      >
-                        <RatingChip
-                          value={ratingValue}
-                          size="sm"
-                          variant="subtle"
-                          showEmptyAsStar={true}
-                          className="ring-0 shadow-none"
-                        />
-                      </button>
-                      {ratingValue && (
-                        <span className="text-[11px] text-gray-500">
-                          {ratingValue}/10
-                        </span>
-                      )}
-                    </div>
+                    <h4 className="heading-display text-xl font-normal tracking-wide text-gray-700 mb-4">
+                      Your Rating
+                    </h4>
+                    
+                    {/* Full Rating Interface - Always Expanded */}
+                    <GameActions
+                      game={{ id: game.id, name: game.name }}
+                      initialPlayedIt={localRanking?.played_it ?? false}
+                      initialInLibrary={membership.library}
+                      initialInWishlist={membership.wishlist}
+                      initialRating={ratingValue}
+                      onRatingClick={(e) => {
+                        const rect = e.currentTarget.getBoundingClientRect()
+                        setRatingAnchor({
+                          x: rect.left + rect.width / 2,
+                          y: rect.top,
+                        })
+                        setRatingOpen((o) => !o)
+                      }}
+                      onMembershipChange={onMembershipChange}
+                      forceRatingExpanded={true}
+                    />
+                    
                     {ratingValue ? (
                       <div className="rounded-xl border border-gray-200 bg-white/80 p-4 shadow-sm">
                         <textarea
@@ -1530,7 +1312,7 @@ export default function GameDetailModal({
                       onClick={() => setShowJournal(true)}
                       className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 text-xs font-medium shadow-sm"
                     >
-                      <BookOpenIcon className="w-4 h-4" /> Add Play Log
+                      <BookOpenIcon className="w-4 h-4" /> Log Play
                     </button>
                   )}
                   {localRanking?.played_it && showJournal && (
@@ -1637,12 +1419,9 @@ export default function GameDetailModal({
                   </div>
                 </section>
               )}
-            </div>{' '}
-            {/* end right content */}
+            </div>
           </div>
         </div>
-      </div>{' '}
-      {/* end dialog */}
       {/* Shared RatingPopup instance anchored to last trigger */}
       {ratingOpen && (
         <RatingPopup
