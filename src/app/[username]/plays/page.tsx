@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import PageLayout from '@/components/Components/PageLayout'
 import ProfileLayout from '@/components/Components/ProfileLayout'
-import PlaysClientPage from '@/app/plays/playsClient'
+import { PlaysContent } from '@/app/plays/PlaysContent'
 
 interface Props {
   params: Promise<{ username: string }>
@@ -20,7 +20,7 @@ export default function UserPlaysPage({ params }: Props) {
       setUsername(username)
       loadUserByUsername(username)
     })
-  }, [])
+  }, [params])
 
   const loadUserByUsername = async (username: string) => {
     const { data } = await supabase

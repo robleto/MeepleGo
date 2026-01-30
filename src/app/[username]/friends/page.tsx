@@ -20,7 +20,7 @@ export default function UserFriendsPage({ params }: Props) {
       setUsername(username)
       loadUserByUsername(username)
     })
-  }, [])
+  }, [params])
 
   const loadUserByUsername = async (username: string) => {
     const { data } = await supabase

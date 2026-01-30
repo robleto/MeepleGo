@@ -24,7 +24,7 @@ export default function UserProfilePage({ params }: Props) {
       setUsername(username)
       loadUserByUsername(username)
     })
-  }, [])
+  }, [params])
 
   const loadUserByUsername = async (username: string) => {
     try {

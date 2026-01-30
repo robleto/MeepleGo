@@ -604,7 +604,7 @@ export default function PlaysClientPage({
 
   if (!targetUserId)
     return (
-      <div className="max-w-5xl mx-auto px-4 py-10 text-sm text-gray-500">
+      <div className="max-w-5xl px-4 py-10 mx-auto text-sm text-gray-500">
         Login to see play logs.
       </div>
     )
@@ -612,15 +612,15 @@ export default function PlaysClientPage({
 
   return (
     <div className="bg-gray-50 min-h-[calc(100vh-4rem)]">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-6">
+      <div className="max-w-5xl px-4 py-6 mx-auto space-y-6 sm:px-6 sm:py-10">
         {/* Compact Header with Title, Stats, and Add Button */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-col sm:flex-row sm:items-center sm:gap-6">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-normal tracking-tight text-gray-900" style={{ fontFamily: 'var(--font-display)' }}>
+            <h1 className="text-2xl font-normal tracking-tight text-gray-900 sm:text-3xl md:text-4xl" style={{ fontFamily: 'var(--font-display)' }}>
               Game Journal
             </h1>
             {/* Compact Stats - inline on desktop */}
-            <div className="hidden lg:flex items-center gap-4">
+            <div className="items-center hidden gap-4 lg:flex">
               {[
                 {
                   iconBg: 'bg-blue-500',
@@ -663,7 +663,7 @@ export default function PlaysClientPage({
           {isOwner && !zeroStateActive && (
             <button
               onClick={() => setShowPlayLogModal(true)}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full btn-brand text-sm font-medium flex-shrink-0 self-start sm:self-auto"
+              className="inline-flex items-center self-start flex-shrink-0 gap-2 px-4 py-2 text-sm font-medium rounded-full btn-brand sm:self-auto"
             >
               Add New
             </button>
@@ -671,7 +671,7 @@ export default function PlaysClientPage({
         </div>
 
         {/* Mobile/Tablet Stats - Below title on smaller screens */}
-        <div className="lg:hidden grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-3 gap-3 lg:hidden">
           {[
             {
               iconBg: 'bg-blue-500',
@@ -698,7 +698,7 @@ export default function PlaysClientPage({
               >
                 <item.Icon className="w-4 h-4 text-white" />
               </div>
-              <div className="leading-tight min-w-0">
+              <div className="min-w-0 leading-tight">
                 <div className="text-sm font-medium text-gray-900">
                   {item.value}
                 </div>
@@ -755,12 +755,12 @@ export default function PlaysClientPage({
               <option value="120+">120m+</option>
             </select>
             {tagFilter && (
-              <div className="flex items-center gap-1 text-xs bg-sky-50 text-sky-700 px-2 py-1 rounded-full border border-sky-200">
+              <div className="flex items-center gap-1 px-2 py-1 text-xs border rounded-full bg-sky-50 text-sky-700 border-sky-200">
                 <span className="font-medium">Tag:</span>
                 <span>{tagFilter}</span>
                 <button
                   onClick={() => setTagFilter(null)}
-                  className="text-sky-600 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 rounded"
+                  className="rounded text-sky-600 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600"
                 >
                   ×
                 </button>
@@ -777,7 +777,7 @@ export default function PlaysClientPage({
                   setPlayerFilter('all')
                   setDurationFilter('all')
                 }}
-                className="ml-auto text-xs text-gray-500 hover:text-gray-700 underline"
+                className="ml-auto text-xs text-gray-500 underline hover:text-gray-700"
               >
                 Reset Filters
               </button>
@@ -787,10 +787,10 @@ export default function PlaysClientPage({
 
         {/* Zero state for own journal */}
         {zeroStateActive && isOwner && (
-          <div className="panel mb-8 flex flex-col md:flex-row md:items-start gap-10 md:gap-20">
+          <div className="flex flex-col gap-10 mb-8 panel md:flex-row md:items-start md:gap-20">
             <div className="flex-1">
               <div className="flex items-center gap-4 mb-6">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-sky-500 to-sky-600 flex items-center justify-center shadow-sm">
+                <div className="flex items-center justify-center w-12 h-12 shadow-sm rounded-xl bg-gradient-to-br from-sky-500 to-sky-600">
                   <svg
                     className="w-6 h-6 text-white"
                     fill="none"
@@ -811,21 +811,21 @@ export default function PlaysClientPage({
                     size="display"
                     align="left"
                     displayFont
-                    className="text-balance tracking-tight leading-none"
+                    className="leading-none tracking-tight text-balance"
                   >
                     Start Logging
                     <br /> Your Plays
                   </Heading>
                 </div>
               </div>
-              <p className="text-lg md:text-xl text-gray-600 max-w-xl leading-snug mb-8">
+              <p className="max-w-xl mb-8 text-lg leading-snug text-gray-600 md:text-xl">
                 Build a living history of what you play. Ratings turn into
                 rankings, and rankings power personalized awards.
               </p>
               {!showAdd && (
                 <button
                   onClick={() => setShowPlayLogModal(true)}
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-full btn-brand text-sm font-medium shadow-sm hover:shadow-md transition-shadow"
+                  className="inline-flex items-center gap-2 px-6 py-3 text-sm font-medium transition-shadow rounded-full shadow-sm btn-brand hover:shadow-md"
                 >
                   <svg
                     className="w-4 h-4"
@@ -844,63 +844,63 @@ export default function PlaysClientPage({
                 </button>
               )}
             </div>
-            <ol className="flex-1 space-y-10 md:space-y-12 relative">
+            <ol className="relative flex-1 space-y-10 md:space-y-12">
               <div
-                className="absolute left-3 top-6 bottom-0 w-px bg-gradient-to-b from-sky-200 via-sky-100 to-transparent"
+                className="absolute bottom-0 w-px left-3 top-6 bg-gradient-to-b from-sky-200 via-sky-100 to-transparent"
                 aria-hidden="true"
               ></div>
               <li className="flex items-start gap-5">
-                <div className="flex-shrink-0 text-sm font-semibold w-6 h-6 rounded-full bg-sky-100 text-sky-700 flex items-center justify-center mt-1 shadow-sm ring-2 ring-white">
+                <div className="flex items-center justify-center flex-shrink-0 w-6 h-6 mt-1 text-sm font-semibold rounded-full shadow-sm bg-sky-100 text-sky-700 ring-2 ring-white">
                   1
                 </div>
-                <div className="flex-1 border-b border-gray-200 pb-8 last:border-b-0 last:pb-0">
+                <div className="flex-1 pb-8 border-b border-gray-200 last:border-b-0 last:pb-0">
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="w-5 h-5 rounded bg-sky-600/10 text-sky-600 flex items-center justify-center text-xs font-bold">
+                    <span className="flex items-center justify-center w-5 h-5 text-xs font-bold rounded bg-sky-600/10 text-sky-600">
                       P
                     </span>
-                    <h3 className="font-semibold text-gray-900 text-lg">
+                    <h3 className="text-lg font-semibold text-gray-900">
                       Log plays
                     </h3>
                   </div>
-                  <p className="text-sm text-gray-500 leading-snug max-w-md">
+                  <p className="max-w-md text-sm leading-snug text-gray-500">
                     Add each session with players, time, notes & tags. A
                     detailed timeline forms automatically.
                   </p>
                 </div>
               </li>
               <li className="flex items-start gap-5">
-                <div className="flex-shrink-0 text-sm font-semibold w-6 h-6 rounded-full bg-sky-100 text-sky-700 flex items-center justify-center mt-1 shadow-sm ring-2 ring-white">
+                <div className="flex items-center justify-center flex-shrink-0 w-6 h-6 mt-1 text-sm font-semibold rounded-full shadow-sm bg-sky-100 text-sky-700 ring-2 ring-white">
                   2
                 </div>
-                <div className="flex-1 border-b border-gray-200 pb-8 last:border-b-0 last:pb-0">
+                <div className="flex-1 pb-8 border-b border-gray-200 last:border-b-0 last:pb-0">
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="w-5 h-5 rounded bg-sky-600/10 text-sky-600 flex items-center justify-center text-xs font-bold">
+                    <span className="flex items-center justify-center w-5 h-5 text-xs font-bold rounded bg-sky-600/10 text-sky-600">
                       ★
                     </span>
-                    <h3 className="font-semibold text-gray-900 text-lg">
+                    <h3 className="text-lg font-semibold text-gray-900">
                       Rate & rank
                     </h3>
                   </div>
-                  <p className="text-sm text-gray-500 leading-snug max-w-md">
+                  <p className="max-w-md text-sm leading-snug text-gray-500">
                     Give every played game a 1–10 rating. Your personal ranking
                     list updates and trends emerge.
                   </p>
                 </div>
               </li>
               <li className="flex items-start gap-5">
-                <div className="flex-shrink-0 text-sm font-semibold w-6 h-6 rounded-full bg-sky-100 text-sky-700 flex items-center justify-center mt-1 shadow-sm ring-2 ring-white">
+                <div className="flex items-center justify-center flex-shrink-0 w-6 h-6 mt-1 text-sm font-semibold rounded-full shadow-sm bg-sky-100 text-sky-700 ring-2 ring-white">
                   3
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="w-5 h-5 rounded bg-amber-500/10 text-amber-600 flex items-center justify-center text-xs font-bold">
+                    <span className="flex items-center justify-center w-5 h-5 text-xs font-bold rounded bg-amber-500/10 text-amber-600">
                       🏆
                     </span>
-                    <h3 className="font-semibold text-gray-900 text-lg">
+                    <h3 className="text-lg font-semibold text-gray-900">
                       Unlock awards
                     </h3>
                   </div>
-                  <p className="text-sm text-gray-500 leading-snug max-w-md">
+                  <p className="max-w-md text-sm leading-snug text-gray-500">
                     Your plays + ratings auto‑generate personal award
                     categories. Fine‑tune nominees & winners anytime.
                   </p>
@@ -939,7 +939,7 @@ export default function PlaysClientPage({
         {!zeroStateActive && (
           <section className="space-y-6">
             {(pageError || statsError || summaryError) && (
-              <div className="text-xs rounded-lg border p-3 bg-red-50 border-red-300 text-red-700 space-y-1">
+              <div className="p-3 space-y-1 text-xs text-red-700 border border-red-300 rounded-lg bg-red-50">
                 {pageError && <div>Plays: {pageError}</div>}
                 {statsError && (
                   <div>
@@ -948,7 +948,7 @@ export default function PlaysClientPage({
                       onClick={() =>
                         targetUserId && revalidateStats(targetUserId)
                       }
-                      className="underline ml-1"
+                      className="ml-1 underline"
                     >
                       Retry
                     </button>
@@ -961,7 +961,7 @@ export default function PlaysClientPage({
                       onClick={() =>
                         targetUserId && revalidateSummary(targetUserId)
                       }
-                      className="underline ml-1"
+                      className="ml-1 underline"
                     >
                       Retry
                     </button>
@@ -970,7 +970,7 @@ export default function PlaysClientPage({
               </div>
             )}
             {filteredLogs.length === 0 ? (
-              <div className="panel py-10 text-center text-sm text-gray-500">
+              <div className="py-10 text-sm text-center text-gray-500 panel">
                 <div className="mb-2 font-medium text-gray-700">No plays in this period</div>
                 <div className="mb-4 text-gray-500">Try a different filter or broaden your timeframe.</div>
                 <button
@@ -999,7 +999,7 @@ export default function PlaysClientPage({
                   {virtualizationEnabled && (
                     <>
                       <div style={{ height: spacerTop }} aria-hidden="true" />
-                      <div className="sticky top-0 z-10 text-xs bg-sky-50 text-sky-700 px-2 py-1 rounded mb-2 inline-flex gap-2 items-center shadow">
+                      <div className="sticky top-0 z-10 inline-flex items-center gap-2 px-2 py-1 mb-2 text-xs rounded shadow bg-sky-50 text-sky-700">
                         Virtualized • {flatLogs.length} plays
                       </div>
                     </>
@@ -1049,10 +1049,10 @@ export default function PlaysClientPage({
                                       <img
                                         src={meta.thumb}
                                         alt=""
-                                        className="w-20 h-20 rounded-lg object-cover shadow ring-1 ring-gray-200"
+                                        className="object-cover w-20 h-20 rounded-lg shadow ring-1 ring-gray-200"
                                       />
                                     ) : (
-                                      <div className="w-20 h-20 rounded-lg bg-gray-200 animate-pulse" />
+                                      <div className="w-20 h-20 bg-gray-200 rounded-lg animate-pulse" />
                                     )}
                                   </div>
                                   <div className="flex-1 min-w-0">
@@ -1106,7 +1106,7 @@ export default function PlaysClientPage({
                                           )}
                                         </div>
                                       </div>
-                                      <div className="flex items-center gap-5 flex-shrink-0 pl-2">
+                                      <div className="flex items-center flex-shrink-0 gap-5 pl-2">
                                         {isOwner && (
                                           <div className="flex items-center gap-4 text-sm">
                                             <button
@@ -1128,7 +1128,7 @@ export default function PlaysClientPage({
                                                   : 'Add to Library'
                                               }
                                             >
-                                              <BookmarkIcon className="h-5 w-5" />
+                                              <BookmarkIcon className="w-5 h-5" />
                                               <span className="hidden sm:inline">
                                                 Own It
                                               </span>
@@ -1155,7 +1155,7 @@ export default function PlaysClientPage({
                                                   : 'Add to Wishlist'
                                               }
                                             >
-                                              <HeartIcon className="h-5 w-5" />
+                                              <HeartIcon className="w-5 h-5" />
                                               <span className="hidden sm:inline">
                                                 Wishlist
                                               </span>
@@ -1211,14 +1211,14 @@ export default function PlaysClientPage({
                                                 [l.id]: true,
                                               }))
                                             }
-                                            className="mt-1 text-xs text-sky-600 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 rounded"
+                                            className="mt-1 text-xs rounded text-sky-600 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600"
                                           >
                                             Show more
                                           </button>
                                         )}
                                       </div>
                                     )}
-                                    <div className="mt-4 text-xs text-gray-400 flex items-center gap-2">
+                                    <div className="flex items-center gap-2 mt-4 text-xs text-gray-400">
                                       <time dateTime={l.played_at}>
                                         {new Date(
                                           l.played_at
@@ -1244,7 +1244,7 @@ export default function PlaysClientPage({
                 {nextCursor && !virtualizationEnabled && (
                   <div
                     ref={loadMoreRef}
-                    className="py-8 text-center text-xs text-gray-400"
+                    className="py-8 text-xs text-center text-gray-400"
                   >
                     {loading ? 'Loading…' : 'Scroll to load more'}
                   </div>
@@ -1264,12 +1264,12 @@ export default function PlaysClientPage({
                       {/* Header */}
                       <div className="flex items-center justify-between p-6 border-b border-gray-200">
                         <div className="flex items-center gap-3">
-                          <div className="w-11 h-11 rounded-xl bg-gray-100 overflow-hidden flex items-center justify-center">
+                          <div className="flex items-center justify-center overflow-hidden bg-gray-100 w-11 h-11 rounded-xl">
                             {gameMeta[editingLog.game_id]?.thumb ? (
                               <img
                                 src={gameMeta[editingLog.game_id]?.thumb || ''}
                                 alt={gameMeta[editingLog.game_id]?.name || 'Game'}
-                                className="w-full h-full object-cover"
+                                className="object-cover w-full h-full"
                               />
                             ) : (
                               <div className="text-xs font-semibold text-gray-500">
@@ -1298,7 +1298,7 @@ export default function PlaysClientPage({
                         </button>
                       </div>
                       {/* Body */}
-                      <div className="p-6 flex-1 overflow-y-auto">
+                      <div className="flex-1 p-6 overflow-y-auto">
                         <PlayLogEditor
                           gameId={editingLog.game_id}
                           gameName={
@@ -1328,7 +1328,7 @@ export default function PlaysClientPage({
                     <button
                       type="button"
                       onClick={handleUndoDelete}
-                      className="font-semibold text-sky-300 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 rounded"
+                      className="font-semibold rounded text-sky-300 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600"
                     >
                       Undo
                     </button>
@@ -1336,7 +1336,7 @@ export default function PlaysClientPage({
                       type="button"
                       onClick={dismissToast}
                       aria-label="Dismiss"
-                      className="text-gray-400 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 rounded"
+                      className="text-gray-400 rounded hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600"
                     >
                       ×
                     </button>
@@ -1371,7 +1371,7 @@ export default function PlaysClientPage({
                 </button>
               </div>
               {/* Body */}
-              <div className="p-6 flex-1 overflow-y-auto">
+              <div className="flex-1 p-6 overflow-y-auto">
                 {selectedGameForPlayLog ? (
                   <PlayLogEditor
                     gameId={selectedGameForPlayLog.id}
@@ -1388,7 +1388,7 @@ export default function PlaysClientPage({
                   />
                 ) : (
                   <div className="space-y-4">
-                    <p className="text-gray-600 text-sm mb-4">
+                    <p className="mb-4 text-sm text-gray-600">
                       Search for a game to log a play:
                     </p>
                     <SearchDropdown
@@ -1404,7 +1404,7 @@ export default function PlaysClientPage({
                     <div className="flex justify-end pt-4">
                       <button
                         onClick={() => setShowPlayLogModal(false)}
-                        className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                        className="px-4 py-2 text-gray-600 transition-colors hover:text-gray-800"
                       >
                         Cancel
                       </button>
