@@ -1,6 +1,8 @@
 /**
- * This file now acts as a thin data wrapper kept in app/ for backward compatibility.
- * The presentational component lives in components/Components/HomepageView.tsx for Storybook usage.
+ * HomepageContent — data container for the logged-in home page.
+ *
+ * Fetches user stats, computes the user's maturity phase, gates
+ * discovery RPCs by phase, and passes everything to HomepageView.
  */
 'use client'
 import { useState, useEffect } from 'react'
@@ -20,6 +22,7 @@ import awardsData from '@/data/awards.json'
 import OnboardingModal from '@/components/Components/OnboardingModal'
 import SignupPrompt from '@/components/Components/SignupPrompt'
 import { shouldPromptSignup, getOnboardingState } from '@/lib/guestSession'
+import { getUserPhase, type UserPhaseResult } from '@/lib/userPhase'
 
 // Module-level cache for React Strict Mode stability
 let cachedFeaturedGames: Game[] | null = null
@@ -32,35 +35,7 @@ const INDUSTRY_AWARDS = (awardsData as any).categories.map((c: any) => ({
   icon: 'TrophyIcon',
 }))
 
-// Mock public lists as fallback
-const MOCK_PUBLIC_LISTS = [
-  {
-    id: 'mock-1',
-    name: 'Best Strategy Games',
-    description: 'Top strategy games for serious gamers',
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    list_type: 'user_custom',
-  },
-  {
-    id: 'mock-2',
-    name: 'Family Game Night',
-    description: 'Perfect games for the whole family',
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    list_type: 'user_custom',
-  },
-  {
-    id: 'mock-3',
-    name: 'Party Games',
-    description: 'Fun games for large groups',
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    list_type: 'user_custom',
-  },
-]
-
-// Mock games as immediate fallback so trending never disappears
+// Fallback games for loading state
 const TRENDING_GAMES: Game[] = Array.from({ length: 20 }, (_, i) => ({
   id: `trending-${i}`,
   bgg_id: 0,
@@ -84,33 +59,6 @@ const TRENDING_GAMES: Game[] = Array.from({ length: 20 }, (_, i) => ({
   updated_at: '',
 }))
 
-const _PLACEHOLDER_GAMES: Game[] = Array.from({ length: 6 }, (_, i) => ({
-  id: `placeholder-${i}` as any,
-  bgg_id: 0,
-  name: 'Loading…',
-  year_published: null,
-  image_url: '/placeholder-game.svg',
-  thumbnail_url: '/placeholder-game.svg',
-  categories: null,
-  mechanics: null,
-  designers: null,
-  artists: null,
-  min_players: null,
-  max_players: null,
-  playtime_minutes: null,
-  age: null,
-  weight: null,
-  publisher: null,
-  description: null,
-  summary: null,
-  rank: null,
-  rating: null,
-  num_ratings: null,
-  cached_at: null,
-  created_at: new Date().toISOString(),
-  updated_at: new Date().toISOString(),
-}))
-
 export default function HomepageContent() {
   const [user, setUser] = useState<any>(null)
   const [userStats, setUserStats] = useState<UserStats | null>(null)
@@ -122,7 +70,8 @@ export default function HomepageContent() {
     cachedIndustryAwards || INDUSTRY_AWARDS
   )
   const [publicLists, setPublicLists] = useState<any[]>(cachedPublicLists || [])
-  
+  const [phaseResult, setPhaseResult] = useState<UserPhaseResult | null>(null)
+
   // Discovery lists state
   const [discoveryLists, setDiscoveryLists] = useState<{
     mostAwarded: MostAwardedGame[]
@@ -146,16 +95,12 @@ export default function HomepageContent() {
   // Check if we should show onboarding or signup prompt
   useEffect(() => {
     const onboardingState = getOnboardingState()
-    
-    // Only show onboarding for truly new users (not logged in, no welcome state, AND no existing data)
-    // Skip for logged-in users or users with stats (indicating they already have data)
+
     if (!onboardingState.welcomed && !user && !userStats) {
       setShowOnboarding(true)
     }
 
-    // Check if we should prompt for signup (guest with activity)
     if (!user && shouldPromptSignup()) {
-      // Delay prompt slightly so it doesn't interrupt browsing
       const timer = setTimeout(() => {
         setShowSignupPrompt(true)
       }, 2000)
@@ -174,24 +119,22 @@ export default function HomepageContent() {
         if (cancelled) return
         setUser(session?.user || null)
 
-        // Featured games: API -> mock
+        // Featured games: API -> fallback
         let gotGames = false
-        if (!gotGames) {
-          try {
-            const res = await fetch('/api/games?limit=20&sort=rank&orderBy=asc')
-            if (res.ok) {
-              const data = await res.json()
-              if (data.games?.length) {
-                if (!cancelled) {
-                  cachedFeaturedGames = data.games
-                  setFeaturedGames(data.games)
-                }
-                gotGames = true
+        try {
+          const res = await fetch('/api/games?limit=20&sort=rank&orderBy=asc')
+          if (res.ok) {
+            const data = await res.json()
+            if (data.games?.length) {
+              if (!cancelled) {
+                cachedFeaturedGames = data.games
+                setFeaturedGames(data.games)
               }
+              gotGames = true
             }
-          } catch (error) {
-            // Ignore fetch errors, fall back to default games
           }
+        } catch {
+          // fall through to default
         }
         if (!gotGames && !cancelled) {
           cachedFeaturedGames = TRENDING_GAMES
@@ -206,7 +149,6 @@ export default function HomepageContent() {
 
         // Load public lists
         try {
-          // Get the public lists
           const { data: publicListsData, error: listsError } = await supabase
             .from('game_lists')
             .select(
@@ -230,58 +172,109 @@ export default function HomepageContent() {
             `
             )
             .eq('is_public', true)
+            .not(
+              'list_type',
+              'in',
+              '(bgg_bestsellers,bgg_hotness,bgg_trendingplays,bgg_mostplayed)'
+            )
             .order('updated_at', { ascending: false })
             .limit(6)
 
-          if (!listsError && publicListsData && publicListsData.length > 0) {
+          if (
+            !listsError &&
+            publicListsData &&
+            publicListsData.length > 0
+          ) {
             if (!cancelled) {
               cachedPublicLists = publicListsData
               setPublicLists(publicListsData)
             }
-          } else {
-            // Use mock as absolute fallback
-            if (!cancelled) {
-              cachedPublicLists = MOCK_PUBLIC_LISTS
-              setPublicLists(MOCK_PUBLIC_LISTS)
-            }
           }
         } catch {
-          if (!cancelled) {
-            cachedPublicLists = MOCK_PUBLIC_LISTS
-            setPublicLists(MOCK_PUBLIC_LISTS)
-          }
+          // No fallback — section simply won't render
         }
 
-        // Load user stats if authenticated
+        // ── Authenticated user: stats + phase + discovery ──
         if (session?.user) {
           try {
+            // Fetch stats, play-logs count, and profile in parallel
+            const [
+              rankingsResult,
+              libraryResult,
+              userListsResult,
+              userAwardsResult,
+              playLogsCountResult,
+              profileResult,
+            ] = await Promise.all([
+              supabase
+                .from('rankings')
+                .select('ranking, played_it, created_at')
+                .eq('user_id', session.user.id),
+              supabase
+                .from('game_list_items')
+                .select('game_id, game_lists!inner(name)')
+                .eq('game_lists.user_id', session.user.id)
+                .eq('game_lists.name', 'Library'),
+              supabase
+                .from('game_lists')
+                .select('id')
+                .eq('user_id', session.user.id),
+              supabase
+                .from('awards')
+                .select('id')
+                .eq('user_id', session.user.id),
+              supabase
+                .from('play_logs')
+                .select('id', { count: 'exact', head: true })
+                .eq('user_id', session.user.id),
+              supabase
+                .from('profiles')
+                .select('created_at')
+                .eq('id', session.user.id)
+                .single(),
+            ])
 
-            // Get user's rankings for stats
-            const { data: rankings, error: rankingsError } = await supabase
-              .from('rankings')
-              .select('ranking, played_it, created_at')
-              .eq('user_id', session.user.id)
+            const rankings = rankingsResult.data
+            const libraryItems = libraryResult.data
+            const userLists = userListsResult.data
+            const userAwards = userAwardsResult.data
+            const playLogsCount = playLogsCountResult.count || 0
 
-            // Get user's game ownership (library membership)
-            const { data: libraryItems, error: libraryError } = await supabase
-              .from('game_list_items')
-              .select('game_id, game_lists!inner(name)')
-              .eq('game_lists.user_id', session.user.id)
-              .eq('game_lists.name', 'Library')
+            // Compute account age
+            const accountCreated = profileResult.data?.created_at
+              ? new Date(profileResult.data.created_at)
+              : new Date()
+            const accountAgeDays = Math.floor(
+              (Date.now() - accountCreated.getTime()) / (1000 * 60 * 60 * 24)
+            )
 
-            // Get user's total lists count (including default Library and Wishlist)
-            const { data: userLists, error: listsError } = await supabase
-              .from('game_lists')
-              .select('id')
-              .eq('user_id', session.user.id)
+            // Compute user phase
+            const rankedGamesCount = rankings?.length || 0
+            const awardsCount = userAwards?.length || 0
+            const phase = getUserPhase({
+              accountAgeDays,
+              rankedGamesCount,
+              playLogsCount,
+              awardsCount,
+            })
 
-            // Get user's awards count - try awards table first
-            const { data: userAwards, error: awardsError } = await supabase
-              .from('awards')
-              .select('id')
-              .eq('user_id', session.user.id)
+            // DEBUG ONLY: remove before release
+            if (process.env.NEXT_PUBLIC_SHOW_PHASE_DEBUG === 'true') {
+              console.log('MeepleGo phaseResult', {
+                rankedGamesCount,
+                playLogsCount,
+                awardsCount,
+                accountAgeDays,
+                phaseResult: phase,
+              })
+            }
 
-            if (!rankingsError && rankings) {
+            if (!cancelled) {
+              setPhaseResult(phase)
+            }
+
+            // Compute user stats
+            if (!rankingsResult.error && rankings) {
               const totalPlays = rankings.filter((r) => r.played_it).length
               const uniqueGames = rankings.length
               const gamesOwned = libraryItems?.length || 0
@@ -299,7 +292,6 @@ export default function HomepageContent() {
                     ) / ratingsWithValues.length
                   : null
 
-              // Group by date for timeline
               const ratingsTimeline = rankings
                 .filter((r) => r.ranking !== null && r.created_at)
                 .reduce(
@@ -336,7 +328,7 @@ export default function HomepageContent() {
                 gamesOwned,
                 avgRating,
                 ratingsTimeline: timelineArray,
-                recentTags: [], // Could add tags logic later
+                recentTags: [],
                 listsCreated,
                 awardsCreated,
               }
@@ -345,7 +337,6 @@ export default function HomepageContent() {
                 setUserStats(stats)
               }
             } else {
-              // Set empty stats for authenticated users with no data
               if (!cancelled) {
                 setUserStats({
                   totalPlays: 0,
@@ -359,6 +350,66 @@ export default function HomepageContent() {
                 })
               }
             }
+
+            // ── Discovery RPCs (gated by phase) ──
+            setDiscoveryLoading(true)
+            try {
+              const noData = Promise.resolve({ data: [], error: null })
+
+              const [
+                mostAwardedResult,
+                highestRankedResult,
+                sleeperHitsResult,
+                hotTakesResult,
+                comebackGamesResult,
+              ] = await Promise.all([
+                phase.canShowMostAwarded
+                  ? supabase.rpc('get_most_awarded_this_year', {
+                      user_uuid: session.user.id,
+                    })
+                  : noData,
+                phase.canShowHighestRanked
+                  ? supabase.rpc('get_highest_ranked', {
+                      user_uuid: session.user.id,
+                    })
+                  : noData,
+                phase.canShowSleeperHits
+                  ? supabase.rpc('get_sleeper_hits', {
+                      user_uuid: session.user.id,
+                      max_num_ratings: 3000,
+                    })
+                  : noData,
+                phase.canShowHotTakes
+                  ? supabase.rpc('get_hot_takes', {
+                      user_uuid: session.user.id,
+                      min_num_ratings: 750,
+                    })
+                  : noData,
+                phase.canShowComebackGames
+                  ? supabase.rpc('get_comeback_games', {
+                      user_uuid: session.user.id,
+                    })
+                  : noData,
+              ])
+
+              if (!cancelled) {
+                setDiscoveryLists({
+                  mostAwarded: (mostAwardedResult.data ||
+                    []) as MostAwardedGame[],
+                  highestRanked: (highestRankedResult.data ||
+                    []) as HighestRankedGame[],
+                  sleeperHits: (sleeperHitsResult.data ||
+                    []) as SleeperHitGame[],
+                  hotTakes: (hotTakesResult.data || []) as HotTakeGame[],
+                  comebackGames: (comebackGamesResult.data ||
+                    []) as ComebackGame[],
+                })
+              }
+            } catch (error) {
+              console.error('Error loading discovery lists:', error)
+            } finally {
+              if (!cancelled) setDiscoveryLoading(false)
+            }
           } catch {
             if (!cancelled) {
               setUserStats({
@@ -371,55 +422,15 @@ export default function HomepageContent() {
                 listsCreated: 0,
                 awardsCreated: 0,
               })
+              setPhaseResult(
+                getUserPhase({
+                  accountAgeDays: 0,
+                  rankedGamesCount: 0,
+                  playLogsCount: 0,
+                  awardsCount: 0,
+                })
+              )
             }
-          }
-        }
-
-        // Load discovery lists for authenticated users
-        if (session?.user) {
-          setDiscoveryLoading(true)
-          try {
-            const [
-              mostAwardedResult,
-              highestRankedResult,
-              sleeperHitsResult,
-              hotTakesResult,
-              comebackGamesResult,
-            ] = await Promise.all([
-              supabase.rpc('get_most_awarded_this_year', {
-                user_uuid: session.user.id,
-              }),
-              supabase.rpc('get_highest_ranked', {
-                user_uuid: session.user.id,
-              }),
-              supabase.rpc('get_sleeper_hits', {
-                user_uuid: session.user.id,
-                max_num_ratings: 3000,
-              }),
-              supabase.rpc('get_hot_takes', {
-                user_uuid: session.user.id,
-                min_num_ratings: 750,
-              }),
-              supabase.rpc('get_comeback_games', {
-                user_uuid: session.user.id,
-              }),
-            ])
-
-            if (!cancelled) {
-              setDiscoveryLists({
-                mostAwarded: (mostAwardedResult.data || []) as MostAwardedGame[],
-                highestRanked: (highestRankedResult.data ||
-                  []) as HighestRankedGame[],
-                sleeperHits: (sleeperHitsResult.data || []) as SleeperHitGame[],
-                hotTakes: (hotTakesResult.data || []) as HotTakeGame[],
-                comebackGames: (comebackGamesResult.data ||
-                  []) as ComebackGame[],
-              })
-            }
-          } catch (error) {
-            console.error('Error loading discovery lists:', error)
-          } finally {
-            if (!cancelled) setDiscoveryLoading(false)
           }
         }
       } catch (e) {
@@ -445,8 +456,9 @@ export default function HomepageContent() {
         publicLists={publicLists}
         discoveryLists={discoveryLists}
         discoveryLoading={discoveryLoading}
+        phaseResult={phaseResult}
       />
-      
+
       {/* Onboarding for new users */}
       <OnboardingModal
         visible={showOnboarding}

@@ -5,8 +5,6 @@ import { supabase } from '@/lib/supabase'
 import PageLayout from '@/components/Components/PageLayout'
 import OnboardingLanding from '@/components/Components/OnboardingLanding'
 import HomepageContent from './HomepageContent'
-import Link from 'next/link'
-import Heading from '@/components/Components/Heading'
 
 export default function HomePage() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
@@ -35,23 +33,7 @@ export default function HomePage() {
   if (isAuthenticated) {
     return (
       <PageLayout>
-        <div className="space-y-6">
-          {/* Personalized Welcome */}
-          <div className="flex items-center justify-between">
-            <Heading as="h1" size="lg">
-              Welcome back
-            </Heading>
-            <Link
-              href="/profile"
-              className="text-sm text-primary-600 hover:text-primary-700 font-medium"
-            >
-              View Profile →
-            </Link>
-          </div>
-
-          {/* Main Content (Trending, etc.) */}
-          <HomepageContent />
-        </div>
+        <HomepageContent />
       </PageLayout>
     )
   }
