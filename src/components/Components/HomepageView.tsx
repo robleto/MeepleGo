@@ -69,6 +69,7 @@ export interface HomepageViewProps {
   discoveryLoading?: boolean
   phaseResult?: UserPhaseResult | null
   foundationalGames?: any[]
+  topCommunityRated?: any[]
 }
 
 // ── Quick Action definitions ──
@@ -172,6 +173,7 @@ export function HomepageView({
   discoveryLoading = false,
   phaseResult,
   foundationalGames = [],
+  topCommunityRated = [],
 }: HomepageViewProps) {
   // ── Guest experience (unchanged — OnboardingLanding handles the main logged-out view) ──
   if (!user) {
@@ -623,52 +625,21 @@ export function HomepageView({
 
       {/* ── Community Sections (gated — hidden for zero-data Phase 1) ── */}
 
-      {/* Explore Top-Rated Games (Phase 2+ — sourced from global rank data) */}
-      {phaseResult?.canShowExplore && (
-        <section className="space-y-4">
-          <div>
-            <div className="flex items-center justify-between gap-4">
-              <Heading as="h2" size="md" className="text-gray-900">
-                Explore Top-Rated Games
-              </Heading>
-              <Link
-                href="/games"
-                className="text-xs sm:text-sm text-primary-600 hover:text-primary-500 font-medium whitespace-nowrap"
-              >
-                View all →
-              </Link>
-            </div>
-            <p className="mt-0.5 text-sm sm:text-base text-gray-600">
-              A public reference list for browsing
-            </p>
-          </div>
-          {loading ? (
-            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4">
-              {Array.from({ length: 8 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="flex-shrink-0 w-48 h-64 bg-gray-200 animate-pulse rounded-lg"
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="-mx-4 sm:-mx-6 lg:-mx-8">
-              <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 px-4 sm:px-6 lg:px-8">
-                {featuredGames.map((game) => (
-                  <div key={game.id} className="flex-shrink-0 w-48">
-                    <GameCard
-                      game={game as any}
-                      viewMode="grid"
-                      variant="balanced"
-                      imageFit="contain"
-                      className="h-full flex flex-col"
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </section>
+      {/* Top-Rated on MeepleGo (Phase 2+ — sourced from MeepleGo community ratings) */}
+      {phaseResult?.canShowExplore && topCommunityRated.length > 0 && (
+        <DiscoveryCard
+          title="Top-Rated on MeepleGo"
+          icon="⭐"
+          subtitle="Games rated highest by the MeepleGo community"
+          games={topCommunityRated}
+          loading={discoveryLoading}
+          sectionKey="top-rated-meepleGo"
+          renderSubtitle={(game: any) =>
+            game.avg_rating
+              ? `${Number(game.avg_rating).toFixed(1)}/10 avg · ${game.rater_count} rating${game.rater_count !== 1 ? 's' : ''}`
+              : ''
+          }
+        />
       )}
 
       {/* Industry Awards (hidden for zero-data Phase 1) */}
