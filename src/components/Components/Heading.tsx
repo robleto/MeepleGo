@@ -54,7 +54,7 @@ export function Heading({
       string
     > = {
       section:
-        'heading-display text-2xl font-normal tracking-wide text-gray-700',
+        'heading-display text-2xl font-medium tracking-wide text-gray-900 dark:text-gray-300',
     }
     return (
       <Comp className={clsx(variantClasses[variant], className)}>
@@ -68,13 +68,12 @@ export function Heading({
     : soft
       ? 'tracking-tight'
       : 'tracking-minus-half'
+  // Always use font-medium for all breakpoints if not soft, matching the example
   const weight = soft
     ? weightScale
       ? 'font-medium md:font-semibold lg:font-semibold'
       : 'font-medium'
-    : weightScale
-      ? 'font-semibold md:font-semibold lg:font-semibold'
-      : 'font-semibold'
+    : 'font-medium md:font-medium lg:font-medium'
   const color = gradient
     ? 'bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-400 bg-clip-text text-transparent'
     : subtle
@@ -84,12 +83,8 @@ export function Heading({
     align === 'center' ? 'text-center' : align === 'right' ? 'text-right' : ''
   const transform = uppercase ? 'uppercase tracking-wide' : ''
 
-  const optical =
-    size === 'display' || size === 'xl'
-      ? 'heading-tight'
-      : size === 'lg'
-        ? 'heading-normal'
-        : 'heading-relaxed'
+  // Always use heading-relaxed for md size and below, matching the example
+  const optical = 'heading-relaxed'
 
   const fontFamily = displayFont ? 'heading-display' : ''
 

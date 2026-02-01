@@ -29,30 +29,27 @@ export interface HeroProps {
   className?: string
 }
 
-const awardsDefaults: Required<
-  Pick<HeroProps, 'title' | 'subtitle' | 'steps'>
-> = {
-  title: 'Create your own Game Awards',
-  subtitle:
-    'Auto‑generate personal awards from the games you play and rate—then fine‑tune the winners.',
-  steps: [
-    {
-      icon: <ClipboardDocumentCheckIcon className="h-5 w-5 text-blue-600" />,
-      heading: 'Track played games',
-      text: 'Add games to your collection and mark them as Played. The more you log, the richer your awards become.',
-    },
-    {
-      icon: <StarIcon className="h-5 w-5 text-amber-500" />,
-      heading: 'Rate & rank them',
-      text: 'Give each played title a 1–10 rating. Rankings power category insights and help surface standout contenders.',
-    },
-    {
-      icon: <TrophyIcon className="h-5 w-5 text-yellow-600" />,
-      heading: 'Generate & refine awards',
-      text: 'We auto‑build personal award categories (Strategy, Family, Party, etc.). Adjust winners manually any time.',
-    },
-  ],
-}
+const defaultTitle = 'Create your own Game Awards'
+const defaultSubtitle =
+  'Auto‑generate personal awards from the games you play and rate—then fine‑tune the winners.'
+const defaultSteps: HeroStep[] = [
+  {
+    icon: <ClipboardDocumentCheckIcon className="w-5 h-5 text-blue-600" />,
+    heading: 'Track played games',
+    text: 'Add games to your collection and mark them as Played. The more you log, the richer your awards become.',
+  },
+  {
+    icon: <StarIcon className="w-5 h-5 text-amber-500" />,
+    heading: 'Rate & rank them',
+    text: 'Give each played title a 1–10 rating. Rankings power category insights and help surface standout contenders.',
+  },
+  {
+    icon: <TrophyIcon className="w-5 h-5 text-yellow-600" />,
+    heading: 'Generate & refine awards',
+    text: 'We auto‑build personal award categories (Strategy, Family, Party, etc.). Adjust winners manually any time.',
+  },
+]
+
 
 export default function Hero({
   variant = 'default',
@@ -62,14 +59,10 @@ export default function Hero({
   cta,
   className,
 }: HeroProps) {
-  const heroTitle =
-    variant === 'awards' ? title ?? awardsDefaults.title : title ?? ''
-  const heroSubtitle =
-    variant === 'awards'
-      ? subtitle ?? awardsDefaults.subtitle
-      : subtitle ?? ''
-  const heroSteps =
-    variant === 'awards' ? steps ?? awardsDefaults.steps : steps ?? []
+  // Use provided props or fallbacks
+  const heroTitle = title ?? defaultTitle
+  const heroSubtitle = subtitle ?? defaultSubtitle
+  const heroSteps = steps && steps.length > 0 ? steps : defaultSteps
 
   const renderCta = () => {
     if (!cta) return null
@@ -129,11 +122,11 @@ export default function Hero({
         >
           {heroSteps.map((step, idx) => (
             <li key={step.heading} className="flex items-start gap-5">
-              <div className="mt-1 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-semibold text-blue-700">
+              <div className="flex items-center justify-center flex-shrink-0 mt-1 text-sm font-semibold text-blue-700 bg-blue-100 rounded-full h-7 w-7">
                 {idx + 1}
               </div>
-              <div className="flex-1 border-b border-slate-200 pb-6 last:border-b-0 last:pb-0">
-                <div className="mb-2 flex items-center gap-2">
+              <div className="flex-1 pb-6 border-b border-slate-200 last:border-b-0 last:pb-0">
+                <div className="flex items-center gap-2 mb-2">
                   {step.icon}
                   <h3 className="text-lg font-semibold text-gray-900">
                     {step.heading}

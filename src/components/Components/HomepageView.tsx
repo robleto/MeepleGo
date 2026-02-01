@@ -5,9 +5,10 @@ import Heading from '@/components/Components/Heading'
 import { AwardCard } from '@/components/Components/AwardCard'
 import ListCard from '@/components/Components/ListCard'
 import StatCard from '@/components/Elements/StatCard'
-import NetflixScrollSection from '@/components/Elements/NetflixScrollSection'
+import HorizontalCardScroll from '@/components/Elements/HorizontalCardScroll'
 import ZeroState from '@/components/Components/ZeroState'
 import DiscoveryCard from './DiscoveryCard'
+import Hero from '@/components/Components/Hero'
 import {
   TrophyIcon,
   CubeIcon,
@@ -194,7 +195,7 @@ export function HomepageView({
               </Heading>
               <Link
                 href="/games"
-                className="text-xs sm:text-sm text-primary-600 hover:text-primary-500 font-medium whitespace-nowrap"
+                className="text-xs font-medium sm:text-sm text-primary-600 hover:text-primary-500 whitespace-nowrap"
               >
                 View all →
               </Link>
@@ -204,17 +205,17 @@ export function HomepageView({
             </p>
           </div>
           {loading ? (
-            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4">
+            <div className="flex gap-4 pb-4 overflow-x-auto scrollbar-hide">
               {Array.from({ length: 8 }).map((_, i) => (
                 <div
                   key={i}
-                  className="flex-shrink-0 w-48 h-64 bg-gray-200 animate-pulse rounded-lg"
+                  className="flex-shrink-0 w-48 h-64 bg-gray-200 rounded-lg animate-pulse"
                 />
               ))}
             </div>
           ) : (
             <div className="-mx-4 sm:-mx-6 lg:-mx-8">
-              <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 px-4 sm:px-6 lg:px-8">
+              <div className="flex gap-4 px-4 pb-4 overflow-x-auto scrollbar-hide sm:px-6 lg:px-8">
                 {featuredGames.map((game) => (
                   <div key={game.id} className="flex-shrink-0 w-48">
                     <GameCard
@@ -222,7 +223,7 @@ export function HomepageView({
                       viewMode="grid"
                       variant="balanced"
                       imageFit="contain"
-                      className="h-full flex flex-col"
+                      className="flex flex-col h-full"
                     />
                   </div>
                 ))}
@@ -241,7 +242,7 @@ export function HomepageView({
                 </Heading>
                 <Link
                   href="/awards"
-                  className="text-xs sm:text-sm text-primary-600 hover:text-primary-500 font-medium whitespace-nowrap"
+                  className="text-xs font-medium sm:text-sm text-primary-600 hover:text-primary-500 whitespace-nowrap"
                 >
                   Explore all →
                 </Link>
@@ -250,7 +251,7 @@ export function HomepageView({
                 Prestigious board game honors and recognition
               </p>
             </div>
-            <NetflixScrollSection itemWidth="w-72" showCount={4}>
+            <HorizontalCardScroll itemWidth="w-72" showCount={4}>
               {industryAwards.map((award: any) => (
                 <AwardCard
                   key={award.id}
@@ -269,7 +270,7 @@ export function HomepageView({
                   cta="View Details"
                 />
               ))}
-            </NetflixScrollSection>
+            </HorizontalCardScroll>
           </section>
         )}
 
@@ -283,7 +284,7 @@ export function HomepageView({
                 </Heading>
                 <Link
                   href="/lists"
-                  className="text-xs sm:text-sm text-primary-600 hover:text-primary-500 font-medium whitespace-nowrap"
+                  className="text-xs font-medium sm:text-sm text-primary-600 hover:text-primary-500 whitespace-nowrap"
                 >
                   Browse lists →
                 </Link>
@@ -292,7 +293,7 @@ export function HomepageView({
                 Collections curated by fellow players
               </p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {publicLists.slice(0, 3).map((list) => (
                 <ListCard key={list.id} list={list as any} isPublic={true} />
               ))}
@@ -393,7 +394,7 @@ export function HomepageView({
         </Heading>
         <Link
           href="/profile"
-          className="text-sm text-primary-600 hover:text-primary-700 font-medium"
+          className="text-sm font-medium text-primary-600 hover:text-primary-700"
         >
           View Profile →
         </Link>
@@ -401,12 +402,12 @@ export function HomepageView({
 
       {/* Quick Actions */}
       {phaseResult?.canShowQuickActions && (
-        <section className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <section className="grid grid-cols-2 gap-3 md:grid-cols-4">
           {quickActions.map((action) => (
             <Link
               key={action.href}
               href={action.href}
-              className="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-200 hover:shadow-md hover:border-gray-300 transition-all"
+              className="flex items-center gap-3 p-3 transition-all bg-white border border-gray-200 rounded-xl hover:shadow-md hover:border-gray-300"
             >
               <div
                 className={`w-10 h-10 ${action.color} rounded-lg flex items-center justify-center flex-shrink-0`}
@@ -481,7 +482,7 @@ export function HomepageView({
         discoveryLists.mostAwarded.length > 0 && (
           <DiscoveryCard
             title="Your Awards"
-            icon="🏆"
+            subtitle="Games with the most personal awards"
             games={discoveryLists.mostAwarded}
             loading={discoveryLoading}
             explainer={EXPLAINERS['most-awarded']}
@@ -497,8 +498,8 @@ export function HomepageView({
         discoveryLists.highestRanked.length > 0 && (
           <DiscoveryCard
             title="Your Top-Rated Games"
-            icon="⭐"
-            games={discoveryLists.highestRanked}
+            subtitle="Your highest rated games"
+            games={discoveryLists.highestRanked}  
             loading={discoveryLoading}
             explainer={EXPLAINERS['highest-ranked']}
             sectionKey="highest-ranked"
@@ -517,7 +518,7 @@ export function HomepageView({
         discoveryLists.hotTakes.length > 0 && (
           <DiscoveryCard
             title="Your Hot Takes"
-            icon="🔥"
+            subtitle="Games where your rating differs most from the community"
             games={discoveryLists.hotTakes}
             loading={discoveryLoading}
             explainer={EXPLAINERS['hot-takes']}
@@ -534,7 +535,7 @@ export function HomepageView({
         discoveryLists.sleeperHits.length > 0 && (
           <DiscoveryCard
             title="Your Hidden Gems"
-            icon="💎"
+            subtitle="Games you rated highly that few others have discovered"
             games={discoveryLists.sleeperHits}
             loading={discoveryLoading}
             explainer={EXPLAINERS['sleeper-hits']}
@@ -550,7 +551,7 @@ export function HomepageView({
         discoveryLists.comebackGames.length > 0 && (
           <DiscoveryCard
             title="Games You Keep Coming Back To"
-            icon="🔄"
+            subtitle="Games you play month after month"
             games={discoveryLists.comebackGames}
             loading={discoveryLoading}
             explainer={EXPLAINERS['comeback-games']}
@@ -561,64 +562,39 @@ export function HomepageView({
           />
         )}
 
-      {/* Discovery loading skeleton (shown when no discovery sections have loaded yet) */}
-      {discoveryLoading &&
-        discoveryLists.highestRanked.length === 0 &&
-        phaseResult?.canShowHighestRanked && (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-            <div className="animate-pulse">
-              <div className="h-6 bg-gray-200 rounded w-48 mb-4" />
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <div key={i}>
-                    <div className="bg-gray-200 aspect-square rounded-lg mb-2" />
-                    <div className="bg-gray-200 h-4 rounded mb-1" />
-                    <div className="bg-gray-200 h-3 rounded w-3/4" />
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-      {/* ── Scaffold card for true zero-data Phase 1 users ── */}
-      {phaseResult && !phaseResult.hasAnyData && (
-        <section className="bg-gradient-to-br from-primary-50 to-blue-50 border border-primary-100 rounded-2xl p-6 sm:p-8">
-          <div className="flex items-start gap-4">
-            <div className="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center flex-shrink-0">
-              <SparklesIcon className="w-6 h-6 text-primary-600" />
-            </div>
-            <div className="space-y-3">
-              <h2 className="text-lg font-bold text-gray-900">
-                Your personal board game companion
-              </h2>
-              <p className="text-sm text-gray-600 leading-relaxed">
-                MeepleGo builds a picture of your taste over time. Start with a
-                rating or two and you'll see your top picks, hot takes, hidden
-                gems, and play stats appear right here.
-              </p>
-              <p className="text-xs text-gray-400">
-                No leaderboards. No pressure. Just your table, over time.
-              </p>
-              <div className="flex flex-wrap gap-3 pt-1">
-                <Link
-                  href="/rankings"
-                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 transition-colors"
-                >
-                  <StarIcon className="w-4 h-4" />
-                  Rate your first game
-                </Link>
-                <Link
-                  href="/games"
-                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-white text-gray-700 text-sm font-medium rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
-                >
-                  <MagnifyingGlassIcon className="w-4 h-4" />
-                  Browse games
-                </Link>
-              </div>
-            </div>
-          </div>
-        </section>
+      {/* ── Scaffold card for Phase 1 users ── */}
+      {/* Always shown in Phase 1 to frame expectation — not just zero-data.
+          A user with 1-2 ratings is still Phase 1 and should see this. */}
+      {phaseResult && phaseResult.phase === 1 && (
+        <Hero
+          title="Your personal board game companion"
+          subtitle={
+            phaseResult.hasAnyData
+              ? 'Keep rating and logging plays — the more you add, the richer your highlights, hot takes, and hidden gems become.'
+              : 'MeepleGo builds a picture of your taste over time. Start with a rating or two and you’ll see your top picks, hot takes, hidden gems, and play stats appear right here.'
+          }
+          steps={[
+            {
+              icon: <StarIcon className="w-5 h-5 text-amber-500" />,
+              heading: 'Rate games',
+              text: 'Score your favorites to start building your personal highlights and stats.'
+            },
+            {
+              icon: <MagnifyingGlassIcon className="w-5 h-5 text-green-500" />,
+              heading: 'Browse & discover',
+              text: 'Explore the catalog and find new games to play and rate.'
+            },
+            {
+              icon: <SparklesIcon className="w-5 h-5 text-primary-600" />,
+              heading: 'See your journey',
+              text: 'Watch your top picks, hot takes, hidden gems, and play stats appear as you log more.'
+            },
+          ]}
+          cta={{
+            label: phaseResult.hasAnyData ? 'Rate more games' : 'Rate your first game',
+            href: '/rankings',
+          }}
+        />
       )}
 
       {/* ── Community Sections (gated — hidden for zero-data Phase 1) ── */}
@@ -633,7 +609,7 @@ export function HomepageView({
               </Heading>
               <Link
                 href="/games"
-                className="text-xs sm:text-sm text-primary-600 hover:text-primary-500 font-medium whitespace-nowrap"
+                className="text-xs font-medium sm:text-sm text-primary-600 hover:text-primary-500 whitespace-nowrap"
               >
                 View all →
               </Link>
@@ -643,17 +619,17 @@ export function HomepageView({
             </p>
           </div>
           {loading ? (
-            <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4">
+            <div className="flex gap-4 pb-4 overflow-x-auto scrollbar-hide">
               {Array.from({ length: 8 }).map((_, i) => (
                 <div
                   key={i}
-                  className="flex-shrink-0 w-48 h-64 bg-gray-200 animate-pulse rounded-lg"
+                  className="flex-shrink-0 w-48 h-64 bg-gray-200 rounded-lg animate-pulse"
                 />
               ))}
             </div>
           ) : (
             <div className="-mx-4 sm:-mx-6 lg:-mx-8">
-              <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 px-4 sm:px-6 lg:px-8">
+              <div className="flex gap-4 px-4 pb-4 overflow-x-auto scrollbar-hide sm:px-6 lg:px-8">
                 {featuredGames.map((game) => (
                   <div key={game.id} className="flex-shrink-0 w-48">
                     <GameCard
@@ -661,7 +637,7 @@ export function HomepageView({
                       viewMode="grid"
                       variant="balanced"
                       imageFit="contain"
-                      className="h-full flex flex-col"
+                      className="flex flex-col h-full"
                     />
                   </div>
                 ))}
@@ -681,7 +657,7 @@ export function HomepageView({
               </Heading>
               <Link
                 href="/awards"
-                className="text-xs sm:text-sm text-primary-600 hover:text-primary-500 font-medium whitespace-nowrap"
+                className="text-xs font-medium sm:text-sm text-primary-600 hover:text-primary-500 whitespace-nowrap"
               >
                 Explore all →
               </Link>
@@ -690,7 +666,7 @@ export function HomepageView({
               Prestigious board game honors and recognition
             </p>
           </div>
-          <NetflixScrollSection itemWidth="w-72" showCount={4}>
+          <HorizontalCardScroll itemWidth="w-72" showCount={4}>
             {industryAwards.map((award: any) => (
               <AwardCard
                 key={award.id}
@@ -709,7 +685,7 @@ export function HomepageView({
                 cta="View Details"
               />
             ))}
-          </NetflixScrollSection>
+          </HorizontalCardScroll>
         </section>
       )}
 
@@ -723,7 +699,7 @@ export function HomepageView({
               </Heading>
               <Link
                 href="/lists"
-                className="text-xs sm:text-sm text-primary-600 hover:text-primary-500 font-medium whitespace-nowrap"
+                className="text-xs font-medium sm:text-sm text-primary-600 hover:text-primary-500 whitespace-nowrap"
               >
                 Browse lists →
               </Link>
@@ -732,7 +708,7 @@ export function HomepageView({
               Collections curated by fellow players
             </p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {publicLists.slice(0, 3).map((list) => (
               <ListCard key={list.id} list={list as any} isPublic={true} />
             ))}
