@@ -36,7 +36,6 @@ export interface UserPhaseResult {
   canShowQuickActions: boolean
   canShowIndustryAwards: boolean
   canShowExplore: boolean // "Explore Top-Rated Games" — Phase 2+
-  canShowFoundationalGames: boolean // Static reference shelf — Phase 1 with 1–2 rankings only
 }
 
 export function getUserPhase(input: UserPhaseInput): UserPhaseResult {
@@ -75,7 +74,5 @@ export function getUserPhase(input: UserPhaseInput): UserPhaseResult {
     // enough personal data for it to feel like context, not noise.
     canShowIndustryAwards: phase >= 2,
     canShowExplore: phase >= 2,
-    canShowFoundationalGames:
-      phase === 1 && rankedGamesCount >= 1 && rankedGamesCount <= 2,
   }
 }

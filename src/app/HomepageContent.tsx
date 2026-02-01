@@ -23,7 +23,6 @@ import OnboardingModal from '@/components/Components/OnboardingModal'
 import SignupPrompt from '@/components/Components/SignupPrompt'
 import { shouldPromptSignup, getOnboardingState } from '@/lib/guestSession'
 import { getUserPhase, type UserPhaseResult } from '@/lib/userPhase'
-import { FOUNDATIONAL_GAMES_BGG_IDS } from '@/lib/constants'
 
 // Module-level cache for React Strict Mode stability
 let cachedFeaturedGames: Game[] | null = null
@@ -72,8 +71,6 @@ export default function HomepageContent() {
   )
   const [publicLists, setPublicLists] = useState<any[]>(cachedPublicLists || [])
   const [phaseResult, setPhaseResult] = useState<UserPhaseResult | null>(null)
-  const [foundationalGames, setFoundationalGames] = useState<any[]>([])
-  const [topCommunityRated, setTopCommunityRated] = useState<any[]>([])
 
   // Discovery lists state
   const [discoveryLists, setDiscoveryLists] = useState<{
@@ -276,27 +273,6 @@ export default function HomepageContent() {
               setPhaseResult(phase)
             }
 
-            // Foundational Games (Phase 1 with 1–2 rankings only)
-            if (phase.canShowFoundationalGames) {
-              try {
-                const { data: foundationalData } = await supabase
-                  .from('games')
-                  .select('id, name, thumbnail_url, bgg_id')
-                  .in('bgg_id', FOUNDATIONAL_GAMES_BGG_IDS)
-                if (!cancelled && foundationalData && foundationalData.length > 0) {
-                  setFoundationalGames(
-                    foundationalData.map((g) => ({
-                      game_id: g.id,
-                      game_name: g.name,
-                      game_thumbnail_url: g.thumbnail_url,
-                    }))
-                  )
-                }
-              } catch {
-                // If fetch fails, section simply does not render
-              }
-            }
-
             // Compute user stats
             if (!rankingsResult.error && rankings) {
               const totalPlays = rankings.filter((r) => r.played_it).length
@@ -386,7 +362,6 @@ export default function HomepageContent() {
                 sleeperHitsResult,
                 hotTakesResult,
                 comebackGamesResult,
-                topCommunityRatedResult,
               ] = await Promise.all([
                 phase.canShowMostAwarded
                   ? supabase.rpc('get_most_awarded_this_year', {
@@ -415,11 +390,6 @@ export default function HomepageContent() {
                       user_uuid: session.user.id,
                     })
                   : noData,
-                phase.canShowExplore
-                  ? supabase.rpc('get_top_community_rated', {
-                      min_raters: 3,
-                    })
-                  : noData,
               ])
 
               if (!cancelled) {
@@ -434,15 +404,6 @@ export default function HomepageContent() {
                   comebackGames: (comebackGamesResult.data ||
                     []) as ComebackGame[],
                 })
-                setTopCommunityRated(
-                  (topCommunityRatedResult.data || []).map((g: any) => ({
-                    game_id: g.game_id,
-                    game_name: g.game_name,
-                    game_thumbnail_url: g.game_thumbnail_url,
-                    avg_rating: g.avg_rating,
-                    rater_count: g.rater_count,
-                  }))
-                )
               }
             } catch (error) {
               console.error('Error loading discovery lists:', error)
@@ -496,8 +457,6 @@ export default function HomepageContent() {
         discoveryLists={discoveryLists}
         discoveryLoading={discoveryLoading}
         phaseResult={phaseResult}
-        foundationalGames={foundationalGames}
-        topCommunityRated={topCommunityRated}
       />
 
       {/* Onboarding for new users */}
