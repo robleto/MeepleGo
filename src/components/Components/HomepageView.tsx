@@ -68,6 +68,7 @@ export interface HomepageViewProps {
   }
   discoveryLoading?: boolean
   phaseResult?: UserPhaseResult | null
+  foundationalGames?: any[]
 }
 
 // ── Quick Action definitions ──
@@ -170,6 +171,7 @@ export function HomepageView({
   },
   discoveryLoading = false,
   phaseResult,
+  foundationalGames = [],
 }: HomepageViewProps) {
   // ── Guest experience (unchanged — OnboardingLanding handles the main logged-out view) ──
   if (!user) {
@@ -422,6 +424,17 @@ export function HomepageView({
             </Link>
           ))}
         </section>
+      )}
+
+      {/* Foundational Games (Phase 1, 1–2 rankings only) */}
+      {phaseResult?.canShowFoundationalGames && foundationalGames.length > 0 && (
+        <DiscoveryCard
+          title="Foundational Games"
+          icon="🎲"
+          subtitle="Widely known games that helped shape modern board gaming"
+          games={foundationalGames}
+          renderSubtitle={() => ''}
+        />
       )}
 
       {/* Gaming at a Glance (Phase 2+) */}

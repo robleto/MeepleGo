@@ -23,6 +23,7 @@ import OnboardingModal from '@/components/Components/OnboardingModal'
 import SignupPrompt from '@/components/Components/SignupPrompt'
 import { shouldPromptSignup, getOnboardingState } from '@/lib/guestSession'
 import { getUserPhase, type UserPhaseResult } from '@/lib/userPhase'
+import { FOUNDATIONAL_GAMES_BGG_IDS } from '@/lib/constants'
 
 // Module-level cache for React Strict Mode stability
 let cachedFeaturedGames: Game[] | null = null
@@ -71,6 +72,7 @@ export default function HomepageContent() {
   )
   const [publicLists, setPublicLists] = useState<any[]>(cachedPublicLists || [])
   const [phaseResult, setPhaseResult] = useState<UserPhaseResult | null>(null)
+  const [foundationalGames, setFoundationalGames] = useState<any[]>([])
 
   // Discovery lists state
   const [discoveryLists, setDiscoveryLists] = useState<{
@@ -273,6 +275,27 @@ export default function HomepageContent() {
               setPhaseResult(phase)
             }
 
+            // Foundational Games (Phase 1 with 1–2 rankings only)
+            if (phase.canShowFoundationalGames) {
+              try {
+                const { data: foundationalData } = await supabase
+                  .from('games')
+                  .select('id, name, thumbnail_url, bgg_id')
+                  .in('bgg_id', FOUNDATIONAL_GAMES_BGG_IDS)
+                if (!cancelled && foundationalData && foundationalData.length > 0) {
+                  setFoundationalGames(
+                    foundationalData.map((g) => ({
+                      game_id: g.id,
+                      game_name: g.name,
+                      game_thumbnail_url: g.thumbnail_url,
+                    }))
+                  )
+                }
+              } catch {
+                // If fetch fails, section simply does not render
+              }
+            }
+
             // Compute user stats
             if (!rankingsResult.error && rankings) {
               const totalPlays = rankings.filter((r) => r.played_it).length
@@ -457,6 +480,7 @@ export default function HomepageContent() {
         discoveryLists={discoveryLists}
         discoveryLoading={discoveryLoading}
         phaseResult={phaseResult}
+        foundationalGames={foundationalGames}
       />
 
       {/* Onboarding for new users */}
