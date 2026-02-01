@@ -44,7 +44,7 @@ export function GameImage({
 
   // Generate fallback content
   const initials =
-    name
+    (name || 'Board Game')
       .split(/\s+/)
       .filter(Boolean)
       .slice(0, 2)
@@ -75,7 +75,7 @@ export function GameImage({
           <polygon points="50,20 78,34 50,48 22,34" fill="#e5e7eb" />
         </svg>
         <span
-          className="relative z-10 font-bold tracking-wide drop-shadow text-gray-700"
+          className="relative z-10 font-bold tracking-wide text-gray-700 drop-shadow"
           style={{ fontSize }}
         >
           {initials}
@@ -83,7 +83,7 @@ export function GameImage({
         {/* Optional small name footer for larger square variant */}
         {variant === 'square' && (
           <div className="absolute bottom-0 left-0 right-0 text-[11px] font-medium px-1 py-0.5 bg-white/70 backdrop-blur line-clamp-1 text-center">
-            {name}
+            {name || 'Board Game'}
           </div>
         )}
       </div>
@@ -94,7 +94,7 @@ export function GameImage({
   return (
     <div className={`relative w-full h-full ${className}`}>
       {imageState === 'loading' && (
-        <div className="absolute inset-0 bg-gray-200 animate-pulse rounded" />
+        <div className="absolute inset-0 bg-gray-200 rounded animate-pulse" />
       )}
       <Image
         src={src}

@@ -44,17 +44,17 @@ function markSectionSeen(sectionKey: string): void {
  */
 function toGameCardShape(game: any, subtitle: string) {
   return {
-    id: game.game_id,
-    name: game.game_name,
-    thumbnail_url: game.game_thumbnail_url ?? null,
-    image_url: game.game_thumbnail_url ?? null,
-    year_published: game.game_year_published ?? null,
-    rating: game.game_rating ?? null,
-    num_ratings: game.game_num_ratings ?? null,
-    min_players: null,
-    max_players: null,
-    playtime_minutes: null,
-    bgg_id: 0,
+    id: game.game_id || game.id,
+    name: game.game_name || game.name,
+    thumbnail_url: game.game_thumbnail_url || game.thumbnail_url || null,
+    image_url: game.game_image_url || game.game_thumbnail_url || game.image_url || game.thumbnail_url || null,
+    year_published: game.game_year_published || game.year_published || null,
+    rating: game.game_rating || game.rating || null,
+    num_ratings: game.game_num_ratings || game.num_ratings || null,
+    min_players: game.game_min_players || game.min_players || null,
+    max_players: game.game_max_players || game.max_players || null,
+    playtime_minutes: game.game_playtime_minutes || game.playtime_minutes || null,
+    bgg_id: game.game_bgg_id || game.bgg_id || 0,
     categories: null,
     mechanics: null,
     publisher: null,
@@ -65,6 +65,9 @@ function toGameCardShape(game: any, subtitle: string) {
     created_at: '',
     updated_at: '',
     tagline: subtitle,
+    ranking: game.ranking ?? null,
+    played_it: game.played_it ?? false,
+    list_membership: game.list_membership ?? { library: false, wishlist: false },
   }
 }
 
@@ -138,7 +141,7 @@ export default function DiscoveryCard({
 
       {/* Loading State */}
       {loading && (
-        <HorizontalCardScroll itemWidth="w-48" showCount={5}>
+        <HorizontalCardScroll itemWidth="w-40" showCount={5.5}>
           {[...Array(8)].map((_, i) => (
             <div key={i} className="animate-pulse">
               <div className="mb-2 bg-gray-200 rounded-lg dark:bg-gray-700 aspect-square" />
@@ -151,7 +154,7 @@ export default function DiscoveryCard({
 
       {/* Games — rendered with GameCard for consistent styling */}
       {!loading && games.length > 0 && (
-        <HorizontalCardScroll itemWidth="w-48" showCount={5}>
+        <HorizontalCardScroll itemWidth="w-40" showCount={5.5}>
           {games.slice(0, 12).map((game) => (
             <GameCard
               key={game.game_id}

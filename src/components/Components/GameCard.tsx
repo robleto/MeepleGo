@@ -261,10 +261,10 @@ export default function GameCard({
         {isAwardWinner && allowWinnerBadgeInListView && !hideWinnerBadge && (
           <div className="absolute -left-2 top-2">
             <div
-              className="bg-amber-400 text-white rounded-r px-2 py-1 flex items-center shadow text-xs font-semibold"
+              className="flex items-center px-2 py-1 text-xs font-semibold text-white rounded-r shadow bg-amber-400"
               title="Award-Winning Game"
             >
-              <TrophyIcon className="h-4 w-4 mr-1" />
+              <TrophyIcon className="w-4 h-4 mr-1" />
               Winner
             </div>
           </div>
@@ -274,13 +274,13 @@ export default function GameCard({
           style={{ fontSize: '0.875rem' }}
         >
           {listRank != null && (
-            <div className="flex-shrink-0 flex items-center gap-2">
+            <div className="flex items-center flex-shrink-0 gap-2">
               {showDragHandle && (
                 <button
                   type="button"
                   title="Drag to reorder"
                   aria-label="Drag to reorder"
-                  className="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing"
+                  className="flex items-center justify-center w-6 h-6 text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing"
                   onClick={(e) => e.stopPropagation()}
                   ref={dragHandleProps?.setActivatorNodeRef as any}
                   {...(dragHandleProps?.attributes || {})}
@@ -297,8 +297,8 @@ export default function GameCard({
                   </svg>
                 </button>
               )}
-              <div className="w-6 sm:w-8 text-center">
-                <div className="inline-flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 rounded-md bg-gray-100 text-gray-700 font-semibold text-xs ring-1 ring-gray-200">
+              <div className="w-6 text-center sm:w-8">
+                <div className="inline-flex items-center justify-center w-6 h-6 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md sm:w-7 sm:h-7 ring-1 ring-gray-200">
                   {listRank}
                 </div>
               </div>
@@ -340,7 +340,7 @@ export default function GameCard({
                 allowWinnerBadgeInListView &&
                 !hideWinnerBadge && (
                   <TrophyIcon
-                    className="h-4 w-4 text-amber-500 flex-shrink-0"
+                    className="flex-shrink-0 w-4 h-4 text-amber-500"
                     aria-label="Award Winning"
                   />
                 )}
@@ -348,7 +348,7 @@ export default function GameCard({
 
             {/* Tagline - only show for detailed variant on desktop */}
             {variant === 'detailed' && (game as any).tagline && (
-              <p className="hidden sm:block text-xs text-gray-600 truncate mb-1">
+              <p className="hidden mb-1 text-xs text-gray-600 truncate sm:block">
                 {game.tagline}
               </p>
             )}
@@ -392,13 +392,13 @@ export default function GameCard({
                 title={`Rating: ${ratingValue}/10`}
                 aria-label={`Rating: ${ratingValue}/10`}
               >
-                <span className="font-bold text-sm">
+                <span className="text-sm font-bold">
                   {ratingValue}
                 </span>
               </button>
             ) : (
               <button
-                className="hidden sm:flex w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 items-center justify-center transition-colors"
+                className="items-center justify-center hidden transition-colors bg-gray-100 rounded-full sm:flex w-9 h-9 hover:bg-gray-200"
                 onClick={(event) => {
                   event.stopPropagation()
                   const rect = event.currentTarget.getBoundingClientRect()
@@ -411,7 +411,7 @@ export default function GameCard({
                 title="Rate this game"
                 aria-label="Rate this game"
               >
-                <StarIcon className="h-5 w-5 text-gray-400" />
+                <StarIcon className="w-5 h-5 text-gray-400" />
               </button>
             )}
 
@@ -480,7 +480,7 @@ export default function GameCard({
                   e.stopPropagation()
                   onRemoveFromCurrentList()
                 }}
-                className="hidden sm:flex w-9 h-9 rounded-full bg-gray-100 hover:bg-red-50 items-center justify-center transition-colors"
+                className="items-center justify-center hidden transition-colors bg-gray-100 rounded-full sm:flex w-9 h-9 hover:bg-red-50"
                 title="Remove from this list"
                 aria-label="Remove from this list"
               >
@@ -563,8 +563,8 @@ export default function GameCard({
 
         {/* Grid view rank badge (top-left), if provided */}
         {listRank != null && (
-          <div className="absolute top-1 left-1 z-10">
-            <div className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-white text-gray-800 text-xs font-semibold ring-1 ring-gray-200 shadow-sm">
+          <div className="absolute z-10 top-1 left-1">
+            <div className="inline-flex items-center justify-center w-6 h-6 text-xs font-semibold text-gray-800 bg-white rounded-md shadow-sm ring-1 ring-gray-200">
               {listRank}
             </div>
           </div>
@@ -572,7 +572,7 @@ export default function GameCard({
 
         {/* Hover overlay with all interactive controls */}
         {showOverlay && (
-          <div className="absolute inset-0 bg-black/20 flex flex-col items-stretch justify-between p-2">
+          <div className="absolute inset-0 flex flex-col items-stretch justify-between p-2 bg-black/20">
             {/* Top right: Collection bookmark */}
             <div className="flex justify-end">
               <button
@@ -650,7 +650,7 @@ export default function GameCard({
                   }`}
                 ref={listButtonRef}
               >
-                <BookmarkIcon className="h-4 w-4" />
+                <BookmarkIcon className="w-4 h-4" />
               </button>
             </div>
 
@@ -669,7 +669,7 @@ export default function GameCard({
                 }`}
                 title={localRanking?.played_it ? 'Played' : 'Mark as played'}
               >
-                <PlayIcon className="h-3 w-3 inline mr-1" />
+                <PlayIcon className="inline w-3 h-3 mr-1" />
                 Played
               </button>
 
@@ -704,7 +704,7 @@ export default function GameCard({
                   }}
                   title="Rate this game"
                 >
-                  <StarIcon className="h-3 w-3 inline mr-1" />
+                  <StarIcon className="inline w-3 h-3 mr-1" />
                   Rate
                 </button>
               )}
@@ -723,7 +723,7 @@ export default function GameCard({
                     Add To List
                   </span>
                   <button
-                    className="text-gray-400 hover:text-gray-600 text-xs"
+                    className="text-xs text-gray-400 hover:text-gray-600"
                     onClick={() => setShowListPicker(false)}
                   >
                     ×
@@ -736,13 +736,13 @@ export default function GameCard({
                     await handleToggle('library')
                   }}
                 >
-                  <span className="w-5 h-5 rounded bg-green-600 text-white flex items-center justify-center">
+                  <span className="flex items-center justify-center w-5 h-5 text-white bg-green-600 rounded">
                     <BookOpenIcon className="w-4 h-4" />
                   </span>
                   <span className="flex-1 text-left">Library</span>
                   {membership.library && (
                     <span className="text-[10px] uppercase tracking-wide text-green-600 font-semibold inline-flex items-center gap-1">
-                      <CheckIcon className="h-3 w-3" />
+                      <CheckIcon className="w-3 h-3" />
                       In
                     </span>
                   )}
@@ -754,20 +754,20 @@ export default function GameCard({
                     await handleToggle('wishlist')
                   }}
                 >
-                  <span className="w-5 h-5 rounded bg-pink-500 text-white flex items-center justify-center">
+                  <span className="flex items-center justify-center w-5 h-5 text-white bg-pink-500 rounded">
                     <HeartIcon className="w-4 h-4" />
                   </span>
                   <span className="flex-1 text-left">Wishlist</span>
                   {membership.wishlist && (
                     <span className="text-[10px] uppercase tracking-wide text-pink-600 font-semibold inline-flex items-center gap-1">
-                      <CheckIcon className="h-3 w-3" />
+                      <CheckIcon className="w-3 h-3" />
                       In
                     </span>
                   )}
                 </button>
-                <div className="h-px bg-gray-200 my-1" />
+                <div className="h-px my-1 bg-gray-200" />
                 {loadingListsQuick && (
-                  <div className="text-xs text-gray-500 px-1 py-1">
+                  <div className="px-1 py-1 text-xs text-gray-500">
                     Loading…
                   </div>
                 )}
@@ -802,12 +802,12 @@ export default function GameCard({
                         <span className="w-5 h-5 rounded bg-gray-200 text-gray-600 text-[10px] flex items-center justify-center">
                           {(l.icon || l.name.charAt(0)).slice(0, 1)}
                         </span>
-                        <span className="truncate flex-1 text-left">
+                        <span className="flex-1 text-left truncate">
                           {l.name}
                         </span>
                         {listMembershipIds.includes(l.id) && (
                           <span className="text-[10px] uppercase tracking-wide text-sky-600 font-semibold inline-flex items-center gap-1">
-                            <CheckIcon className="h-3 w-3" />
+                            <CheckIcon className="w-3 h-3" />
                             In
                           </span>
                         )}
@@ -818,7 +818,7 @@ export default function GameCard({
                   userLists.filter(
                     (l) => l.name !== 'Library' && l.name !== 'Wishlist'
                   ).length === 0 && (
-                    <div className="text-xs text-gray-400 px-1 py-1">
+                    <div className="px-1 py-1 text-xs text-gray-400">
                       No custom lists
                     </div>
                   )}
@@ -840,11 +840,11 @@ export default function GameCard({
               titleClassName || ''
             } ${variant === 'compact' ? 'text-[0.76rem]' : 'text-[0.84rem]'} `}
           >
-            {game.name.length > 48
-              ? `${game.name.substring(0, 48)}...`
-              : game.name}
+            {(game.name || 'Untitled Game').length > 48
+              ? `${(game.name || 'Untitled Game').substring(0, 48)}...`
+              : (game.name || 'Untitled Game')}
             {variant === 'compact' && (
-              <span className="ml-2 text-xs text-gray-500 tabular-nums font-normal">
+              <span className="ml-2 text-xs font-normal text-gray-500 tabular-nums">
                 {formatYear(game.year_published)}
               </span>
             )}
@@ -872,13 +872,13 @@ export default function GameCard({
           {(variant === 'balanced' || variant === 'detailed') && showMeta && (
             <div className="flex items-center justify-between text-xs">
               <div className="flex items-center space-x-1">
-                <UserGroupIcon className="h-4 w-4" />
+                <UserGroupIcon className="w-4 h-4" />
                 <span>
                   {formatPlayerCount(game.min_players, game.max_players)}
                 </span>
               </div>
               <div className="flex items-center space-x-1">
-                <ClockIcon className="h-4 w-4" />
+                <ClockIcon className="w-4 h-4" />
                 <span>{formatPlayingTime(game.playtime_minutes)}</span>
               </div>
             </div>
@@ -942,7 +942,7 @@ export default function GameCard({
               </button>
             </div>
             {/* Body */}
-            <div className="p-6 flex-1 overflow-y-auto">
+            <div className="flex-1 p-6 overflow-y-auto">
               <PlayLogEditor
                 gameId={game.id}
                 gameName={game.name}

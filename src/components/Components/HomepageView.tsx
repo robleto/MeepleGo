@@ -433,7 +433,6 @@ export function HomepageView({
       {phaseResult?.canShowFoundationalGames && foundationalGames.length > 0 && (
         <DiscoveryCard
           title="Foundational Games"
-          icon="🎲"
           subtitle="Widely known games that helped shape modern board gaming"
           games={foundationalGames}
           renderSubtitle={() => ''}
