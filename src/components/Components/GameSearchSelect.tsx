@@ -270,10 +270,10 @@ export default function GameSearchSelect({
           )}
           {!loading && !flat.length && (
             <div className="px-6 py-6 text-center">
-              <div className="w-10 h-10 mx-auto mb-2 rounded-full bg-gray-100 flex items-center justify-center">
+              <div className="flex items-center justify-center w-10 h-10 mx-auto mb-2 bg-gray-100 rounded-full">
                 <MagnifyingGlassIcon className="w-5 h-5 text-gray-400" />
               </div>
-              <div className="text-gray-500 text-sm font-medium mb-1">
+              <div className="mb-1 text-sm font-medium text-gray-500">
                 No games found
               </div>
               <div className="text-[11px] text-gray-400">
@@ -394,14 +394,14 @@ function SuggestionRow({
           <img
             src={game.thumbnail_url}
             alt=""
-            className="w-10 h-10 rounded-lg object-cover ring-1 ring-gray-200"
+            className="object-cover w-10 h-10 rounded-lg ring-1 ring-gray-200"
           />
         ) : (
           <div className="w-10 h-10 rounded-lg bg-gray-200 flex items-center justify-center text-[10px] font-semibold text-gray-600">
             {game.name.slice(0, 2).toUpperCase()}
           </div>
         )}
-        <div className="min-w-0 flex-1">
+        <div className="flex-1 min-w-0">
           <div className="text-sm font-medium text-gray-900 truncate">
             {highlight(game.name)}
           </div>

@@ -5,8 +5,12 @@
  * homepage sections they should see. Pure function — no side effects,
  * no Supabase calls. All data fetching happens in HomepageContent.
  *
- * Phase 1 (New):       Default. Minimal data. Guidance-oriented.
- * Phase 2 (Returning): >=10 ranked games OR >=3 play logs OR >=7 days.
+ * Phase 1 (New):       Default. Minimal data. Personal-first.
+ *                      Page should feel intentionally small, personal,
+ *                      and incomplete — not quietly global.
+ * Phase 2 (Returning): >=5 ranked games OR >=2 play logs.
+ *                      Activity-based only — account age alone does
+ *                      NOT promote to Phase 2.
  * Phase 3 (Power):     >=25 ranked games OR >=10 play logs.
  */
 
@@ -42,11 +46,12 @@ export interface UserPhaseResult {
 export function getUserPhase(input: UserPhaseInput): UserPhaseResult {
   const { accountAgeDays, rankedGamesCount, playLogsCount, awardsCount } = input
 
-  // Determine phase
+  // Determine phase — purely activity-based.
+  // Account age alone does NOT promote phases. A 6-month-old account
+  // with 0 ratings stays in Phase 1 until they engage.
   let phase: UserPhase = 1
 
-  const meetsPhase2 =
-    rankedGamesCount >= 10 || playLogsCount >= 3 || accountAgeDays >= 7
+  const meetsPhase2 = rankedGamesCount >= 5 || playLogsCount >= 2
 
   const meetsPhase3 = rankedGamesCount >= 25 || playLogsCount >= 10
 
@@ -62,17 +67,24 @@ export function getUserPhase(input: UserPhaseInput): UserPhaseResult {
     phase,
     accountAgeDays,
     hasAnyData,
-    canShowHighestRanked: rankedGamesCount >= 1,
-    canShowHotTakes: rankedGamesCount >= 1,
-    canShowSleeperHits: phase >= 2 && rankedGamesCount >= 3,
-    canShowComebackGames: phase >= 2 && playLogsCount >= 1,
+
+    // Personal discovery cards — need enough ratings to be meaningful
+    canShowHighestRanked: rankedGamesCount >= 3,
+    canShowHotTakes: rankedGamesCount >= 3,
+    canShowSleeperHits: phase >= 2 && rankedGamesCount >= 5,
+    canShowComebackGames: phase >= 2 && playLogsCount >= 2,
     canShowMostAwarded: phase >= 3 && awardsCount >= 1,
+
+    // Stats snapshot
     canShowGlanceStats: phase >= 2,
-    canShowPublicLists: phase >= 2,
+
+    // Quick actions — always available as entry points
     canShowQuickActions: true,
+
     // Community/external sections are Phase 2+ so Phase 1 stays
     // personal-first. No outside-world content until you've built
     // enough personal data for it to feel like context, not noise.
+    canShowPublicLists: phase >= 2,
     canShowIndustryAwards: phase >= 2,
     canShowExplore: phase >= 2,
     canShowFoundationalGames:

@@ -1,9 +1,9 @@
-'use client'
+"use client"
 
 import React, { useRef, useState } from 'react'
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline'
 
-interface NetflixScrollSectionProps {
+interface HorizontalCardScrollProps {
   children: React.ReactNode
   className?: string
   itemWidth?: string // Tailwind width class for items
@@ -11,14 +11,14 @@ interface NetflixScrollSectionProps {
 }
 
 /**
- * Netflix-style horizontal scrolling section with navigation arrows
+ * HorizontalCardScroll - Netflix-style horizontal scrolling section with navigation arrows
  */
-export default function NetflixScrollSection({
+export default function HorizontalCardScroll({
   children,
   className = '',
   itemWidth = 'w-72',
   showCount = 4,
-}: NetflixScrollSectionProps) {
+}: HorizontalCardScrollProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(true)

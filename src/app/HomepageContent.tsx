@@ -24,6 +24,10 @@ import SignupPrompt from '@/components/Components/SignupPrompt'
 import { shouldPromptSignup, getOnboardingState } from '@/lib/guestSession'
 import { getUserPhase, type UserPhaseResult } from '@/lib/userPhase'
 import { FOUNDATIONAL_GAMES_BGG_IDS } from '@/lib/constants'
+import {
+  hydrateDiscoveryListsWithUserMeta,
+  hydrateItemsWithUserMeta,
+} from '@/lib/gameHydration'
 
 // Module-level cache for React Strict Mode stability
 let cachedFeaturedGames: Game[] | null = null
@@ -199,6 +203,18 @@ export default function HomepageContent() {
 
         // ── Authenticated user: stats + phase + discovery ──
         if (session?.user) {
+          if (!cancelled && cachedFeaturedGames && cachedFeaturedGames.length > 0) {
+            const hydratedFeatured = await hydrateItemsWithUserMeta(
+              supabase,
+              session.user.id,
+              cachedFeaturedGames as any
+            )
+            if (!cancelled) {
+              cachedFeaturedGames = hydratedFeatured as Game[]
+              setFeaturedGames(hydratedFeatured as Game[])
+            }
+          }
+
           try {
             // Fetch stats, play-logs count, and profile in parallel
             const [
@@ -281,16 +297,30 @@ export default function HomepageContent() {
               try {
                 const { data: foundationalData } = await supabase
                   .from('games')
-                  .select('id, name, thumbnail_url, bgg_id')
+                  .select(
+                    'id, name, thumbnail_url, image_url, year_published, min_players, max_players, playtime_minutes, bgg_id'
+                  )
                   .in('bgg_id', FOUNDATIONAL_GAMES_BGG_IDS)
                 if (!cancelled && foundationalData && foundationalData.length > 0) {
-                  setFoundationalGames(
-                    foundationalData.map((g) => ({
-                      game_id: g.id,
-                      game_name: g.name,
-                      game_thumbnail_url: g.thumbnail_url,
-                    }))
+                  const foundationalItems = foundationalData.map((g) => ({
+                    game_id: g.id,
+                    game_name: g.name,
+                    game_thumbnail_url: g.thumbnail_url ?? g.image_url,
+                    game_year_published: g.year_published,
+                    game_min_players: g.min_players,
+                    game_max_players: g.max_players,
+                    game_playtime_minutes: g.playtime_minutes,
+                  }))
+
+                  const hydratedFoundational = await hydrateItemsWithUserMeta(
+                    supabase,
+                    session.user.id,
+                    foundationalItems
                   )
+
+                  if (!cancelled) {
+                    setFoundationalGames(hydratedFoundational)
+                  }
                 }
               } catch {
                 // If fetch fails, section simply does not render
@@ -421,19 +451,20 @@ export default function HomepageContent() {
                     })
                   : noData,
               ])
-
               if (!cancelled) {
-                setDiscoveryLists({
-                  mostAwarded: (mostAwardedResult.data ||
-                    []) as MostAwardedGame[],
-                  highestRanked: (highestRankedResult.data ||
-                    []) as HighestRankedGame[],
-                  sleeperHits: (sleeperHitsResult.data ||
-                    []) as SleeperHitGame[],
+                const merged = await hydrateDiscoveryListsWithUserMeta(
+                  supabase,
+                  session.user.id,
+                  {
+                  mostAwarded: (mostAwardedResult.data || []) as MostAwardedGame[],
+                  highestRanked: (highestRankedResult.data || []) as HighestRankedGame[],
+                  sleeperHits: (sleeperHitsResult.data || []) as SleeperHitGame[],
                   hotTakes: (hotTakesResult.data || []) as HotTakeGame[],
-                  comebackGames: (comebackGamesResult.data ||
-                    []) as ComebackGame[],
-                })
+                  comebackGames: (comebackGamesResult.data || []) as ComebackGame[],
+                  }
+                )
+
+                setDiscoveryLists(merged)
                 setTopCommunityRated(
                   (topCommunityRatedResult.data || []).map((g: any) => ({
                     game_id: g.game_id,

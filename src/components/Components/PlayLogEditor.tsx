@@ -115,13 +115,13 @@ export function PlayLogEditor({
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-600 px-3 py-2 rounded-md text-sm">
+        <div className="px-3 py-2 text-sm text-red-600 border border-red-200 rounded-md bg-red-50">
           {error}
         </div>
       )}
 
       {/* Date & Players */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <div className="sm:col-span-2">
           <DateTimePicker
             id="playedAt"
@@ -134,7 +134,7 @@ export function PlayLogEditor({
         <div>
           <label
             htmlFor="playerCount"
-            className="block text-sm font-medium text-gray-700 mb-1"
+            className="block mb-1 text-sm font-medium text-gray-700"
           >
             Players
           </label>
@@ -154,11 +154,11 @@ export function PlayLogEditor({
       </div>
 
       {/* Location & Duration */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <div className="sm:col-span-2">
           <label
             htmlFor="location"
-            className="block text-sm font-medium text-gray-700 mb-1"
+            className="block mb-1 text-sm font-medium text-gray-700"
           >
             Location
           </label>
@@ -174,7 +174,7 @@ export function PlayLogEditor({
         <div>
           <label
             htmlFor="duration"
-            className="block text-sm font-medium text-gray-700 mb-1"
+            className="block mb-1 text-sm font-medium text-gray-700"
           >
             Duration (min)
           </label>
@@ -197,7 +197,7 @@ export function PlayLogEditor({
       <div>
         <label
           htmlFor="notes"
-          className="block text-sm font-medium text-gray-700 mb-1"
+          className="block mb-1 text-sm font-medium text-gray-700"
         >
           Notes
         </label>
@@ -219,22 +219,22 @@ export function PlayLogEditor({
           id="isPublic"
           checked={isPublic}
           onChange={(e) => setIsPublic(e.target.checked)}
-          className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+          className="w-4 h-4 border-gray-300 rounded text-primary-600 focus:ring-primary-500"
         />
         <label
           htmlFor="isPublic"
-          className="ml-2 block text-sm text-gray-700"
+          className="block ml-2 text-sm text-gray-700"
         >
           Make this play log public
         </label>
       </div>
 
       {/* Submit Button */}
-      <div className="flex justify-end space-x-3 pt-2">
+      <div className="flex justify-end pt-2 space-x-3">
         <button
           type="submit"
           disabled={isSubmitting}
-          className="bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 text-white px-4 py-2 rounded-md font-medium text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+          className="px-4 py-2 text-sm font-medium text-white transition-colors rounded-md bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
         >
           {isSubmitting ? 'Saving...' : editLog ? 'Update Play' : 'Log Play'}
         </button>

@@ -12,7 +12,7 @@ export function formatYear(year: number | null): string {
 
 export function formatPlayingTime(minutes: number | null): string {
   if (!minutes) return 'Unknown'
-  if (minutes < 60) return `${minutes} min`
+  if (minutes < 60) return `${minutes}m`
 
   const hours = Math.floor(minutes / 60)
   const remainingMinutes = minutes % 60
@@ -29,8 +29,8 @@ export function formatPlayerCount(
   max: number | null
 ): string {
   if (!min && !max) return 'Unknown'
-  if (!max || min === max) return `${min} player${min !== 1 ? 's' : ''}`
-  return `${min}–${max} players`
+  if (!max || min === max) return `${min}`
+  return `${min}–${max}`
 }
 
 // NOTE: getRatingColor removed - use getRatingSolidClass from @/components/Foundations/ratingColors instead
