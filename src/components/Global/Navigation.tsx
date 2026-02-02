@@ -623,18 +623,13 @@ function Navigation() {
         )}
       >
       {/* Background layer to ensure sticky nav has a visible backdrop over content */}
-      {/* On home page (landing), nav has full white background for contrast */}
       <div
         aria-hidden
         className={cn(
           'absolute inset-0 pointer-events-none border-b z-0 transition-all duration-300',
-          pathname === '/'
+          scrolled
             ? 'bg-white border-gray-200/70'
-            : [
-                'backdrop-blur supports-[backdrop-filter]:bg-white/70',
-                'bg-white/90',
-                'border-gray-200/70'
-              ]
+            : 'border-transparent'
         )}
       />
       <div className="relative z-10 px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
@@ -1076,7 +1071,7 @@ function Navigation() {
                           },
                           {
                             label: 'Awards',
-                            href: '/awards',
+                            href: '/profile/awards',
                             Icon: TrophyIcon,
                           },
                           {
@@ -1195,7 +1190,7 @@ function Navigation() {
                                 { name: 'Wishlist', href: '/profile/wishlist', icon: HeartIcon },
                                 { name: 'Rankings', href: '/profile/rankings', icon: ChartBarIcon },
                                 { name: 'Lists', href: '/profile/lists', icon: ListBulletIcon },
-                                { name: 'Awards', href: '/awards', icon: TrophyIcon },
+                                { name: 'Awards', href: '/profile/awards', icon: TrophyIcon },
                                 { name: 'Journal', href: '/profile/plays', icon: BookOpenIcon },
                                 { name: 'Friends', href: '/profile/friends', icon: UserGroupIcon },
                               ].map((item) => {

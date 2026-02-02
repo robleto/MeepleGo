@@ -78,7 +78,7 @@ export default function HorizontalCardScroll({
         className="overflow-x-auto scrollbar-hide"
         onScroll={checkScrollability}
       >
-        <div className="flex gap-4 pb-4" style={{ width: 'max-content' }}>
+        <div className="flex gap-3 pb-2" style={{ width: 'max-content' }}>
           {React.Children.toArray(children)
             .filter(Boolean)
             .map((child, idx) => (

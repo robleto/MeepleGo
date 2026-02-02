@@ -36,54 +36,58 @@ export default function StatCard({
   size = 'default',
 }: StatCardProps) {
   const baseClasses =
-    'bg-white border border-gray-200 rounded-2xl flex flex-col justify-between transition-all duration-200'
-  const sizeClasses =
-    size === 'mini'
-      ? 'p-2 min-h-[56px]'
-      : size === 'compact'
-        ? 'p-3 min-h-[72px]'
-        : 'p-4 min-h-[100px]'
+    'bg-white border border-gray-200 rounded-2xl transition-all duration-200'
   const interactiveClasses = onClick
     ? 'cursor-pointer hover:scale-105 hover:shadow-lg'
     : ''
-  const iconSizeClasses =
-    size === 'mini' ? 'w-5 h-5' : size === 'compact' ? 'w-7 h-7' : 'w-8 h-8'
-  const iconInnerSizeClasses =
-    size === 'mini'
-      ? 'w-2.5 h-2.5'
-      : size === 'compact'
-        ? 'w-3.5 h-3.5'
-        : 'w-4 h-4'
-  const valueClasses =
-    size === 'mini' ? 'text-base' : size === 'compact' ? 'text-xl' : 'text-2xl'
-  const labelClasses =
-    size === 'mini' ? 'text-[9px]' : size === 'compact' ? 'text-[11px]' : 'text-sm'
 
+  if (size === 'mini') {
+    return (
+      <div
+        className={`${baseClasses} p-2 min-h-[56px] flex flex-col justify-between ${interactiveClasses} ${className}`}
+        onClick={onClick}
+      >
+        <div className="flex items-start justify-between mb-2">
+          <div className={`flex items-center justify-center w-5 h-5 ${iconBg} rounded-full`}>
+            <Icon className={`w-2.5 h-2.5 ${iconColor}`} />
+          </div>
+          <div className="text-base font-bold text-gray-900">{value}</div>
+        </div>
+        <div className="text-[9px] font-medium text-gray-600">{label}</div>
+      </div>
+    )
+  }
+
+  if (size === 'compact') {
+    return (
+      <div
+        className={`${baseClasses} p-3 min-h-[72px] flex flex-col justify-between ${interactiveClasses} ${className}`}
+        onClick={onClick}
+      >
+        <div className="flex items-start justify-between mb-2">
+          <div className={`flex items-center justify-center w-7 h-7 ${iconBg} rounded-full`}>
+            <Icon className={`w-3.5 h-3.5 ${iconColor}`} />
+          </div>
+          <div className="text-xl font-bold text-gray-900">{value}</div>
+        </div>
+        <div className="text-[11px] font-medium text-gray-600">{label}</div>
+      </div>
+    )
+  }
+
+  // Default size: icon + label stacked left, large value spanning full height on right
   return (
     <div
-      className={`${baseClasses} ${sizeClasses} ${interactiveClasses} ${className}`}
+      className={`${baseClasses} p-4 min-h-[100px] flex items-center justify-between ${interactiveClasses} ${className}`}
       onClick={onClick}
     >
-      {/* Header with Icon and Value */}
-      <div className="flex items-start justify-between mb-2">
-        <div
-          className={`flex items-center justify-center ${iconSizeClasses} ${iconBg} rounded-full`}
-        >
-          <Icon className={`${iconInnerSizeClasses} ${iconColor}`} />
+      <div className="flex flex-col justify-between h-full gap-2">
+        <div className={`flex items-center justify-center w-8 h-8 ${iconBg} rounded-full`}>
+          <Icon className={`w-4 h-4 ${iconColor}`} />
         </div>
-        <div
-          className={`${valueClasses} font-bold text-gray-900`}
-        >
-          {value}
-        </div>
+        <div className="text-sm font-medium text-gray-600">{label}</div>
       </div>
-
-      {/* Label */}
-      <div
-        className={`${labelClasses} font-medium text-gray-600`}
-      >
-        {label}
-      </div>
+      <div className="text-4xl font-bold text-gray-900">{value}</div>
     </div>
   )
 }

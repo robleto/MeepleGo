@@ -40,6 +40,7 @@ export interface UserPhaseResult {
   canShowQuickActions: boolean
   canShowIndustryAwards: boolean
   canShowExplore: boolean // "Explore Top-Rated Games" — Phase 2+
+  canShowRecentlyPlayed: boolean // "Recently Played" — Phase 3 replaces top Hot Takes
   canShowFoundationalGames: boolean // Static reference shelf — Phase 1 with 1–2 rankings only
 }
 
@@ -75,8 +76,8 @@ export function getUserPhase(input: UserPhaseInput): UserPhaseResult {
     canShowComebackGames: phase >= 2 && playLogsCount >= 2,
     canShowMostAwarded: phase >= 3 && awardsCount >= 1,
 
-    // Stats snapshot
-    canShowGlanceStats: phase >= 2,
+    // Stats snapshot — always visible for authenticated users
+    canShowGlanceStats: true,
 
     // Quick actions — always available as entry points
     canShowQuickActions: true,
@@ -87,6 +88,7 @@ export function getUserPhase(input: UserPhaseInput): UserPhaseResult {
     canShowPublicLists: phase >= 2,
     canShowIndustryAwards: phase >= 2,
     canShowExplore: phase >= 2,
+    canShowRecentlyPlayed: phase >= 3,
     canShowFoundationalGames:
       phase === 1 && rankedGamesCount >= 1 && rankedGamesCount <= 2,
   }

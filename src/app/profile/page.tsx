@@ -307,7 +307,7 @@ function ProfilePageContent() {
     return (
       <PageLayout>
         <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+          <div className="w-8 h-8 border-b-2 rounded-full animate-spin border-primary-600"></div>
         </div>
       </PageLayout>
     )
@@ -316,7 +316,7 @@ function ProfilePageContent() {
   if (!profile) {
     return (
       <PageLayout>
-        <div className="text-center py-12">
+        <div className="py-12 text-center">
           <p className="text-gray-600">Failed to load profile</p>
         </div>
       </PageLayout>
@@ -326,12 +326,12 @@ function ProfilePageContent() {
   return (
     <PageLayout>
       <div className="space-y-6">
-        <div className="bg-white dark:bg-gray-900 rounded-lg shadow p-6">
+        <div className="p-6 bg-white rounded-lg shadow dark:bg-gray-900">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex items-center space-x-4">
               <Link
                 href="/settings"
-                className="group relative h-12 w-12 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700 flex items-center justify-center"
+                className="relative flex items-center justify-center w-12 h-12 overflow-hidden bg-gray-200 rounded-full group dark:bg-gray-700"
                 aria-label="Edit profile photo"
               >
                 {profile.avatar_url ? (
@@ -339,10 +339,10 @@ function ProfilePageContent() {
                   <img
                     src={profile.avatar_url}
                     alt="Profile"
-                    className="w-full h-full object-cover"
+                    className="object-cover w-full h-full"
                   />
                 ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white text-base font-semibold">
+                  <div className="flex items-center justify-center w-full h-full text-base font-semibold text-white bg-gradient-to-br from-primary-500 to-primary-600">
                     {(
                       profile.username ||
                       profile.full_name ||
@@ -448,7 +448,7 @@ function ProfilePageContent() {
             }}
             aria-hidden="true"
           />
-          <ul className="flex flex-wrap items-center font-medium text-xs font-inter gap-1 relative z-10">
+          <ul className="relative z-10 flex flex-wrap items-center gap-1 text-xs font-medium font-inter">
             {tabs.map((tab) => {
               const isActive = activeTab === tab.key
               return (
@@ -482,62 +482,62 @@ function ProfilePageContent() {
         )}
 
         {activeTab === 'rankings' && (
-          <div className="rounded-2xl border border-gray-200/70 dark:border-white/10 bg-white/80 dark:bg-gray-900/70 p-6">
+          <div className="p-6 border rounded-2xl border-gray-200/70 dark:border-white/10 bg-white/80 dark:bg-gray-900/70">
             <RankingsContent embedded />
           </div>
         )}
 
         {activeTab === 'games' && (
-          <div className="rounded-2xl border border-gray-200/70 dark:border-white/10 bg-white/80 dark:bg-gray-900/70 p-6">
+          <div className="p-6 border rounded-2xl border-gray-200/70 dark:border-white/10 bg-white/80 dark:bg-gray-900/70">
             <LibraryContent embedded />
           </div>
         )}
 
         {activeTab === 'watchlist' && (
-          <div className="rounded-2xl border border-gray-200/70 dark:border-white/10 bg-white/80 dark:bg-gray-900/70 p-6">
+          <div className="p-6 border rounded-2xl border-gray-200/70 dark:border-white/10 bg-white/80 dark:bg-gray-900/70">
             <WishlistContent embedded />
           </div>
         )}
 
         {activeTab === 'awards' && (
-          <div className="rounded-2xl border border-gray-200/70 dark:border-white/10 bg-white/80 dark:bg-gray-900/70 p-6">
+          <div className="p-6 border rounded-2xl border-gray-200/70 dark:border-white/10 bg-white/80 dark:bg-gray-900/70">
             <PersonalAwardsAuto />
           </div>
         )}
 
         {activeTab === 'lists' && (
-          <div className="rounded-2xl border border-gray-200/70 dark:border-white/10 bg-white/80 dark:bg-gray-900/70 p-6">
+          <div className="p-6 border rounded-2xl border-gray-200/70 dark:border-white/10 bg-white/80 dark:bg-gray-900/70">
             <ListsContent embedded showDefaults={false} showPublic={false} />
           </div>
         )}
 
         {activeTab === 'friends' && (
-          <div className="rounded-2xl border border-gray-200/70 dark:border-white/10 bg-white/80 dark:bg-gray-900/70 p-6 space-y-6">
+          <div className="p-6 space-y-6 border rounded-2xl border-gray-200/70 dark:border-white/10 bg-white/80 dark:bg-gray-900/70">
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                   Friends
                 </h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                   Find players to follow and see who follows you.
                 </p>
               </div>
               <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                <UserGroupIcon className="h-4 w-4" />
+                <UserGroupIcon className="w-4 h-4" />
                 {following.length} following • {followers.length} followers
               </div>
             </div>
 
             <div>
-              <label className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
+              <label className="text-xs tracking-wide text-gray-500 uppercase dark:text-gray-400">
                 Search users
               </label>
-              <div className="mt-2 flex items-center gap-2">
+              <div className="flex items-center gap-2 mt-2">
                 <input
                   value={friendsQuery}
                   onChange={(e) => setFriendsQuery(e.target.value)}
                   placeholder="Search by username or name"
-                  className="flex-1 px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  className="flex-1 px-4 py-2 text-sm bg-white border border-gray-200 rounded-xl dark:border-gray-700 dark:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
                 />
               </div>
               {friendsQuery && (
@@ -562,29 +562,29 @@ function ProfilePageContent() {
                     return (
                       <div
                         key={p.id}
-                        className="flex items-center justify-between rounded-xl border border-gray-200/70 dark:border-white/10 bg-white/70 dark:bg-gray-900/70 px-3 py-2"
+                        className="flex items-center justify-between px-3 py-2 border rounded-xl border-gray-200/70 dark:border-white/10 bg-white/70 dark:bg-gray-900/70"
                       >
-                        <div className="flex items-center gap-3 min-w-0">
+                        <div className="flex items-center min-w-0 gap-3">
                           {p.avatar_url ? (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img
                               src={p.avatar_url}
                               alt=""
-                              className="w-8 h-8 rounded-full object-cover"
+                              className="object-cover w-8 h-8 rounded-full"
                             />
                           ) : (
-                            <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-800 flex items-center justify-center text-xs font-semibold text-gray-500">
+                            <div className="flex items-center justify-center w-8 h-8 text-xs font-semibold text-gray-500 bg-gray-200 rounded-full dark:bg-gray-800">
                               {(p.username || p.full_name || 'U')
                                 .charAt(0)
                                 .toUpperCase()}
                             </div>
                           )}
                           <div className="min-w-0">
-                            <div className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                            <div className="text-sm font-medium text-gray-900 truncate dark:text-white">
                               {p.full_name || p.username || 'User'}
                             </div>
                             {p.username && (
-                              <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                              <div className="text-xs text-gray-500 truncate dark:text-gray-400">
                                 @{p.username}
                               </div>
                             )}
@@ -620,8 +620,8 @@ function ProfilePageContent() {
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
-              <div className="rounded-xl border border-gray-200/70 dark:border-white/10 bg-white/70 dark:bg-gray-900/70 p-4">
-                <div className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-3">
+              <div className="p-4 border rounded-xl border-gray-200/70 dark:border-white/10 bg-white/70 dark:bg-gray-900/70">
+                <div className="mb-3 text-xs tracking-wide text-gray-500 uppercase dark:text-gray-400">
                   Following
                 </div>
                 {friendsLoading && following.length === 0 ? (
@@ -639,13 +639,13 @@ function ProfilePageContent() {
                         key={p.id}
                         className="flex items-center justify-between rounded-lg px-2 py-1.5 hover:bg-gray-50 dark:hover:bg-gray-800/50"
                       >
-                        <div className="flex items-center gap-3 min-w-0">
+                        <div className="flex items-center min-w-0 gap-3">
                           {p.avatar_url ? (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img
                               src={p.avatar_url}
                               alt=""
-                              className="w-7 h-7 rounded-full object-cover"
+                              className="object-cover rounded-full w-7 h-7"
                             />
                           ) : (
                             <div className="w-7 h-7 rounded-full bg-gray-200 dark:bg-gray-800 flex items-center justify-center text-[10px] font-semibold text-gray-500">
@@ -655,11 +655,11 @@ function ProfilePageContent() {
                             </div>
                           )}
                           <div className="min-w-0">
-                            <div className="text-sm text-gray-900 dark:text-white truncate">
+                            <div className="text-sm text-gray-900 truncate dark:text-white">
                               {p.full_name || p.username || 'User'}
                             </div>
                             {p.username && (
-                              <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                              <div className="text-xs text-gray-500 truncate dark:text-gray-400">
                                 @{p.username}
                               </div>
                             )}
@@ -677,8 +677,8 @@ function ProfilePageContent() {
                 )}
               </div>
 
-              <div className="rounded-xl border border-gray-200/70 dark:border-white/10 bg-white/70 dark:bg-gray-900/70 p-4">
-                <div className="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-3">
+              <div className="p-4 border rounded-xl border-gray-200/70 dark:border-white/10 bg-white/70 dark:bg-gray-900/70">
+                <div className="mb-3 text-xs tracking-wide text-gray-500 uppercase dark:text-gray-400">
                   Followers
                 </div>
                 {friendsLoading && followers.length === 0 ? (
@@ -701,7 +701,7 @@ function ProfilePageContent() {
                           <img
                             src={p.avatar_url}
                             alt=""
-                            className="w-7 h-7 rounded-full object-cover"
+                            className="object-cover rounded-full w-7 h-7"
                           />
                         ) : (
                           <div className="w-7 h-7 rounded-full bg-gray-200 dark:bg-gray-800 flex items-center justify-center text-[10px] font-semibold text-gray-500">
@@ -711,11 +711,11 @@ function ProfilePageContent() {
                           </div>
                         )}
                         <div className="min-w-0">
-                          <div className="text-sm text-gray-900 dark:text-white truncate">
+                          <div className="text-sm text-gray-900 truncate dark:text-white">
                             {p.full_name || p.username || 'User'}
                           </div>
                           {p.username && (
-                            <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                            <div className="text-xs text-gray-500 truncate dark:text-gray-400">
                               @{p.username}
                             </div>
                           )}
@@ -730,34 +730,34 @@ function ProfilePageContent() {
         )}
 
         {activeTab === 'journal' && (
-          <div className="rounded-2xl border border-gray-200/70 dark:border-white/10 bg-white/80 dark:bg-gray-900/70 p-6">
+          <div className="p-6 border rounded-2xl border-gray-200/70 dark:border-white/10 bg-white/80 dark:bg-gray-900/70">
             <PlaysClientPage />
           </div>
         )}
 
         {activeTab === 'collections' && (
-          <div className="rounded-2xl border border-gray-200/70 dark:border-white/10 bg-white/80 dark:bg-gray-900/70 p-8 text-center space-y-3">
+          <div className="p-8 space-y-3 text-center border rounded-2xl border-gray-200/70 dark:border-white/10 bg-white/80 dark:bg-gray-900/70">
             <div className="text-3xl opacity-40">
               {'\u{1F4E6}'}
             </div>
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
               Collections
             </h2>
-            <p className="text-sm text-gray-400 dark:text-gray-500 max-w-sm mx-auto">
+            <p className="max-w-sm mx-auto text-sm text-gray-400 dark:text-gray-500">
               Organize your games into themed collections. Coming soon.
             </p>
           </div>
         )}
 
         {activeTab === 'stats' && (
-          <div className="rounded-2xl border border-gray-200/70 dark:border-white/10 bg-white/80 dark:bg-gray-900/70 p-8 text-center space-y-3">
+          <div className="p-8 space-y-3 text-center border rounded-2xl border-gray-200/70 dark:border-white/10 bg-white/80 dark:bg-gray-900/70">
             <div className="text-3xl opacity-40">
               {'\u{1F4CA}'}
             </div>
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
               Stats
             </h2>
-            <p className="text-sm text-gray-400 dark:text-gray-500 max-w-sm mx-auto">
+            <p className="max-w-sm mx-auto text-sm text-gray-400 dark:text-gray-500">
               Deep insights into your gaming habits and history. Coming soon.
             </p>
           </div>

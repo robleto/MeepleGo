@@ -78,6 +78,7 @@ export default function HomepageContent() {
   const [phaseResult, setPhaseResult] = useState<UserPhaseResult | null>(null)
   const [foundationalGames, setFoundationalGames] = useState<any[]>([])
   const [topCommunityRated, setTopCommunityRated] = useState<any[]>([])
+  const [recentlyPlayed, setRecentlyPlayed] = useState<any[]>([])
 
   // Discovery lists state
   const [discoveryLists, setDiscoveryLists] = useState<{
@@ -224,6 +225,7 @@ export default function HomepageContent() {
               userAwardsResult,
               playLogsCountResult,
               profileResult,
+              journalledResult,
             ] = await Promise.all([
               supabase
                 .from('rankings')
@@ -251,6 +253,12 @@ export default function HomepageContent() {
                 .select('created_at')
                 .eq('id', session.user.id)
                 .single(),
+              supabase
+                .from('play_logs')
+                .select('game_id, notes')
+                .eq('user_id', session.user.id)
+                .not('notes', 'is', null)
+                .neq('notes', ''),
             ])
 
             const rankings = rankingsResult.data
@@ -258,6 +266,9 @@ export default function HomepageContent() {
             const userLists = userListsResult.data
             const userAwards = userAwardsResult.data
             const playLogsCount = playLogsCountResult.count || 0
+            const journalledCount = new Set(
+              journalledResult.data?.map((r: any) => r.game_id)
+            ).size
 
             // Compute account age
             const accountCreated = profileResult.data?.created_at
@@ -385,6 +396,7 @@ export default function HomepageContent() {
                 recentTags: [],
                 listsCreated,
                 awardsCreated,
+                journalledCount,
               }
 
               if (!cancelled) {
@@ -465,20 +477,106 @@ export default function HomepageContent() {
                 )
 
                 setDiscoveryLists(merged)
-                setTopCommunityRated(
-                  (topCommunityRatedResult.data || []).map((g: any) => ({
-                    game_id: g.game_id,
-                    game_name: g.game_name,
-                    game_thumbnail_url: g.game_thumbnail_url,
-                    avg_rating: g.avg_rating,
-                    rater_count: g.rater_count,
-                  }))
+                const communityItems = (topCommunityRatedResult.data || []).map((g: any) => ({
+                  game_id: g.game_id,
+                  game_name: g.game_name,
+                  game_thumbnail_url: g.game_thumbnail_url,
+                  game_year_published: g.game_year_published ?? null,
+                  game_min_players: g.game_min_players ?? null,
+                  game_max_players: g.game_max_players ?? null,
+                  game_playtime_minutes: g.game_playtime_minutes ?? null,
+                  avg_rating: g.avg_rating,
+                  rater_count: g.rater_count,
+                }))
+                const hydratedCommunity = await hydrateItemsWithUserMeta(
+                  supabase,
+                  session.user.id,
+                  communityItems
                 )
+                setTopCommunityRated(hydratedCommunity)
               }
             } catch (error) {
               console.error('Error loading discovery lists:', error)
             } finally {
               if (!cancelled) setDiscoveryLoading(false)
+            }
+
+            // ── Recently Played (Phase 3) ──
+            if (phase.canShowRecentlyPlayed) {
+              try {
+                // Play logs with actual play dates (prioritized)
+                const { data: playLogRows } = await supabase
+                  .from('play_logs')
+                  .select('game_id, played_at')
+                  .eq('user_id', session.user.id)
+                  .order('played_at', { ascending: false })
+                  .limit(30)
+
+                // Rankings marked as played (fallback for games without logs)
+                const { data: playedRankings } = await supabase
+                  .from('rankings')
+                  .select('game_id, updated_at')
+                  .eq('user_id', session.user.id)
+                  .eq('played_it', true)
+                  .order('updated_at', { ascending: false })
+                  .limit(30)
+
+                // Merge both sources by most-recent timestamp per game.
+                // A game can appear in both — keep whichever timestamp is newer.
+                const latest = new Map<string, string>() // game_id → ISO timestamp
+
+                for (const log of playLogRows || []) {
+                  if (!log.game_id) continue
+                  const prev = latest.get(log.game_id)
+                  if (!prev || log.played_at > prev) {
+                    latest.set(log.game_id, log.played_at)
+                  }
+                }
+                for (const r of playedRankings || []) {
+                  if (!r.game_id || !r.updated_at) continue
+                  const prev = latest.get(r.game_id)
+                  if (!prev || r.updated_at > prev) {
+                    latest.set(r.game_id, r.updated_at)
+                  }
+                }
+
+                // Sort by timestamp descending, take top 12
+                const topIds = [...latest.entries()]
+                  .sort((a, b) => b[1].localeCompare(a[1]))
+                  .slice(0, 12)
+                  .map(([id]) => id)
+                if (topIds.length > 0) {
+                  const { data: games } = await supabase
+                    .from('games')
+                    .select('id, name, thumbnail_url, image_url, year_published, min_players, max_players, playtime_minutes, bgg_id')
+                    .in('id', topIds)
+
+                  // Preserve recency order
+                  const gameMap = new Map((games || []).map((g) => [g.id, g]))
+                  const ordered = topIds
+                    .map((id) => gameMap.get(id))
+                    .filter(Boolean)
+                    .map((g: any) => ({
+                      game_id: g.id,
+                      game_name: g.name,
+                      game_thumbnail_url: g.thumbnail_url ?? g.image_url,
+                      game_year_published: g.year_published,
+                      game_min_players: g.min_players,
+                      game_max_players: g.max_players,
+                      game_playtime_minutes: g.playtime_minutes,
+                    }))
+
+                  const hydrated = await hydrateItemsWithUserMeta(
+                    supabase,
+                    session.user.id,
+                    ordered
+                  )
+
+                  if (!cancelled) setRecentlyPlayed(hydrated)
+                }
+              } catch {
+                // Section simply won't render
+              }
             }
           } catch {
             if (!cancelled) {
@@ -491,6 +589,7 @@ export default function HomepageContent() {
                 recentTags: [],
                 listsCreated: 0,
                 awardsCreated: 0,
+                journalledCount: 0,
               })
               setPhaseResult(
                 getUserPhase({
@@ -529,6 +628,7 @@ export default function HomepageContent() {
         phaseResult={phaseResult}
         foundationalGames={foundationalGames}
         topCommunityRated={topCommunityRated}
+        recentlyPlayed={recentlyPlayed}
       />
 
       {/* Onboarding for new users */}

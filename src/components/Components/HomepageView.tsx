@@ -5,20 +5,20 @@ import Heading from '@/components/Components/Heading'
 import { AwardCard } from '@/components/Components/AwardCard'
 import ListCard from '@/components/Components/ListCard'
 import StatCard from '@/components/Elements/StatCard'
-import HorizontalCardScroll from '@/components/Elements/HorizontalCardScroll'
 import ZeroState from '@/components/Components/ZeroState'
-import DiscoveryCard from './DiscoveryCard'
+import HorizontalCardSection from './HorizontalCardSection'
 import Hero from '@/components/Components/Hero'
 import {
-  TrophyIcon,
-  CubeIcon,
   ListBulletIcon,
   StarIcon,
   PlayIcon,
   BookmarkIcon,
-  UserIcon,
+  BookOpenIcon,
   MagnifyingGlassIcon,
   SparklesIcon,
+  SunIcon,
+  MoonIcon,
+  HandRaisedIcon,
 } from '@heroicons/react/24/outline'
 import type { Game } from '@/types/supabase'
 import type {
@@ -39,10 +39,12 @@ export interface UserStats {
   recentTags: Array<{ tag: string; count: number }>
   listsCreated: number
   awardsCreated: number
+  journalledCount: number
 }
 
 export interface HomepageViewProps {
   user: { id: string } | null
+  username?: string | null
   loading: boolean
   featuredGames: Game[]
   userStats: UserStats | null
@@ -70,6 +72,7 @@ export interface HomepageViewProps {
   discoveryLoading?: boolean
   phaseResult?: UserPhaseResult | null
   foundationalGames?: any[]
+  recentlyPlayed?: any[]
   topCommunityRated?: any[]
 }
 
@@ -136,13 +139,6 @@ const PHASE_2_ACTIONS: QuickAction[] = [
     description: 'Curate a collection',
     color: 'bg-purple-500',
   },
-  {
-    label: 'View Profile',
-    href: '/profile',
-    icon: UserIcon,
-    description: 'See your stats',
-    color: 'bg-gray-600',
-  },
 ]
 
 // ── Section explainer copy ──
@@ -159,6 +155,7 @@ const EXPLAINERS: Record<string, string> = {
 
 export function HomepageView({
   user,
+  username,
   loading,
   featuredGames,
   userStats,
@@ -174,12 +171,13 @@ export function HomepageView({
   discoveryLoading = false,
   phaseResult,
   foundationalGames = [],
+  recentlyPlayed = [],
   topCommunityRated = [],
 }: HomepageViewProps) {
   // ── Guest experience (unchanged — OnboardingLanding handles the main logged-out view) ──
   if (!user) {
     return (
-      <div className="space-y-12" id="games-section">
+      <div className="space-y-6" id="games-section">
         <section className="space-y-2">
           <ZeroState
             title="Track your board game life"
@@ -236,44 +234,33 @@ export function HomepageView({
 
         {/* Industry Awards */}
         {industryAwards.length > 0 && (
-          <section className="space-y-4">
-            <div>
-              <div className="flex items-center justify-between gap-4">
-                <Heading as="h2" size="md" className="text-gray-900">
-                  Industry Awards
-                </Heading>
-                <Link
-                  href="/awards"
-                  className="text-xs font-medium sm:text-sm text-primary-600 hover:text-primary-500 whitespace-nowrap"
-                >
-                  Explore all →
-                </Link>
-              </div>
-              <p className="mt-0.5 text-sm sm:text-base text-gray-600">
-                Prestigious board game honors and recognition
-              </p>
-            </div>
-            <HorizontalCardScroll itemWidth="w-72" showCount={4}>
-              {industryAwards.map((award: any) => (
-                <AwardCard
-                  key={award.id}
-                  href={`/awards#${award.id}`}
-                  title={award.name}
-                  description={
-                    award.description || 'Prestigious board game recognition'
-                  }
-                  yearSpan={undefined}
-                  winners={undefined as any}
-                  nominees={undefined as any}
-                  circleBorderClass={award.borderColor || 'border-amber-200'}
-                  circleBgClass={award.backgroundColor || 'bg-amber-50'}
-                  iconColorClass={award.iconColor || 'text-amber-600'}
-                  showStats={false}
-                  cta="View Details"
-                />
-              ))}
-            </HorizontalCardScroll>
-          </section>
+          <HorizontalCardSection
+            mode="custom"
+            title="Industry Awards"
+            href="/awards"
+            itemWidth="w-72"
+            showCount={4}
+            hideIfEmpty={false}
+          >
+            {industryAwards.map((award: any) => (
+              <AwardCard
+                key={award.id}
+                href={`/awards#${award.id}`}
+                title={award.name}
+                description={
+                  award.description || 'Prestigious board game recognition'
+                }
+                yearSpan={undefined}
+                winners={undefined as any}
+                nominees={undefined as any}
+                circleBorderClass={award.borderColor || 'border-amber-200'}
+                circleBgClass={award.backgroundColor || 'bg-amber-50'}
+                iconColorClass={award.iconColor || 'text-amber-600'}
+                showStats={false}
+                cta="View Details"
+              />
+            ))}
+          </HorizontalCardSection>
         )}
 
         {/* Public Lists */}
@@ -311,76 +298,93 @@ export function HomepageView({
   const phase = phaseResult?.phase ?? 1
   const quickActions = phase >= 2 ? PHASE_2_ACTIONS : PHASE_1_ACTIONS
 
-  // Determine welcome heading
-  let welcomeHeading = 'Welcome to MeepleGo'
-  if (phase >= 2) {
-    welcomeHeading = 'Today for You'
-  } else if (phaseResult && phaseResult.accountAgeDays > 3) {
-    welcomeHeading = 'Good to see you'
+  // Determine welcome heading with time-based greeting
+  const getTimeBasedGreeting = () => {
+    const hour = new Date().getHours()
+    if (hour < 12) {
+      return (
+        <span className="inline-flex items-center gap-2">
+          <SunIcon className="w-6 h-6 text-yellow-500" />
+          Good morning
+        </span>
+      )
+    }
+    if (hour < 17) {
+      return (
+        <span className="inline-flex items-center gap-2">
+          <SunIcon className="w-6 h-6 text-orange-500" />
+          Good afternoon
+        </span>
+      )
+    }
+    return (
+      <span className="inline-flex items-center gap-2">
+        <MoonIcon className="w-6 h-6 text-indigo-500" />
+        Good evening
+      </span>
+    )
   }
 
-  // Collect stat cards that have non-zero values
-  const statCards: Array<{
+  let welcomeHeading: React.ReactNode = getTimeBasedGreeting()
+  if (phase >= 2) {
+    welcomeHeading = (
+      <span className="inline-flex items-center gap-2">
+        {getTimeBasedGreeting()}, {username || 'friend'}!
+      </span>
+    )
+  } else if (phaseResult && phaseResult.accountAgeDays > 3) {
+    welcomeHeading = (
+      <span className="inline-flex items-center gap-2">
+        Welcome back
+        <HandRaisedIcon className="w-6 h-6 text-amber-500" />
+      </span>
+    )
+  }
+
+  // Fixed glance stat cards — subtle color treatment matching Sleeper Hits / Hot Takes badges
+  const glanceCards: Array<{
     iconBg: string
     Icon: React.ComponentType<{ className?: string }>
     iconColor: string
-    value: string | number
+    value: number
     label: string
-  }> = []
+    phase?: number // minimum phase to show (default: all)
+  }> = [
+    {
+      iconBg: 'bg-indigo-600/10',
+      Icon: BookmarkIcon,
+      iconColor: 'text-indigo-700',
+      value: userStats?.gamesOwned ?? 0,
+      label: 'Games Owned',
+    },
+    {
+      iconBg: 'bg-blue-600/10',
+      Icon: PlayIcon,
+      iconColor: 'text-blue-700',
+      value: userStats?.totalPlays ?? 0,
+      label: 'Games Played',
+    },
+    {
+      iconBg: 'bg-green-600/10',
+      Icon: StarIcon,
+      iconColor: 'text-green-700',
+      value: userStats?.uniqueGames ?? 0,
+      label: 'Games Ranked',
+    },
+    {
+      iconBg: 'bg-amber-600/10',
+      Icon: BookOpenIcon,
+      iconColor: 'text-amber-700',
+      value: userStats?.journalledCount ?? 0,
+      label: 'Games Journalled',
+      phase: 2,
+    },
+  ]
 
-  if (userStats) {
-    if (userStats.uniqueGames > 0)
-      statCards.push({
-        iconBg: 'bg-green-500',
-        Icon: CubeIcon,
-        iconColor: 'text-white',
-        value: userStats.uniqueGames,
-        label: 'Games Ranked',
-      })
-    if (userStats.totalPlays > 0)
-      statCards.push({
-        iconBg: 'bg-blue-500',
-        Icon: PlayIcon,
-        iconColor: 'text-white',
-        value: userStats.totalPlays,
-        label: 'Games Played',
-      })
-    if (userStats.avgRating !== null)
-      statCards.push({
-        iconBg: 'bg-yellow-500',
-        Icon: StarIcon,
-        iconColor: 'text-white',
-        value: userStats.avgRating.toFixed(1),
-        label: 'Avg Rating',
-      })
-    if (userStats.gamesOwned > 0)
-      statCards.push({
-        iconBg: 'bg-indigo-500',
-        Icon: BookmarkIcon,
-        iconColor: 'text-white',
-        value: userStats.gamesOwned,
-        label: 'Games Owned',
-      })
-    if (userStats.listsCreated > 0)
-      statCards.push({
-        iconBg: 'bg-purple-500',
-        Icon: ListBulletIcon,
-        iconColor: 'text-white',
-        value: userStats.listsCreated,
-        label: 'Lists Created',
-      })
-    if (userStats.awardsCreated > 0)
-      statCards.push({
-        iconBg: 'bg-amber-500',
-        Icon: TrophyIcon,
-        iconColor: 'text-white',
-        value: userStats.awardsCreated,
-        label: 'Awards Created',
-      })
-  }
+  const visibleGlanceCards = glanceCards.filter((c) => !c.phase || phase >= c.phase)
 
   return (
-    <div className="space-y-12" id="games-section">
+    <div className="space-y-6" id="games-section">
       {/* DEBUG ONLY: remove before release */}
       {process.env.NEXT_PUBLIC_SHOW_PHASE_DEBUG === 'true' && phaseResult && (
         <details style={{ opacity: 0.7, fontSize: 12, marginBottom: 12 }}>
@@ -389,70 +393,99 @@ export function HomepageView({
         </details>
       )}
 
-      {/* Welcome Heading */}
-      <div className="flex items-center justify-between">
-        <Heading as="h1" size="lg">
-          {welcomeHeading}
-        </Heading>
-        <Link
-          href="/profile"
-          className="text-sm font-medium text-primary-600 hover:text-primary-700"
-        >
-          View Profile →
-        </Link>
-      </div>
-
-      {/* Quick Actions */}
+      {/* Welcome Heading & Quick Actions */}
       {phaseResult?.canShowQuickActions && (
-        <section className="grid grid-cols-2 gap-3 md:grid-cols-4">
-          {quickActions.map((action) => (
-            <Link
-              key={action.href}
-              href={action.href}
-              className="flex items-center gap-3 p-3 transition-all bg-white border border-gray-200 rounded-xl hover:shadow-md hover:border-gray-300"
-            >
-              <div
-                className={`w-10 h-10 ${action.color} rounded-lg flex items-center justify-center flex-shrink-0`}
+        <section className="space-y-4 text-center">
+          <Heading as="h1" size="lg">
+            {welcomeHeading}
+          </Heading>
+          
+          <div className="flex flex-wrap items-center justify-center gap-4">
+            {quickActions.map((action) => (
+              <Link
+                key={action.href}
+                href={action.href}
+                className="flex items-center gap-2 px-3 py-2 transition-all hover:scale-105"
               >
-                <action.icon className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <div className="text-sm font-semibold text-gray-900">
+                <div
+                  className={`w-8 h-8 ${action.color.replace('bg-', 'bg-').replace('-500', '-100')} rounded-lg flex items-center justify-center flex-shrink-0`}
+                >
+                  <action.icon className={`w-4 h-4 ${action.color.replace('bg-', 'text-').replace('-500', '-600')}`} />
+                </div>
+                <span className="text-sm font-medium text-gray-700">
                   {action.label}
-                </div>
-                <div className="text-xs text-gray-500">
-                  {action.description}
-                </div>
-              </div>
-            </Link>
-          ))}
+                </span>
+              </Link>
+            ))}
+          </div>
         </section>
       )}
 
+      {/* White container for all discovery sections */}
+      <section className="p-6 space-y-12 bg-white border shadow-sm sm:p-8 rounded-2xl border-gray-200/60">
       {/* Foundational Games (Phase 1, 1–2 rankings only) */}
       {phaseResult?.canShowFoundationalGames && foundationalGames.length > 0 && (
-        <DiscoveryCard
-          title="Foundational Games"
-          subtitle="Widely known games that helped shape modern board gaming"
+        <HorizontalCardSection
+          mode="games"
+          title="Have you played?"
           games={foundationalGames}
+          loading={discoveryLoading}
+          sectionKey="foundational-games"
+          explainer={EXPLAINERS['foundational-games']}
           renderSubtitle={() => ''}
         />
       )}
 
-      {/* Gaming at a Glance (Phase 2+) */}
-      {phaseResult?.canShowGlanceStats && statCards.length > 0 && (
-        <section className="space-y-4">
-          <div>
-            <Heading as="h2" size="md" className="text-gray-900">
-              Your Gaming at a Glance
-            </Heading>
-            <p className="mt-0.5 text-sm sm:text-base text-gray-600">
-              A snapshot of your board game life
-            </p>
-          </div>
+      {/* Recently Played (Phase 3) — replaces top Hot Takes for power users */}
+      {phaseResult?.canShowRecentlyPlayed && recentlyPlayed.length > 0 && (
+        <HorizontalCardSection
+          mode="games"
+          title="Recently Played"
+          games={recentlyPlayed}
+          loading={discoveryLoading}
+          sectionKey="recently-played"
+          metadata={{
+              showTitle: true,
+              showYear: false,
+              showPlayerCount: false,
+              showPlaytime: false,
+              showTagline: false,
+            }}
+        />
+      )}
+
+      {/* Your Hot Takes (Phase 1/2 top slot — Phase 3 sees it further down only) */}
+      {!phaseResult?.canShowRecentlyPlayed &&
+        phaseResult?.canShowHotTakes &&
+        discoveryLists.hotTakes.length > 0 && (
+          <HorizontalCardSection
+            mode="games"
+            title="Your Hot Takes"
+            games={discoveryLists.hotTakes}
+            loading={discoveryLoading}
+            explainer={EXPLAINERS['hot-takes']}
+            sectionKey="hot-takes"
+            metadata={{
+              showTitle: true,
+              showYear: false,
+              showPlayerCount: false,
+              showPlaytime: false,
+              showTagline: false,
+            }}
+          />
+        )}
+
+
+
+      {/* Gaming at a Glance */}
+      {phaseResult?.canShowGlanceStats && (
+        <section className="space-y-3">
+          {/* <h2 className="text-[22px] font-semibold text-gray-900">
+            Your Gaming at a Glance
+          </h2> */}
           {loading ? (
-            <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
-              {Array.from({ length: 5 }).map((_, i) => (
+            <div className={`grid grid-cols-2 gap-4 md:grid-cols-${visibleGlanceCards.length}`}>
+              {visibleGlanceCards.map((_, i) => (
                 <div
                   key={i}
                   className="bg-white border border-gray-200 animate-pulse rounded-2xl h-[120px]"
@@ -460,8 +493,8 @@ export function HomepageView({
               ))}
             </div>
           ) : (
-            <div className={`grid grid-cols-2 gap-4 ${statCards.length <= 4 ? `md:grid-cols-${statCards.length}` : 'md:grid-cols-5'}`}>
-              {statCards.map((card) => (
+            <div className={`grid grid-cols-2 gap-4 md:grid-cols-${visibleGlanceCards.length}`}>
+              {visibleGlanceCards.map((card) => (
                 <StatCard
                   key={card.label}
                   iconBg={card.iconBg}
@@ -481,9 +514,9 @@ export function HomepageView({
       {/* Your Awards (Phase 3 only — all-time by default) */}
       {phaseResult?.canShowMostAwarded &&
         discoveryLists.mostAwarded.length > 0 && (
-          <DiscoveryCard
+          <HorizontalCardSection
+            mode="games"
             title="Your Awards"
-            subtitle="Games with the most personal awards"
             games={discoveryLists.mostAwarded}
             loading={discoveryLoading}
             explainer={EXPLAINERS['most-awarded']}
@@ -497,62 +530,77 @@ export function HomepageView({
       {/* Highest Ranked by You (Phase 1+) */}
       {phaseResult?.canShowHighestRanked &&
         discoveryLists.highestRanked.length > 0 && (
-          <DiscoveryCard
+          <HorizontalCardSection
+            mode="games"
             title="Your Top-Rated Games"
-            subtitle="Your highest rated games"
             games={discoveryLists.highestRanked}  
             loading={discoveryLoading}
             explainer={EXPLAINERS['highest-ranked']}
             sectionKey="highest-ranked"
-            renderSubtitle={(game: HighestRankedGame) => {
-              const plays =
-                game.plays_12mo > 0
-                  ? ` · played ${game.plays_12mo}x this year`
-                  : ''
-              return `${game.user_ranking}/10${plays}`
+            metadata={{
+              showTitle: true,
+              showYear: false,
+              showPlayerCount: false,
+              showPlaytime: false,
             }}
+            renderSubtitle={() => ''}
+            metadataMapper={(game: any) => ({
+              userRanking: game.user_ranking ?? null,
+            })}
           />
         )}
 
       {/* Your Hot Takes (Phase 1+) */}
       {phaseResult?.canShowHotTakes &&
         discoveryLists.hotTakes.length > 0 && (
-          <DiscoveryCard
+          <HorizontalCardSection
+            mode="games"
             title="Your Hot Takes"
-            subtitle="Games where your rating differs most from the community"
             games={discoveryLists.hotTakes}
             loading={discoveryLoading}
             explainer={EXPLAINERS['hot-takes']}
             sectionKey="hot-takes"
-            renderSubtitle={(game: HotTakeGame) => {
-              const sign = game.delta > 0 ? '+' : ''
-              return `You: ${game.user_ranking}/10 · BGG: ${game.bgg_rating.toFixed(1)} · ${sign}${game.delta.toFixed(1)}`
+            metadata={{
+              showTitle: true,
+              showYear: false,
+              showPlayerCount: false,
+              showPlaytime: false,
+              showTagline: false,
+              // delta will auto-populate from game.delta
+              averageRating: null,
             }}
+            renderSubtitle={() => ''}
           />
         )}
 
       {/* Sleeper Hits (Phase 2+) */}
       {phaseResult?.canShowSleeperHits &&
         discoveryLists.sleeperHits.length > 0 && (
-          <DiscoveryCard
-            title="Your Hidden Gems"
-            subtitle="Games you rated highly that few others have discovered"
+          <HorizontalCardSection
+            mode="games"
+            title="Your Sleeper Hits"
             games={discoveryLists.sleeperHits}
             loading={discoveryLoading}
             explainer={EXPLAINERS['sleeper-hits']}
             sectionKey="sleeper-hits"
-            renderSubtitle={(game: SleeperHitGame) =>
-              `Rated ${game.user_ranking}/10 · only ${game.game_num_ratings?.toLocaleString()} ratings`
-            }
+            metadata={{
+              showTitle: true,
+              showYear: false,
+              showPlayerCount: false,
+              showPlaytime: false,
+              showTagline: false,
+              // sleepinessClassification will auto-populate from game_num_ratings
+            }}
+            renderSubtitle={() => ''}
           />
         )}
 
       {/* Comeback Games (Phase 2+) */}
       {phaseResult?.canShowComebackGames &&
         discoveryLists.comebackGames.length > 0 && (
-          <DiscoveryCard
+          <HorizontalCardSection
+            mode="games"
             title="Games You Keep Coming Back To"
-            subtitle="Games you play month after month"
             games={discoveryLists.comebackGames}
             loading={discoveryLoading}
             explainer={EXPLAINERS['comeback-games']}
@@ -600,63 +648,53 @@ export function HomepageView({
 
       {/* ── Community Sections (gated — hidden for zero-data Phase 1) ── */}
 
-      {/* Top-Rated on MeepleGo (Phase 2+ — sourced from MeepleGo community ratings) */}
+      {/* Explore Top-Rated Games (Phase 2+ — sourced from MeepleGo user rankings) */}
       {phaseResult?.canShowExplore && topCommunityRated.length > 0 && (
-        <DiscoveryCard
+        <HorizontalCardSection
+          mode="games"
           title="Top-Rated on MeepleGo"
-          icon="⭐"
-          subtitle="Games rated highest by the MeepleGo community"
           games={topCommunityRated}
           loading={discoveryLoading}
           sectionKey="top-rated-meepleGo"
-          renderSubtitle={(game: any) =>
-            game.avg_rating
-              ? `${Number(game.avg_rating).toFixed(1)}/10 avg · ${game.rater_count} rating${game.rater_count !== 1 ? 's' : ''}`
-              : ''
-          }
+          metadata={{
+            showTitle: true,
+            showYear: false,
+            showPlayerCount: false,
+            showPlaytime: false,
+          }}
+          renderSubtitle={() => ''}
         />
       )}
 
       {/* Industry Awards (hidden for zero-data Phase 1) */}
       {phaseResult?.canShowIndustryAwards && industryAwards.length > 0 && (
-        <section className="space-y-4">
-          <div>
-            <div className="flex items-center justify-between gap-4">
-              <Heading as="h2" size="md" className="text-gray-900">
-                Industry Awards
-              </Heading>
-              <Link
-                href="/awards"
-                className="text-xs font-medium sm:text-sm text-primary-600 hover:text-primary-500 whitespace-nowrap"
-              >
-                Explore all →
-              </Link>
-            </div>
-            <p className="mt-0.5 text-sm sm:text-base text-gray-600">
-              Prestigious board game honors and recognition
-            </p>
-          </div>
-          <HorizontalCardScroll itemWidth="w-72" showCount={4}>
-            {industryAwards.map((award: any) => (
-              <AwardCard
-                key={award.id}
-                href={`/awards#${award.id}`}
-                title={award.name}
-                description={
-                  award.description || 'Prestigious board game recognition'
-                }
-                yearSpan={undefined}
-                winners={undefined as any}
-                nominees={undefined as any}
-                circleBorderClass={award.borderColor || 'border-amber-200'}
-                circleBgClass={award.backgroundColor || 'bg-amber-50'}
-                iconColorClass={award.iconColor || 'text-amber-600'}
-                showStats={false}
-                cta="View Details"
-              />
-            ))}
-          </HorizontalCardScroll>
-        </section>
+        <HorizontalCardSection
+          mode="custom"
+          title="Industry Awards"
+          href="/awards"
+          itemWidth="w-72"
+          showCount={4}
+          hideIfEmpty={false}
+        >
+          {industryAwards.map((award: any) => (
+            <AwardCard
+              key={award.id}
+              href={`/awards#${award.id}`}
+              title={award.name}
+              description={
+                award.description || 'Prestigious board game recognition'
+              }
+              yearSpan={undefined}
+              winners={undefined as any}
+              nominees={undefined as any}
+              circleBorderClass={award.borderColor || 'border-amber-200'}
+              circleBgClass={award.backgroundColor || 'bg-amber-50'}
+              iconColorClass={award.iconColor || 'text-amber-600'}
+              showStats={false}
+              cta="View Details"
+            />
+          ))}
+        </HorizontalCardSection>
       )}
 
       {/* Community Lists (Phase 2+) */}
@@ -685,6 +723,7 @@ export function HomepageView({
           </div>
         </section>
       )}
+      </section>
     </div>
   )
 }

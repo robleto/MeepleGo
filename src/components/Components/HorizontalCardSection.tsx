@@ -11,8 +11,10 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
 import GameCard from '@/components/Components/GameCard'
+import type { GameCardMetadata } from '@/components/Components/GameCardTypes'
 import HorizontalCardScroll from '@/components/Elements/HorizontalCardScroll'
 import Heading from '@/components/Components/Heading'
+import { getSleepinessClassification } from '@/utils/sleepinessClassification'
 
 const SEEN_SECTIONS_KEY = 'meeplego_seen_sections'
 
@@ -88,7 +90,9 @@ type HorizontalCardSectionProps = {
       // Mode 1: Render game cards from discovery data
       mode: 'games'
       games: any[]
-      renderSubtitle: (game: any) => string
+      renderSubtitle?: (game: any) => string
+      metadata?: Omit<GameCardMetadata, 'customSubtext'> // customSubtext comes from renderSubtitle
+      metadataMapper?: (game: any) => Partial<GameCardMetadata> // Per-game metadata overrides
       children?: never
     }
   | {
@@ -97,6 +101,7 @@ type HorizontalCardSectionProps = {
       children: ReactNode
       games?: never
       renderSubtitle?: never
+      metadata?: never
     }
 )
 
@@ -135,32 +140,33 @@ export default function HorizontalCardSection(props: HorizontalCardSectionProps)
   }
 
   return (
-    <section className="space-y-4">
-      {/* Header */}
-      <div>
-        <div className="flex items-center justify-between gap-4">
-          <Heading size="md" className="mb-0">
-            {title}
-          </Heading>
-          {href && hasContent && (
-            <Link
-              href={href}
-              className="text-xs font-medium sm:text-sm text-primary-600 hover:text-primary-500 whitespace-nowrap"
-            >
-              View all →
-            </Link>
-          )}
-        </div>
-        {subtitle && (
-          <p className="mt-0.5 text-sm sm:text-base text-gray-600 dark:text-gray-300">
-            {subtitle}
-          </p>
+    <section className="space-y-1.5">
+      {/* Header - Airbnb style with inline arrow */}
+      <div className="flex items-center gap-2">
+        <h2 className="text-[22px] font-semibold text-gray-900">
+          {title}
+        </h2>
+        {href && hasContent && (
+          <Link
+            href={href}
+            className="text-[22px] font-semibold text-gray-900 hover:text-gray-700 transition-colors"
+            aria-label={`View all ${title}`}
+          >
+            →
+          </Link>
         )}
       </div>
 
+      {/* Optional subtitle (hidden by default to match Airbnb) */}
+      {subtitle && (
+        <p className="-mt-1 text-sm text-gray-600">
+          {subtitle}
+        </p>
+      )}
+
       {/* First-time explainer */}
       {showExplainer && explainer && (
-        <div className="px-4 py-3 mb-4 border rounded-lg bg-amber-50 border-amber-200">
+        <div className="px-4 py-3 border rounded-lg bg-amber-50 border-amber-200">
           <p className="text-sm text-amber-800">{explainer}</p>
         </div>
       )}
@@ -182,17 +188,34 @@ export default function HorizontalCardSection(props: HorizontalCardSectionProps)
       {!loading && hasContent && (
         <HorizontalCardScroll itemWidth={itemWidth} showCount={showCount}>
           {props.mode === 'games'
-            ? props.games.slice(0, 12).map((game) => (
-                <GameCard
-                  key={game.game_id}
-                  game={toGameCardShape(game, props.renderSubtitle(game)) as any}
-                  viewMode="grid"
-                  variant="detailed"
-                  imageFit="contain"
-                  className="flex flex-col h-full"
-                  delta={game.delta ?? null}
-                />
-              ))
+            ? props.games.slice(0, 12).map((game) => {
+                const customSubtext = props.renderSubtitle ? props.renderSubtitle(game) : ''
+                const perGameMetadata = props.metadataMapper ? props.metadataMapper(game) : {}
+                const cardMetadata: GameCardMetadata = {
+                  showYear: false,
+                  ...props.metadata,
+                  ...perGameMetadata,
+                  // Auto-populate from game data if not explicitly set
+                  delta: props.metadata?.delta !== undefined ? props.metadata.delta : (game.delta ?? null),
+                  averageRating: props.metadata?.averageRating !== undefined ? props.metadata.averageRating : (game.average_user_rating || game.avgRating || null),
+                  customSubtext: customSubtext || null,
+                  // Auto-populate sleepiness classification for Sleeper Hits if game_num_ratings exists
+                  sleepinessClassification: props.metadata?.sleepinessClassification !== undefined 
+                    ? props.metadata.sleepinessClassification 
+                    : (game.game_num_ratings != null ? getSleepinessClassification(game.game_num_ratings) : null),
+                }
+                return (
+                  <GameCard
+                    key={game.game_id}
+                    game={toGameCardShape(game, customSubtext) as any}
+                    viewMode="grid"
+                    variant="detailed"
+                    imageFit="contain"
+                    className="flex flex-col h-full"
+                    metadata={cardMetadata}
+                  />
+                )
+              })
             : props.children}
         </HorizontalCardScroll>
       )}

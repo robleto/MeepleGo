@@ -39,6 +39,11 @@ const GameDetailModal = dynamic(() => import('./GameDetailModal'), {
 import RatingPopup from '../Elements/RatingPopup'
 import { RatingChip } from '../Elements/Chip'
 const AddToModal = dynamic(() => import('./AddToModal'), { ssr: false })
+// Subcomponents for GameCard
+import GameCardListActions from './GameCardListActions'
+import type { GameCardMetadata } from './GameCardTypes'
+import GameCardMeta from './GameCardMeta'
+import { GameCardDeltaBadge, GameCardAverageRatingBadge } from './GameCardBadges'
 
 interface GameCardProps {
   game: GameWithRanking & {
@@ -69,6 +74,8 @@ interface GameCardProps {
   onRemoveFromCurrentList?: () => void
   // Controls object-fit for grid image (default cover for tighter layouts)
   imageFit?: 'cover' | 'contain'
+  // Optional metadata configuration for controlling what info to display
+  metadata?: GameCardMetadata
 }
 
 export default function GameCard({
@@ -88,6 +95,7 @@ export default function GameCard({
   dragHandleProps,
   onRemoveFromCurrentList,
   imageFit = 'cover',
+  metadata,
 }: GameCardProps) {
   const initialLibrary = game.list_membership?.library ?? false
   const initialWishlist = game.list_membership?.wishlist ?? false
@@ -245,7 +253,7 @@ export default function GameCard({
 
   // Removed overflow-hidden so popovers are not clipped
   const cardClass =
-    'bg-white rounded-lg shadow hover:shadow-lg transition-all group relative ' +
+    'rounded-lg transition-all group relative ' +
     (className || '')
 
   const listButtonRef = useRef<HTMLButtonElement | null>(null)
@@ -346,148 +354,108 @@ export default function GameCard({
                 )}
             </h3>
 
-            {/* Tagline - only show for detailed variant on desktop */}
-            {variant === 'detailed' && (game as any).tagline && (
+            {/* Tagline - only show if metadata config allows and detailed variant */}
+            {variant === 'detailed' && 
+             metadata?.showTagline !== false && 
+             (game as any).tagline && (
               <p className="hidden mb-1 text-xs text-gray-600 truncate sm:block">
                 {game.tagline}
               </p>
             )}
 
-            {/* Metadata - show for balanced and detailed variants */}
-            {(variant === 'balanced' || variant === 'detailed') && showMeta && (
-              <div className="flex items-center gap-2 sm:gap-4 text-xs text-gray-500 mt-0.5">
-                <span className="tabular-nums">{formatYear(game.year_published)}</span>
-                <span className="hidden sm:inline">
-                  {formatPlayerCount(game.min_players, game.max_players)}
-                </span>
-                <span className="hidden md:inline">
-                  {formatPlayingTime(game.playtime_minutes)}
-                </span>
+            {/* Metadata - show based on metadata config or showMeta prop for backward compat */}
+            {(variant === 'balanced' || variant === 'detailed') && 
+             (metadata ? true : showMeta) && (
+              <div className="flex items-center gap-2 text-xs text-gray-500 mt-0.5 flex-wrap">
+                {(metadata?.showYear !== false) && (
+                  <span className="tabular-nums">{formatYear(game.year_published)}</span>
+                )}
+                {(metadata?.showPlayerCount !== false) && (
+                  <span className="hidden sm:inline">
+                    {formatPlayerCount(game.min_players, game.max_players)}
+                  </span>
+                )}
+                {(metadata?.showPlaytime !== false) && (
+                  <span className="hidden md:inline">
+                    {formatPlayingTime(game.playtime_minutes)}
+                  </span>
+                )}
+                {/* Delta badge (Hot Takes) */}
+                {metadata?.delta != null && (
+                  <span
+                    className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                      metadata.delta > 0
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-red-100 text-red-800'
+                    }`}
+                  >
+                    {metadata.delta > 0 ? '↑' : '↓'} {Math.abs(metadata.delta)}
+                  </span>
+                )}
+                {/* Average Rating badge */}
+                {metadata?.averageRating != null && (
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary text-white">
+                    ★ {metadata.averageRating.toFixed(1)}
+                  </span>
+                )}
+                {/* Custom subtext */}
+                {metadata?.customSubtext && (
+                  <span className="text-gray-600">
+                    {metadata.customSubtext}
+                  </span>
+                )}
               </div>
             )}
 
             {/* Compact variant shows only year inline */}
-            {variant === 'compact' && (
+            {variant === 'compact' && (metadata?.showYear !== false) && (
               <div className="text-xs text-gray-500 tabular-nums mt-0.5">
                 {formatYear(game.year_published)}
               </div>
             )}
           </div>
 
-          {/* Right side actions - show only rating on mobile, full set on desktop */}
-          <div className="flex items-center gap-1.5 flex-shrink-0">
-            {/* Rating Chip or Rate Button - Always visible */}
-            {ratingValue ? (
-              <button
-                className={`px-2.5 h-9 rounded-full flex items-center justify-center gap-1 transition-all ${getRatingSubtleClass(ratingValue)} ${saving ? 'opacity-70' : ''}`}
-                onClick={(event) => {
-                  event.stopPropagation()
-                  const rect = event.currentTarget.getBoundingClientRect()
-                  setRatingPosition({
-                    x: rect.left + rect.width / 2,
-                    y: rect.bottom + 8,
-                  })
-                  setIsRating(true)
-                }}
-                title={`Rating: ${ratingValue}/10`}
-                aria-label={`Rating: ${ratingValue}/10`}
-              >
-                <span className="text-sm font-bold">
-                  {ratingValue}
-                </span>
-              </button>
-            ) : (
-              <button
-                className="items-center justify-center hidden transition-colors bg-gray-100 rounded-full sm:flex w-9 h-9 hover:bg-gray-200"
-                onClick={(event) => {
-                  event.stopPropagation()
-                  const rect = event.currentTarget.getBoundingClientRect()
-                  setRatingPosition({
-                    x: rect.left + rect.width / 2,
-                    y: rect.bottom + 8,
-                  })
-                  setIsRating(true)
-                }}
-                title="Rate this game"
-                aria-label="Rate this game"
-              >
-                <StarIcon className="w-5 h-5 text-gray-400" />
-              </button>
-            )}
-
-            {/* Played It Chip - Desktop only */}
-            <button
-              className={`hidden sm:flex w-9 h-9 rounded-full items-center justify-center transition-all ${
-                localRanking?.played_it
-                  ? 'bg-green-100 text-green-700 ring-1 ring-green-200'
-                  : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
-              }`}
-              onClick={(e) => {
-                e.stopPropagation()
-                handlePlayedToggle()
-              }}
-              title={localRanking?.played_it ? 'Mark as not played' : 'Mark as played'}
-              aria-label={localRanking?.played_it ? 'Mark as not played' : 'Mark as played'}
-            >
-              <PlayIcon className="w-5 h-5" />
-            </button>
-
-            {/* Own It Chip - Desktop only */}
-            <button
-              className={`hidden sm:flex w-9 h-9 rounded-full items-center justify-center transition-all ${
-                membership.library
-                  ? 'bg-blue-100 text-blue-700 ring-1 ring-blue-200'
-                  : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
-              }`}
-              onClick={(e) => {
-                e.stopPropagation()
-                if (onMembershipChange) {
-                  onMembershipChange(game.id, { library: !membership.library })
-                }
-              }}
-              title={membership.library ? 'Remove from library' : 'Add to library'}
-              aria-label={membership.library ? 'Remove from library' : 'Add to library'}
-            >
-              <BookmarkIcon className="w-5 h-5" />
-            </button>
-
-            {/* Wishlist Chip - Desktop only */}
-            <button
-              className={`hidden sm:flex w-9 h-9 rounded-full items-center justify-center transition-all ${
-                membership.wishlist
-                  ? 'bg-pink-100 text-pink-700 ring-1 ring-pink-200'
-                  : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
-              }`}
-              onClick={(e) => {
-                e.stopPropagation()
-                if (onMembershipChange) {
-                  onMembershipChange(game.id, {
-                    wishlist: !membership.wishlist,
-                  })
-                }
-              }}
-              title={membership.wishlist ? 'Remove from wishlist' : 'Add to wishlist'}
-              aria-label={membership.wishlist ? 'Remove from wishlist' : 'Add to wishlist'}
-            >
-              <HeartIcon className="w-5 h-5" />
-            </button>
-
-            {/* Remove from current list */}
-            {onRemoveFromCurrentList && (
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  onRemoveFromCurrentList()
-                }}
-                className="items-center justify-center hidden transition-colors bg-gray-100 rounded-full sm:flex w-9 h-9 hover:bg-red-50"
-                title="Remove from this list"
-                aria-label="Remove from this list"
-              >
-                <XMarkIcon className="w-5 h-5 text-gray-400 hover:text-red-600" />
-              </button>
-            )}
-          </div>
+          {/* Right side actions */}
+          <GameCardListActions
+            game={game}
+            ratingValue={ratingValue}
+            saving={saving}
+            playedIt={localRanking?.played_it ?? false}
+            membership={membership}
+            onRateClick={(event: React.MouseEvent<HTMLButtonElement>) => {
+              event.stopPropagation()
+              const rect = event.currentTarget.getBoundingClientRect()
+              setRatingPosition({
+                x: rect.left + rect.width / 2,
+                y: rect.bottom + 8,
+              })
+              setIsRating(true)
+            }}
+            onTogglePlayed={(e: React.MouseEvent<HTMLButtonElement>) => {
+              e.stopPropagation()
+              handlePlayedToggle()
+            }}
+            onToggleLibrary={(e: React.MouseEvent<HTMLButtonElement>) => {
+              e.stopPropagation()
+              if (onMembershipChange) {
+                onMembershipChange(game.id, { library: !membership.library })
+              }
+            }}
+            onToggleWishlist={(e: React.MouseEvent<HTMLButtonElement>) => {
+              e.stopPropagation()
+              if (onMembershipChange) {
+                onMembershipChange(game.id, { wishlist: !membership.wishlist })
+              }
+            }}
+            onRemoveFromCurrentList={
+              onRemoveFromCurrentList
+                ? (e: React.MouseEvent<HTMLButtonElement>) => {
+                    e.stopPropagation()
+                    onRemoveFromCurrentList()
+                  }
+                : undefined
+            }
+          />
         </div>
 
         {/* Game Detail Modal (only mount when open to prevent Next router hook errors in Storybook) */}
@@ -830,60 +798,82 @@ export default function GameCard({
 
       {/* Game Info */}
       <div
-        className={`p-3 ${variant === 'compact' ? 'pb-2' : ''} flex flex-col flex-1 min-h-0`}
+        className={`${
+          metadata &&
+          metadata.showTitle === false &&
+          metadata.showYear === false &&
+          metadata.showPlayerCount === false &&
+          metadata.showPlaytime === false
+            ? 'px-0 pt-1 flex flex-col min-h-0'
+            : variant === 'compact'
+              ? 'px-0 pt-1.5 pb-1 flex flex-col flex-1 min-h-0'
+              : 'px-0 pt-1.5 flex flex-col flex-1 min-h-0'
+        }`}
         style={{ fontSize: '0.875rem' }}
       >
-        {/* Title (same size for all variants) */}
-        <div className="flex-shrink-0">
-          <h3
-            className={`font-bold text-gray-900 leading-tight line-clamp-2 ${
-              titleClassName || ''
-            } ${variant === 'compact' ? 'text-[0.76rem]' : 'text-[0.84rem]'} `}
-          >
-            {(game.name || 'Untitled Game').length > 48
-              ? `${(game.name || 'Untitled Game').substring(0, 48)}...`
-              : (game.name || 'Untitled Game')}
-            {variant === 'compact' && (
-              <span className="ml-2 text-xs font-normal text-gray-500 tabular-nums">
-                {formatYear(game.year_published)}
-              </span>
-            )}
-          </h3>
+        {metadata ? (
+          <GameCardMeta
+            game={game}
+            variant={variant}
+            metaConfig={metadata}
+            titleClassName={titleClassName}
+            emphasizeMeta={emphasizeMeta}
+          />
+        ) : (
+          <>
+            {/* Legacy rendering when no metadata config provided */}
+            <div className="flex-shrink-0">
+              <h3
+                className={`font-bold text-gray-900 leading-tight line-clamp-2 ${
+                  titleClassName || ''
+                } ${variant === 'compact' ? 'text-[0.67rem]' : 'text-[0.74rem]'} `}
+              >
+                {(game.name || 'Untitled Game').length > 48
+                  ? `${(game.name || 'Untitled Game').substring(0, 48)}...`
+                  : (game.name || 'Untitled Game')}
+                {variant === 'compact' && (
+                  <span className="ml-2 text-xs font-normal text-gray-500 tabular-nums">
+                    {formatYear(game.year_published)}
+                  </span>
+                )}
+              </h3>
 
-          {/* Description/tagline - only show for non-compact variants */}
-          {variant === 'detailed' && (game as any).tagline && (
-            <p className="mt-0.5 text-[0.8rem] leading-snug text-gray-600 line-clamp-2 min-h-[1.2rem]">
-              {truncate(game.tagline || '', 90)}
-            </p>
-          )}
+              {/* Description/tagline - only show for non-compact variants */}
+              {variant === 'detailed' && (game as any).tagline && (
+                <p className="mt-0.5 text-[0.8rem] leading-snug text-gray-600 line-clamp-2 min-h-[1.2rem]">
+                  {truncate(game.tagline || '', 90)}
+                </p>
+              )}
 
-          {/* Year below title for balanced and detailed variants */}
-          {(variant === 'balanced' || variant === 'detailed') && (
-            <div className="mt-0.5 text-[0.7rem] text-gray-500 tabular-nums">
-              {formatYear(game.year_published)}
+              {/* Year below title for balanced and detailed variants */}
+              {(variant === 'balanced' || variant === 'detailed') && (
+                <div className="mt-0.5 text-[0.7rem] text-gray-500 tabular-nums">
+                  {formatYear(game.year_published)}
+                </div>
+              )}
             </div>
-          )}
-        </div>
 
-        {/* Bottom-aligned metadata section - for balanced and detailed variants */}
-        <div
-          className={`mt-auto pt-2 space-y-1 ${emphasizeMeta ? 'text-gray-700' : 'text-gray-500'} flex-shrink-0 text-[0.7rem]`}
-        >
-          {(variant === 'balanced' || variant === 'detailed') && showMeta && (
-            <div className="flex items-center justify-between text-xs">
-              <div className="flex items-center space-x-1">
-                <UserGroupIcon className="w-4 h-4" />
-                <span>
-                  {formatPlayerCount(game.min_players, game.max_players)}
-                </span>
-              </div>
-              <div className="flex items-center space-x-1">
-                <ClockIcon className="w-4 h-4" />
-                <span>{formatPlayingTime(game.playtime_minutes)}</span>
-              </div>
+            {/* Bottom-aligned metadata section - for balanced and detailed variants */}
+            <div
+              className={`mt-auto pt-2 space-y-1 ${emphasizeMeta ? 'text-gray-700' : 'text-gray-500'} flex-shrink-0 text-[0.7rem]`}
+            >
+              {(variant === 'balanced' || variant === 'detailed') && showMeta && (
+                <div className="flex items-center justify-between text-xs">
+                  <div className="flex items-center space-x-1">
+                    <UserGroupIcon className="w-4 h-4" />
+                    <span>
+                      {formatPlayerCount(game.min_players, game.max_players)}
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <ClockIcon className="w-4 h-4" />
+                    <span>{formatPlayingTime(game.playtime_minutes)}</span>
+                  </div>
+                </div>
+              )}
             </div>
-          )}
-        </div>
+          </>
+        )}
       </div>
 
       {/* Rating Popup */}

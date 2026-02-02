@@ -106,7 +106,7 @@ export default function RootLayout({
       </head>
       <body
         className={
-          'font-sans min-h-screen bg-white text-gray-900'
+          'font-sans min-h-screen bg-gray-50 text-gray-900'
           /* TODO: Re-enable dark mode - see GitHub issue */
           /* 'font-sans min-h-screen bg-gray-50 text-gray-900' */
         }

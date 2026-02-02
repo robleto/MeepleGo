@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import GameSearchSelect, { SuggestionGame } from './GameSearchSelect'
+import GameSearchSelect, { SuggestionGame } from '@/components/Components/GameSearchSelect'
 
 const meta = {
   title: 'Components/GameSearchSelect',
