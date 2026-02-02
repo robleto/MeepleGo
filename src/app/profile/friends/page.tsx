@@ -1,13 +1,10 @@
-import PageLayout from '@/components/Components/PageLayout'
-import ProfileLayout from '@/components/Components/ProfileLayout'
-import { FriendsContent } from '@/app/friends/page'
+import ProfileShell from '@/components/Components/Profile/ProfileShell'
+import ProfileFriendsSection from '@/components/Components/Profile/ProfileFriendsSection'
 
 export default function ProfileFriendsPage() {
   return (
-    <PageLayout>
-      <ProfileLayout>
-        <FriendsContent embedded />
-      </ProfileLayout>
-    </PageLayout>
+    <ProfileShell activeTab="friends">
+      {({ userId, profile, stats }) => <ProfileFriendsSection userId={userId} profile={profile} stats={stats} />}
+    </ProfileShell>
   )
 }

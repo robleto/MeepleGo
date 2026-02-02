@@ -1,8 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import PageLayout from '@/components/Components/PageLayout'
-import ProfileLayout from '@/components/Components/ProfileLayout'
+import ProfileShell from '@/components/Components/Profile/ProfileShell'
 import { supabase } from '@/lib/supabase'
 import {
   ChartBarIcon,
@@ -296,31 +295,31 @@ export default function StatsPage() {
 
   if (!isMounted || loading) {
     return (
-      <PageLayout>
-        <ProfileLayout>
+      <ProfileShell activeTab="stats">
+        {() => (
           <div className="flex items-center justify-center py-12">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
           </div>
-        </ProfileLayout>
-      </PageLayout>
+        )}
+      </ProfileShell>
     )
   }
 
   if (!stats) {
     return (
-      <PageLayout>
-        <ProfileLayout>
+      <ProfileShell activeTab="stats">
+        {() => (
           <div className="text-center py-12">
             <p className="text-gray-500">No stats available</p>
           </div>
-        </ProfileLayout>
-      </PageLayout>
+        )}
+      </ProfileShell>
     )
   }
 
   return (
-    <PageLayout>
-      <ProfileLayout>
+    <ProfileShell activeTab="stats">
+      {() => (
         <div className="max-w-5xl mx-auto space-y-6">{/* Collection Overview */}
         <div className="rounded-2xl border border-gray-200/70 bg-white/80">
           <div className="flex items-center justify-between p-6 border-b border-gray-200/50">
@@ -560,9 +559,9 @@ export default function StatsPage() {
             </div>
           </div>
         </div>
-      </div>
-      </ProfileLayout>
-    </PageLayout>
+        </div>
+      )}
+    </ProfileShell>
   )
 }
 

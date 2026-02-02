@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import PageLayout from '@/components/Components/PageLayout'
 import ProfileLayout from '@/components/Components/ProfileLayout'
-import { RankingsContent } from '@/app/rankings/page'
+import { RankingsContent } from '@/app/rankings/RankingsContent'
 
 interface Props {
   params: Promise<{ username: string }>
