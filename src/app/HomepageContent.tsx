@@ -10,6 +10,7 @@ import { supabase } from '@/lib/supabase'
 import HomepageView, {
   type UserStats,
 } from '@/components/Components/HomepageView'
+import PageLayout from '@/components/Components/PageLayout'
 import type { Game } from '@/types/supabase'
 import type {
   MostAwardedGame,
@@ -616,20 +617,44 @@ export default function HomepageContent() {
 
   return (
     <>
-      <HomepageView
-        user={user}
-        loading={loading}
-        featuredGames={featuredGames}
-        userStats={userStats}
-        industryAwards={industryAwards}
-        publicLists={publicLists}
-        discoveryLists={discoveryLists}
-        discoveryLoading={discoveryLoading}
-        phaseResult={phaseResult}
-        foundationalGames={foundationalGames}
-        topCommunityRated={topCommunityRated}
-        recentlyPlayed={recentlyPlayed}
-      />
+      {/* PageLayout owns full-bleed layout + backgrounds. */}
+      <PageLayout
+        subHeader={
+          // Utility slot: welcome + quick actions
+          <HomepageView
+            mode="utility"
+            user={user}
+            loading={loading}
+            featuredGames={featuredGames}
+            userStats={userStats}
+            industryAwards={industryAwards}
+            publicLists={publicLists}
+            discoveryLists={discoveryLists}
+            discoveryLoading={discoveryLoading}
+            phaseResult={phaseResult}
+            foundationalGames={foundationalGames}
+            topCommunityRated={topCommunityRated}
+            recentlyPlayed={recentlyPlayed}
+          />
+        }
+      >
+        {/* Main slot: all horizontal rails + discovery sections */}
+        <HomepageView
+          mode="main"
+          user={user}
+          loading={loading}
+          featuredGames={featuredGames}
+          userStats={userStats}
+          industryAwards={industryAwards}
+          publicLists={publicLists}
+          discoveryLists={discoveryLists}
+          discoveryLoading={discoveryLoading}
+          phaseResult={phaseResult}
+          foundationalGames={foundationalGames}
+          topCommunityRated={topCommunityRated}
+          recentlyPlayed={recentlyPlayed}
+        />
+      </PageLayout>
 
       {/* Onboarding for new users */}
       <OnboardingModal

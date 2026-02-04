@@ -20,6 +20,8 @@ export default function RankingsPage() {
   )
 }
 
+export { RankingsContent }
+
 // TODO: Add ranking distribution visualization (histogram of 1-10 usage)
 // TODO: Add comparative panel: Average ranking vs BGG global rank delta
 // TODO: Add quick edit inline ranking adjuster for list view (hover slider)

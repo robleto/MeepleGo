@@ -74,6 +74,7 @@ export interface HomepageViewProps {
   foundationalGames?: any[]
   recentlyPlayed?: any[]
   topCommunityRated?: any[]
+  mode?: 'utility' | 'main'
 }
 
 // ── Quick Action definitions ──
@@ -173,9 +174,11 @@ export function HomepageView({
   foundationalGames = [],
   recentlyPlayed = [],
   topCommunityRated = [],
+  mode = 'main',
 }: HomepageViewProps) {
   // ── Guest experience (unchanged — OnboardingLanding handles the main logged-out view) ──
   if (!user) {
+    if (mode === 'utility') return null
     return (
       <div className="space-y-6" id="games-section">
         <section className="space-y-2">
@@ -383,8 +386,40 @@ export function HomepageView({
 
   const visibleGlanceCards = glanceCards.filter((c) => !c.phase || phase >= c.phase)
 
+  // Utility slot: welcome + quick actions only
+  if (mode === 'utility') {
+    if (!phaseResult?.canShowQuickActions) return null
+    return (
+      <div className="space-y-4 text-center">
+        <Heading as="h1" size="lg">
+          {welcomeHeading}
+        </Heading>
+
+        <div className="flex flex-wrap items-center justify-center gap-4">
+          {quickActions.map((action) => (
+            <Link
+              key={action.href}
+              href={action.href}
+              className="flex items-center gap-2 px-3 py-2 transition-all hover:scale-105"
+            >
+              <div
+                className={`w-8 h-8 ${action.color.replace('bg-', 'bg-').replace('-500', '-100')} rounded-lg flex items-center justify-center flex-shrink-0`}
+              >
+                <action.icon className={`w-4 h-4 ${action.color.replace('bg-', 'text-').replace('-500', '-600')}`} />
+              </div>
+              <span className="text-sm font-medium text-gray-700">
+                {action.label}
+              </span>
+            </Link>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  // Main slot: all rails and discovery sections
   return (
-    <div className="space-y-6" id="games-section">
+    <div className="space-y-12" id="games-section">
       {/* DEBUG ONLY: remove before release */}
       {process.env.NEXT_PUBLIC_SHOW_PHASE_DEBUG === 'true' && phaseResult && (
         <details style={{ opacity: 0.7, fontSize: 12, marginBottom: 12 }}>
@@ -392,37 +427,6 @@ export function HomepageView({
           <pre>{JSON.stringify(phaseResult, null, 2)}</pre>
         </details>
       )}
-
-      {/* Welcome Heading & Quick Actions */}
-      {phaseResult?.canShowQuickActions && (
-        <section className="space-y-4 text-center">
-          <Heading as="h1" size="lg">
-            {welcomeHeading}
-          </Heading>
-          
-          <div className="flex flex-wrap items-center justify-center gap-4">
-            {quickActions.map((action) => (
-              <Link
-                key={action.href}
-                href={action.href}
-                className="flex items-center gap-2 px-3 py-2 transition-all hover:scale-105"
-              >
-                <div
-                  className={`w-8 h-8 ${action.color.replace('bg-', 'bg-').replace('-500', '-100')} rounded-lg flex items-center justify-center flex-shrink-0`}
-                >
-                  <action.icon className={`w-4 h-4 ${action.color.replace('bg-', 'text-').replace('-500', '-600')}`} />
-                </div>
-                <span className="text-sm font-medium text-gray-700">
-                  {action.label}
-                </span>
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* White container for all discovery sections */}
-      <section className="p-6 space-y-12 bg-white border shadow-sm sm:p-8 rounded-2xl border-gray-200/60">
       {/* Foundational Games (Phase 1, 1–2 rankings only) */}
       {phaseResult?.canShowFoundationalGames && foundationalGames.length > 0 && (
         <HorizontalCardSection
@@ -723,7 +727,6 @@ export function HomepageView({
           </div>
         </section>
       )}
-      </section>
     </div>
   )
 }

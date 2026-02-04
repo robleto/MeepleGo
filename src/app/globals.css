@@ -185,6 +185,37 @@ body {
 }
 */
 
+/* PageLayout utility + main section styling */
+.utility-section {
+  background: transparent;
+  padding: 1.5rem 1rem 0.5rem;
+}
+@media (min-width: 640px) {
+  .utility-section {
+    padding: 1.5rem 1.5rem 0.75rem;
+  }
+}
+@media (min-width: 1024px) {
+  .utility-section {
+    padding: 1.75rem 2rem 1rem;
+  }
+}
+
+.main-content-section {
+  background: #ffffff;
+  padding: 1.5rem 1rem 5rem;
+}
+@media (min-width: 640px) {
+  .main-content-section {
+    padding: 2rem 1.5rem 5rem;
+  }
+}
+@media (min-width: 1024px) {
+  .main-content-section {
+    padding: 2.25rem 2rem 5rem;
+  }
+}
+
 /* Reusable panel wrapper (award sections, hero blocks, general cards) */
 .panel {
   --panel-pad: 2rem; /* default ~32px (Tailwind p-8 at base 16px) */
