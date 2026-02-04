@@ -618,7 +618,7 @@ function Navigation() {
       <nav
         aria-label="Primary navigation"
         className={cn(
-          'fixed inset-x-0 top-0 z-50 transition-[transform] duration-300',
+          'fixed inset-x-0 top-0 z-50 transition-[transform] duration-300 border-b-[.1rem] border-gray-150',
           visible ? 'translate-y-0' : '-translate-y-full'
         )}
       >

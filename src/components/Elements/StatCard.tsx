@@ -3,7 +3,7 @@
 import React from 'react'
 
 interface StatCardProps {
-  /** Background color class for the icon circle */
+  /** Background color class for the icon circle and entire card */
   iconBg: string
   /** Heroicon component to display */
   Icon: React.ComponentType<{ className?: string }>
@@ -36,7 +36,7 @@ export default function StatCard({
   size = 'default',
 }: StatCardProps) {
   const baseClasses =
-    'bg-white border border-gray-200 rounded-2xl transition-all duration-200'
+    'border border-gray-200 rounded-2xl transition-all duration-200'
   const interactiveClasses = onClick
     ? 'cursor-pointer hover:scale-105 hover:shadow-lg'
     : ''
@@ -44,7 +44,7 @@ export default function StatCard({
   if (size === 'mini') {
     return (
       <div
-        className={`${baseClasses} p-2 min-h-[56px] flex flex-col justify-between ${interactiveClasses} ${className}`}
+        className={`${baseClasses} ${iconBg} p-2 min-h-[56px] flex flex-col justify-between ${interactiveClasses} ${className}`}
         onClick={onClick}
       >
         <div className="flex items-start justify-between mb-2">
@@ -61,7 +61,7 @@ export default function StatCard({
   if (size === 'compact') {
     return (
       <div
-        className={`${baseClasses} p-3 min-h-[72px] flex flex-col justify-between ${interactiveClasses} ${className}`}
+        className={`${baseClasses} ${iconBg} p-3 min-h-[72px] flex flex-col justify-between ${interactiveClasses} ${className}`}
         onClick={onClick}
       >
         <div className="flex items-start justify-between mb-2">
@@ -78,7 +78,7 @@ export default function StatCard({
   // Default size: icon + label stacked left, large value spanning full height on right
   return (
     <div
-      className={`${baseClasses} p-4 min-h-[100px] flex items-center justify-between ${interactiveClasses} ${className}`}
+      className={`${baseClasses} ${iconBg} p-4 min-h-[100px] flex items-center justify-between ${interactiveClasses} ${className}`}
       onClick={onClick}
     >
       <div className="flex flex-col justify-between h-full gap-2">

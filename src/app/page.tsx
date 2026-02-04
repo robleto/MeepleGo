@@ -31,11 +31,7 @@ export default function HomePage() {
 
   // Logged-in users: Show personalized homepage with PageLayout
   if (isAuthenticated) {
-    return (
-      <PageLayout>
-        <HomepageContent />
-      </PageLayout>
-    )
+    return <HomepageContent />
   }
 
   // Logged-out users: Show full-viewport onboarding landing (no PageLayout wrapper)

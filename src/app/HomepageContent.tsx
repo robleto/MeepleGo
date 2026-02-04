@@ -7,7 +7,9 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
+import PageLayout from '@/components/Components/PageLayout'
 import HomepageView, {
+  HomepageSubHeader,
   type UserStats,
 } from '@/components/Components/HomepageView'
 import type { Game } from '@/types/supabase'
@@ -614,8 +616,15 @@ export default function HomepageContent() {
     }
   }, [])
 
+  const username =
+    user?.user_metadata?.username || user?.user_metadata?.full_name || null
+
   return (
-    <>
+    <PageLayout
+      subHeader={
+        <HomepageSubHeader phaseResult={phaseResult} username={username} />
+      }
+    >
       <HomepageView
         user={user}
         loading={loading}
@@ -629,6 +638,7 @@ export default function HomepageContent() {
         foundationalGames={foundationalGames}
         topCommunityRated={topCommunityRated}
         recentlyPlayed={recentlyPlayed}
+        username={username}
       />
 
       {/* Onboarding for new users */}
@@ -643,6 +653,6 @@ export default function HomepageContent() {
         visible={showSignupPrompt}
         onClose={() => setShowSignupPrompt(false)}
       />
-    </>
+    </PageLayout>
   )
 }

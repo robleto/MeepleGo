@@ -76,6 +76,11 @@ export interface HomepageViewProps {
   topCommunityRated?: any[]
 }
 
+export interface HomepageSubHeaderProps {
+  phaseResult?: UserPhaseResult | null
+  username?: string | null
+}
+
 // ── Quick Action definitions ──
 
 interface QuickAction {
@@ -141,6 +146,81 @@ const PHASE_2_ACTIONS: QuickAction[] = [
   },
 ]
 
+export function HomepageSubHeader({
+  phaseResult,
+  username,
+}: HomepageSubHeaderProps) {
+  if (!phaseResult?.canShowQuickActions) {
+    return null
+  }
+
+  const phase = phaseResult?.phase ?? 1
+  const quickActions = phase >= 2 ? PHASE_2_ACTIONS : PHASE_1_ACTIONS
+
+  const getTimeBasedGreeting = () => {
+    const hour = new Date().getHours()
+    if (hour < 12) {
+      return { icon: <SunIcon className="w-6 h-6 text-yellow-500" />, text: 'Good morning' }
+    }
+    if (hour < 17) {
+      return { icon: <SunIcon className="w-6 h-6 text-orange-500" />, text: 'Good afternoon' }
+    }
+    return { icon: <MoonIcon className="w-6 h-6 text-indigo-500" />, text: 'Good evening' }
+  }
+
+  const greeting = getTimeBasedGreeting()
+  
+  let welcomeHeading: React.ReactNode = (
+    <span className="inline-flex items-center gap-2">
+      {greeting.icon}
+      {greeting.text}
+    </span>
+  )
+  
+  if (phase >= 2) {
+    welcomeHeading = (
+      <span className="inline-flex items-center gap-2">
+        {greeting.icon}
+        {greeting.text}, {username || 'friend'}!
+      </span>
+    )
+  } else if (phaseResult && phaseResult.accountAgeDays > 3) {
+    welcomeHeading = (
+      <span className="inline-flex items-center gap-2">
+        Welcome back
+        <HandRaisedIcon className="w-6 h-6 text-amber-500" />
+      </span>
+    )
+  }
+
+  return (
+    <section className="space-y-4 text-center">
+      <Heading as="h1" size="lg">
+        {welcomeHeading}
+      </Heading>
+
+      <div className="flex flex-wrap items-center justify-center gap-4">
+        {quickActions.map((action) => (
+          <Link
+            key={action.href}
+            href={action.href}
+            className="flex items-center gap-2 px-3 py-2 transition-all hover:scale-105"
+          >
+            <div
+              className={`w-8 h-8 ${action.color.replace('bg-', 'bg-').replace('-500', '-100')} rounded-lg flex items-center justify-center flex-shrink-0`}
+            >
+              <action.icon className={`w-4 h-4 ${action.color.replace('bg-', 'text-').replace('-500', '-600')}`} />
+            </div>
+            <span className="text-sm font-medium text-gray-700">
+              {action.label}
+            </span>
+          </Link>
+        ))}
+      </div>
+    </section>
+  )
+}
+
 // ── Section explainer copy ──
 
 const EXPLAINERS: Record<string, string> = {
@@ -178,7 +258,7 @@ export function HomepageView({
   if (!user) {
     return (
       <div className="space-y-6" id="games-section">
-        <section className="space-y-2">
+        <section className="space-y-2 bg-transparent">
           <ZeroState
             title="Track your board game life"
             description="Organize your collection, rate what you play, and celebrate your favorites. Join to unlock your personal stats."
@@ -187,7 +267,7 @@ export function HomepageView({
         </section>
 
         {/* Trending Games */}
-        <section className="space-y-4">
+        <section className="space-y-4 bg-white">
           <div>
             <div className="flex items-center justify-between gap-4">
               <Heading as="h2" size="md" className="text-gray-900">
@@ -296,53 +376,10 @@ export function HomepageView({
   // ── Authenticated experience with progressive unlocking ──
 
   const phase = phaseResult?.phase ?? 1
-  const quickActions = phase >= 2 ? PHASE_2_ACTIONS : PHASE_1_ACTIONS
-
-  // Determine welcome heading with time-based greeting
-  const getTimeBasedGreeting = () => {
-    const hour = new Date().getHours()
-    if (hour < 12) {
-      return (
-        <span className="inline-flex items-center gap-2">
-          <SunIcon className="w-6 h-6 text-yellow-500" />
-          Good morning
-        </span>
-      )
-    }
-    if (hour < 17) {
-      return (
-        <span className="inline-flex items-center gap-2">
-          <SunIcon className="w-6 h-6 text-orange-500" />
-          Good afternoon
-        </span>
-      )
-    }
-    return (
-      <span className="inline-flex items-center gap-2">
-        <MoonIcon className="w-6 h-6 text-indigo-500" />
-        Good evening
-      </span>
-    )
-  }
-
-  let welcomeHeading: React.ReactNode = getTimeBasedGreeting()
-  if (phase >= 2) {
-    welcomeHeading = (
-      <span className="inline-flex items-center gap-2">
-        {getTimeBasedGreeting()}, {username || 'friend'}!
-      </span>
-    )
-  } else if (phaseResult && phaseResult.accountAgeDays > 3) {
-    welcomeHeading = (
-      <span className="inline-flex items-center gap-2">
-        Welcome back
-        <HandRaisedIcon className="w-6 h-6 text-amber-500" />
-      </span>
-    )
-  }
 
   // Fixed glance stat cards — subtle color treatment matching Sleeper Hits / Hot Takes badges
   const glanceCards: Array<{
+    backgroundColor: string
     iconBg: string
     Icon: React.ComponentType<{ className?: string }>
     iconColor: string
@@ -351,6 +388,7 @@ export function HomepageView({
     phase?: number // minimum phase to show (default: all)
   }> = [
     {
+      backgroundColor: 'bg-indigo-600/10',
       iconBg: 'bg-indigo-600/10',
       Icon: BookmarkIcon,
       iconColor: 'text-indigo-700',
@@ -358,6 +396,7 @@ export function HomepageView({
       label: 'Games Owned',
     },
     {
+      backgroundColor: 'bg-blue-600/10',
       iconBg: 'bg-blue-600/10',
       Icon: PlayIcon,
       iconColor: 'text-blue-700',
@@ -365,6 +404,7 @@ export function HomepageView({
       label: 'Games Played',
     },
     {
+      backgroundColor: 'bg-green-600/10',
       iconBg: 'bg-green-600/10',
       Icon: StarIcon,
       iconColor: 'text-green-700',
@@ -372,6 +412,7 @@ export function HomepageView({
       label: 'Games Ranked',
     },
     {
+      backgroundColor: 'bg-amber-600/10',
       iconBg: 'bg-amber-600/10',
       Icon: BookOpenIcon,
       iconColor: 'text-amber-700',
@@ -393,36 +434,8 @@ export function HomepageView({
         </details>
       )}
 
-      {/* Welcome Heading & Quick Actions */}
-      {phaseResult?.canShowQuickActions && (
-        <section className="space-y-4 text-center">
-          <Heading as="h1" size="lg">
-            {welcomeHeading}
-          </Heading>
-          
-          <div className="flex flex-wrap items-center justify-center gap-4">
-            {quickActions.map((action) => (
-              <Link
-                key={action.href}
-                href={action.href}
-                className="flex items-center gap-2 px-3 py-2 transition-all hover:scale-105"
-              >
-                <div
-                  className={`w-8 h-8 ${action.color.replace('bg-', 'bg-').replace('-500', '-100')} rounded-lg flex items-center justify-center flex-shrink-0`}
-                >
-                  <action.icon className={`w-4 h-4 ${action.color.replace('bg-', 'text-').replace('-500', '-600')}`} />
-                </div>
-                <span className="text-sm font-medium text-gray-700">
-                  {action.label}
-                </span>
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
-
       {/* White container for all discovery sections */}
-      <section className="p-6 space-y-12 bg-white border shadow-sm sm:p-8 rounded-2xl border-gray-200/60">
+      <section className="space-y-12">
       {/* Foundational Games (Phase 1, 1–2 rankings only) */}
       {phaseResult?.canShowFoundationalGames && foundationalGames.length > 0 && (
         <HorizontalCardSection
