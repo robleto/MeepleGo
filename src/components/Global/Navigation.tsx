@@ -1,52 +1,34 @@
 'use client'
 
 import React, { useEffect, useRef, useState } from 'react'
-import Portal from '@/components/Elements/Portal'
-import Overlay from '@/components/Elements/Overlay'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
-import NavItem from '../Elements/NavItem'
 import { cn, getGameUrl } from '@/utils/helpers'
-import { Button } from '../Elements/Button'
 import { Logo } from '../Foundations/Logo'
-import dynamic from 'next/dynamic'
+import Portal from '@/components/Elements/Portal'
+import Overlay from '@/components/Elements/Overlay'
+import { Button } from '../Elements/Button'
+import NavigationAddMenu from './NavigationAddMenu'
+import NavigationSearchPill from './NavigationSearchPill'
+import NavigationUserMenu from './NavigationUserMenu'
+import type {
+  GroupedSuggestions,
+  SuggestionGame,
+  ProfileMenuItem,
+} from './navigationTypes'
 import {
   TrophyIcon,
   ChartBarIcon,
   CubeIcon as GamesIcon,
   ListBulletIcon,
-  PlayIcon,
   PencilSquareIcon,
-  MoonIcon,
-  SunIcon,
-  MagnifyingGlassIcon,
   UserCircleIcon,
-  ArrowRightOnRectangleIcon,
-  CubeIcon,
   BookmarkIcon,
   HeartIcon,
   XMarkIcon,
-  PlusIcon,
   UserGroupIcon,
-  CogIcon,
-  ComputerDesktopIcon,
-  BookOpenIcon,
-  SparklesIcon,
 } from '@heroicons/react/24/outline'
-
-// Dynamic imports for heavy components
-const PlayLogEditor = dynamic(
-  () => import('@/components/Components/PlayLogEditor'),
-  {
-    loading: () => (
-      <div className="animate-pulse">
-        <div className="w-3/4 h-4 mb-4 bg-gray-200 rounded"></div>
-        <div className="h-32 bg-gray-200 rounded"></div>
-      </div>
-    ),
-  }
-)
 
 interface NavLinkItem {
   name: string
@@ -58,112 +40,16 @@ const NAV_ITEMS: NavLinkItem[] = [
   { name: 'Lists', href: '/lists', icon: ListBulletIcon },
   { name: 'Awards', href: '/awards', icon: TrophyIcon },
 ]
-
-interface SuggestionGame {
-  id: number
-  name: string
-  year_published: number | null
-  thumbnail_url: string | null
-  rating?: number | null
-}
-interface GroupedSuggestions {
-  exactMatches: SuggestionGame[]
-  popular: SuggestionGame[]
-  other: SuggestionGame[]
-}
-
-function SuggestionItem({
-  game,
-  active,
-  index,
-  query,
-  onSelect,
-  onHover,
-}: {
-  game: SuggestionGame
-  active: boolean
-  index: number
-  query: string
-  onSelect: (g: SuggestionGame) => void
-  onHover: () => void
-}) {
-  const highlight = (name: string) => {
-    const tokens = query
-      .toLowerCase()
-      .split(/\s+/)
-      .filter((t) => t.length > 1)
-    if (!tokens.length) return name
-    const parts: React.ReactNode[] = []
-    let i = 0
-    while (i < name.length) {
-      let match: string | null = null
-      for (const tk of tokens) {
-        if (name.toLowerCase().startsWith(tk, i)) {
-          match = name.slice(i, i + tk.length)
-          break
-        }
-      }
-      if (match) {
-        parts.push(
-          <span
-            key={i}
-            className="bg-yellow-200 rounded px-0.5"
-          >
-            {match}
-          </span>
-        )
-        i += match.length
-      } else {
-        parts.push(name[i])
-        i++
-      }
-    }
-    return <>{parts}</>
-  }
-  return (
-    <button
-      id={`nav-sugg-${index}`}
-      role="option"
-      aria-selected={active}
-      type="button"
-      onMouseEnter={onHover}
-      onMouseDown={(e) => e.preventDefault()}
-      onClick={() => onSelect(game)}
-      className={cn(
-        'w-full flex items-center gap-4 px-6 py-3 text-left transition-colors',
-        active
-          ? 'bg-primary-50'
-          : 'hover:bg-gray-50'
-      )}
-    >
-        {game.thumbnail_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={game.thumbnail_url}
-            alt=""
-            className="object-cover w-10 h-10 rounded-lg ring-1 ring-gray-200"
-          />
-        ) : (
-          <div className="w-10 h-10 rounded-lg bg-gray-200 flex items-center justify-center text-[10px] font-semibold text-gray-600">
-            {game.name.slice(0, 2).toUpperCase()}
-          </div>
-        )}
-        <div className="flex-1 min-w-0">
-          <div className="text-sm font-medium text-gray-900 truncate">
-            {highlight(game.name)}
-          </div>
-          <div className="text-[11px] text-gray-500 flex items-center gap-2">
-            {game.year_published && <span>{game.year_published}</span>}
-            {game.rating != null && (
-              <span className="font-mono text-gray-400">
-                {Number(game.rating).toFixed(1)}
-              </span>
-            )}
-          </div>
-        </div>
-    </button>
-  )
-}
+const PROFILE_MENU_ITEMS: ProfileMenuItem[] = [
+  { label: 'Overview', href: '/profile', Icon: UserCircleIcon },
+  { label: 'Library', href: '/profile/library', Icon: BookmarkIcon },
+  { label: 'Wishlist', href: '/profile/wishlist', Icon: HeartIcon },
+  { label: 'Rankings', href: '/profile/rankings', Icon: ChartBarIcon },
+  { label: 'Lists', href: '/profile/lists', Icon: ListBulletIcon },
+  { label: 'Awards', href: '/profile/awards', Icon: TrophyIcon },
+  { label: 'Journal', href: '/profile/plays', Icon: PencilSquareIcon },
+  { label: 'Friends', href: '/profile/friends', Icon: UserGroupIcon },
+]
 
 function Navigation() {
   // Always call hooks unconditionally.
@@ -178,16 +64,21 @@ function Navigation() {
     full_name?: string
     avatar_url?: string
   } | null>(null)
-  const [isDarkMode, setIsDarkMode] = useState(false)
-  const [themeMode, setThemeMode] = useState<'system' | 'light' | 'dark'>('system')
+  const [themeMode, setThemeMode] = useState<'system' | 'light' | 'dark'>(() => {
+    if (typeof window === 'undefined') return 'system'
+    const saved = localStorage.getItem('themeMode')
+    return saved === 'light' || saved === 'dark' || saved === 'system'
+      ? saved
+      : 'system'
+  })
   const [showUserMenu, setShowUserMenu] = useState(false)
   const [showAddMenu, setShowAddMenu] = useState(false)
   // Refs for outside click detection of dropdown menus
-  const addMenuRef = useRef<HTMLDivElement | null>(null)
-  const addButtonRef = useRef<HTMLButtonElement | null>(null)
-  const userMenuRef = useRef<HTMLDivElement | null>(null)
-  const userButtonRef = useRef<HTMLButtonElement | null>(null)
-  const mobileUserMenuRef = useRef<HTMLDivElement | null>(null)
+  const addMenuRef = useRef<HTMLDivElement>(null!)
+  const addButtonRef = useRef<HTMLButtonElement>(null!)
+  const userMenuRef = useRef<HTMLDivElement>(null!)
+  const userButtonRef = useRef<HTMLButtonElement>(null!)
+  const mobileUserMenuRef = useRef<HTMLDivElement>(null!)
 
   const userInitials = (
     profile?.username ||
@@ -199,13 +90,8 @@ function Navigation() {
     .toUpperCase()
 
   // Modal states
-  const [showPlayLogModal, setShowPlayLogModal] = useState(false)
   const [showCreateListModal, setShowCreateListModal] = useState(false)
   const [showAddGameModal, setShowAddGameModal] = useState(false)
-  const [selectedGameForPlayLog, setSelectedGameForPlayLog] = useState<{
-    id: string
-    name: string
-  } | null>(null)
 
   // Create list form state
   const [listName, setListName] = useState('')
@@ -292,14 +178,14 @@ function Navigation() {
   const [searchOpen, setSearchOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [activeIndex, setActiveIndex] = useState(-1)
-  const inputRef = useRef<HTMLInputElement | null>(null)
-  const dropdownRef = useRef<HTMLDivElement | null>(null)
+  const inputRef = useRef<HTMLInputElement>(null!)
+  const dropdownRef = useRef<HTMLDivElement>(null!)
   const cacheRef = useRef<Record<string, SuggestionGame[]>>({})
   const abortRef = useRef<AbortController | null>(null)
 
   // Moving highlighter refs/state
-  const navContainerRef = useRef<HTMLDivElement | null>(null)
-  const highlighterRef = useRef<HTMLDivElement | null>(null)
+  const navContainerRef = useRef<HTMLDivElement>(null!)
+  const highlighterRef = useRef<HTMLDivElement>(null!)
   const linkRefs = useRef<Record<string, HTMLAnchorElement | null>>({})
 
   const moveHighlighterTo = (el: HTMLAnchorElement | null) => {
@@ -378,34 +264,26 @@ function Navigation() {
   // Mount guard
   useEffect(() => {
     setIsMounted(true)
-    const savedTheme = localStorage.getItem('themeMode') as any
-    if (savedTheme) setThemeMode(savedTheme)
   }, [])
 
-  // Mount guard and theme init
+  // Legacy theme migration (darkMode -> themeMode)
   useEffect(() => {
-    setIsMounted(true)
-    const savedTheme = localStorage.getItem('themeMode') as any
-    if (savedTheme) setThemeMode(savedTheme)
-  }, [])
-
-  // Dark mode init
-  useEffect(() => {
-    const saved = localStorage.getItem('darkMode')
-    if (saved) {
-      const val = JSON.parse(saved)
-      setIsDarkMode(val)
-      document.documentElement.classList.toggle('dark', val)
-    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      setIsDarkMode(true)
-      document.documentElement.classList.add('dark')
+    const savedTheme = localStorage.getItem('themeMode')
+    if (!savedTheme) {
+      const legacy = localStorage.getItem('darkMode')
+      if (legacy !== null) {
+        const val = JSON.parse(legacy)
+        const next = val ? 'dark' : 'light'
+        setThemeMode(next)
+        localStorage.setItem('themeMode', next)
+      }
     }
   }, [])
+
   const applyTheme = (mode: 'system' | 'light' | 'dark') => {
     const sysDark = window.matchMedia('(prefers-color-scheme: dark)').matches
     const dark = mode === 'dark' || (mode === 'system' && sysDark)
     document.documentElement.classList.toggle('dark', dark)
-    setIsDarkMode(dark)
   }
   const setTheme = (mode: 'system' | 'light' | 'dark') => {
     setThemeMode(mode)
@@ -414,7 +292,7 @@ function Navigation() {
   }
   useEffect(() => {
     if (typeof window !== 'undefined') applyTheme(themeMode)
-  }, [])
+  }, [themeMode])
   useEffect(() => {
     if (themeMode === 'system') {
       const mq = window.matchMedia('(prefers-color-scheme: dark)')
@@ -605,7 +483,7 @@ function Navigation() {
       window.removeEventListener('mousedown', onPointerDown)
       window.removeEventListener('keydown', onKey)
     }
-  }, [showAddMenu, showUserMenu])
+  }, [showAddMenu, showUserMenu, searchOpen])
 
   useEffect(() => {
     if (searchOpen) {
@@ -693,580 +571,51 @@ function Navigation() {
           </div>
 
           <div className="flex-1" />
-          {/* Search (Airbnb-style pill, compact) - TEMPORARILY COMMENTED OUT 
-          <div className="relative hidden w-full max-w-lg md:flex">
-            <div className="flex w-full items-center gap-2 rounded-full border border-gray-200 bg-white/85 px-4 py-1.5 shadow-sm hover:shadow-md backdrop-blur-sm transition focus-within:ring-2 focus-within:ring-primary-500">
-              <input
-                ref={inputRef}
-                type="text"
-                value={query}
-                onChange={(e)=>{ setQuery(e.target.value); if (e.target.value) setShow(true) }}
-                onKeyDown={onKey}
-                onFocus={()=>{ if (flat.length) setShow(true) }}
-                placeholder="Start for games"
-                className="flex-1 text-sm leading-tight placeholder-gray-400 bg-transparent focus:outline-none"
-                role="combobox"
-                aria-autocomplete="list"
-                aria-expanded={show}
-                aria-controls="nav-suggestions"
-                aria-activedescendant={activeIndex>=0 && show?`nav-sugg-${activeIndex}`:undefined}
-              />
-              <button
-                type="button"
-                onClick={()=>{ if(query && flat.length && activeIndex>=0) { selectGame(flat[activeIndex]) } else { inputRef.current?.focus(); setShow(true) } }}
-                aria-label="Search"
-                className="flex items-center justify-center text-white transition rounded-full shadow-sm shrink-0 h-9 w-9 bg-primary-600 hover:bg-primary-600/90 active:bg-primary-700"
-              >
-                <MagnifyingGlassIcon className="w-5 h-5" />
-              </button>
-            </div>
-            {show && (
-              <div ref={dropdownRef} id="nav-suggestions" role="listbox" className="absolute left-0 right-0 top-full mt-2 bg-white border border-gray-200 rounded-2xl shadow-xl overflow-hidden max-h-[400px] overflow-y-auto z-50 text-sm">
-                {loading && <div className="px-6 py-4 text-gray-500">Searching…</div>}
-                {!loading && !flat.length && (
-                  <div className="px-6 py-6 text-center">
-                    <div className="flex items-center justify-center w-10 h-10 mx-auto mb-2 bg-gray-100 rounded-full"><MagnifyingGlassIcon className="w-5 h-5 text-gray-400" /></div>
-                    <div className="mb-1 text-sm font-medium text-gray-500">No games found</div>
-                    <div className="text-[11px] text-gray-400">Try another search term</div>
-                  </div>
-                )}
-                {!loading && flat.length > 0 && (
-                  <>
-                    {grouped.exactMatches.length > 0 && (
-                      <div className="border-b border-gray-100">
-                        <div className="px-6 py-2 bg-gray-50 text-[11px] font-semibold uppercase tracking-wide text-gray-500">Exact Match</div>
-                        {grouped.exactMatches.map((g,i)=> <SuggestionItem key={`e-${g.id}`} game={g} active={activeIndex===i} index={i} query={query} onSelect={selectGame} onHover={()=>setActiveIndex(i)} />)}
-                      </div>
-                    )}
-                    {grouped.popular.length > 0 && (
-                      <div className="border-b border-gray-100">
-                        <div className="px-6 py-2 bg-gray-50 text-[11px] font-semibold uppercase tracking-wide text-gray-500 flex items-center gap-2"><TrophyIcon className="w-3.5 h-3.5" /> Popular</div>
-                        {grouped.popular.map((g,i)=>{ const idx = grouped.exactMatches.length + i; return <SuggestionItem key={`p-${g.id}`} game={g} active={activeIndex===idx} index={idx} query={query} onSelect={selectGame} onHover={()=>setActiveIndex(idx)} /> })}
-                      </div>
-                    )}
-                    {grouped.other.length > 0 && (
-                      <div>
-                        <div className="px-6 py-2 bg-gray-50 text-[11px] font-semibold uppercase tracking-wide text-gray-500 flex items-center gap-2"><CubeIcon className="w-3.5 h-3.5" /> Other</div>
-                        {grouped.other.map((g,i)=>{ const idx = grouped.exactMatches.length + grouped.popular.length + i; return <SuggestionItem key={`o-${g.id}`} game={g} active={activeIndex===idx} index={idx} query={query} onSelect={selectGame} onHover={()=>setActiveIndex(idx)} /> })}
-                      </div>
-                    )}
-                  </>
-                )}
-                <div className="border-t border-gray-100">
-                  <div className="px-6 py-2 text-[11px] text-gray-400">Press Enter to search • ↑↓ navigate</div>
-                  <div className="px-6 py-2 text-center">
-                    <Link href="/add" onClick={()=>{ setShow(false); setQuery('') }} className="text-xs text-gray-400 transition-colors hover:text-primary-600">Can't find your game? Add it here</Link>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-          */}
 
           {/* Actions */}
           {isMounted && (
-          <div className="relative flex items-center gap-2" ref={addMenuRef}>
-            <Button
-              ref={addButtonRef}
-              onClick={() => setShowAddMenu((o) => !o)}
-              variant="ghost"
-              size="sm"
-              shape="square"
-              leftIcon={<PlusIcon className="w-5 h-5" />}
-              aria-label="Add"
-              aria-haspopup="menu"
-              aria-expanded={showAddMenu}
-            />
-            <div className="relative">
-              <div
-                className={cn(
-                  'flex items-center gap-2 rounded-full border border-gray-200 bg-white/90 shadow-sm backdrop-blur-sm transition-all duration-200 overflow-hidden',
-                  searchOpen
-                    ? 'w-72 pl-2 pr-2 py-1.5'
-                    : 'w-9 h-9 justify-center p-0'
-                )}
-              >
-                <button
-                  type="button"
-                  onClick={() =>
-                    setSearchOpen((v) => {
-                      const next = !v
-                      if (!next) {
-                        setShow(false)
-                        setQuery('')
-                      }
-                      return next
-                    })
-                  }
-                  aria-label="Search"
-                  className={cn(
-                    'shrink-0 flex items-center justify-center rounded-full text-gray-600',
-                    searchOpen
-                      ? 'h-7 w-7 hover:bg-gray-100'
-                      : 'h-9 w-9'
-                  )}
-                >
-                  <MagnifyingGlassIcon className="w-4 h-4 ml-2" />
-                </button>
-                <input
-                  ref={inputRef}
-                  type="text"
-                  value={query}
-                  onChange={(e) => {
-                    setQuery(e.target.value)
-                    if (e.target.value) setShow(true)
-                  }}
-                  onKeyDown={onKey}
-                  onFocus={() => {
-                    if (flat.length) setShow(true)
-                  }}
-                  placeholder="Search games"
-                  className={cn(
-                    'bg-transparent text-sm placeholder-gray-400 focus:outline-none transition-all duration-200',
-                    searchOpen ? 'w-full opacity-100' : 'w-0 opacity-0 pointer-events-none'
-                  )}
-                  role="combobox"
-                  aria-autocomplete="list"
-                  aria-expanded={show}
-                  aria-controls="nav-suggestions"
-                  aria-activedescendant={
-                    activeIndex >= 0 && show
-                      ? `nav-sugg-${activeIndex}`
-                      : undefined
-                  }
-                />
-              </div>
-              {searchOpen && show && (
-                <div
-                  ref={dropdownRef}
-                  id="nav-suggestions"
-                  role="listbox"
-                  className="absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-2xl shadow-xl overflow-hidden max-h-[400px] overflow-y-auto z-50 text-sm"
-                >
-                  {loading && (
-                    <div className="px-6 py-4 text-gray-500">
-                      Searching…
-                    </div>
-                  )}
-                  {!loading && !flat.length && (
-                    <div className="px-6 py-6 text-center">
-                      <div className="flex items-center justify-center w-10 h-10 mx-auto mb-2 bg-gray-100 rounded-full">
-                        <MagnifyingGlassIcon className="w-5 h-5 text-gray-400" />
-                      </div>
-                      <div className="mb-1 text-sm font-medium text-gray-500">
-                        No games found
-                      </div>
-                      <div className="text-[11px] text-gray-400">
-                        Try another search term
-                      </div>
-                    </div>
-                  )}
-                  {!loading && flat.length > 0 && (
-                    <>
-                      {grouped.exactMatches.length > 0 && (
-                        <div className="border-b border-gray-100">
-                          <div className="px-6 py-2 bg-gray-50 text-[11px] font-semibold uppercase tracking-wide text-gray-500">
-                            Exact Match
-                          </div>
-                          {grouped.exactMatches.map((g, i) => (
-                            <SuggestionItem
-                              key={`e-${g.id}`}
-                              game={g}
-                              active={activeIndex === i}
-                              index={i}
-                              query={query}
-                              onSelect={selectGame}
-                              onHover={() => setActiveIndex(i)}
-                            />
-                          ))}
-                        </div>
-                      )}
-                      {grouped.popular.length > 0 && (
-                        <div className="border-b border-gray-100">
-                          <div className="px-6 py-2 bg-gray-50 text-[11px] font-semibold uppercase tracking-wide text-gray-500 flex items-center gap-2">
-                            <TrophyIcon className="w-3.5 h-3.5" /> Popular
-                          </div>
-                          {grouped.popular.map((g, i) => {
-                            const idx = grouped.exactMatches.length + i
-                            return (
-                              <SuggestionItem
-                                key={`p-${g.id}`}
-                                game={g}
-                                active={activeIndex === idx}
-                                index={idx}
-                                query={query}
-                                onSelect={selectGame}
-                                onHover={() => setActiveIndex(idx)}
-                              />
-                            )
-                          })}
-                        </div>
-                      )}
-                      {grouped.other.length > 0 && (
-                        <div>
-                          <div className="px-6 py-2 bg-gray-50 text-[11px] font-semibold uppercase tracking-wide text-gray-500 flex items-center gap-2">
-                            <CubeIcon className="w-3.5 h-3.5" /> Other
-                          </div>
-                          {grouped.other.map((g, i) => {
-                            const idx =
-                              grouped.exactMatches.length +
-                              grouped.popular.length +
-                              i
-                            return (
-                              <SuggestionItem
-                                key={`o-${g.id}`}
-                                game={g}
-                                active={activeIndex === idx}
-                                index={idx}
-                                query={query}
-                                onSelect={selectGame}
-                                onHover={() => setActiveIndex(idx)}
-                              />
-                            )
-                          })}
-                        </div>
-                      )}
-                    </>
-                  )}
-                  <div className="border-t border-gray-100">
-                    <div className="px-6 py-2 text-[11px] text-gray-400">
-                      Press Enter to search • ↑↓ navigate
-                    </div>
-                    <div className="px-6 py-2 text-center">
-                      <Link
-                        href="/add"
-                        onClick={() => {
-                          setShow(false)
-                          setQuery('')
-                          setSearchOpen(false)
-                        }}
-                        className="text-xs text-gray-400 transition-colors hover:text-primary-600"
-                      >
-                        Can't find your game? Add it here
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-            {showAddMenu && (
-              <div
-                className="absolute top-0 z-50 p-2 mt-10 mr-2 bg-white border border-gray-200 shadow-xl right-full w-60 rounded-xl"
-                role="menu"
-              >
-                <div className="text-[11px] uppercase tracking-wide font-semibold text-gray-500 px-2 pb-1">
-                  Quick Add
-                </div>
-                <button
-                  onClick={() => {
-                    setShowAddMenu(false)
-                    setShowPlayLogModal(true)
-                  }}
-                  className="flex items-center w-full gap-3 px-3 py-2 text-sm transition rounded-lg hover:bg-gray-50"
-                >
-                  <PlayIcon className="w-4 h-4 text-gray-400" /> Log a Play
-                </button>
-                <button
-                  onClick={() => {
-                    setShowAddMenu(false)
-                    setShowCreateListModal(true)
-                  }}
-                  className="flex items-center w-full gap-3 px-3 py-2 text-sm transition rounded-lg hover:bg-gray-50"
-                >
-                  <ListBulletIcon className="w-4 h-4 text-gray-400" /> New List
-                </button>
-                <button
-                  onClick={() => {
-                    setShowAddGameModal(true)
-                    setShowAddMenu(false)
-                  }}
-                  className="flex items-center w-full gap-3 px-3 py-2 text-sm transition rounded-lg hover:bg-gray-50"
-                >
-                  <CubeIcon className="w-4 h-4 text-gray-400" /> Missing Game
-                </button>
-              </div>
-            )}
-            <div className="relative">
+            <div className="relative flex items-center gap-2">
+              <NavigationAddMenu
+                showAddMenu={showAddMenu}
+                setShowAddMenu={setShowAddMenu}
+                addMenuRef={addMenuRef}
+                addButtonRef={addButtonRef}
+                onLogPlay={() => router.push('/plays/new')}
+                onCreateList={() => setShowCreateListModal(true)}
+                onAddGame={() => setShowAddGameModal(true)}
+              />
+              <NavigationSearchPill
+                searchOpen={searchOpen}
+                setSearchOpen={setSearchOpen}
+                query={query}
+                setQuery={setQuery}
+                show={show}
+                setShow={setShow}
+                grouped={grouped}
+                flat={flat}
+                loading={loading}
+                activeIndex={activeIndex}
+                setActiveIndex={setActiveIndex}
+                inputRef={inputRef}
+                dropdownRef={dropdownRef}
+                onKey={onKey}
+                selectGame={selectGame}
+              />
               {session ? (
-                <>
-                  <button
-                    ref={userButtonRef}
-                    onClick={() => setShowUserMenu((v) => !v)}
-                    aria-haspopup="menu"
-                    aria-expanded={showUserMenu}
-                    className="flex items-center gap-2 p-1 transition-colors rounded-full hover:bg-gray-100"
-                    title={
-                      profile?.username ||
-                      profile?.full_name ||
-                      session.user.email ||
-                      'Profile'
-                    }
-                  >
-                    {profile?.avatar_url ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={profile.avatar_url}
-                        alt="Profile"
-                        className="object-cover rounded-full w-7 h-7 ring-2 ring-gray-200"
-                      />
-                    ) : (
-                      <div className="w-7 h-7 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white text-[12px] font-medium ring-2 ring-gray-200">
-                        {(
-                          profile?.username ||
-                          profile?.full_name ||
-                          session.user.email ||
-                          'U'
-                        )
-                          .charAt(0)
-                          .toUpperCase()}
-                      </div>
-                    )}
-                    <span className="hidden text-sm font-medium text-gray-700 truncate sm:block max-w-24">
-                      {profile?.username || profile?.full_name || 'Profile'}
-                    </span>
-                  </button>
-                  
-                  {/* Desktop User Menu Dropdown - Hidden on mobile */}
-                  {showUserMenu && (
-                    <>
-                      <div
-                        ref={userMenuRef}
-                        className="absolute right-0 z-50 hidden w-64 py-2 mt-2 text-sm bg-white border border-gray-200 shadow-xl sm:block rounded-2xl"
-                        role="menu"
-                      >
-                        <div className="px-4 py-3 border-b border-gray-100">
-                          <div className="font-medium text-gray-900 truncate">
-                            {profile?.username || profile?.full_name || 'User'}
-                          </div>
-                          <div className="text-xs text-gray-500 truncate">
-                            {session?.user.email}
-                          </div>
-                        </div>
-                        <div className="px-2 py-2">
-                        {[
-                          {
-                            label: 'Overview',
-                            href: '/profile',
-                            Icon: UserCircleIcon,
-                          },
-                          {
-                            label: 'Library',
-                            href: '/profile/library',
-                            Icon: BookmarkIcon,
-                          },
-                          {
-                            label: 'Wishlist',
-                            href: '/profile/wishlist',
-                            Icon: HeartIcon,
-                          },
-                          {
-                            label: 'Rankings',
-                            href: '/profile/rankings',
-                            Icon: ChartBarIcon,
-                          },
-                          {
-                            label: 'Lists',
-                            href: '/profile/lists',
-                            Icon: ListBulletIcon,
-                          },
-                          {
-                            label: 'Awards',
-                            href: '/profile/awards',
-                            Icon: TrophyIcon,
-                          },
-                          {
-                            label: 'Journal',
-                            href: '/profile/plays',
-                            Icon: PencilSquareIcon,
-                          },
-                          {
-                            label: 'Friends',
-                            href: '/profile/friends',
-                            Icon: UserGroupIcon,
-                          },
-                        ].map(({ label, href, Icon }) => (
-                          <Link
-                            key={label}
-                            href={href}
-                            className="flex items-center gap-2 px-3 py-1.5 rounded-md text-xs hover:bg-gray-50 transition-colors"
-                          >
-                            <Icon className="h-3.5 w-3.5 text-gray-400" />
-                            <span className="text-gray-700">
-                              {label}
-                            </span>
-                          </Link>
-                        ))}
-                        </div>
-                        <hr className="my-1 border-gray-100" />
-                        <Link
-                        href="/settings"
-                        className="flex items-center gap-2 px-4 py-2 text-xs transition-colors hover:bg-gray-50"
-                      >
-                        <ListBulletIcon className="h-3.5 w-3.5 text-gray-400" />
-                        Settings
-                      </Link>
-                      <button
-                        onClick={signOut}
-                        className="flex items-center w-full gap-2 px-4 py-2 text-xs text-red-600 transition-colors hover:bg-gray-50"
-                      >
-                        <ArrowRightOnRectangleIcon className="h-3.5 w-3.5" />
-                        Sign out
-                      </button>
-                      <div className="px-4 pt-3 pb-2">
-                        <div className="text-[10px] font-semibold uppercase tracking-wide text-gray-500 mb-2">
-                          Theme
-                        </div>
-                        <div className="grid grid-cols-3 gap-2">
-                          {(['system', 'light', 'dark'] as const).map((m) => (
-                            <button
-                              key={m}
-                              onClick={() => setTheme(m)}
-                              className={`flex items-center justify-center gap-1 px-2 py-1.5 rounded-md text-[11px] font-medium border transition ${themeMode === m ? 'border-primary-500 text-primary-600 bg-primary-50' : 'border-gray-200 hover:bg-gray-50 text-gray-600'}`}
-                            >
-                              {m === 'system' ? (
-                                <span className="flex items-center gap-1">
-                                  <SunIcon className="w-3.5 h-3.5" />
-                                  <MoonIcon className="w-3.5 h-3.5" />
-                                </span>
-                              ) : m === 'light' ? (
-                                <SunIcon className="w-4 h-4" />
-                              ) : (
-                                <MoonIcon className="w-4 h-4" />
-                              )}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                      </div>
-
-                      {/* Mobile Full-Screen User Menu */}
-                      <Portal>
-                        <Overlay
-                          visible={showUserMenu}
-                          variant="blur"
-                          clickToClose={true}
-                          zIndex={200}
-                          className="sm:hidden"
-                          onClick={() => setShowUserMenu(false)}
-                        >
-                        <div
-                          ref={mobileUserMenuRef}
-                          className="fixed inset-y-0 right-0 flex flex-col w-full overflow-y-auto bg-white shadow-2xl"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          {/* Header with Close Button */}
-                          <div className="flex items-center justify-between p-4 border-b border-gray-200">
-                            <div className="flex items-center gap-3">
-                              <div className="flex items-center justify-center w-12 h-12 text-lg font-semibold text-white rounded-full bg-gradient-to-br from-orange-400 to-orange-500">
-                                {userInitials}
-                              </div>
-                              <div>
-                                <div className="text-base font-semibold">
-                                  {session?.user?.user_metadata?.preferred_username ||
-                                    session?.user?.user_metadata?.name ||
-                                    session?.user?.email?.split('@')[0] ||
-                                    'User'}
-                                </div>
-                                <div className="text-xs text-gray-600">
-                                  {session?.user?.email}
-                                </div>
-                              </div>
-                            </div>
-                            <button
-                              onClick={() => setShowUserMenu(false)}
-                              className="p-2 rounded-lg hover:bg-gray-100"
-                              aria-label="Close menu"
-                            >
-                              <XMarkIcon className="w-6 h-6" />
-                            </button>
-                          </div>
-
-                          {/* Navigation Links */}
-                          <div className="flex-1 py-4">
-                            <div className="px-2 space-y-1">
-                              {[
-                                { name: 'Overview', href: '/profile', icon: UserCircleIcon },
-                                { name: 'Library', href: '/profile/library', icon: BookmarkIcon },
-                                { name: 'Wishlist', href: '/profile/wishlist', icon: HeartIcon },
-                                { name: 'Rankings', href: '/profile/rankings', icon: ChartBarIcon },
-                                { name: 'Lists', href: '/profile/lists', icon: ListBulletIcon },
-                                { name: 'Awards', href: '/profile/awards', icon: TrophyIcon },
-                                { name: 'Journal', href: '/profile/plays', icon: BookOpenIcon },
-                                { name: 'Friends', href: '/profile/friends', icon: UserGroupIcon },
-                              ].map((item) => {
-                                const Icon = item.icon
-                                return (
-                                  <Link
-                                    key={item.name}
-                                    href={item.href}
-                                    onClick={() => setShowUserMenu(false)}
-                                    className="flex items-center gap-3 px-4 py-3 text-base font-medium rounded-xl hover:bg-gray-100"
-                                  >
-                                    <Icon className="w-6 h-6 text-gray-500" />
-                                    {item.name}
-                                  </Link>
-                                )
-                              })}
-                            </div>
-
-                            {/* Settings */}
-                            <div className="px-2 pt-4 mt-6 border-t border-gray-200">
-                              <Link
-                                href="/settings"
-                                onClick={() => setShowUserMenu(false)}
-                                className="flex items-center gap-3 px-4 py-3 text-base font-medium rounded-xl hover:bg-gray-100"
-                              >
-                                <CogIcon className="w-6 h-6 text-gray-500" />
-                                Settings
-                              </Link>
-                            </div>
-
-                            {/* Theme Switcher */}
-                            <div className="px-2 mt-4">
-                              <div className="px-4 py-2 text-xs font-semibold tracking-wider text-gray-500 uppercase">
-                                Theme
-                              </div>
-                              <div className="flex gap-2 px-4 py-2">
-                                {(['system', 'light', 'dark'] as const).map((themeOption) => (
-                                  <button
-                                    key={themeOption}
-                                    onClick={() => setTheme(themeOption)}
-                                    className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-medium transition-colors ${
-                                      themeMode === themeOption
-                                        ? 'bg-orange-500 text-white'
-                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                    }`}
-                                  >
-                                    {themeOption === 'system' ? (
-                                      <ComputerDesktopIcon className="w-5 h-5" />
-                                    ) : themeOption === 'light' ? (
-                                      <SunIcon className="w-5 h-5" />
-                                    ) : (
-                                      <MoonIcon className="w-5 h-5" />
-                                    )}
-                                    <span className="capitalize">{themeOption}</span>
-                                  </button>
-                                ))}
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Sign Out Button */}
-                          <div className="p-4 border-t border-gray-200">
-                            <button
-                              onClick={signOut}
-                              className="flex items-center justify-center w-full gap-2 px-4 py-3 text-base font-medium text-white bg-red-500 rounded-xl hover:bg-red-600"
-                            >
-                              <ArrowRightOnRectangleIcon className="w-5 h-5" />
-                              Sign Out
-                            </button>
-                          </div>
-                        </div>
-                      </Overlay>
-                    </Portal>
-                    </>
-                  )}
-                </>
+                <NavigationUserMenu
+                  session={session}
+                  profile={profile}
+                  showUserMenu={showUserMenu}
+                  setShowUserMenu={setShowUserMenu}
+                  userButtonRef={userButtonRef}
+                  userMenuRef={userMenuRef}
+                  mobileUserMenuRef={mobileUserMenuRef}
+                  userInitials={userInitials}
+                  onSignOut={signOut}
+                  onSetTheme={setTheme}
+                  themeMode={themeMode}
+                  profileMenuItems={PROFILE_MENU_ITEMS}
+                />
               ) : (
                 <Link href="/login">
                   <Button variant="primary" size="sm">
@@ -1275,78 +624,9 @@ function Navigation() {
                 </Link>
               )}
             </div>
-          </div>
           )}
         </div>
       </div>
-
-      {/* Play Log Modal */}
-      <Portal>
-        <Overlay
-          visible={showPlayLogModal}
-          variant="blur"
-          clickToClose={false}
-          zIndex={200}
-          className="p-4"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) {
-              setShowPlayLogModal(false)
-            }
-          }}
-        >
-          <div
-            className="bg-white w-full sm:max-w-2xl rounded-t-2xl sm:rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[80vh]"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
-              <h3 className="text-lg font-semibold">Log Your Play</h3>
-              <button
-                onClick={() => setShowPlayLogModal(false)}
-                className="p-2 rounded-md hover:bg-gray-100"
-                aria-label="Close"
-              >
-                <XMarkIcon className="w-6 h-6 text-gray-500" />
-              </button>
-            </div>
-            {/* Body */}
-            <div className="flex-1 p-6 overflow-y-auto">
-              {selectedGameForPlayLog ? (
-                <PlayLogEditor
-                  gameId={selectedGameForPlayLog.id}
-                  gameName={selectedGameForPlayLog.name}
-                  openForm
-                  autoFocus
-                  onCreated={() => {
-                    setShowPlayLogModal(false)
-                    setSelectedGameForPlayLog(null)
-                  }}
-                />
-              ) : (
-                <div className="space-y-4">
-                  <p className="mb-4 text-sm text-gray-600">
-                    Search for a game to log a play:
-                  </p>
-                  <input
-                    type="text"
-                    placeholder="Search for a game..."
-                    className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                    autoFocus
-                  />
-                  <div className="flex justify-end pt-4">
-                    <button
-                      onClick={() => setShowPlayLogModal(false)}
-                      className="px-4 py-2 text-gray-600 transition-colors hover:text-gray-800"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </Overlay>
-      </Portal>
 
       {/* Create List Modal */}
       <Portal>

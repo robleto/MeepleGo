@@ -298,14 +298,6 @@ export default function GameOnboardingModal({
                 {game.year_published && (
                   <p className="text-sm text-gray-500">{game.year_published}</p>
                 )}
-                {game.rating && (
-                  <div className="mt-2 flex items-center gap-2">
-                    <span className="text-xs text-gray-500">BGG:</span>
-                    <span className="text-sm font-medium text-gray-700">
-                      {Number(game.rating).toFixed(1)}
-                    </span>
-                  </div>
-                )}
               </div>
             </div>
           </div>

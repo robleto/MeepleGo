@@ -47,12 +47,15 @@ export default function SettingsPage() {
 
   // Density must be declared before any conditional return to keep hook order stable
   const [density, setDensity] = useState<string>('expanded')
+  const [greetingDisplay, setGreetingDisplay] = useState<string>('first_name')
 
-  // Load stored density preference once on mount (client only)
+  // Load stored preferences once on mount (client only)
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem('listDensity')
       if (stored && stored !== density) setDensity(stored)
+      const storedGreeting = localStorage.getItem('greetingDisplay')
+      if (storedGreeting) setGreetingDisplay(storedGreeting)
     }
     // we intentionally leave density out to avoid triggering if user changes it later
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -180,6 +183,11 @@ export default function SettingsPage() {
     window.dispatchEvent(
       new CustomEvent('list-density-change', { detail: val })
     )
+  }
+
+  const updateGreetingDisplay = (val: string) => {
+    setGreetingDisplay(val)
+    localStorage.setItem('greetingDisplay', val)
   }
 
   if (loading)
@@ -438,6 +446,60 @@ export default function SettingsPage() {
                 </div>
               </div>
             </div>
+
+            <section className="bg-white rounded-lg shadow p-6 space-y-4">
+              <h2 className="text-lg font-semibold text-gray-900">
+                Greeting Display
+              </h2>
+              <p className="text-xs text-gray-500 max-w-prose">
+                Choose how your name appears in the homepage greeting.
+              </p>
+              <div className="grid gap-3">
+                <button
+                  onClick={() => updateGreetingDisplay('first_name')}
+                  className={`rounded-lg border p-4 text-left text-sm transition ${
+                    greetingDisplay === 'first_name'
+                      ? 'border-primary-500 bg-primary-50'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  First Name
+                  <div className="text-[11px] text-gray-500 mt-1">
+                    {profile.full_name
+                      ? `"Good morning, ${profile.full_name.trim().split(/\s+/)[0]}"`
+                      : '"Good morning, Greg"'}
+                  </div>
+                </button>
+                <button
+                  onClick={() => updateGreetingDisplay('username')}
+                  className={`rounded-lg border p-4 text-left text-sm transition ${
+                    greetingDisplay === 'username'
+                      ? 'border-primary-500 bg-primary-50'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  Username
+                  <div className="text-[11px] text-gray-500 mt-1">
+                    {profile.username
+                      ? `"Good morning, ${profile.username}"`
+                      : '"Good morning, player42"'}
+                  </div>
+                </button>
+                <button
+                  onClick={() => updateGreetingDisplay('none')}
+                  className={`rounded-lg border p-4 text-left text-sm transition ${
+                    greetingDisplay === 'none'
+                      ? 'border-primary-500 bg-primary-50'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  No Name
+                  <div className="text-[11px] text-gray-500 mt-1">
+                    "Good morning"
+                  </div>
+                </button>
+              </div>
+            </section>
 
             <section className="bg-white rounded-lg shadow p-6 space-y-4">
               <h2 className="text-lg font-semibold text-gray-900">

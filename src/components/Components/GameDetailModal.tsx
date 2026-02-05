@@ -3,13 +3,13 @@ import React, { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
-import { RatingChip } from '../Elements/Chip'
-import RatingPopup from '../Elements/RatingPopup'
 import dynamic from 'next/dynamic'
 import {
   XMarkIcon,
   PlayIcon,
   BookOpenIcon,
+  StarIcon,
+  HeartIcon,
   TrophyIcon,
   TagIcon,
   AdjustmentsHorizontalIcon,
@@ -26,13 +26,14 @@ import {
   CubeIcon,
   PaintBrushIcon,
 } from '@heroicons/react/24/outline'
+import { CheckCircleIcon } from '@heroicons/react/24/solid'
 import { addGameToDefaultList, removeGameFromDefaultList } from '@/lib/lists'
 import {
   formatPlayerCount,
   formatPlayingTime,
   getGameUrl,
 } from '@/utils/helpers'
-import GameActions from './GameActions'
+import { Button } from '@/components/Elements/Button'
 
 const PlayLogEditor = dynamic(() => import('./PlayLogEditor'), { ssr: false })
 
@@ -44,6 +45,8 @@ interface GameDetailModalProps {
   onMembershipChange?: (gameId: string, patch: any) => void
   /** Position modal considering navigation height */
   fromNav?: boolean
+  initialTab?: 'play' | 'collections' | 'gamelog' | 'awards' | 'details'
+  initialPlayStep?: 'status' | 'rate' | 'log'
 }
 
 export default function GameDetailModal({
@@ -53,6 +56,8 @@ export default function GameDetailModal({
   variant = 'modal',
   onMembershipChange,
   fromNav = false,
+  initialTab,
+  initialPlayStep: _initialPlayStep,
 }: GameDetailModalProps) {
   let router: any
   let searchParamsNav: any
@@ -81,21 +86,13 @@ export default function GameDetailModal({
   const [showFullSummary, setShowFullSummary] = useState(false)
   const [showJournal, setShowJournal] = useState(false)
   const [saving, setSaving] = useState(false)
-  const [note, setNote] = useState<string>(
-    (game as any)?.ranking?.public_note || (game as any)?.ranking?.notes || ''
-  )
-  const [noteDirty, setNoteDirty] = useState(false)
-  const noteSaveTimeout = useRef<any>(null)
   const [activeSection, setActiveSection] = useState<
     'overview' | 'ratings' | 'mygames' | 'awards' | 'tags' | 'lists'
   >('overview')
+  const [activeTab, setActiveTab] = useState<
+    'play' | 'collections' | 'gamelog' | 'awards' | 'details'
+  >('details')
   const stackSections = true
-  // Shared rating popup state (position + open) used everywhere
-  const [ratingOpen, setRatingOpen] = useState(false)
-  const [ratingAnchor, setRatingAnchor] = useState<{
-    x: number
-    y: number
-  } | null>(null)
   const sectionIds: (typeof activeSection)[] = [
     'overview',
     'ratings',
@@ -120,10 +117,10 @@ export default function GameDetailModal({
   const [refreshingBgg, setRefreshingBgg] = useState(false)
   const [isAdmin, setIsAdmin] = useState(false)
   const [showBggMetrics, setShowBggMetrics] = useState(false)
+  void _initialPlayStep
 
   // Lists state
   const [allLists, setAllLists] = useState<any[]>([])
-  const [containingLists, setContainingLists] = useState<any[]>([])
   const [listMembership, setListMembership] = useState<Set<string>>(new Set())
   const [loadingLists, setLoadingLists] = useState(false)
   const [publicLists, setPublicLists] = useState<any[]>([])
@@ -145,10 +142,6 @@ export default function GameDetailModal({
       wishlist: game.list_membership?.wishlist ?? false,
     })
     setExpandedDescription(false)
-    const existingNote =
-      (game as any)?.ranking?.public_note || (game as any)?.ranking?.notes || ''
-    setNote(existingNote)
-    setNoteDirty(false)
     setEnrichedGame(game) // reset enriched copy when switching to a new game
   }, [game.id, game.ranking, game.list_membership])
 
@@ -186,7 +179,6 @@ export default function GameDetailModal({
         } = await supabase.auth.getSession()
         if (!session) {
           setAllLists([])
-          setContainingLists([])
           setListMembership(new Set())
           return
         }
@@ -217,10 +209,8 @@ export default function GameDetailModal({
           const setIds = new Set<string>()
           membershipRows?.forEach((r) => setIds.add(r.list_id))
           setListMembership(setIds)
-          setContainingLists(sorted.filter((l: any) => setIds.has(l.id)))
         } else {
           setListMembership(new Set())
-          setContainingLists([])
         }
         const { data: pubRows, error: pubErr } = await supabase
           .from('game_list_items')
@@ -345,38 +335,19 @@ export default function GameDetailModal({
   }
 
   const handleRatingClick = async (rating: number) => {
-    await upsertRanking({ ranking: rating })
+    await upsertRanking({ ranking: rating, played_it: true })
+    const listId = await ensurePlayedList()
+    if (listId) await setCustomCollectionMembership(listId, true)
     // close popup after selection
     setRatingOpen(false)
   }
 
   const handlePlayedToggle = async () => {
-    await upsertRanking({ played_it: !localRanking?.played_it })
+    const nextPlayed = !localRanking?.played_it
+    await upsertRanking({ played_it: nextPlayed })
+    const listId = await ensurePlayedList()
+    if (listId) await setCustomCollectionMembership(listId, nextPlayed)
   }
-
-  const handleNoteSave = async () => {
-    await upsertRanking({ public_note: note.trim() ? note.trim() : null })
-    setNoteDirty(false)
-  }
-
-  // Debounced auto-save for note (800ms after last change)
-  useEffect(() => {
-    if (!noteDirty) return
-    if (noteSaveTimeout.current) clearTimeout(noteSaveTimeout.current)
-    noteSaveTimeout.current = setTimeout(() => {
-      handleNoteSave()
-    }, 800)
-    return () => {
-      if (noteSaveTimeout.current) clearTimeout(noteSaveTimeout.current)
-    }
-  }, [note])
-
-  // Ensure note saves when switching away from note tab or closing
-  useEffect(() => {
-    return () => {
-      if (noteDirty) handleNoteSave()
-    }
-  }, [noteDirty])
 
   const handleAddTo = async (type: 'library' | 'wishlist') => {
     if (membership[type]) {
@@ -407,6 +378,104 @@ export default function GameDetailModal({
     }
   }
 
+  const handleToggleCustomCollection = async (listId: string) => {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
+    if (!session) return
+
+    const nextMembership = new Set(listMembership)
+    const isMember = nextMembership.has(listId)
+
+    if (isMember) {
+      nextMembership.delete(listId)
+    } else {
+      nextMembership.add(listId)
+    }
+    setListMembership(nextMembership)
+    try {
+      if (isMember) {
+        await supabase
+          .from('game_list_items')
+          .delete()
+          .eq('game_id', game.id)
+          .eq('list_id', listId)
+      } else {
+        await supabase.from('game_list_items').insert({
+          game_id: game.id,
+          list_id: listId,
+          user_id: session.user.id,
+        })
+      }
+    } catch (e) {
+      const rollback = new Set(listMembership)
+      setListMembership(rollback)
+    }
+  }
+
+  const setCustomCollectionMembership = async (
+    listId: string,
+    shouldBeMember: boolean
+  ) => {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
+    if (!session) return
+
+    const nextMembership = new Set(listMembership)
+    const isMember = nextMembership.has(listId)
+    if (shouldBeMember === isMember) return
+
+    if (shouldBeMember) nextMembership.add(listId)
+    else nextMembership.delete(listId)
+    setListMembership(nextMembership)
+
+    try {
+      if (shouldBeMember) {
+        await supabase.from('game_list_items').insert({
+          game_id: game.id,
+          list_id: listId,
+          user_id: session.user.id,
+        })
+      } else {
+        await supabase
+          .from('game_list_items')
+          .delete()
+          .eq('game_id', game.id)
+          .eq('list_id', listId)
+      }
+    } catch (e) {
+      const rollback = new Set(listMembership)
+      setListMembership(rollback)
+    }
+  }
+
+  const ensurePlayedList = async (): Promise<string | null> => {
+    if (playedList?.id) return playedList.id
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
+    if (!session) return null
+    try {
+      const { data, error } = await supabase
+        .from('game_lists')
+        .insert({
+          user_id: session.user.id,
+          name: 'Played',
+          list_type: 'custom',
+          description: 'Games I have played',
+          is_public: false,
+        })
+        .select('id,name,list_type,description')
+        .maybeSingle()
+      if (error || !data) return null
+      setAllLists((prev) => [data, ...prev])
+      return data.id as string
+    } catch {
+      return null
+    }
+  }
+
   // NOTE: Early return moved to after hooks to keep hook order stable
 
   const EG = enrichedGame || game
@@ -431,11 +500,6 @@ export default function GameDetailModal({
       : localRanking && typeof localRanking === 'object'
         ? ((localRanking as any).ranking ?? null)
         : null
-  // Derive total ratings count if not provided; prefer game.total_ratings or game.ratings_count
-  const totalRatings: number = (EG.total_ratings ??
-    EG.ratings_count ??
-    EG.rating_count ??
-    0) as number
   const honors: any[] = Array.isArray((EG as any).honors)
     ? (EG as any).honors
     : []
@@ -456,11 +520,34 @@ export default function GameDetailModal({
     'tags',
     'lists',
   ]
+  const allCustomCollections = allLists.filter(
+    (l: any) => l.list_type === 'custom'
+  )
+  const wantToPlayList = allCustomCollections.find(
+    (l: any) => (l.name || '').trim().toLowerCase() === 'want to play'
+  )
+  const wantToPlayActive = wantToPlayList
+    ? listMembership.has(wantToPlayList.id)
+    : false
+  const playedList = allCustomCollections.find(
+    (l: any) => (l.name || '').trim().toLowerCase() === 'played'
+  )
+  const playedCollectionActive = playedList
+    ? listMembership.has(playedList.id)
+    : false
   // Ensure activeSection valid
   useEffect(() => {
     if (!hasAnyAwards && activeSection === 'awards')
       setActiveSection('overview')
   }, [hasAnyAwards, activeSection])
+  useEffect(() => {
+    if (!initialTab) return
+    const normalized =
+      initialTab === 'play' || initialTab === 'collections'
+        ? 'details'
+        : initialTab
+    setActiveTab(normalized)
+  }, [initialTab, game.id])
   // Load personal honors (user-created awards referencing this game) basic approach: query awards / nominations tables if exist
   useEffect(() => {
     ;(async () => {
@@ -538,7 +625,7 @@ export default function GameDetailModal({
       : { className: 'w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 max-w-6xl' }
   const panelClasses =
     variant === 'modal'
-      ? 'relative w-full max-w-3xl md:h-[calc(100vh-6rem)] h-[100dvh] md:rounded-2xl rounded-none shadow-xl ring-1 ring-black/5 border border-gray-100 bg-white/95 backdrop-blur-sm text-gray-900 focus:outline-none overflow-hidden flex flex-col z-10'
+      ? 'relative w-full max-w-xl md:h-[calc(100vh-6rem)] h-[100dvh] md:rounded-2xl rounded-none shadow-xl ring-1 ring-black/5 border border-gray-100 bg-white/95 backdrop-blur-sm text-gray-900 focus:outline-none overflow-hidden flex flex-col z-10'
       : 'relative w-full rounded-2xl bg-white text-gray-900 flex flex-col shadow-sm border border-gray-100'
 
   return (
@@ -562,7 +649,7 @@ export default function GameDetailModal({
         onClick={(e) => variant === 'modal' && e.stopPropagation()}
       >
         {/* Header simplified for readability */}
-        <div className="px-4 pt-4 pb-3 sm:px-8 sm:pt-8 sm:pb-4 border-b border-gray-200 relative flex-shrink-0">
+        <div className="relative flex-shrink-0 px-4 pt-4 pb-3 border-b border-gray-200 sm:px-8 sm:pt-8 sm:pb-4">
           {variant === 'page' && (
             <div className="mb-3">
               <span className="inline-flex items-center rounded-full bg-emerald-50 text-emerald-700 px-2.5 py-1 text-[11px] font-semibold ring-1 ring-emerald-100">
@@ -572,7 +659,7 @@ export default function GameDetailModal({
           )}
           {/* Window controls only for modal variant */}
           {variant === 'modal' && (
-            <div className="absolute top-4 right-4 flex items-center gap-1">
+            <div className="absolute flex items-center gap-1 top-4 right-4">
               <button
                 onClick={(e) => {
                   e.stopPropagation()
@@ -603,8 +690,8 @@ export default function GameDetailModal({
             </div>
           )}
           <div className="grid gap-4 sm:gap-6 sm:grid-cols-[128px,1fr]">
-            <div className="w-28 sm:w-32 flex-shrink-0">
-              <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-lg overflow-hidden shadow-sm ring-1 ring-gray-200 bg-gradient-to-b from-gray-300 to-gray-200">
+            <div className="flex-shrink-0 w-28 sm:w-32">
+              <div className="overflow-hidden rounded-lg shadow-sm w-28 h-28 sm:w-32 sm:h-32 ring-1 ring-gray-200 bg-gradient-to-b from-gray-300 to-gray-200">
                 <Image
                   src={
                     EG.image_url || EG.thumbnail_url || '/placeholder-game.svg'
@@ -615,23 +702,23 @@ export default function GameDetailModal({
                   className="object-contain w-full h-full"
                 />
               </div>
-              <div className="mt-4 flex flex-col gap-2">
+              <div className="flex flex-col gap-2 mt-4">
                 {/* Played / Log Play moved to actions row */}
               </div>
             </div>
-            <div className="min-w-0 flex flex-col gap-3">
+            <div className="flex flex-col min-w-0 gap-3">
                   <div className="flex flex-col gap-2">
-                    <div className="flex items-center gap-2 flex-wrap mr-20">
+                    <div className="flex flex-wrap items-center gap-2 mr-20">
                       <h1
                         id="game-detail-title"
-                        className="text-2xl font-bold text-gray-900 leading-tight"
+                        className="text-2xl font-bold leading-tight text-gray-900"
                       >
                         <span>{EG.name}</span>
                       </h1>
                     </div>
                   </div>
                   {(tagline || summary || description) && (
-                    <p className="text-sm text-gray-600 leading-snug">
+                    <p className="text-sm leading-snug text-gray-600">
                       {tagline ||
                         summaryDisplay ||
                         (description
@@ -646,7 +733,7 @@ export default function GameDetailModal({
                     EG.weight ||
                     (EG.min_players && EG.max_players) ||
                     EG.playtime_minutes) && (
-                    <div className="flex items-center gap-2 flex-wrap">
+                    <div className="flex flex-wrap items-center gap-2">
                       {EG.year_published && (
                         <button
                           onClick={(e) => {
@@ -713,287 +800,152 @@ export default function GameDetailModal({
           </div>
         {/* end header */}
         
-        {/* Game Actions Panel */}
+        {/* Status summary */}
         <div className="px-4 sm:px-8">
-          <GameActions
-            game={{ id: game.id, name: game.name }}
-            initialPlayedIt={localRanking?.played_it ?? false}
-            initialInLibrary={membership.library}
-            initialInWishlist={membership.wishlist}
-            initialRating={ratingValue}
-            onRatingClick={(e) => {
-              const rect = e.currentTarget.getBoundingClientRect()
-              setRatingAnchor({
-                x: rect.left + rect.width / 2,
-                y: rect.top,
-              })
-              setRatingOpen((o) => !o)
-            }}
-            onMembershipChange={onMembershipChange}
-          />
+          <div className="flex flex-wrap items-center gap-2 py-2">
+            {(localRanking?.played_it || playedCollectionActive) && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold rounded-full bg-emerald-100 text-emerald-700">
+                <PlayIcon className="w-3.5 h-3.5" />
+                Played
+              </span>
+            )}
+            {membership.library && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold rounded-full bg-green-100 text-green-700">
+                <BookOpenIcon className="w-3.5 h-3.5" />
+                Owned
+              </span>
+            )}
+            {membership.wishlist && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold rounded-full bg-pink-100 text-pink-700">
+                <HeartIcon className="w-3.5 h-3.5" />
+                Want to Own
+              </span>
+            )}
+            {wantToPlayActive && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold rounded-full bg-sky-100 text-sky-700">
+                <TimeIcon className="w-3.5 h-3.5" />
+                Want to Play
+              </span>
+            )}
+            {ratingValue != null && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold rounded-full bg-amber-100 text-amber-700">
+                <StarIcon className="w-3.5 h-3.5" />
+                Rated {ratingValue}
+              </span>
+            )}
+            {ratingValue == null &&
+              !membership.library &&
+              !membership.wishlist &&
+              !wantToPlayActive &&
+              !localRanking?.played_it &&
+              !playedCollectionActive && (
+                <span className="text-[11px] text-gray-400">
+                  No status yet
+                </span>
+              )}
+          </div>
+        </div>
+
+        {/* Tabs */}
+        <div className="px-4 sm:px-8 border-b border-gray-200">
+          <div className="flex items-center gap-2 py-3">
+            {[
+              { id: 'gamelog', label: 'GameLog' },
+              { id: 'awards', label: 'Awards' },
+              { id: 'details', label: 'Details' },
+            ].map((tab) => {
+              const isActive = activeTab === tab.id
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() =>
+                    setActiveTab(
+                      tab.id as
+                        | 'gamelog'
+                        | 'awards'
+                        | 'details'
+                    )
+                  }
+                  className={`px-3 py-1.5 text-xs font-semibold tracking-wide rounded-full transition-colors ${
+                    isActive
+                      ? 'bg-gray-900 text-white'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              )
+            })}
+          </div>
         </div>
         
         {/* Main content area (stacked sections) */}
-        <div className="flex-1 overflow-y-auto px-4 pt-4 pb-6 sm:px-8 sm:pt-6 sm:pb-8">
-          <div className="space-y-12">
-              {/* Radial rating component replaces popup */}
+        <div className="flex-1 px-4 pt-4 pb-6 overflow-y-auto sm:px-8 sm:pt-6 sm:pb-8">
+          {activeTab === 'gamelog' && (
+            <div className="space-y-5">
+              <section id="gd-mygames" className="space-y-5">
+                <h3 className="flex items-center gap-3 text-2xl font-medium tracking-tight text-gray-900">
+                  <BookOpenIcon className="w-6 h-6 text-gray-400" /> Game Log
+                </h3>
+                {!localRanking?.played_it && (
+                  <div className="p-6 space-y-2 text-xs text-center text-gray-500 border border-gray-300 border-dashed rounded-lg">
+                    <p>
+                      Mark this game as{' '}
+                      <span className="font-medium">Played</span> to start
+                      logging plays.
+                    </p>
+                    <button
+                      onClick={handlePlayedToggle}
+                      className="inline-flex items-center gap-1 px-4 py-1.5 rounded-full border text-xs font-medium transition shadow-sm bg-white text-gray-600 border-gray-300 hover:bg-gray-50"
+                    >
+                      <PlayIcon className="w-4 h-4" /> I Played This
+                    </button>
+                  </div>
+                )}
+                {localRanking?.played_it && !showJournal && (
+                  <p className="max-w-md text-xs leading-relaxed text-gray-500">
+                    Build your personal play history: each log captures the
+                    date and what stood out so you can spot trends, remember
+                    favorites, and power future stats. Add a quick note
+                    now—details can come later.
+                  </p>
+                )}
+                {localRanking?.played_it && !showJournal && (
+                  <button
+                    onClick={() => setShowJournal(true)}
+                    className="inline-flex items-center gap-2 px-4 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-full shadow-sm hover:bg-gray-50"
+                  >
+                    <BookOpenIcon className="w-4 h-4" /> Log Play
+                  </button>
+                )}
+                {localRanking?.played_it && showJournal && (
+                  <div className="p-4 border border-gray-300 border-dashed rounded-lg">
+                    <PlayLogEditor
+                      gameId={game.id}
+                      gameName={game.name}
+                      openForm={true}
+                      startCollapsed={false}
+                    />
+                    <div className="mt-3">
+                      <button
+                        onClick={() => setShowJournal(false)}
+                        className="text-[10px] font-medium text-gray-500 hover:text-gray-700 underline"
+                      >
+                        Close Log Form
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </section>
+            </div>
+          )}
 
-              {(stackSections || activeSection === 'overview') && (
-                <section id="gd-overview" className="space-y-8">
-                  <h3 className="text-2xl font-medium text-gray-900 tracking-tight flex items-center gap-3">
-                    <AdjustmentsHorizontalIcon className="w-6 h-6 text-gray-400" />{' '}
-                    Overview
-                  </h3>
-                  <div className="space-y-8">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm">
-                      {((Array.isArray(EG.designers) && EG.designers.length) ||
-                        EG.designer) && (
-                        <div className="flex items-start gap-3 sm:col-span-1 col-span-full">
-                          <div className="w-7 h-7 rounded-md bg-gray-100 flex items-center justify-center">
-                            <UserIcon className="w-4 h-4 text-gray-500" />
-                          </div>
-                          <div>
-                            <div className="text-gray-500">Designer</div>
-                            <div className="font-medium text-gray-900 space-y-0.5">
-                              {(Array.isArray(EG.designers) && EG.designers.length
-                                ? EG.designers
-                                : [EG.designer]
-                              )
-                                .filter(Boolean)
-                                .map((d: string, i: number) => (
-                                  <div key={i}>{d}</div>
-                                ))}
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                      {((Array.isArray(EG.artists) && EG.artists.length > 0) ||
-                        EG.artist) && (
-                        <div className="flex items-start gap-3 sm:col-span-1 col-span-full">
-                          <div className="w-7 h-7 rounded-md bg-gray-100 flex items-center justify-center">
-                            <PaintBrushIcon className="w-4 h-4 text-gray-500" />
-                          </div>
-                          <div>
-                            <div className="text-gray-500">
-                              Artist
-                              {EG.artists && EG.artists.length > 1 ? 's' : ''}
-                            </div>
-                            <div
-                              className="font-medium text-gray-900 space-y-0.5"
-                              title={(Array.isArray(EG.artists)
-                                ? EG.artists
-                                : [EG.artist]
-                              ).join(', ')}
-                            >
-                              {(Array.isArray(EG.artists) && EG.artists.length
-                                ? EG.artists
-                                : [EG.artist]
-                              )
-                                .filter(Boolean)
-                                .map((a: string, i: number) => (
-                                  <div key={i}>{a}</div>
-                                ))}
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                    {/* Related expansions / integrations */}
-                    {(parentGame ||
-                      (expansions && expansions.length) ||
-                      (integrations && integrations.length)) && (
-                      <div className="space-y-8">
-                        {parentGame && (
-                          <div>
-                            <h5 className="heading-display text-xl font-normal tracking-wide text-gray-700 mb-2">
-                              Parent Game
-                            </h5>
-                            <RelationGrid
-                              games={[parentGame]}
-                              onNavigate={(g) => router.push(`/games/${g.id}`)}
-                            />
-                          </div>
-                        )}
-                        {expansions && expansions.length > 0 && (
-                          <div>
-                            <h5 className="heading-display text-xl font-normal tracking-wide text-gray-700 mb-2 flex items-center gap-2">
-                              Expansions{' '}
-                              <span className="text-sm text-gray-400 font-normal">
-                                {expansions.length}
-                              </span>
-                            </h5>
-                            <RelationGrid
-                              games={expansions}
-                              onNavigate={(g) => router.push(`/games/${g.id}`)}
-                            />
-                          </div>
-                        )}
-                        {integrations && integrations.length > 0 && (
-                          <div>
-                            <h5 className="heading-display text-xl font-normal tracking-wide text-gray-700 mb-2 flex items-center gap-2">
-                              Integrates With{' '}
-                              <span className="text-sm text-gray-400 font-normal">
-                                {integrations.length}
-                              </span>
-                            </h5>
-                            <RelationGrid
-                              games={integrations}
-                              onNavigate={(g) => router.push(`/games/${g.id}`)}
-                            />
-                          </div>
-                        )}
-                        {loadingRelations && (
-                          <div className="text-xs text-gray-400">
-                            Loading related games…
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </section>
-              )}
-              {/* Categories & Mechanics */}
-              {(stackSections || activeSection === 'tags') && (
-                <section className="space-y-8">
-                  <h3 className="text-lg font-medium text-gray-900 flex items-center gap-2">
-                    <TagIcon className="w-5 h-5 text-gray-400" />{' '}
-                    Classifications
-                  </h3>
-                  {/* Type */}
-                  {game.bgg_type && (
-                    <div>
-                      <h4 className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">
-                        Type
-                      </h4>
-                      <div className="flex flex-wrap gap-2">
-                        {(() => {
-                          const active =
-                            searchParamsNav?.get('type') === game.bgg_type
-                          return (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                router.push(
-                                  `/games?type=${encodeURIComponent(game.bgg_type)}`
-                                )
-                                if (variant === 'modal') onClose?.()
-                              }}
-                              className={`px-2.5 py-1 rounded-full text-xs font-medium shadow-sm border ${active ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border-indigo-100'}`}
-                            >
-                              {game.bgg_type
-                                .replace(/_/g, ' ')
-                                .replace(/\b\w/g, (c: string) =>
-                                  c.toUpperCase()
-                                )}
-                            </button>
-                          )
-                        })()}
-                      </div>
-                    </div>
-                  )}
-                  {/* Categories */}
-                  <div>
-                    <h4 className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">
-                      Categories
-                    </h4>
-                    <div className="flex flex-wrap gap-2">
-                      {Array.isArray(game.categories) &&
-                      game.categories.length > 0 ? (
-                        game.categories.map((c: string, i: number) => {
-                          const active = searchParamsNav?.get('category') === c
-                          return (
-                            <button
-                              key={i}
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                router.push(
-                                  `/games?category=${encodeURIComponent(c)}`
-                                )
-                                if (variant === 'modal') onClose?.()
-                              }}
-                              className={`px-2.5 py-1 rounded-full text-xs font-medium shadow-sm border ${active ? 'bg-blue-600 text-white border-blue-600' : 'bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-100'}`}
-                            >
-                              {c}
-                            </button>
-                          )
-                        })
-                      ) : (
-                        <span className="text-xs text-gray-400">None</span>
-                      )}
-                    </div>
-                  </div>
-                  {/* Mechanisms */}
-                  <div>
-                    <h4 className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">
-                      Mechanisms
-                    </h4>
-                    <div className="flex flex-wrap gap-2">
-                      {Array.isArray(game.mechanics) &&
-                      game.mechanics.length > 0 ? (
-                        game.mechanics.map((m: string, i: number) => {
-                          const active = searchParamsNav?.get('mechanic') === m
-                          return (
-                            <button
-                              key={i}
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                router.push(
-                                  `/games?mechanic=${encodeURIComponent(m)}`
-                                )
-                                if (variant === 'modal') onClose?.()
-                              }}
-                              className={`px-2.5 py-1 rounded-full text-xs font-medium shadow-sm border ${active ? 'bg-violet-600 text-white border-violet-600' : 'bg-violet-50 hover:bg-violet-100 text-violet-700 border-violet-100'}`}
-                            >
-                              {m}
-                            </button>
-                          )
-                        })
-                      ) : (
-                        <span className="text-xs text-gray-400">None</span>
-                      )}
-                    </div>
-                  </div>
-                  {/* Families */}
-                  <div>
-                    <h4 className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">
-                      Families
-                    </h4>
-                    <div className="flex flex-wrap gap-2">
-                      {familyCodes && familyCodes.length > 0 ? (
-                        familyCodes.slice(0, 24).map((code) => {
-                          const label = code
-                            .replace(/games$/, '')
-                            .replace(/_/g, ' ')
-                            .replace(/\b\w/g, (c) => c.toUpperCase())
-                          const active = searchParamsNav?.get('family') === code
-                          return (
-                            <button
-                              key={code}
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                router.push(
-                                  `/games?family=${encodeURIComponent(code)}`
-                                )
-                                if (variant === 'modal') onClose?.()
-                              }}
-                              className={`px-2.5 py-1 rounded-full text-xs font-medium shadow-sm border ${active ? 'bg-sky-600 text-white border-sky-600' : 'bg-sky-50 hover:bg-sky-100 text-sky-700 border-sky-100'}`}
-                            >
-                              {label}
-                            </button>
-                          )
-                        })
-                      ) : (
-                        <span className="text-xs text-gray-400">None</span>
-                      )}
-                    </div>
-                  </div>
-                </section>
-              )}
-
-              {hasAnyAwards && (stackSections || activeSection === 'awards') && (
+          {activeTab === 'awards' && (
+            <div className="space-y-8">
+              {hasAnyAwards ? (
                 <section id="gd-awards" className="space-y-8">
-                  <h3 className="text-lg font-medium text-gray-900 mb-3 flex items-center gap-2">
-                    <TrophyIcon className="h-5 w-5 text-amber-500" />
+                  <h3 className="flex items-center gap-2 mb-3 text-lg font-medium text-gray-900">
+                    <TrophyIcon className="w-5 h-5 text-amber-500" />
                     Awards & Honors
                   </h3>
                   {sortedHonors.length > 0 ? (
@@ -1014,8 +966,6 @@ export default function GameDetailModal({
                         const isWinner = (category + result)
                           .toLowerCase()
                           .includes('winner')
-
-                        // Clean category and result to avoid duplicate "Winner" text
                         const cleanCategory = category
                           .toLowerCase()
                           .includes('winner')
@@ -1030,11 +980,11 @@ export default function GameDetailModal({
                         return (
                           <li
                             key={i}
-                            className="rounded-lg border border-gray-200 bg-white/60 p-3"
+                            className="p-3 border border-gray-200 rounded-lg bg-white/60"
                           >
                             <div className="flex items-start justify-between gap-4">
                               <div className="min-w-0">
-                                <div className="text-sm font-medium text-gray-900 flex items-center gap-2 flex-wrap">
+                                <div className="flex flex-wrap items-center gap-2 text-sm font-medium text-gray-900">
                                   {label}
                                   {year && (
                                     <span className="text-[10px] font-semibold text-gray-400">
@@ -1074,7 +1024,7 @@ export default function GameDetailModal({
                   )}
                   {personalHonors.length > 0 && (
                     <div className="pt-4 border-t border-gray-200">
-                      <h4 className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">
+                      <h4 className="mb-2 text-xs font-semibold tracking-wide text-gray-500 uppercase">
                         Personal Honors
                       </h4>
                       <ul className="space-y-2">
@@ -1086,7 +1036,7 @@ export default function GameDetailModal({
                           .map((h: any, i: number) => (
                             <li
                               key={i}
-                              className="text-xs text-gray-700 flex items-center gap-2"
+                              className="flex items-center gap-2 text-xs text-gray-700"
                             >
                               <span className="inline-block w-2 h-2 rounded-full bg-amber-400" />
                               <span className="font-medium">
@@ -1111,336 +1061,274 @@ export default function GameDetailModal({
                     </div>
                   )}
                 </section>
-              )}
-              {(stackSections || activeSection === 'ratings') && (
-                <section id="gd-ratings" className="space-y-8">
-                  <h3 className="text-2xl font-medium text-gray-900 tracking-tight flex items-center gap-3">
-                    <ChartBarIcon className="w-6 h-6 text-gray-400" /> Rating
-                  </h3>
-                  {/* BGG Rating Block */}
-                  <div className="pb-6 border-b border-gray-200">
-                    <h4 className="heading-display text-xl font-normal tracking-wide text-gray-700 mb-4">
-                      BGG Rating
-                    </h4>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm">
-                      {game.rating ? (
-                        <div className="flex items-start gap-3">
-                          <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center">
-                            <ChartBarIcon className="w-4 h-4 text-gray-500" />
-                          </div>
-                          <div>
-                            <div className="text-xs uppercase tracking-wide text-gray-500">
-                              BGG Rating
-                            </div>
-                            <div className="font-semibold text-gray-900">
-                              {Number(game.rating).toFixed(1)}/10
-                            </div>
-                            {game.num_ratings && (
-                              <div className="text-xs text-gray-500">
-                                {game.num_ratings.toLocaleString()} users
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="flex items-start gap-3">
-                          <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center">
-                            <ChartBarIcon className="w-4 h-4 text-gray-400" />
-                          </div>
-                          <div>
-                            <div className="text-xs uppercase tracking-wide text-gray-400">
-                              BGG Rating
-                            </div>
-                            <div className="text-sm text-gray-400">
-                              Not available
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                      {game.rank ? (
-                        <div className="flex items-start gap-3">
-                          <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center">
-                            <TrophyIcon className="w-4 h-4 text-gray-500" />
-                          </div>
-                          <div>
-                            <div className="text-xs uppercase tracking-wide text-gray-500">
-                              BGG Rank
-                            </div>
-                            <div className="font-semibold text-gray-900">
-                              #{game.rank}
-                            </div>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="flex items-start gap-3">
-                          <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center">
-                            <TrophyIcon className="w-4 h-4 text-gray-400" />
-                          </div>
-                          <div>
-                            <div className="text-xs uppercase tracking-wide text-gray-400">
-                              BGG Rank
-                            </div>
-                            <div className="text-sm text-gray-400">
-                              Not available
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  {/* Your Rating Block */}
-                  <div className="pb-6 border-b border-gray-200">
-                    <h4 className="heading-display text-xl font-normal tracking-wide text-gray-700 mb-4">
-                      Your Rating
-                    </h4>
-                    
-                    {/* Full Rating Interface - Always Expanded */}
-                    <GameActions
-                      game={{ id: game.id, name: game.name }}
-                      initialPlayedIt={localRanking?.played_it ?? false}
-                      initialInLibrary={membership.library}
-                      initialInWishlist={membership.wishlist}
-                      initialRating={ratingValue}
-                      onRatingClick={(e) => {
-                        const rect = e.currentTarget.getBoundingClientRect()
-                        setRatingAnchor({
-                          x: rect.left + rect.width / 2,
-                          y: rect.top,
-                        })
-                        setRatingOpen((o) => !o)
-                      }}
-                      onMembershipChange={onMembershipChange}
-                      forceRatingExpanded={true}
-                    />
-                    
-                    {ratingValue ? (
-                      <div className="rounded-xl border border-gray-200 bg-white/80 p-4 shadow-sm">
-                        <textarea
-                          value={note}
-                          onChange={(e) => {
-                            setNote(e.target.value)
-                            setNoteDirty(true)
-                          }}
-                          rows={4}
-                          className="w-full text-sm rounded-md border-0 focus:ring-0 focus:outline-none p-0 bg-transparent resize-y placeholder:text-gray-400"
-                          placeholder="Add a public note about why you rated it this way, key impressions, plays, etc."
-                        />
-                        {noteDirty && (
-                          <div className="mt-1 text-[10px] text-primary-500">
-                            saving…
-                          </div>
-                        )}
-                        {!noteDirty && note && (
-                          <div className="mt-1 text-[10px] text-gray-400">
-                            saved
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="rounded-xl border border-dashed border-gray-300 bg-white/40 p-4 text-xs text-gray-500">
-                        Leave a rating to add a public note.
-                      </div>
-                    )}
-                  </div>
-                  {/* Distribution */}
-                  {totalRatings >= 5 && (
-                    <div className="pb-6 border-b border-gray-200">
-                      <div className="rounded-xl border border-dashed border-gray-300 p-4 bg-white/50">
-                        <div className="flex items-end gap-1 h-28">
-                          {Array.from({ length: 10 }).map((_, i) => (
-                            <div
-                              key={i}
-                              className="flex flex-col items-center justify-end gap-1 w-6"
-                            >
-                              <div
-                                className="w-full bg-gradient-to-t from-gray-300 to-gray-100 rounded-sm"
-                                style={{ height: `${10 + i * 4}%` }}
-                              ></div>
-                              <span className="text-[10px] text-gray-500">
-                                {i + 1}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                        <div className="mt-2 text-[10px] text-gray-400">
-                          Distribution placeholder.
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                  {/* Community ratings with notes */}
-                  <div>
-                    <h4 className="heading-display text-xl font-normal tracking-wide text-gray-700 mb-3">
-                      Community Ratings & Notes
-                    </h4>
-                    <p className="text-xs text-gray-500">
-                      No community ratings and notes to share yet.
-                    </p>
-                  </div>
-                </section>
-              )}
-              {(stackSections || activeSection === 'mygames') && (
-                <section id="gd-mygames" className="space-y-5">
-                  <h3 className="text-2xl font-medium text-gray-900 tracking-tight flex items-center gap-3">
-                    <BookOpenIcon className="w-6 h-6 text-gray-400" /> My Games
-                  </h3>
-                  {!localRanking?.played_it && (
-                    <div className="border border-dashed border-gray-300 rounded-lg p-6 text-center text-xs text-gray-500 space-y-2">
-                      <p>
-                        Mark this game as{' '}
-                        <span className="font-medium">Played</span> to start
-                        logging plays.
-                      </p>
-                      <button
-                        onClick={handlePlayedToggle}
-                        className="inline-flex items-center gap-1 px-4 py-1.5 rounded-full border text-xs font-medium transition shadow-sm bg-white text-gray-600 border-gray-300 hover:bg-gray-50"
-                      >
-                        <PlayIcon className="h-4 w-4" /> I Played This
-                      </button>
-                    </div>
-                  )}
-                  {localRanking?.played_it && !showJournal && (
-                    <p className="text-xs text-gray-500 max-w-md leading-relaxed">
-                      Build your personal play history: each log captures the
-                      date and what stood out so you can spot trends, remember
-                      favorites, and power future stats. Add a quick note
-                      now—details can come later.
-                    </p>
-                  )}
-                  {localRanking?.played_it && !showJournal && (
-                    <button
-                      onClick={() => setShowJournal(true)}
-                      className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 text-xs font-medium shadow-sm"
-                    >
-                      <BookOpenIcon className="w-4 h-4" /> Log Play
-                    </button>
-                  )}
-                  {localRanking?.played_it && showJournal && (
-                    <div className="border border-dashed border-gray-300 rounded-lg p-4">
-                      <PlayLogEditor
-                        gameId={game.id}
-                        gameName={game.name}
-                        openForm={true}
-                        startCollapsed={false}
-                      />
-                      <div className="mt-3">
-                        <button
-                          onClick={() => setShowJournal(false)}
-                          className="text-[10px] font-medium text-gray-500 hover:text-gray-700 underline"
-                        >
-                          Close Log Form
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </section>
-              )}
-              {(stackSections || activeSection === 'lists') && (
-                <section className="space-y-8" id="gd-lists">
-                  <h3 className="text-lg font-medium text-gray-900 flex items-center gap-2">
-                    <ListBulletIcon className="w-5 h-5 text-gray-400" /> Lists
-                  </h3>
-                  {/* Removed Library / Wishlist status chips */}
-                  {/* User lists containing game */}
-                  <div className="space-y-3">
-                    <h4 className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-                      My Lists
-                    </h4>
-                    {loadingLists && (
-                      <div className="text-xs text-gray-500">Loading…</div>
-                    )}
-                    {!loadingLists && containingLists.length === 0 && (
-                      <div className="rounded-lg border border-dashed border-gray-300 p-4 text-xs text-gray-500">
-                        Not in any of your custom lists.
-                      </div>
-                    )}
-                    {!loadingLists && containingLists.length > 0 && (
-                      <ul className="space-y-2">
-                        {containingLists.map((l) => (
-                          <li
-                            key={l.id}
-                            className="flex items-center justify-between rounded-md border border-gray-200 bg-white/70 px-3 py-2 text-sm"
-                          >
-                            <div className="flex items-center gap-2 min-w-0">
-                              <span className="font-medium truncate">
-                                {l.name}
-                              </span>
-                            </div>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                    <div>
-                      <button
-                        onClick={() => router.push('/lists')}
-                        className="inline-flex items-center gap-1 text-[11px] font-medium text-primary-600 hover:text-primary-700"
-                      >
-                        <PlusIcon className="w-4 h-4" /> Create New List
-                      </button>
-                    </div>
-                  </div>
-                  {/* Public lists */}
-                  <div className="pt-4 border-t border-gray-200 space-y-3">
-                    <h2 className="heading-display text-2xl font-normal tracking-wide text-gray-700 mb-1">
-                      Public Lists
-                    </h2>
-                    {loadingLists && (
-                      <div className="text-xs text-gray-500">Loading…</div>
-                    )}
-                    {!loadingLists && publicLists.length === 0 && (
-                      <div className="text-[11px] text-gray-400">
-                        No public lists found for this game yet.
-                      </div>
-                    )}
-                    {!loadingLists && publicLists.length > 0 && (
-                      <ul className="space-y-2">
-                        {publicLists.map((l) => (
-                          <li
-                            key={l.id}
-                            className="flex items-center justify-between rounded-md border border-gray-200 bg-white/70 px-3 py-2 text-sm"
-                          >
-                            <div className="flex items-center gap-2 min-w-0">
-                              <span className="font-medium truncate">
-                                {l.name}
-                              </span>
-                              <span className="text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded-md font-semibold bg-gray-200 text-gray-600">
-                                Public
-                              </span>
-                            </div>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                    {publicLists.length === 20 && (
-                      <div className="text-[10px] text-gray-400">
-                        Showing first 20… refine coming.
-                      </div>
-                    )}
-                  </div>
-                </section>
+              ) : (
+                <div className="p-6 text-xs text-gray-500 border border-gray-300 border-dashed rounded-lg">
+                  No awards to show yet.
+                </div>
               )}
             </div>
-          </div>
+          )}
+
+          {activeTab === 'details' && (
+            <div className="space-y-12">
+              {/* Radial rating component replaces popup */}
+
+              {(stackSections || activeSection === 'overview') && (
+                <section id="gd-overview" className="space-y-8">
+                  <h3 className="flex items-center gap-3 text-2xl font-medium tracking-tight text-gray-900">
+                    <AdjustmentsHorizontalIcon className="w-6 h-6 text-gray-400" />{' '}
+                    Overview
+                  </h3>
+                  <div className="space-y-8">
+                    <div className="grid grid-cols-1 gap-6 text-sm">
+                      {((Array.isArray(EG.designers) && EG.designers.length) ||
+                        EG.designer) && (
+                        <div className="flex items-start gap-3 sm:col-span-1 col-span-full">
+                          <div className="flex items-center justify-center bg-gray-100 rounded-md w-7 h-7">
+                            <UserIcon className="w-4 h-4 text-gray-500" />
+                          </div>
+                          <div>
+                            <div className="text-gray-500">Designer</div>
+                            <div className="font-medium text-gray-900 space-y-0.5">
+                              {(Array.isArray(EG.designers) && EG.designers.length
+                                ? EG.designers
+                                : [EG.designer]
+                              )
+                                .filter(Boolean)
+                                .map((d: string, i: number) => (
+                                  <div key={i}>{d}</div>
+                                ))}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      {((Array.isArray(EG.artists) && EG.artists.length > 0) ||
+                        EG.artist) && (
+                        <div className="flex items-start gap-3 sm:col-span-1 col-span-full">
+                          <div className="flex items-center justify-center bg-gray-100 rounded-md w-7 h-7">
+                            <PaintBrushIcon className="w-4 h-4 text-gray-500" />
+                          </div>
+                          <div>
+                            <div className="text-gray-500">
+                              Artist
+                              {EG.artists && EG.artists.length > 1 ? 's' : ''}
+                            </div>
+                            <div
+                              className="font-medium text-gray-900 space-y-0.5"
+                              title={(Array.isArray(EG.artists)
+                                ? EG.artists
+                                : [EG.artist]
+                              ).join(', ')}
+                            >
+                              {(Array.isArray(EG.artists) && EG.artists.length
+                                ? EG.artists
+                                : [EG.artist]
+                              )
+                                .filter(Boolean)
+                                .map((a: string, i: number) => (
+                                  <div key={i}>{a}</div>
+                                ))}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    {/* Related expansions / integrations */}
+                    {(parentGame ||
+                      (expansions && expansions.length) ||
+                      (integrations && integrations.length)) && (
+                      <div className="space-y-8">
+                        {parentGame && (
+                          <div>
+                            <h5 className="mb-2 text-xl font-normal tracking-wide text-gray-700 heading-display">
+                              Parent Game
+                            </h5>
+                            <RelationGrid
+                              games={[parentGame]}
+                              onNavigate={(g) => router.push(`/games/${g.id}`)}
+                            />
+                          </div>
+                        )}
+                        {expansions && expansions.length > 0 && (
+                          <div>
+                            <h5 className="flex items-center gap-2 mb-2 text-xl font-normal tracking-wide text-gray-700 heading-display">
+                              Expansions{' '}
+                              <span className="text-sm font-normal text-gray-400">
+                                {expansions.length}
+                              </span>
+                            </h5>
+                            <RelationGrid
+                              games={expansions}
+                              onNavigate={(g) => router.push(`/games/${g.id}`)}
+                            />
+                          </div>
+                        )}
+                        {integrations && integrations.length > 0 && (
+                          <div>
+                            <h5 className="flex items-center gap-2 mb-2 text-xl font-normal tracking-wide text-gray-700 heading-display">
+                              Integrates With{' '}
+                              <span className="text-sm font-normal text-gray-400">
+                                {integrations.length}
+                              </span>
+                            </h5>
+                            <RelationGrid
+                              games={integrations}
+                              onNavigate={(g) => router.push(`/games/${g.id}`)}
+                            />
+                          </div>
+                        )}
+                        {loadingRelations && (
+                          <div className="text-xs text-gray-400">
+                            Loading related games…
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </section>
+              )}
+              {/* Categories & Mechanics */}
+              {(stackSections || activeSection === 'tags') && (
+                <section className="space-y-8">
+                  <h3 className="flex items-center gap-2 text-lg font-medium text-gray-900">
+                    <TagIcon className="w-5 h-5 text-gray-400" />{' '}
+                    Classifications
+                  </h3>
+                  {/* Type */}
+                  {game.bgg_type && (
+                    <div>
+                      <h4 className="mb-2 text-xs font-semibold tracking-wide text-gray-500 uppercase">
+                        Type
+                      </h4>
+                      <div className="flex flex-wrap gap-2">
+                        {(() => {
+                          const active =
+                            searchParamsNav?.get('type') === game.bgg_type
+                          return (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                router.push(
+                                  `/games?type=${encodeURIComponent(game.bgg_type)}`
+                                )
+                                if (variant === 'modal') onClose?.()
+                              }}
+                              className={`px-2.5 py-1 rounded-full text-xs font-medium shadow-sm border ${active ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border-indigo-100'}`}
+                            >
+                              {game.bgg_type
+                                .replace(/_/g, ' ')
+                                .replace(/\b\w/g, (c: string) =>
+                                  c.toUpperCase()
+                                )}
+                            </button>
+                          )
+                        })()}
+                      </div>
+                    </div>
+                  )}
+                  {/* Categories */}
+                  <div>
+                    <h4 className="mb-2 text-xs font-semibold tracking-wide text-gray-500 uppercase">
+                      Categories
+                    </h4>
+                    <div className="flex flex-wrap gap-2">
+                      {Array.isArray(game.categories) &&
+                      game.categories.length > 0 ? (
+                        game.categories.map((c: string, i: number) => {
+                          const active = searchParamsNav?.get('category') === c
+                          return (
+                            <button
+                              key={i}
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                router.push(
+                                  `/games?category=${encodeURIComponent(c)}`
+                                )
+                                if (variant === 'modal') onClose?.()
+                              }}
+                              className={`px-2.5 py-1 rounded-full text-xs font-medium shadow-sm border ${active ? 'bg-blue-600 text-white border-blue-600' : 'bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-100'}`}
+                            >
+                              {c}
+                            </button>
+                          )
+                        })
+                      ) : (
+                        <span className="text-xs text-gray-400">None</span>
+                      )}
+                    </div>
+                  </div>
+                  {/* Mechanisms */}
+                  <div>
+                    <h4 className="mb-2 text-xs font-semibold tracking-wide text-gray-500 uppercase">
+                      Mechanisms
+                    </h4>
+                    <div className="flex flex-wrap gap-2">
+                      {Array.isArray(game.mechanics) &&
+                      game.mechanics.length > 0 ? (
+                        game.mechanics.map((m: string, i: number) => {
+                          const active = searchParamsNav?.get('mechanic') === m
+                          return (
+                            <button
+                              key={i}
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                router.push(
+                                  `/games?mechanic=${encodeURIComponent(m)}`
+                                )
+                                if (variant === 'modal') onClose?.()
+                              }}
+                              className={`px-2.5 py-1 rounded-full text-xs font-medium shadow-sm border ${active ? 'bg-violet-600 text-white border-violet-600' : 'bg-violet-50 hover:bg-violet-100 text-violet-700 border-violet-100'}`}
+                            >
+                              {m}
+                            </button>
+                          )
+                        })
+                      ) : (
+                        <span className="text-xs text-gray-400">None</span>
+                      )}
+                    </div>
+                  </div>
+                  {/* Families */}
+                  <div>
+                    <h4 className="mb-2 text-xs font-semibold tracking-wide text-gray-500 uppercase">
+                      Families
+                    </h4>
+                    <div className="flex flex-wrap gap-2">
+                      {familyCodes && familyCodes.length > 0 ? (
+                        familyCodes.slice(0, 24).map((code) => {
+                          const label = code
+                            .replace(/games$/, '')
+                            .replace(/_/g, ' ')
+                            .replace(/\b\w/g, (c) => c.toUpperCase())
+                          const active = searchParamsNav?.get('family') === code
+                          return (
+                            <button
+                              key={code}
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                router.push(
+                                  `/games?family=${encodeURIComponent(code)}`
+                                )
+                                if (variant === 'modal') onClose?.()
+                              }}
+                              className={`px-2.5 py-1 rounded-full text-xs font-medium shadow-sm border ${active ? 'bg-sky-600 text-white border-sky-600' : 'bg-sky-50 hover:bg-sky-100 text-sky-700 border-sky-100'}`}
+                            >
+                              {label}
+                            </button>
+                          )
+                        })
+                      ) : (
+                        <span className="text-xs text-gray-400">None</span>
+                      )}
+                    </div>
+                  </div>
+                </section>
+              )}
+
+            </div>
+          )}
         </div>
-      {/* Shared RatingPopup instance anchored to last trigger */}
-      {ratingOpen && (
-        <RatingPopup
-          gameId={game.id}
-          gameName={game.name}
-          currentRating={ratingValue || undefined}
-          isOpen={ratingOpen}
-          position={ratingAnchor || undefined}
-          onClose={() => setRatingOpen(false)}
-          onRatingChange={(r) => {
-            if (r != null) {
-              handleRatingClick(r)
-            } else {
-              upsertRanking({ ranking: null as any })
-              setRatingOpen(false)
-            }
-          }}
-        />
-      )}
+        </div>
     </Container>
   )
 }
@@ -1457,14 +1345,14 @@ interface RelationGridProps {
 function RelationGrid({ games, onNavigate }: RelationGridProps) {
   if (!games || !games.length) return null
   return (
-    <ul className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+    <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
       {games.map((g) => (
         <li key={g.id}>
           <button
             onClick={() => onNavigate(g)}
-            className="group w-full flex items-center gap-3 p-2 rounded-lg border border-gray-200 bg-white hover:border-sky-300 hover:bg-sky-50 transition text-left"
+            className="flex items-center w-full gap-3 p-2 text-left transition bg-white border border-gray-200 rounded-lg group hover:border-sky-300 hover:bg-sky-50"
           >
-            <div className="w-10 h-10 rounded-md bg-gray-50 ring-1 ring-gray-200 overflow-hidden flex-shrink-0 flex items-center justify-center">
+            <div className="flex items-center justify-center flex-shrink-0 w-10 h-10 overflow-hidden rounded-md bg-gray-50 ring-1 ring-gray-200">
               {g.thumbnail_url ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img

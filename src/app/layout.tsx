@@ -4,6 +4,7 @@ import './globals.css'
 import { Inter, Outfit } from 'next/font/google'
 import Navigation from '@/components/Global/Navigation'
 import SiteFooter from '@/components/Global/SiteFooter'
+import HideOnV2 from '@/components/v2/navigation/HideOnV2'
 import AnalyticsWrapper from '@/components/Analytics/AnalyticsWrapper'
 
 // Using system fonts with optimized fallback stack for better performance.
@@ -119,11 +120,16 @@ export default function RootLayout({
           Skip to main content
         </a>
         <AnalyticsWrapper />
-        <Navigation />
+        <HideOnV2>
+          <Navigation />
+        </HideOnV2>
+        {/* Base app shell: PageLayout renders inside this main */}
         <main id="main-content" className="min-h-[70vh] pt-16">
           {children}
         </main>
-        <SiteFooter />
+        <HideOnV2>
+          <SiteFooter />
+        </HideOnV2>
       </body>
     </html>
   )

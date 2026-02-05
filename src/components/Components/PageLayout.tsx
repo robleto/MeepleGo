@@ -7,22 +7,27 @@ interface PageLayoutProps {
   fullWidth?: boolean
 }
 
-export default function PageLayout({ children, subHeader, fullWidth = false }: PageLayoutProps) {
+export default function PageLayout({
+  children,
+  subHeader,
+  fullWidth = false,
+}: PageLayoutProps) {
+  // PageLayout is the one place that owns full-bleed backgrounds + max-width wrapping.
   return (
     <div className="min-h-screen">
       {subHeader && (
         <section className="bg-transparent utility-section">
-          <div className="px-4 py-6 mx-auto max-w-7xl sm:px-6 lg:px-8">
-          {subHeader}
+          {/* Utility slot: transparent full-bleed with max-width inner wrapper */}
+          <div className="mx-auto max-w-7xl">
+            {subHeader}
           </div>
         </section>
       )}
-
-      {/* Main content zone: full-bleed white background */}
-      <main className="bg-white border-t-2 border-gray-100 main-content-section">
-          <div className="px-4 py-6 mx-auto max-w-7xl sm:px-6 lg:px-8">
-             {children}
-          </div>
+      {/* Main slot: white full-bleed with max-width inner wrapper */}
+      <main className="bg-white main-content-section">
+        <div className="mx-auto max-w-7xl">
+          {children}
+        </div>
       </main>
     </div>
   )

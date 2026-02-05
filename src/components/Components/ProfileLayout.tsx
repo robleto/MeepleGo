@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import Heading from '@/components/Components/Heading'
+import PageLayout from '@/components/Components/PageLayout'
 import {
   BookmarkIcon,
   CubeIcon,
@@ -186,21 +187,25 @@ export default function ProfileLayout({
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-      </div>
+      <PageLayout>
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+        </div>
+      </PageLayout>
     )
   }
 
   if (!profile) {
     return (
-      <div className="text-center py-12">
-        <p className="text-gray-600">Profile not found</p>
-      </div>
+      <PageLayout>
+        <div className="text-center py-12">
+          <p className="text-gray-600">Profile not found</p>
+        </div>
+      </PageLayout>
     )
   }
 
-  return (
+  const headerAndNav = (
     <div className="space-y-3">
       {/* Profile Header - Ultra-Compact Mobile */}
       <div className="bg-white sm:rounded-2xl sm:shadow-sm sm:border sm:border-gray-100 sm:dark:border-gray-800 p-3 sm:p-4">
@@ -329,9 +334,12 @@ export default function ProfileLayout({
           </div>
         </div>
       </div>
-
-      {/* Page Content */}
-      {children}
     </div>
+  )
+
+  return (
+    <PageLayout subHeader={headerAndNav}>
+      <div className="space-y-3">{children}</div>
+    </PageLayout>
   )
 }

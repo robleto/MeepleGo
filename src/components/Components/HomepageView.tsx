@@ -19,6 +19,9 @@ import {
   SunIcon,
   MoonIcon,
   HandRaisedIcon,
+  FireIcon,
+  ClockIcon,
+  RocketLaunchIcon,
 } from '@heroicons/react/24/outline'
 import type { Game } from '@/types/supabase'
 import type {
@@ -44,7 +47,10 @@ export interface UserStats {
 
 export interface HomepageViewProps {
   user: { id: string } | null
+  /** @deprecated Use firstName + profileUsername instead */
   username?: string | null
+  firstName?: string | null
+  profileUsername?: string | null
   loading: boolean
   featuredGames: Game[]
   userStats: UserStats | null
@@ -74,11 +80,7 @@ export interface HomepageViewProps {
   foundationalGames?: any[]
   recentlyPlayed?: any[]
   topCommunityRated?: any[]
-}
-
-export interface HomepageSubHeaderProps {
-  phaseResult?: UserPhaseResult | null
-  username?: string | null
+  mode?: 'utility' | 'main'
 }
 
 // ── Quick Action definitions ──
@@ -146,81 +148,6 @@ const PHASE_2_ACTIONS: QuickAction[] = [
   },
 ]
 
-export function HomepageSubHeader({
-  phaseResult,
-  username,
-}: HomepageSubHeaderProps) {
-  if (!phaseResult?.canShowQuickActions) {
-    return null
-  }
-
-  const phase = phaseResult?.phase ?? 1
-  const quickActions = phase >= 2 ? PHASE_2_ACTIONS : PHASE_1_ACTIONS
-
-  const getTimeBasedGreeting = () => {
-    const hour = new Date().getHours()
-    if (hour < 12) {
-      return { icon: <SunIcon className="w-6 h-6 text-yellow-500" />, text: 'Good morning' }
-    }
-    if (hour < 17) {
-      return { icon: <SunIcon className="w-6 h-6 text-orange-500" />, text: 'Good afternoon' }
-    }
-    return { icon: <MoonIcon className="w-6 h-6 text-indigo-500" />, text: 'Good evening' }
-  }
-
-  const greeting = getTimeBasedGreeting()
-  
-  let welcomeHeading: React.ReactNode = (
-    <span className="inline-flex items-center gap-2">
-      {greeting.icon}
-      {greeting.text}
-    </span>
-  )
-  
-  if (phase >= 2) {
-    welcomeHeading = (
-      <span className="inline-flex items-center gap-2">
-        {greeting.icon}
-        {greeting.text}, {username || 'friend'}!
-      </span>
-    )
-  } else if (phaseResult && phaseResult.accountAgeDays > 3) {
-    welcomeHeading = (
-      <span className="inline-flex items-center gap-2">
-        Welcome back
-        <HandRaisedIcon className="w-6 h-6 text-amber-500" />
-      </span>
-    )
-  }
-
-  return (
-    <section className="space-y-4 text-center">
-      <Heading as="h1" size="lg">
-        {welcomeHeading}
-      </Heading>
-
-      <div className="flex flex-wrap items-center justify-center gap-4">
-        {quickActions.map((action) => (
-          <Link
-            key={action.href}
-            href={action.href}
-            className="flex items-center gap-2 px-3 py-2 transition-all hover:scale-105"
-          >
-            <div
-              className={`w-8 h-8 ${action.color.replace('bg-', 'bg-').replace('-500', '-100')} rounded-lg flex items-center justify-center flex-shrink-0`}
-            >
-              <action.icon className={`w-4 h-4 ${action.color.replace('bg-', 'text-').replace('-500', '-600')}`} />
-            </div>
-            <span className="text-sm font-medium text-gray-700">
-              {action.label}
-            </span>
-          </Link>
-        ))}
-      </div>
-    </section>
-  )
-}
-
 // ── Section explainer copy ──
 
 const EXPLAINERS: Record<string, string> = {
@@ -236,6 +163,8 @@ const EXPLAINERS: Record<string, string> = {
 export function HomepageView({
   user,
   username,
+  firstName,
+  profileUsername,
   loading,
   featuredGames,
   userStats,
@@ -253,12 +182,14 @@ export function HomepageView({
   foundationalGames = [],
   recentlyPlayed = [],
   topCommunityRated = [],
+  mode = 'main',
 }: HomepageViewProps) {
   // ── Guest experience (unchanged — OnboardingLanding handles the main logged-out view) ──
   if (!user) {
+    if (mode === 'utility') return null
     return (
       <div className="space-y-6" id="games-section">
-        <section className="space-y-2 bg-transparent">
+        <section className="space-y-2">
           <ZeroState
             title="Track your board game life"
             description="Organize your collection, rate what you play, and celebrate your favorites. Join to unlock your personal stats."
@@ -267,7 +198,7 @@ export function HomepageView({
         </section>
 
         {/* Trending Games */}
-        <section className="space-y-4 bg-white">
+        <section className="space-y-4">
           <div>
             <div className="flex items-center justify-between gap-4">
               <Heading as="h2" size="md" className="text-gray-900">
@@ -376,10 +307,127 @@ export function HomepageView({
   // ── Authenticated experience with progressive unlocking ──
 
   const phase = phaseResult?.phase ?? 1
+  const quickActions = phase >= 2 ? PHASE_2_ACTIONS : PHASE_1_ACTIONS
+
+  // ── Smart greeting system ──
+  // Considers: time of day, visit recency, account age, and activity level.
+  // Stores last visit in localStorage to personalise return greetings.
+
+  const buildGreeting = (): React.ReactNode => {
+    const now = new Date()
+    const hour = now.getHours()
+    const accountAge = phaseResult?.accountAgeDays ?? 0
+
+    // Resolve display name from user preference (localStorage)
+    let greetingPref = 'first_name'
+    if (typeof window !== 'undefined') {
+      greetingPref = localStorage.getItem('greetingDisplay') || 'first_name'
+    }
+    const name =
+      greetingPref === 'none'
+        ? null
+        : greetingPref === 'username'
+          ? (profileUsername || firstName || username || null)
+          : (firstName || profileUsername || username || null)
+
+    // Track visit recency via localStorage
+    let hoursSinceLastVisit: number | null = null
+    if (typeof window !== 'undefined') {
+      const lastVisitKey = 'meeplego_last_visit'
+      const prev = localStorage.getItem(lastVisitKey)
+      if (prev) {
+        hoursSinceLastVisit = (Date.now() - Number(prev)) / (1000 * 60 * 60)
+      }
+      localStorage.setItem(lastVisitKey, String(Date.now()))
+    }
+
+    // Time-of-day icon
+    const TimeIcon =
+      hour < 6 ? MoonIcon :
+      hour < 12 ? SunIcon :
+      hour < 17 ? SunIcon :
+      hour < 21 ? MoonIcon :
+      MoonIcon
+    const timeIconColor =
+      hour < 6 ? 'text-indigo-400' :
+      hour < 12 ? 'text-yellow-500' :
+      hour < 17 ? 'text-orange-500' :
+      hour < 21 ? 'text-indigo-500' :
+      'text-indigo-400'
+
+    // Greeting text based on time of day
+    const timeGreeting =
+      hour < 6 ? 'Burning the midnight oil' :
+      hour < 12 ? 'Good morning' :
+      hour < 17 ? 'Good afternoon' :
+      hour < 21 ? 'Good evening' :
+      'Late night gaming'
+
+    // Build the name suffix: ", Greg" or ""
+    const nameSuffix = name ? `, ${name}` : ''
+
+    // ── Recency-aware greetings ──
+
+    // Brand new user (first visit / account < 1 day)
+    if (accountAge < 1 && hoursSinceLastVisit === null) {
+      return (
+        <span className="inline-flex items-center gap-2">
+          <RocketLaunchIcon className="w-6 h-6 text-blue-500" />
+          Welcome to MeepleGo{nameSuffix}!
+        </span>
+      )
+    }
+
+    // Returning same day (< 4 hours since last visit)
+    if (hoursSinceLastVisit !== null && hoursSinceLastVisit < 4) {
+      const quickReturnPhrases = [
+        { text: `Back for more${nameSuffix}?`, Icon: FireIcon, color: 'text-orange-500' },
+        { text: `Back already${nameSuffix}!`, Icon: SparklesIcon, color: 'text-amber-500' },
+        { text: `Couldn\u2019t stay away${nameSuffix}?`, Icon: SparklesIcon, color: 'text-purple-500' },
+      ]
+      const pick = quickReturnPhrases[Math.floor(hour / 8) % quickReturnPhrases.length]
+      return (
+        <span className="inline-flex items-center gap-2">
+          <pick.Icon className={`w-6 h-6 ${pick.color}`} />
+          {pick.text}
+        </span>
+      )
+    }
+
+    // Away for a while (> 7 days since last visit)
+    if (hoursSinceLastVisit !== null && hoursSinceLastVisit > 7 * 24) {
+      const weekCount = Math.floor(hoursSinceLastVisit / (7 * 24))
+      return (
+        <span className="inline-flex items-center gap-2">
+          <HandRaisedIcon className="w-6 h-6 text-amber-500" />
+          {weekCount > 3 ? `Long time no see${nameSuffix}!` : `Welcome back${nameSuffix}!`}
+        </span>
+      )
+    }
+
+    // Away > 1 day but < 7 days
+    if (hoursSinceLastVisit !== null && hoursSinceLastVisit > 24) {
+      return (
+        <span className="inline-flex items-center gap-2">
+          <HandRaisedIcon className="w-6 h-6 text-amber-500" />
+          Welcome back{nameSuffix}!
+        </span>
+      )
+    }
+
+    // Default: time-of-day greeting with name
+    return (
+      <span className="inline-flex items-center gap-2">
+        <TimeIcon className={`w-6 h-6 ${timeIconColor}`} />
+        {timeGreeting}{nameSuffix}
+      </span>
+    )
+  }
+
+  const welcomeHeading: React.ReactNode = buildGreeting()
 
   // Fixed glance stat cards — subtle color treatment matching Sleeper Hits / Hot Takes badges
   const glanceCards: Array<{
-    backgroundColor: string
     iconBg: string
     Icon: React.ComponentType<{ className?: string }>
     iconColor: string
@@ -388,7 +436,6 @@ export function HomepageView({
     phase?: number // minimum phase to show (default: all)
   }> = [
     {
-      backgroundColor: 'bg-indigo-600/10',
       iconBg: 'bg-indigo-600/10',
       Icon: BookmarkIcon,
       iconColor: 'text-indigo-700',
@@ -396,7 +443,6 @@ export function HomepageView({
       label: 'Games Owned',
     },
     {
-      backgroundColor: 'bg-blue-600/10',
       iconBg: 'bg-blue-600/10',
       Icon: PlayIcon,
       iconColor: 'text-blue-700',
@@ -404,7 +450,6 @@ export function HomepageView({
       label: 'Games Played',
     },
     {
-      backgroundColor: 'bg-green-600/10',
       iconBg: 'bg-green-600/10',
       Icon: StarIcon,
       iconColor: 'text-green-700',
@@ -412,7 +457,6 @@ export function HomepageView({
       label: 'Games Ranked',
     },
     {
-      backgroundColor: 'bg-amber-600/10',
       iconBg: 'bg-amber-600/10',
       Icon: BookOpenIcon,
       iconColor: 'text-amber-700',
@@ -424,8 +468,40 @@ export function HomepageView({
 
   const visibleGlanceCards = glanceCards.filter((c) => !c.phase || phase >= c.phase)
 
+  // Utility slot: welcome + quick actions only
+  if (mode === 'utility') {
+    if (!phaseResult?.canShowQuickActions) return null
+    return (
+      <div className="space-y-4 text-center">
+        <Heading as="h1" size="lg">
+          {welcomeHeading}
+        </Heading>
+
+        <div className="flex flex-wrap items-center justify-center gap-4">
+          {quickActions.map((action) => (
+            <Link
+              key={action.href}
+              href={action.href}
+              className="flex items-center gap-2 px-3 py-2 transition-all hover:scale-105"
+            >
+              <div
+                className={`w-8 h-8 ${action.color.replace('bg-', 'bg-').replace('-500', '-100')} rounded-lg flex items-center justify-center flex-shrink-0`}
+              >
+                <action.icon className={`w-4 h-4 ${action.color.replace('bg-', 'text-').replace('-500', '-600')}`} />
+              </div>
+              <span className="text-sm font-medium text-gray-700">
+                {action.label}
+              </span>
+            </Link>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  // Main slot: all rails and discovery sections
   return (
-    <div className="space-y-6" id="games-section">
+    <div className="space-y-12" id="games-section">
       {/* DEBUG ONLY: remove before release */}
       {process.env.NEXT_PUBLIC_SHOW_PHASE_DEBUG === 'true' && phaseResult && (
         <details style={{ opacity: 0.7, fontSize: 12, marginBottom: 12 }}>
@@ -433,9 +509,6 @@ export function HomepageView({
           <pre>{JSON.stringify(phaseResult, null, 2)}</pre>
         </details>
       )}
-
-      {/* White container for all discovery sections */}
-      <section className="space-y-12">
       {/* Foundational Games (Phase 1, 1–2 rankings only) */}
       {phaseResult?.canShowFoundationalGames && foundationalGames.length > 0 && (
         <HorizontalCardSection
@@ -736,7 +809,6 @@ export function HomepageView({
           </div>
         </section>
       )}
-      </section>
     </div>
   )
 }

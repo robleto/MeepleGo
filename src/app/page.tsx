@@ -29,7 +29,7 @@ export default function HomePage() {
     )
   }
 
-  // Logged-in users: Show personalized homepage with PageLayout
+  // Logged-in users: Show personalized homepage (PageLayout handled inside HomepageContent)
   if (isAuthenticated) {
     return <HomepageContent />
   }

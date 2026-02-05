@@ -7,11 +7,10 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
-import PageLayout from '@/components/Components/PageLayout'
 import HomepageView, {
-  HomepageSubHeader,
   type UserStats,
 } from '@/components/Components/HomepageView'
+import PageLayout from '@/components/Components/PageLayout'
 import type { Game } from '@/types/supabase'
 import type {
   MostAwardedGame,
@@ -81,6 +80,8 @@ export default function HomepageContent() {
   const [foundationalGames, setFoundationalGames] = useState<any[]>([])
   const [topCommunityRated, setTopCommunityRated] = useState<any[]>([])
   const [recentlyPlayed, setRecentlyPlayed] = useState<any[]>([])
+  const [firstName, setFirstName] = useState<string | null>(null)
+  const [profileUsername, setProfileUsername] = useState<string | null>(null)
 
   // Discovery lists state
   const [discoveryLists, setDiscoveryLists] = useState<{
@@ -252,7 +253,7 @@ export default function HomepageContent() {
                 .eq('user_id', session.user.id),
               supabase
                 .from('profiles')
-                .select('created_at')
+                .select('created_at, username, full_name')
                 .eq('id', session.user.id)
                 .single(),
               supabase
@@ -279,6 +280,15 @@ export default function HomepageContent() {
             const accountAgeDays = Math.floor(
               (Date.now() - accountCreated.getTime()) / (1000 * 60 * 60 * 24)
             )
+
+            // Extract name options for greeting preference
+            const fullName = profileResult.data?.full_name || ''
+            const first = fullName.trim().split(/\s+/)[0] || null
+            const uname = profileResult.data?.username || null
+            if (!cancelled) {
+              setFirstName(first)
+              setProfileUsername(uname)
+            }
 
             // Compute user phase
             const rankedGamesCount = rankings?.length || 0
@@ -616,30 +626,55 @@ export default function HomepageContent() {
     }
   }, [])
 
-  const username =
-    user?.user_metadata?.username || user?.user_metadata?.full_name || null
-
   return (
-    <PageLayout
-      subHeader={
-        <HomepageSubHeader phaseResult={phaseResult} username={username} />
-      }
-    >
-      <HomepageView
-        user={user}
-        loading={loading}
-        featuredGames={featuredGames}
-        userStats={userStats}
-        industryAwards={industryAwards}
-        publicLists={publicLists}
-        discoveryLists={discoveryLists}
-        discoveryLoading={discoveryLoading}
-        phaseResult={phaseResult}
-        foundationalGames={foundationalGames}
-        topCommunityRated={topCommunityRated}
-        recentlyPlayed={recentlyPlayed}
-        username={username}
-      />
+    <>
+      {/* PageLayout owns full-bleed layout + backgrounds. */}
+      <PageLayout
+        subHeader={
+          // Utility slot: welcome + quick actions
+          <HomepageView
+            mode="utility"
+            user={user}
+            firstName={firstName}
+            profileUsername={profileUsername}
+            loading={loading}
+            featuredGames={featuredGames}
+            userStats={userStats}
+            industryAwards={industryAwards}
+            publicLists={publicLists}
+            discoveryLists={discoveryLists}
+            discoveryLoading={discoveryLoading}
+            phaseResult={phaseResult}
+            foundationalGames={foundationalGames}
+            topCommunityRated={topCommunityRated}
+            recentlyPlayed={recentlyPlayed}
+          />
+        }
+      >
+        {/* Main slot: all horizontal rails + discovery sections */}
+        <HomepageView
+          mode="main"
+          user={user}
+          username={
+            profileUsername ||
+            firstName ||
+            user?.user_metadata?.username ||
+            user?.email?.split('@')?.[0] ||
+            null
+          }
+          loading={loading}
+          featuredGames={featuredGames}
+          userStats={userStats}
+          industryAwards={industryAwards}
+          publicLists={publicLists}
+          discoveryLists={discoveryLists}
+          discoveryLoading={discoveryLoading}
+          phaseResult={phaseResult}
+          foundationalGames={foundationalGames}
+          topCommunityRated={topCommunityRated}
+          recentlyPlayed={recentlyPlayed}
+        />
+      </PageLayout>
 
       {/* Onboarding for new users */}
       <OnboardingModal
@@ -653,6 +688,6 @@ export default function HomepageContent() {
         visible={showSignupPrompt}
         onClose={() => setShowSignupPrompt(false)}
       />
-    </PageLayout>
+    </>
   )
 }
