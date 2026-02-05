@@ -618,11 +618,12 @@ export default function GameCard({
 
         {/* ── Hover Overlay ─────────────────────────────
              Background click → game detail modal
-             Button clicks → stopPropagation → open steppers */}
+             Button clicks → stopPropagation → actions
+             Pattern: Played | Rate | ··· (more menu) */}
         <div
           className={cn(
             'absolute inset-0 flex flex-col items-stretch justify-between p-2 rounded-t-lg transition-opacity duration-150',
-            (showOverlay || showCollectionStepper || showPlayStepper)
+            (showOverlay || showCollectionStepper || showPlayStepper || showMoreMenu)
               ? 'opacity-100 pointer-events-auto'
               : 'opacity-0 pointer-events-none'
           )}
@@ -696,16 +697,17 @@ export default function GameCard({
             </button>
           </div>
 
-          {/* Bottom center: Play / Rate / Log pill */}
+          {/* Bottom center: Played | Rate | ··· pill */}
           <div className="flex items-center justify-center">
-            <div className="inline-flex overflow-hidden rounded-lg shadow-sm bg-white/90 backdrop-blur-sm border border-white/60">
+            <div className="relative inline-flex overflow-visible rounded-lg shadow-sm bg-white/90 backdrop-blur-sm border border-white/60">
+              {/* Played */}
               <button
                 onClick={(e) => {
                   e.stopPropagation()
-                  openPlayStepper('status', e.currentTarget)
+                  handlePlayedToggle()
                 }}
                 className={cn(
-                  'w-9 h-8 flex items-center justify-center transition-colors',
+                  'w-9 h-8 flex items-center justify-center transition-colors rounded-l-lg',
                   localRanking?.played_it
                     ? 'bg-green-600 text-white hover:bg-green-700'
                     : 'text-gray-600 hover:text-gray-800 hover:bg-white'
@@ -716,6 +718,7 @@ export default function GameCard({
                 <PlayIcon className="w-4 h-4" />
               </button>
 
+              {/* Rate */}
               <button
                 onClick={(e) => {
                   e.stopPropagation()
@@ -733,17 +736,92 @@ export default function GameCard({
                 <StarIcon className="w-4 h-4" />
               </button>
 
+              {/* More ··· */}
               <button
                 onClick={(e) => {
                   e.stopPropagation()
-                  openPlayStepper('log', e.currentTarget)
+                  setShowMoreMenu((v) => !v)
                 }}
-                className="w-9 h-8 flex items-center justify-center transition-colors border-l border-gray-200/60 text-gray-600 hover:text-gray-800 hover:bg-white"
-                title="Log a play session"
-                aria-label="Log a play session"
+                className={cn(
+                  'w-9 h-8 flex items-center justify-center transition-colors border-l border-gray-200/60 rounded-r-lg',
+                  showMoreMenu
+                    ? 'bg-gray-700 text-white'
+                    : 'text-gray-600 hover:text-gray-800 hover:bg-white'
+                )}
+                title="More actions"
+                aria-label="More actions"
+                ref={moreMenuButtonRef}
               >
-                <PencilSquareIcon className="w-4 h-4" />
+                <EllipsisHorizontalIcon className="w-4 h-4" />
               </button>
+
+              {/* ── More Menu Popover ───────────────── */}
+              {showMoreMenu && (
+                <div
+                  className="absolute bottom-full right-0 mb-2 w-48 bg-gray-800/95 backdrop-blur-md rounded-xl shadow-xl border border-white/10 overflow-hidden z-50"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="py-1">
+                    {/* Log a play */}
+                    <button
+                      onClick={() => {
+                        setShowMoreMenu(false)
+                        openPlayStepper('log', moreMenuButtonRef.current)
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-200 hover:bg-white/10 transition-colors"
+                    >
+                      <PencilSquareIcon className="w-4 h-4 text-gray-400" />
+                      <span>Log a play</span>
+                    </button>
+
+                    {/* Add to list */}
+                    <button
+                      onClick={() => {
+                        setShowMoreMenu(false)
+                        const rect = collectionButtonRef.current?.getBoundingClientRect()
+                        if (rect && typeof window !== 'undefined') {
+                          const width = 320
+                          const left = Math.min(
+                            Math.max(12, rect.right - width),
+                            window.innerWidth - width - 12
+                          )
+                          const top = Math.min(
+                            rect.bottom + 8,
+                            window.innerHeight - 12
+                          )
+                          setCollectionStepperStyle({
+                            position: 'fixed',
+                            top,
+                            left,
+                          })
+                        }
+                        setShowCollectionStepper(true)
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-200 hover:bg-white/10 transition-colors"
+                    >
+                      <QueueListIcon className="w-4 h-4 text-gray-400" />
+                      <span>Add to list</span>
+                    </button>
+
+                    {/* Divider */}
+                    <div className="my-1 border-t border-white/10" />
+
+                    {/* View details */}
+                    <button
+                      onClick={() => {
+                        setShowMoreMenu(false)
+                        setModalInitialTab(undefined)
+                        setModalInitialPlayStep(undefined)
+                        setShowModal(true)
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-200 hover:bg-white/10 transition-colors"
+                    >
+                      <ArrowTopRightOnSquareIcon className="w-4 h-4 text-gray-400" />
+                      <span>View details</span>
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
