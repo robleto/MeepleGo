@@ -53,51 +53,52 @@ export default function NavigationUserMenu({
 
   return (
     <>
-      <button
-        ref={userButtonRef}
-        onClick={() => setShowUserMenu((v) => !v)}
-        aria-haspopup="menu"
-        aria-expanded={showUserMenu}
-        className="flex items-center gap-2 p-1 transition-colors rounded-full hover:bg-gray-100"
-        title={
-          profile?.username ||
-          profile?.full_name ||
-          session.user.email ||
-          'Profile'
-        }
-      >
-        {profile?.avatar_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={profile.avatar_url}
-            alt="Profile"
-            className="object-cover rounded-full w-7 h-7 ring-2 ring-gray-200"
-          />
-        ) : (
-          <div className="w-7 h-7 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white text-[12px] font-medium ring-2 ring-gray-200">
-            {(
-              profile?.username ||
-              profile?.full_name ||
-              session.user.email ||
-              'U'
-            )
-              .charAt(0)
-              .toUpperCase()}
-          </div>
-        )}
-        <span className="hidden text-sm font-medium text-gray-700 truncate sm:block max-w-24">
-          {profile?.username || profile?.full_name || 'Profile'}
-        </span>
-      </button>
+      <div className="relative">
+        <button
+          ref={userButtonRef}
+          onClick={() => setShowUserMenu((v) => !v)}
+          aria-haspopup="menu"
+          aria-expanded={showUserMenu}
+          className="flex items-center gap-2 p-1 transition-colors rounded-full hover:bg-gray-100"
+          title={
+            profile?.username ||
+            profile?.full_name ||
+            session.user.email ||
+            'Profile'
+          }
+        >
+          {profile?.avatar_url ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={profile.avatar_url}
+              alt="Profile"
+              className="object-cover rounded-full w-7 h-7 ring-2 ring-gray-200"
+            />
+          ) : (
+            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white text-[12px] font-medium ring-2 ring-gray-200">
+              {(
+                profile?.username ||
+                profile?.full_name ||
+                session.user.email ||
+                'U'
+              )
+                .charAt(0)
+                .toUpperCase()}
+            </div>
+          )}
+          <span className="hidden text-sm font-medium text-gray-700 truncate sm:block max-w-24">
+            {profile?.username || profile?.full_name || 'Profile'}
+          </span>
+        </button>
 
-      {/* Desktop User Menu Dropdown - Hidden on mobile */}
-      {showUserMenu && (
-        <>
-          <div
-            ref={userMenuRef}
-            className="absolute right-0 z-50 hidden w-64 py-2 mt-2 text-sm bg-white border border-gray-200 shadow-xl sm:block rounded-2xl"
-            role="menu"
-          >
+        {/* Desktop User Menu Dropdown - Hidden on mobile */}
+        {showUserMenu && (
+          <>
+            <div
+              ref={userMenuRef}
+              className="absolute right-0 z-50 hidden w-64 py-2 mt-2 text-sm bg-white border border-gray-200 shadow-xl sm:block rounded-2xl"
+              role="menu"
+            >
             <div className="px-4 py-3 border-b border-gray-100">
               <div className="font-medium text-gray-900 truncate">
                 {profile?.username || profile?.full_name || 'User'}
@@ -281,7 +282,8 @@ export default function NavigationUserMenu({
             </Overlay>
           </Portal>
         </>
-      )}
+        )}
+      </div>
     </>
   )
 }

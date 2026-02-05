@@ -163,6 +163,7 @@ export function useGameFilters(
     | 'players'
     | 'category'
     | 'mechanic'
+    | 'family'
     | 'game'
     | 'award'
     | 'playtime'
@@ -282,6 +283,11 @@ export function useGameFilters(
         if (filterValue === 'all') return true
         const mechs = game.mechanics || []
         return mechs.includes(filterValue)
+      }
+      if (filterType === 'family') {
+        if (filterValue === 'all') return true
+        const families = (game as any).rank_families || []
+        return families.includes(filterValue)
       }
       if (filterType === 'game') {
         return String(game.id) === filterValue
@@ -802,6 +808,11 @@ export function useRankingsFilters(
         if (filterValue === 'all') return true
         const mechs = game.mechanics || []
         return mechs.includes(filterValue)
+      }
+      if (filterType === 'family') {
+        if (filterValue === 'all') return true
+        const families = (game as any).rank_families || []
+        return families.includes(filterValue)
       }
       if (filterType === 'game') {
         return String(game.id) === filterValue

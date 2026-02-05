@@ -19,12 +19,19 @@ const PlayLogEditor = dynamic(
   () => import('@/components/Components/PlayLogEditor'),
   { ssr: false }
 )
+const CollectionStepper = dynamic(
+  () => import('@/components/Components/CollectionStepper'),
+  { ssr: false }
+)
 import { RatingChip } from '../Elements/Chip'
 import { EyeIcon } from '@heroicons/react/24/solid'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import RatingPicker from '@/components/Components/Rankings/RatingPicker'
-import { addGameToDefaultList, removeGameFromDefaultList } from '@/lib/lists'
 import { GameImage } from '../Elements/GameImage'
+import dynamic from 'next/dynamic'
+const CollectionStepper = dynamic(() => import('./CollectionStepper'), {
+  ssr: false,
+})
 
 interface GameRowCardProps {
   game: GameWithRanking & { tagline?: string | null }
@@ -48,6 +55,13 @@ export default function GameRowCard({
 }: GameRowCardProps) {
   const [isRating, setIsRating] = useState(false)
   const [showModal, setShowModal] = useState(false)
+  const [modalInitialTab, setModalInitialTab] = useState<
+    'play' | 'collections' | 'gamelog' | 'awards' | 'details' | undefined
+  >(undefined)
+  const [showCollectionStepper, setShowCollectionStepper] = useState(false)
+  const [collectionStepperStyle, setCollectionStepperStyle] =
+    useState<React.CSSProperties>()
+  const collectionButtonRef = useRef<HTMLButtonElement | null>(null)
   const r = game.ranking
   // Normalize possible shapes: ranking can be object { ranking, played_it } or primitive number.
   const rankingValue: number | null =
@@ -65,6 +79,17 @@ export default function GameRowCard({
       wishlist: (game as any).wishlist || false,
     }
   )
+  const suggestedLists = [
+    ...(Array.isArray((game as any).categories)
+      ? (game as any).categories
+      : []),
+    ...(Array.isArray((game as any).mechanics)
+      ? (game as any).mechanics
+      : []),
+  ]
+    .map((c: any) => (typeof c === 'string' ? c : c?.name))
+    .filter(Boolean)
+    .slice(0, 6)
   const [density, setDensity] = useState<'expanded' | 'balanced' | 'compact'>(
     () => {
       if (typeof window === 'undefined') return 'expanded'
@@ -102,7 +127,10 @@ export default function GameRowCard({
         className="flex items-center gap-4 flex-1 min-w-0 cursor-pointer hover:bg-gray-50 rounded-md -m-2 p-2"
         onClick={() => {
           if (onClick) onClick()
-          else setShowModal(true)
+          else {
+            setModalInitialTab(undefined)
+            setShowModal(true)
+          }
         }}
         role={onClick ? 'button' : undefined}
         tabIndex={onClick ? 0 : undefined}
@@ -169,6 +197,33 @@ export default function GameRowCard({
         </div>
       </div>
 
+      {showCollectionStepper && (
+        <CollectionStepper
+          gameId={game.id}
+          gameName={game.name}
+          membership={membership}
+          onMembershipChange={(next) => setMembership(next)}
+          onClose={() => setShowCollectionStepper(false)}
+          onOpenCollections={() => {
+            setShowCollectionStepper(false)
+            setModalInitialTab('collections')
+            setShowModal(true)
+          }}
+          onDismiss={() => {
+            const dismissKey = `collection_stepper_dismissed_${game.id}`
+            if (typeof window !== 'undefined') {
+              sessionStorage.setItem(dismissKey, '1')
+            }
+            setShowCollectionStepper(false)
+          }}
+          className="z-[999]"
+          style={collectionStepperStyle}
+          playedIt={playedIt}
+          onTogglePlayed={togglePlayed}
+          suggestedLists={suggestedLists}
+        />
+      )}
+
       {/* Status indicators (non-click area) */}
       <div className="flex items-center gap-3 pl-2">
         {/* Played It Toggle */}
@@ -176,7 +231,12 @@ export default function GameRowCard({
           <button
             onClick={(e) => {
               e.stopPropagation()
-              togglePlayed()
+              if (!onClick) {
+                setModalInitialTab('play')
+                setShowModal(true)
+              } else {
+                togglePlayed()
+              }
             }}
             className={`flex items-center gap-1 transition-colors text-xs font-medium ${playedIt ? 'text-green-600 hover:text-green-500' : 'text-gray-300 hover:text-blue-600'} `}
             title={playedIt ? 'Mark unplayed' : 'Mark as played'}
@@ -195,17 +255,39 @@ export default function GameRowCard({
           <button
             onClick={async (e) => {
               e.stopPropagation()
-              const next = !membership.library
-              setMembership((m) => ({ ...m, library: next }))
-              const ok = next
-                ? await addGameToDefaultList(game.id, 'library')
-                : await removeGameFromDefaultList(game.id, 'library')
-              if (!ok) setMembership((m) => ({ ...m, library: !next }))
+              const dismissKey = `collection_stepper_dismissed_${game.id}`
+              const dismissed =
+                typeof window !== 'undefined' &&
+                sessionStorage.getItem(dismissKey) === '1'
+              if (dismissed) {
+                setModalInitialTab('collections')
+                setShowModal(true)
+                return
+              }
+              const rect = collectionButtonRef.current?.getBoundingClientRect()
+              if (rect && typeof window !== 'undefined') {
+                const width = 320
+                const left = Math.min(
+                  Math.max(12, rect.right - width),
+                  window.innerWidth - width - 12
+                )
+                const top = Math.min(
+                  rect.bottom + 8,
+                  window.innerHeight - 12
+                )
+                setCollectionStepperStyle({
+                  position: 'fixed',
+                  top,
+                  left,
+                })
+              }
+              setShowCollectionStepper(true)
             }}
             className={`flex items-center gap-1 transition-colors ${membership.library ? 'text-green-600' : 'text-gray-300 hover:text-green-600'}`}
             title={
               membership.library ? 'Remove from Library' : 'Add to Library'
             }
+            ref={collectionButtonRef}
           >
             <BookmarkIcon
               className={`h-4 w-4 ${membership.library ? 'fill-current' : ''}`}
@@ -218,12 +300,33 @@ export default function GameRowCard({
           <button
             onClick={async (e) => {
               e.stopPropagation()
-              const next = !membership.wishlist
-              setMembership((m) => ({ ...m, wishlist: next }))
-              const ok = next
-                ? await addGameToDefaultList(game.id, 'wishlist')
-                : await removeGameFromDefaultList(game.id, 'wishlist')
-              if (!ok) setMembership((m) => ({ ...m, wishlist: !next }))
+              const dismissKey = `collection_stepper_dismissed_${game.id}`
+              const dismissed =
+                typeof window !== 'undefined' &&
+                sessionStorage.getItem(dismissKey) === '1'
+              if (dismissed) {
+                setModalInitialTab('collections')
+                setShowModal(true)
+                return
+              }
+              const rect = collectionButtonRef.current?.getBoundingClientRect()
+              if (rect && typeof window !== 'undefined') {
+                const width = 320
+                const left = Math.min(
+                  Math.max(12, rect.right - width),
+                  window.innerWidth - width - 12
+                )
+                const top = Math.min(
+                  rect.bottom + 8,
+                  window.innerHeight - 12
+                )
+                setCollectionStepperStyle({
+                  position: 'fixed',
+                  top,
+                  left,
+                })
+              }
+              setShowCollectionStepper(true)
             }}
             className={`flex items-center gap-1 transition-colors ${membership.wishlist ? 'text-pink-600' : 'text-gray-300 hover:text-pink-500'}`}
             title={
@@ -312,6 +415,7 @@ export default function GameRowCard({
           }}
           open={showModal}
           onClose={() => setShowModal(false)}
+          initialTab={modalInitialTab}
           onMembershipChange={(gid, change) => {
             if (gid !== game.id) return
             setMembership((m) => ({ ...m, ...change }))

@@ -323,157 +323,161 @@ function ProfilePageContent() {
     )
   }
 
-  return (
-    <PageLayout>
-      <div className="space-y-6">
-        <div className="p-6 bg-white rounded-lg shadow dark:bg-gray-900">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex items-center space-x-4">
-              <Link
-                href="/settings"
-                className="relative flex items-center justify-center w-12 h-12 overflow-hidden bg-gray-200 rounded-full group dark:bg-gray-700"
-                aria-label="Edit profile photo"
-              >
-                {profile.avatar_url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={profile.avatar_url}
-                    alt="Profile"
-                    className="object-cover w-full h-full"
-                  />
-                ) : (
-                  <div className="flex items-center justify-center w-full h-full text-base font-semibold text-white bg-gradient-to-br from-primary-500 to-primary-600">
-                    {(
-                      profile.username ||
-                      profile.full_name ||
-                      profile.email ||
-                      'U'
-                    )
-                      .charAt(0)
-                      .toUpperCase()}
-                  </div>
-                )}
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-[10px] font-medium text-white">
-                  Edit
+  const profileHeader = (
+    <div className="space-y-6">
+      <div className="p-6 bg-white rounded-lg shadow dark:bg-gray-900">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex items-center space-x-4">
+            <Link
+              href="/settings"
+              className="relative flex items-center justify-center w-12 h-12 overflow-hidden bg-gray-200 rounded-full group dark:bg-gray-700"
+              aria-label="Edit profile photo"
+            >
+              {profile.avatar_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={profile.avatar_url}
+                  alt="Profile"
+                  className="object-cover w-full h-full"
+                />
+              ) : (
+                <div className="flex items-center justify-center w-full h-full text-base font-semibold text-white bg-gradient-to-br from-primary-500 to-primary-600">
+                  {(
+                    profile.username ||
+                    profile.full_name ||
+                    profile.email ||
+                    'U'
+                  )
+                    .charAt(0)
+                    .toUpperCase()}
                 </div>
-              </Link>
-              <div>
-                <Heading as="h1" size="lg" className="font-medium">
-                  {profile.username || profile.full_name || 'Your Profile'}
-                </Heading>
-                <p className="text-[11px] text-gray-600 dark:text-gray-400 mt-1">
-                  {profile.full_name || '—'}
-                  <span className="mx-2 text-gray-400">|</span>
-                  {profile.email}
-                </p>
-                <p className="text-[11px] text-gray-500 dark:text-gray-500 mt-1">
-                  {profile.bio || 'Add your personal statement in Settings.'}
-                </p>
+              )}
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-[10px] font-medium text-white">
+                Edit
               </div>
-            </div>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 lg:justify-end">
-              {[
-                {
-                  iconBg: 'bg-blue-500',
-                  Icon: BookmarkIcon,
-                  label: 'Games Owned',
-                  value: stats.gamesOwned,
-                },
-                {
-                  iconBg: 'bg-green-500',
-                  Icon: CubeIcon,
-                  label: 'Games Played',
-                  value: stats.gamesPlayed,
-                },
-                {
-                  iconBg: 'bg-yellow-500',
-                  Icon: StarIcon,
-                  label: 'Avg Rating',
-                  value: stats.avgRating || '—',
-                },
-                {
-                  iconBg: 'bg-purple-500',
-                  Icon: ListBulletIcon,
-                  label: 'Lists Created',
-                  value: stats.listsCreated,
-                },
-                {
-                  iconBg: 'bg-amber-500',
-                  Icon: TrophyIcon,
-                  label: 'Awards Created',
-                  value: stats.awardsCreated,
-                },
-              ].map((item) => (
-                <div key={item.label} className="flex items-center gap-3">
-                  <div
-                    className={`flex items-center justify-center w-8 h-8 rounded-xl ${item.iconBg}`}
-                  >
-                    <item.Icon className="w-5 h-5 text-white" />
-                  </div>
-                  <div className="leading-tight">
-                    <div className="text-base font-semibold text-gray-900 dark:text-white">
-                      {item.value}
-                    </div>
-                    <div className="text-[10px] font-semibold tracking-wider text-gray-500 dark:text-gray-400 uppercase">
-                      {item.label}
-                    </div>
-                  </div>
-                </div>
-              ))}
+            </Link>
+            <div>
+              <Heading as="h1" size="lg" className="font-medium">
+                {profile.username || profile.full_name || 'Your Profile'}
+              </Heading>
+              <p className="text-[11px] text-gray-600 dark:text-gray-400 mt-1">
+                {profile.full_name || '—'}
+                <span className="mx-2 text-gray-400">|</span>
+                {profile.email}
+              </p>
+              <p className="text-[11px] text-gray-500 dark:text-gray-500 mt-1">
+                {profile.bio || 'Add your personal statement in Settings.'}
+              </p>
             </div>
           </div>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 lg:justify-end">
+            {[
+              {
+                iconBg: 'bg-blue-500',
+                Icon: BookmarkIcon,
+                label: 'Games Owned',
+                value: stats.gamesOwned,
+              },
+              {
+                iconBg: 'bg-green-500',
+                Icon: CubeIcon,
+                label: 'Games Played',
+                value: stats.gamesPlayed,
+              },
+              {
+                iconBg: 'bg-yellow-500',
+                Icon: StarIcon,
+                label: 'Avg Rating',
+                value: stats.avgRating || '—',
+              },
+              {
+                iconBg: 'bg-purple-500',
+                Icon: ListBulletIcon,
+                label: 'Lists Created',
+                value: stats.listsCreated,
+              },
+              {
+                iconBg: 'bg-amber-500',
+                Icon: TrophyIcon,
+                label: 'Awards Created',
+                value: stats.awardsCreated,
+              },
+            ].map((item) => (
+              <div key={item.label} className="flex items-center gap-3">
+                <div
+                  className={`flex items-center justify-center w-8 h-8 rounded-xl ${item.iconBg}`}
+                >
+                  <item.Icon className="w-5 h-5 text-white" />
+                </div>
+                <div className="leading-tight">
+                  <div className="text-base font-semibold text-gray-900 dark:text-white">
+                    {item.value}
+                  </div>
+                  <div className="text-[10px] font-semibold tracking-wider text-gray-500 dark:text-gray-400 uppercase">
+                    {item.label}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
+      </div>
 
+      <div
+        ref={tabContainerRef}
+        className="relative rounded-3xl px-2 backdrop-blur-xl shadow-[0_6px_30px_rgba(0,0,0,0.06)] border bg-white/60 dark:bg-black/30 border-gray-200/60 dark:border-white/10"
+        onMouseLeave={() => {
+          const active = tabLinkRefs.current[activeTab] || null
+          moveTabHighlighterTo(active)
+        }}
+      >
         <div
-          ref={tabContainerRef}
-          className="relative rounded-3xl px-2 backdrop-blur-xl shadow-[0_6px_30px_rgba(0,0,0,0.06)] border bg-white/60 dark:bg-black/30 border-gray-200/60 dark:border-white/10"
-          onMouseLeave={() => {
-            const active = tabLinkRefs.current[activeTab] || null
-            moveTabHighlighterTo(active)
+          ref={tabHighlighterRef}
+          className="absolute left-0 rounded-2xl pointer-events-none border transition-all duration-300 ease-out will-change-[transform,width]"
+          style={{
+            top: 6,
+            bottom: 6,
+            opacity: 0,
+            width: 0,
+            transform: 'translate3d(0,0,0)',
+            backgroundColor: 'rgba(224, 242, 254, 0.7)',
+            borderColor: 'rgba(186, 230, 253, 0.6)',
+            boxShadow:
+              'inset 0 1px 0 rgba(255,255,255,0.6), 0 6px 12px rgba(0,0,0,0.06)',
           }}
-        >
-          <div
-            ref={tabHighlighterRef}
-            className="absolute left-0 rounded-2xl pointer-events-none border transition-all duration-300 ease-out will-change-[transform,width]"
-            style={{
-              top: 6,
-              bottom: 6,
-              opacity: 0,
-              width: 0,
-              transform: 'translate3d(0,0,0)',
-              backgroundColor: 'rgba(224, 242, 254, 0.7)',
-              borderColor: 'rgba(186, 230, 253, 0.6)',
-              boxShadow:
-                'inset 0 1px 0 rgba(255,255,255,0.6), 0 6px 12px rgba(0,0,0,0.06)',
-            }}
-            aria-hidden="true"
-          />
-          <ul className="relative z-10 flex flex-wrap items-center gap-1 text-xs font-medium font-inter">
-            {tabs.map((tab) => {
-              const isActive = activeTab === tab.key
-              return (
-                <li key={tab.key}>
-                  <Link
-                    ref={(el) => {
-                      tabLinkRefs.current[tab.key] = el
-                    }}
-                    onMouseEnter={(e) => moveTabHighlighterTo(e.currentTarget)}
-                    href={`/profile?tab=${tab.key}`}
-                    aria-current={isActive ? 'page' : undefined}
-                    className={`block px-4 py-2.5 rounded-xl text-center transition-colors duration-200 ${
-                      isActive
-                        ? 'text-gray-900 dark:text-gray-100'
-                        : 'text-black dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
-                    }`}
-                  >
-                    {tab.label}
-                  </Link>
-                </li>
-              )
-            })}
-          </ul>
-        </div>
+          aria-hidden="true"
+        />
+        <ul className="relative z-10 flex flex-wrap items-center gap-1 text-xs font-medium font-inter">
+          {tabs.map((tab) => {
+            const isActive = activeTab === tab.key
+            return (
+              <li key={tab.key}>
+                <Link
+                  ref={(el) => {
+                    tabLinkRefs.current[tab.key] = el
+                  }}
+                  onMouseEnter={(e) => moveTabHighlighterTo(e.currentTarget)}
+                  href={`/profile?tab=${tab.key}`}
+                  aria-current={isActive ? 'page' : undefined}
+                  className={`block px-4 py-2.5 rounded-xl text-center transition-colors duration-200 ${
+                    isActive
+                      ? 'text-gray-900 dark:text-gray-100'
+                      : 'text-black dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+                  }`}
+                >
+                  {tab.label}
+                </Link>
+              </li>
+            )
+          })}
+        </ul>
+      </div>
+    </div>
+  )
 
+  return (
+    <PageLayout subHeader={profileHeader}>
+      <div className="space-y-6">
         {activeTab === 'overview' && userId && (
           <ForYouOverview
             userId={userId}

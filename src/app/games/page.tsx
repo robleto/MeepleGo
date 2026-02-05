@@ -75,12 +75,24 @@ function GamesPageContent() {
   useEffect(() => {
     if (!hasMounted) return
 
+    const categoryParam = searchParams.get('category')
+    const mechanicParam = searchParams.get('mechanic')
+    const familyParam = searchParams.get('family')
     const yearParam = searchParams.get('year')
     const playersParam = searchParams.get('players')
     const playtimeParam = searchParams.get('playtime')
     const weightParam = searchParams.get('weight')
 
-    if (yearParam) {
+    if (categoryParam) {
+      setFilterType('category')
+      setFilterValue(categoryParam)
+    } else if (mechanicParam) {
+      setFilterType('mechanic')
+      setFilterValue(mechanicParam)
+    } else if (familyParam) {
+      setFilterType('family')
+      setFilterValue(familyParam)
+    } else if (yearParam) {
       setFilterType('year')
       setFilterValue(yearParam)
     } else if (playersParam) {
@@ -214,6 +226,9 @@ function GamesPageContent() {
     }
     if (filterType === 'mechanic' && filterValue !== 'all') {
       query = query.contains('mechanics', [filterValue])
+    }
+    if (filterType === 'family' && filterValue !== 'all') {
+      query = query.contains('rank_families', [filterValue])
     }
     if (filterType === 'award') {
       // Filter to games that have at least one honor entry (winner refinement done client-side)
@@ -558,13 +573,33 @@ function GamesPageContent() {
     }))
   }
 
+  const formatTaxonomyLabel = (value: string) =>
+    value
+      .replace(/games$/i, '')
+      .replace(/_/g, ' ')
+      .replace(/\s+/g, ' ')
+      .replace(/\b\w/g, (c) => c.toUpperCase())
+      .trim()
+
   // Helper to get filter title based on current URL params
   const getFilterTitle = () => {
+    const categoryParam = searchParams.get('category')
+    const mechanicParam = searchParams.get('mechanic')
+    const familyParam = searchParams.get('family')
     const yearParam = searchParams.get('year')
     const playersParam = searchParams.get('players')
     const playtimeParam = searchParams.get('playtime')
     const weightParam = searchParams.get('weight')
 
+    if (categoryParam) {
+      return `Category: ${formatTaxonomyLabel(categoryParam)}`
+    }
+    if (mechanicParam) {
+      return `Mechanic: ${formatTaxonomyLabel(mechanicParam)}`
+    }
+    if (familyParam) {
+      return `Family: ${formatTaxonomyLabel(familyParam)}`
+    }
     if (yearParam) {
       return `Games from ${yearParam}`
     }
@@ -650,6 +685,35 @@ function GamesPageContent() {
 
   const activeFilterCount = getActiveFilterCount()
 
+  const activeFilterChip = (() => {
+    if (filterType === 'none' || filterValue === 'all') return null
+    if (filterType === 'year') return `Year: ${filterValue}`
+    if (filterType === 'players') return `Players: ${filterValue}`
+    if (filterType === 'playtime') return `Playtime: ${filterValue}m`
+    if (filterType === 'weight') return `Weight: ${filterValue}`
+    if (filterType === 'category') return `Category: ${formatTaxonomyLabel(filterValue)}`
+    if (filterType === 'mechanic') return `Mechanic: ${formatTaxonomyLabel(filterValue)}`
+    if (filterType === 'family') return `Family: ${formatTaxonomyLabel(filterValue)}`
+    if (filterType === 'publisher') return `Publisher: ${filterValue}`
+    if (filterType === 'award') return `Awards`
+    return `${filterType}: ${filterValue}`
+  })()
+
+  const clearActiveFilter = () => {
+    const params = new URLSearchParams(searchParams.toString())
+    params.delete('year')
+    params.delete('players')
+    params.delete('playtime')
+    params.delete('weight')
+    params.delete('category')
+    params.delete('mechanic')
+    params.delete('publisher')
+    params.delete('award')
+    params.delete('type')
+    params.delete('family')
+    router.replace(`${pathname}?${params.toString()}`)
+  }
+
   const taxonomyLinkForGroup = (groupKey: string) => {
     if (groupBy === 'categories') {
       if (groupKey === 'Uncategorized') return null
@@ -677,7 +741,47 @@ function GamesPageContent() {
   }
 
   return (
-    <PageLayout>
+    <PageLayout
+      subHeader={
+        <>
+          {/* Search + Filters */}
+          <SearchandFilters
+            // search integration: update URL param so nav search consistent
+            value={searchTerm}
+            onChange={(val) => {
+              const params = new URLSearchParams(searchParams.toString())
+              if (val) params.set('search', val)
+              else params.delete('search')
+              router.replace(`${pathname}?${params.toString()}`)
+            }}
+            onSearch={(val) => {
+              const params = new URLSearchParams(searchParams.toString())
+              if (val) params.set('search', val)
+              else params.delete('search')
+              router.replace(`${pathname}?${params.toString()}`)
+            }}
+            filtersCount={activeFilterCount}
+            onOpenFilters={() => setShowFilters(true)}
+          />
+
+          {activeFilterChip && (
+            <div className="mt-2 flex flex-wrap justify-center gap-2">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">
+                {activeFilterChip}
+                <button
+                  onClick={clearActiveFilter}
+                  className="w-4 h-4 inline-flex items-center justify-center rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-200"
+                  aria-label="Clear filter"
+                  title="Clear filter"
+                >
+                  ×
+                </button>
+              </span>
+            </div>
+          )}
+        </>
+      }
+    >
       <div className="space-y-6">
         {/* Optional Rank Debug Panel (?debug=ranks) */}
         {(() => {
@@ -722,26 +826,6 @@ function GamesPageContent() {
           )
         })()}
 
-        {/* Search + Filters */}
-        <SearchandFilters
-          // search integration: update URL param so nav search consistent
-          value={searchTerm}
-          onChange={(val) => {
-            const params = new URLSearchParams(searchParams.toString())
-            if (val) params.set('search', val)
-            else params.delete('search')
-            router.replace(`${pathname}?${params.toString()}`)
-          }}
-          onSearch={(val) => {
-            const params = new URLSearchParams(searchParams.toString())
-            if (val) params.set('search', val)
-            else params.delete('search')
-            router.replace(`${pathname}?${params.toString()}`)
-          }}
-          filtersCount={activeFilterCount}
-          onOpenFilters={() => setShowFilters(true)}
-        />
-
         {/* Filter Title - shown when filtering via URL params */}
         {filterTitle && (
           <div className="border-b border-gray-200 pb-4">
@@ -761,7 +845,7 @@ function GamesPageContent() {
         {/* Loading State */}
         {loading && (
           <div className={viewMode === 'grid' 
-            ? 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4' 
+            ? 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-6 gap-4' 
             : 'space-y-4'
           }>
             {Array.from({ length: 12 }).map((_, i) => (
@@ -797,7 +881,7 @@ function GamesPageContent() {
 
                 {/* Games for this group */}
                 {viewMode === 'grid' ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-6 gap-4">
                     {group.games.map((game) => (
                       <GameCard
                         key={game.id}
@@ -816,6 +900,10 @@ function GamesPageContent() {
                         variant={cardVariant}
                         onMembershipChange={handleMembershipChange}
                         imageFit="contain"
+                        metadata={{
+                          showPlayerCount: false,
+                          showPlaytime: false,
+                        }}
                       />
                     ))}
                   </div>
@@ -839,6 +927,10 @@ function GamesPageContent() {
                         variant={cardVariant}
                         listRank={idx + 1}
                         onMembershipChange={handleMembershipChange}
+                        metadata={{
+                          showPlayerCount: false,
+                          showPlaytime: false,
+                        }}
                       />
                     ))}
                   </div>

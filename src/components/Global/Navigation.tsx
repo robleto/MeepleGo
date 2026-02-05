@@ -74,11 +74,11 @@ function Navigation() {
   const [showUserMenu, setShowUserMenu] = useState(false)
   const [showAddMenu, setShowAddMenu] = useState(false)
   // Refs for outside click detection of dropdown menus
-  const addMenuRef = useRef<HTMLDivElement | null>(null)
-  const addButtonRef = useRef<HTMLButtonElement | null>(null)
-  const userMenuRef = useRef<HTMLDivElement | null>(null)
-  const userButtonRef = useRef<HTMLButtonElement | null>(null)
-  const mobileUserMenuRef = useRef<HTMLDivElement | null>(null)
+  const addMenuRef = useRef<HTMLDivElement>(null!)
+  const addButtonRef = useRef<HTMLButtonElement>(null!)
+  const userMenuRef = useRef<HTMLDivElement>(null!)
+  const userButtonRef = useRef<HTMLButtonElement>(null!)
+  const mobileUserMenuRef = useRef<HTMLDivElement>(null!)
 
   const userInitials = (
     profile?.username ||
@@ -178,14 +178,14 @@ function Navigation() {
   const [searchOpen, setSearchOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [activeIndex, setActiveIndex] = useState(-1)
-  const inputRef = useRef<HTMLInputElement | null>(null)
-  const dropdownRef = useRef<HTMLDivElement | null>(null)
+  const inputRef = useRef<HTMLInputElement>(null!)
+  const dropdownRef = useRef<HTMLDivElement>(null!)
   const cacheRef = useRef<Record<string, SuggestionGame[]>>({})
   const abortRef = useRef<AbortController | null>(null)
 
   // Moving highlighter refs/state
-  const navContainerRef = useRef<HTMLDivElement | null>(null)
-  const highlighterRef = useRef<HTMLDivElement | null>(null)
+  const navContainerRef = useRef<HTMLDivElement>(null!)
+  const highlighterRef = useRef<HTMLDivElement>(null!)
   const linkRefs = useRef<Record<string, HTMLAnchorElement | null>>({})
 
   const moveHighlighterTo = (el: HTMLAnchorElement | null) => {

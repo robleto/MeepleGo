@@ -19,6 +19,9 @@ import {
   SunIcon,
   MoonIcon,
   HandRaisedIcon,
+  FireIcon,
+  ClockIcon,
+  RocketLaunchIcon,
 } from '@heroicons/react/24/outline'
 import type { Game } from '@/types/supabase'
 import type {
@@ -44,7 +47,10 @@ export interface UserStats {
 
 export interface HomepageViewProps {
   user: { id: string } | null
+  /** @deprecated Use firstName + profileUsername instead */
   username?: string | null
+  firstName?: string | null
+  profileUsername?: string | null
   loading: boolean
   featuredGames: Game[]
   userStats: UserStats | null
@@ -157,6 +163,8 @@ const EXPLAINERS: Record<string, string> = {
 export function HomepageView({
   user,
   username,
+  firstName,
+  profileUsername,
   loading,
   featuredGames,
   userStats,
@@ -301,48 +309,122 @@ export function HomepageView({
   const phase = phaseResult?.phase ?? 1
   const quickActions = phase >= 2 ? PHASE_2_ACTIONS : PHASE_1_ACTIONS
 
-  // Determine welcome heading with time-based greeting
-  const getTimeBasedGreeting = () => {
-    const hour = new Date().getHours()
-    if (hour < 12) {
+  // ── Smart greeting system ──
+  // Considers: time of day, visit recency, account age, and activity level.
+  // Stores last visit in localStorage to personalise return greetings.
+
+  const buildGreeting = (): React.ReactNode => {
+    const now = new Date()
+    const hour = now.getHours()
+    const accountAge = phaseResult?.accountAgeDays ?? 0
+
+    // Resolve display name from user preference (localStorage)
+    let greetingPref = 'first_name'
+    if (typeof window !== 'undefined') {
+      greetingPref = localStorage.getItem('greetingDisplay') || 'first_name'
+    }
+    const name =
+      greetingPref === 'none'
+        ? null
+        : greetingPref === 'username'
+          ? (profileUsername || firstName || username || null)
+          : (firstName || profileUsername || username || null)
+
+    // Track visit recency via localStorage
+    let hoursSinceLastVisit: number | null = null
+    if (typeof window !== 'undefined') {
+      const lastVisitKey = 'meeplego_last_visit'
+      const prev = localStorage.getItem(lastVisitKey)
+      if (prev) {
+        hoursSinceLastVisit = (Date.now() - Number(prev)) / (1000 * 60 * 60)
+      }
+      localStorage.setItem(lastVisitKey, String(Date.now()))
+    }
+
+    // Time-of-day icon
+    const TimeIcon =
+      hour < 6 ? MoonIcon :
+      hour < 12 ? SunIcon :
+      hour < 17 ? SunIcon :
+      hour < 21 ? MoonIcon :
+      MoonIcon
+    const timeIconColor =
+      hour < 6 ? 'text-indigo-400' :
+      hour < 12 ? 'text-yellow-500' :
+      hour < 17 ? 'text-orange-500' :
+      hour < 21 ? 'text-indigo-500' :
+      'text-indigo-400'
+
+    // Greeting text based on time of day
+    const timeGreeting =
+      hour < 6 ? 'Burning the midnight oil' :
+      hour < 12 ? 'Good morning' :
+      hour < 17 ? 'Good afternoon' :
+      hour < 21 ? 'Good evening' :
+      'Late night gaming'
+
+    // Build the name suffix: ", Greg" or ""
+    const nameSuffix = name ? `, ${name}` : ''
+
+    // ── Recency-aware greetings ──
+
+    // Brand new user (first visit / account < 1 day)
+    if (accountAge < 1 && hoursSinceLastVisit === null) {
       return (
         <span className="inline-flex items-center gap-2">
-          <SunIcon className="w-6 h-6 text-yellow-500" />
-          Good morning
+          <RocketLaunchIcon className="w-6 h-6 text-blue-500" />
+          Welcome to MeepleGo{nameSuffix}!
         </span>
       )
     }
-    if (hour < 17) {
+
+    // Returning same day (< 4 hours since last visit)
+    if (hoursSinceLastVisit !== null && hoursSinceLastVisit < 4) {
+      const quickReturnPhrases = [
+        { text: `Back for more${nameSuffix}?`, Icon: FireIcon, color: 'text-orange-500' },
+        { text: `Back already${nameSuffix}!`, Icon: SparklesIcon, color: 'text-amber-500' },
+        { text: `Couldn\u2019t stay away${nameSuffix}?`, Icon: SparklesIcon, color: 'text-purple-500' },
+      ]
+      const pick = quickReturnPhrases[Math.floor(hour / 8) % quickReturnPhrases.length]
       return (
         <span className="inline-flex items-center gap-2">
-          <SunIcon className="w-6 h-6 text-orange-500" />
-          Good afternoon
+          <pick.Icon className={`w-6 h-6 ${pick.color}`} />
+          {pick.text}
         </span>
       )
     }
+
+    // Away for a while (> 7 days since last visit)
+    if (hoursSinceLastVisit !== null && hoursSinceLastVisit > 7 * 24) {
+      const weekCount = Math.floor(hoursSinceLastVisit / (7 * 24))
+      return (
+        <span className="inline-flex items-center gap-2">
+          <HandRaisedIcon className="w-6 h-6 text-amber-500" />
+          {weekCount > 3 ? `Long time no see${nameSuffix}!` : `Welcome back${nameSuffix}!`}
+        </span>
+      )
+    }
+
+    // Away > 1 day but < 7 days
+    if (hoursSinceLastVisit !== null && hoursSinceLastVisit > 24) {
+      return (
+        <span className="inline-flex items-center gap-2">
+          <HandRaisedIcon className="w-6 h-6 text-amber-500" />
+          Welcome back{nameSuffix}!
+        </span>
+      )
+    }
+
+    // Default: time-of-day greeting with name
     return (
       <span className="inline-flex items-center gap-2">
-        <MoonIcon className="w-6 h-6 text-indigo-500" />
-        Good evening
+        <TimeIcon className={`w-6 h-6 ${timeIconColor}`} />
+        {timeGreeting}{nameSuffix}
       </span>
     )
   }
 
-  let welcomeHeading: React.ReactNode = getTimeBasedGreeting()
-  if (phase >= 2) {
-    welcomeHeading = (
-      <span className="inline-flex items-center gap-2">
-        {getTimeBasedGreeting()}, {username || 'friend'}!
-      </span>
-    )
-  } else if (phaseResult && phaseResult.accountAgeDays > 3) {
-    welcomeHeading = (
-      <span className="inline-flex items-center gap-2">
-        Welcome back
-        <HandRaisedIcon className="w-6 h-6 text-amber-500" />
-      </span>
-    )
-  }
+  const welcomeHeading: React.ReactNode = buildGreeting()
 
   // Fixed glance stat cards — subtle color treatment matching Sleeper Hits / Hot Takes badges
   const glanceCards: Array<{
