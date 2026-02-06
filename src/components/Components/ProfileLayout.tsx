@@ -202,7 +202,7 @@ export default function ProfileLayout({
     return (
       <PageLayout>
         <div className="flex items-center justify-center py-12">
-          <div className="w-8 h-8 border-b-2 rounded-full animate-spin border-primary-600"></div>
+          <div className="w-8 h-8 border-b-4 rounded-full animate-spin border-primary-600"></div>
         </div>
       </PageLayout>
     )
@@ -221,7 +221,7 @@ export default function ProfileLayout({
   const headerAndNav = (
     <div>
       {/* Profile header section with opaque background */}
-      <div className="bg-gray-50 dark:bg-gray-950 pt-2 pb-4 sm:pt-4 sm:pb-5 px-4 sm:px-6 lg:px-8">
+      <div className="px-4 pt-2 pb-4 bg-gray-50 dark:bg-gray-950 sm:pt-4 sm:pb-5 sm:px-6 lg:px-8">
         <ProfileHeader
           profile={profile}
           stats={{
@@ -237,9 +237,9 @@ export default function ProfileLayout({
       </div>
 
       {/* Navigation tabs - sticky with opaque bg on scroll */}
-      <div className="sticky top-14 z-30 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 px-4 sm:px-6 lg:px-8">
+      <div className="sticky z-30 px-4 bg-transparent border-b top-14 border-gray-200/70 dark:border-gray-700/70 sm:px-6 lg:px-8">
         <nav
-          className="flex gap-1 overflow-x-auto scrollbar-hide -mb-px"
+          className="flex gap-1 -mb-px overflow-x-auto scrollbar-hide"
           aria-label="Profile tabs"
         >
           {tabs.map((tab) => {
@@ -249,17 +249,13 @@ export default function ProfileLayout({
                 key={tab.key}
                 href={tab.href}
                 className={cn(
-                  'unstyled relative py-3 px-3 text-sm font-medium whitespace-nowrap transition-colors duration-150',
+                  'unstyled relative py-3 px-3 text-sm font-medium whitespace-nowrap transition-colors duration-150 border-b-4',
                   isActive
-                    ? 'text-gray-900 dark:text-gray-100'
-                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
+                    ? 'text-primary-600 border-primary-600'
+                    : 'text-gray-500 dark:text-gray-400 border-transparent hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300'
                 )}
               >
                 {tab.label}
-                {/* Active indicator bar */}
-                {isActive && (
-                  <span className="absolute inset-x-0 bottom-0 h-[2.5px] rounded-full bg-gray-900 dark:bg-gray-100" />
-                )}
               </Link>
             )
           })}
@@ -270,7 +266,7 @@ export default function ProfileLayout({
 
   return (
     <PageLayout subHeader={headerAndNav} subHeaderSpacing={false}>
-      <div className="space-y-3 -mt-10 sm:-mt-12 lg:-mt-12">
+      <div className="-mt-10 space-y-3 sm:-mt-12 lg:-mt-12">
         {children}
       </div>
     </PageLayout>

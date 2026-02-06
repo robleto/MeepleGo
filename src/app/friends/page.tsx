@@ -42,6 +42,7 @@ export function FriendsContent({
     'following'
   )
   const [friendsLoading, setFriendsLoading] = useState(false)
+  const [followBusy, setFollowBusy] = useState<Record<string, boolean>>({})
 
   useEffect(() => {
     loadUser()
@@ -108,6 +109,7 @@ export function FriendsContent({
 
   const followUser = async (targetId: string) => {
     if (!userId || userId === targetId) return
+    setFollowBusy((prev) => ({ ...prev, [targetId]: true }))
     const { error } = await supabase.from('user_follows').upsert(
       {
         follower_id: userId,
@@ -122,16 +124,19 @@ export function FriendsContent({
       console.error('Error following user:', error)
     }
     await fetchFollowersAndFollowing(userId)
+    setFollowBusy((prev) => ({ ...prev, [targetId]: false }))
   }
 
   const unfollowUser = async (targetId: string) => {
     if (!userId) return
+    setFollowBusy((prev) => ({ ...prev, [targetId]: true }))
     await supabase
       .from('user_follows')
       .delete()
       .eq('follower_id', userId)
       .eq('following_id', targetId)
     await fetchFollowersAndFollowing(userId)
+    setFollowBusy((prev) => ({ ...prev, [targetId]: false }))
   }
 
   const filteredFollowing = useMemo(() => {
@@ -152,7 +157,7 @@ export function FriendsContent({
 
   return (
     <Wrapper>
-      <div className="space-y-6 pt-4 sm:pt-6">
+      <div className="pt-4 space-y-6 sm:pt-6">
         <div className="flex flex-col gap-2 sm:gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex-1 min-w-0">
             <PillTabs
@@ -181,7 +186,7 @@ export function FriendsContent({
             title={username ? `${username}'s Friends` : 'Friends'}
             rightSlot={
               <div className="flex items-center gap-2 text-xs text-gray-500">
-                <UserGroupIcon className="h-4 w-4" />
+                <UserGroupIcon className="w-4 h-4" />
                 {following.length} following • {followers.length} followers
               </div>
             }
@@ -191,12 +196,12 @@ export function FriendsContent({
 
       {/* Zero State */}
       {!friendsLoading && following.length === 0 && followers.length === 0 && !friendsQuery && (
-        <div className="rounded-2xl border border-gray-200/70 bg-white/80 p-12 text-center">
-          <UserGroupIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+        <div className="p-12 text-center border rounded-2xl border-gray-200/70 bg-white/80">
+          <UserGroupIcon className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+          <h3 className="mb-2 text-lg font-semibold text-gray-900">
             No friends yet
           </h3>
-          <p className="text-sm text-gray-500 mb-6 max-w-md mx-auto">
+          <p className="max-w-md mx-auto mb-6 text-sm text-gray-500">
             You haven't connected with any players yet. Search above to find friends to follow.
           </p>
         </div>
@@ -207,16 +212,16 @@ export function FriendsContent({
         <div className="space-y-6 lg:grid lg:grid-cols-2 lg:gap-6 lg:space-y-0">
           <div>
             {activeTab === 'following' ? (
-              <div className="rounded-2xl border border-gray-200/70 bg-white/80 p-6">
-                <div className="text-xs uppercase tracking-wide text-gray-500 mb-4">
+              <div className="p-6 border rounded-2xl border-gray-200/70 bg-white/80">
+                <div className="mb-4 text-xs tracking-wide text-gray-500 uppercase">
                   Following ({filteredFollowing.length})
                 </div>
                 {friendsLoading && following.length === 0 ? (
-                  <div className="text-sm text-gray-500 text-center py-8">
+                  <div className="py-8 text-sm text-center text-gray-500">
                     Loading…
                   </div>
                 ) : filteredFollowing.length === 0 ? (
-                  <div className="text-sm text-gray-500 text-center py-8">
+                  <div className="py-8 text-sm text-center text-gray-500">
                     You aren't following anyone yet.
                   </div>
                 ) : (
@@ -224,21 +229,21 @@ export function FriendsContent({
                     {filteredFollowing.map((p) => (
                       <div
                         key={p.id}
-                        className="flex items-center justify-between rounded-lg px-3 py-2 hover:bg-gray-50 transition-colors"
+                        className="flex items-center justify-between px-3 py-2 transition-colors rounded-lg hover:bg-gray-50"
                       >
                         <Link
                           href={p.username ? `/${p.username}` : '#'}
-                          className="flex items-center gap-3 min-w-0 flex-1 hover:opacity-80 transition-opacity"
+                          className="flex items-center flex-1 min-w-0 gap-3 transition-opacity hover:opacity-80"
                         >
                           {p.avatar_url ? (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img
                               src={p.avatar_url}
                               alt=""
-                              className="w-9 h-9 rounded-full object-cover"
+                              className="object-cover rounded-full w-9 h-9"
                             />
                           ) : (
-                            <div className="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center text-xs font-semibold text-gray-500">
+                            <div className="flex items-center justify-center text-xs font-semibold text-gray-500 bg-gray-200 rounded-full w-9 h-9">
                               {(p.username || p.full_name || 'U')
                                 .charAt(0)
                                 .toUpperCase()}
@@ -257,12 +262,19 @@ export function FriendsContent({
                         </Link>
                         <button
                           onClick={() => unfollowUser(p.id)}
-                          className="group inline-flex items-center justify-center rounded-full border border-gray-200 px-3 py-1 text-xs font-medium text-gray-600 hover:border-red-200 hover:bg-red-50 hover:text-red-600"
+                          className="inline-flex items-center justify-center px-5 py-2.5 text-sm font-medium text-gray-600 border border-gray-200 rounded-full group hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:opacity-60 disabled:cursor-not-allowed"
+                          disabled={!!followBusy[p.id]}
                         >
-                          <span className="group-hover:hidden">Following</span>
-                          <span className="hidden group-hover:inline text-red-600">
-                            Unfollow
-                          </span>
+                          {followBusy[p.id] ? (
+                            <span>Updating…</span>
+                          ) : (
+                            <>
+                              <span className="group-hover:hidden">Following</span>
+                              <span className="hidden text-red-600 group-hover:inline">
+                                Unfollow
+                              </span>
+                            </>
+                          )}
                         </button>
                       </div>
                     ))}
@@ -270,16 +282,16 @@ export function FriendsContent({
                 )}
               </div>
             ) : (
-              <div className="rounded-2xl border border-gray-200/70 bg-white/80 p-6">
-                <div className="text-xs uppercase tracking-wide text-gray-500 mb-4">
+              <div className="p-6 border rounded-2xl border-gray-200/70 bg-white/80">
+                <div className="mb-4 text-xs tracking-wide text-gray-500 uppercase">
                   Followers ({filteredFollowers.length})
                 </div>
                 {friendsLoading && followers.length === 0 ? (
-                  <div className="text-sm text-gray-500 text-center py-8">
+                  <div className="py-8 text-sm text-center text-gray-500">
                     Loading…
                   </div>
                 ) : filteredFollowers.length === 0 ? (
-                  <div className="text-sm text-gray-500 text-center py-8">
+                  <div className="py-8 text-sm text-center text-gray-500">
                     No followers yet.
                   </div>
                 ) : (
@@ -289,21 +301,21 @@ export function FriendsContent({
                       return (
                         <div
                           key={p.id}
-                          className="flex items-center justify-between rounded-lg px-3 py-2 hover:bg-gray-50 transition-colors"
+                          className="flex items-center justify-between px-3 py-2 transition-colors rounded-lg hover:bg-gray-50"
                         >
                           <Link
                             href={p.username ? `/${p.username}` : '#'}
-                            className="flex items-center gap-3 min-w-0 flex-1 hover:opacity-80 transition-opacity"
+                            className="flex items-center flex-1 min-w-0 gap-3 transition-opacity hover:opacity-80"
                           >
                             {p.avatar_url ? (
                               // eslint-disable-next-line @next/next/no-img-element
                               <img
                                 src={p.avatar_url}
                                 alt=""
-                                className="w-9 h-9 rounded-full object-cover"
+                                className="object-cover rounded-full w-9 h-9"
                               />
                             ) : (
-                              <div className="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center text-xs font-semibold text-gray-500">
+                              <div className="flex items-center justify-center text-xs font-semibold text-gray-500 bg-gray-200 rounded-full w-9 h-9">
                                 {(p.username || p.full_name || 'U')
                                   .charAt(0)
                                   .toUpperCase()}
@@ -323,19 +335,27 @@ export function FriendsContent({
                           {isFollowing ? (
                             <button
                               onClick={() => unfollowUser(p.id)}
-                              className="group inline-flex items-center justify-center rounded-full border border-gray-200 px-3 py-1 text-xs font-medium text-gray-600 hover:border-red-200 hover:bg-red-50 hover:text-red-600"
+                              className="inline-flex items-center justify-center px-5 py-2.5 text-sm font-medium text-gray-600 border border-gray-200 rounded-full group hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:opacity-60 disabled:cursor-not-allowed"
+                              disabled={!!followBusy[p.id]}
                             >
-                              <span className="group-hover:hidden">Following</span>
-                              <span className="hidden group-hover:inline text-red-600">
-                                Unfollow
-                              </span>
+                              {followBusy[p.id] ? (
+                                <span>Updating…</span>
+                              ) : (
+                                <>
+                                  <span className="group-hover:hidden">Following</span>
+                                  <span className="hidden text-red-600 group-hover:inline">
+                                    Unfollow
+                                  </span>
+                                </>
+                              )}
                             </button>
                           ) : (
                             <button
                               onClick={() => followUser(p.id)}
-                              className="inline-flex items-center justify-center rounded-full bg-sky-600 px-3 py-1 text-xs font-semibold text-white hover:bg-sky-700"
+                              className="inline-flex items-center justify-center px-5 py-2.5 text-sm font-semibold text-white rounded-full bg-sky-600 hover:bg-sky-700 disabled:opacity-60 disabled:cursor-not-allowed"
+                              disabled={!!followBusy[p.id]}
                             >
-                              Follow Back
+                              {followBusy[p.id] ? 'Updating…' : 'Follow Back'}
                             </button>
                           )}
                         </div>
@@ -347,7 +367,7 @@ export function FriendsContent({
             )}
           </div>
 
-          <div className="hidden lg:block rounded-2xl border border-dashed border-gray-200 bg-gray-50/70 p-6 text-sm text-gray-500">
+          <div className="hidden p-6 text-sm text-gray-500 border border-gray-200 border-dashed lg:block rounded-2xl bg-gray-50/70">
             Recommendations coming soon — friends of friends, local players, and popular community members.
           </div>
         </div>

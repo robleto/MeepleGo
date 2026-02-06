@@ -1,5 +1,5 @@
 'use client'
-import AwardCategoryPanel from '@/components/Components/Awards/AwardCategoryPanel'
+import AwardsPanelReadOnly from '@/components/Components/Awards/AwardsPanelReadOnly'
 import type { GameWithRanking } from '@/types'
 import { useEffect, useMemo, useState } from 'react'
 import AwardCategoryEditor from '@/components/Components/AwardCategoryEditor'
@@ -202,24 +202,23 @@ export default function AwardShowcase({
           />
         </div>
       ) : (
-        <AwardCategoryPanel
+        <AwardsPanelReadOnly
           title={title}
           description={description}
           winner={winnerGame as any}
           nominees={nomineeGames as any}
-          className=""
           headerExtra={
             inlineEditable ? (
               <button
                 onClick={() => setShowEditor((s) => !s)}
-                className="text-[11px] inline-flex items-center gap-1 px-2 py-1 rounded border bg-white hover:bg-gray-50"
+                className="text-[11px] inline-flex items-center gap-1 px-2 py-1 rounded border border-gray-200 bg-white hover:bg-gray-50 text-gray-600"
               >
                 {showEditor ? 'Close' : editLabel}
               </button>
             ) : editHref ? (
               <a
                 href={editHref}
-                className="text-[11px] inline-flex items-center gap-1 px-2 py-1 rounded border bg-white hover:bg-gray-50"
+                className="text-[11px] inline-flex items-center gap-1 px-2 py-1 rounded border border-gray-200 bg-white hover:bg-gray-50 text-gray-600"
               >
                 {editLabel}
               </a>
