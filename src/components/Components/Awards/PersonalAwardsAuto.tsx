@@ -24,12 +24,18 @@ interface RankingRow {
   } | null
 }
 
-export default function PersonalAwardsAuto({ 
+export default function PersonalAwardsAuto({
   forcedUserId,
-  username 
-}: { 
+  username,
+  filterYear = 'all',
+  searchTerm = '',
+  showHeader = true,
+}: {
   forcedUserId?: string
-  username?: string 
+  username?: string
+  filterYear?: 'all' | 'this' | 'last'
+  searchTerm?: string
+  showHeader?: boolean
 } = {}) {
   const [loading, setLoading] = useState(true)
   const [sessionUserId, setSessionUserId] = useState<string | null>(null)
@@ -82,6 +88,8 @@ export default function PersonalAwardsAuto({
         description?: string
         games: any[]
       }>
+    const currentYear = new Date().getFullYear()
+    const search = searchTerm.trim().toLowerCase()
     const mapped = rows
       .map((r) => ({
         ranking: (r as any).ranking as number | null,
@@ -89,9 +97,18 @@ export default function PersonalAwardsAuto({
         game: (r as any).games ?? null,
       }))
       .filter((r) => !!r.game)
-    const sorted = mapped
+    let sorted = mapped
       .filter((r) => r.played_it && (r.ranking ?? 0) > 0)
       .sort((a, b) => (b.ranking ?? 0) - (a.ranking ?? 0))
+    if (filterYear !== 'all') {
+      const year = filterYear === 'this' ? currentYear : currentYear - 1
+      sorted = sorted.filter((r) => r.game?.year_published === year)
+    }
+    if (search) {
+      sorted = sorted.filter((r) =>
+        (r.game?.name || '').toLowerCase().includes(search)
+      )
+    }
     const defs: Array<{
       id: string
       label: string
@@ -285,7 +302,7 @@ export default function PersonalAwardsAuto({
           })),
       }))
       .filter((b) => b.games.length > 0)
-  }, [rows])
+  }, [rows, filterYear, searchTerm])
 
   if (loading) {
     return (
@@ -304,7 +321,11 @@ export default function PersonalAwardsAuto({
       <div>
         <Hero variant="awards" />
         <div className="mb-16">
-          <SectionHeader title={username ? `${username}'s Awards` : 'My Awards'} />
+          {showHeader && (
+            <SectionHeader
+              title={username ? `${username}'s Awards` : 'My Awards'}
+            />
+          )}
           <p className="text-xs text-center text-gray-500">
             Sign in to see your personalized awards based on your game ratings.
           </p>
@@ -314,7 +335,9 @@ export default function PersonalAwardsAuto({
   }
   return (
     <div className="mb-16">
-      <SectionHeader title={username ? `${username}'s Awards` : 'My Awards'} />
+      {showHeader && (
+        <SectionHeader title={username ? `${username}'s Awards` : 'My Awards'} />
+      )}
       <div className="space-y-10">
         {categories.map((block) => {
           // Use current year as default for editing; user can switch years in editor

@@ -29,6 +29,8 @@ interface Stats {
   avgRating: number
   listsCreated: number
   wishlistItems: number
+  followers: number
+  following: number
 }
 
 interface ProfileLayoutProps {
@@ -51,6 +53,8 @@ export default function ProfileLayout({
     avgRating: 0,
     listsCreated: 0,
     wishlistItems: 0,
+    followers: 0,
+    following: 0,
   })
   const [loading, setLoading] = useState(true)
   const [isOwnProfile, setIsOwnProfile] = useState(false)
@@ -134,7 +138,14 @@ export default function ProfileLayout({
       const targetUserId = userId || session?.user?.id
       if (!targetUserId) return
 
-      const [rankingsResult, listsResult, libraryResult, wishlistResult] =
+      const [
+        rankingsResult,
+        listsResult,
+        libraryResult,
+        wishlistResult,
+        followingResult,
+        followersResult,
+      ] =
         await Promise.all([
           supabase
             .from('rankings')
@@ -151,12 +162,22 @@ export default function ProfileLayout({
             .select('game_id, game_lists!inner(name)')
             .eq('game_lists.user_id', targetUserId)
             .eq('game_lists.name', 'Wishlist'),
+          supabase
+            .from('user_follows')
+            .select('id', { count: 'exact', head: true })
+            .eq('follower_id', targetUserId),
+          supabase
+            .from('user_follows')
+            .select('id', { count: 'exact', head: true })
+            .eq('following_id', targetUserId),
         ])
 
       const rankings = rankingsResult.data || []
       const lists = listsResult.data || []
       const libraryItems = libraryResult.data || []
       const wishlistItems = wishlistResult.data || []
+      const followingCount = followingResult.count || 0
+      const followersCount = followersResult.count || 0
 
       const gamesPlayed = rankings.filter((r) => r.played_it).length
       const totalRatings = rankings.filter((r) => r.ranking !== null)
@@ -173,6 +194,8 @@ export default function ProfileLayout({
         avgRating: Math.round(avgRating * 10) / 10,
         listsCreated: lists.length,
         wishlistItems: wishlistItems.length,
+        followers: followersCount,
+        following: followingCount,
       })
     } catch (error) {
       console.error('Error loading stats:', error)
@@ -207,6 +230,8 @@ export default function ProfileLayout({
           gamesOwned: stats.gamesOwned,
           gamesPlayed: stats.gamesPlayed,
           listsCreated: stats.listsCreated,
+          followers: stats.followers,
+          following: stats.following,
         }}
         isOwnProfile={isOwnProfile}
         showBanner={Boolean(profile?.banner_url)}

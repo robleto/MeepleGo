@@ -6,6 +6,7 @@ import {
   CubeIcon,
   ListBulletIcon,
   TrophyIcon,
+  UserGroupIcon,
 } from '@heroicons/react/24/outline'
 
 interface ProfileHeaderProps {
@@ -21,6 +22,8 @@ interface ProfileHeaderProps {
     gamesOwned: number
     gamesPlayed: number
     listsCreated: number
+    followers: number
+    following: number
   }
   isOwnProfile: boolean
   showBanner?: boolean
@@ -126,7 +129,10 @@ export default function ProfileHeader({
                   @{profile.username}
                 </p>
               )}
-              <p className="mt-1 text-xs text-gray-500">Followers · Following</p>
+              <div className="mt-1 flex items-center gap-2 text-xs text-gray-500">
+                <UserGroupIcon className="h-4 w-4" />
+                {stats.following} following • {stats.followers} followers
+              </div>
               {profile.bio && (
                 <p className="max-w-2xl mt-2 text-sm text-gray-600">
                   {profile.bio}

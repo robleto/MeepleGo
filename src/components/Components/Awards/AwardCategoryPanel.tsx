@@ -48,7 +48,7 @@ export default function AwardCategoryPanel({
       <Heading
         as="h3"
         size="lg"
-        className="mb-6 flex items-center font-semibold gap-2"
+        className="mb-3 flex items-center font-semibold gap-2"
       >
         <TrophyIcon className="w-5 h-5 text-yellow-500" />
         {yearLabel ? (
@@ -59,17 +59,13 @@ export default function AwardCategoryPanel({
         <span>{title}</span>
         {headerExtra ? <span className="ml-auto">{headerExtra}</span> : null}
       </Heading>
-      {description ? (
-        <p className="text-sm text-gray-600 leading-relaxed max-w-2xl mb-6">
-          {description}
-        </p>
-      ) : null}
+      {description ? null : null}
       <div
         className={`${nomineeOnly ? '' : 'md:grid md:grid-cols-12 md:gap-8'} items-start`}
       >
         {!nomineeOnly && (
           <div className="md:col-span-4 mb-6 md:mb-0">
-            <div className="flex items-center gap-2 mb-3 font-display">
+            <div className="flex items-center gap-2 mb-2 font-display">
               <TrophyIcon className="w-4 h-4 text-amber-500" />
               <h4 className="text-sm font-semibold text-gray-700">
                 {winnerLabel}
@@ -107,7 +103,7 @@ export default function AwardCategoryPanel({
         )}
         {hasRightContent && (
           <div className={`${nomineeOnly ? '' : 'md:col-span-8'}`}>
-            <div className="flex items-center gap-2 mb-3 font-display">
+            <div className="flex items-center gap-2 mb-2 font-display">
               <UserGroupIcon className="w-4 h-4 text-gray-500" />
               <h4 className="text-sm font-semibold text-gray-700">
                 {nomineesLabel}

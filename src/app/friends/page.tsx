@@ -1,16 +1,17 @@
 'use client'
 
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import PageLayout from '@/components/Components/PageLayout'
 import SectionHeader from '@/components/Components/SectionHeader'
+import PillTabs from '@/components/Components/PillTabs'
+import SearchandFilters from '@/components/Components/SearchandFilters'
 import {
   UserGroupIcon,
   UserMinusIcon,
   UserPlusIcon,
-  MagnifyingGlassIcon,
 } from '@heroicons/react/24/outline'
 
 interface ProfileLite {
@@ -36,11 +37,11 @@ export function FriendsContent({
   const [userId, setUserId] = useState<string | null>(null)
   const [followers, setFollowers] = useState<ProfileLite[]>([])
   const [following, setFollowing] = useState<ProfileLite[]>([])
-  const [searchResults, setSearchResults] = useState<ProfileLite[]>([])
   const [friendsQuery, setFriendsQuery] = useState('')
+  const [activeTab, setActiveTab] = useState<'following' | 'followers'>(
+    'following'
+  )
   const [friendsLoading, setFriendsLoading] = useState(false)
-  const [friendsSearching, setFriendsSearching] = useState(false)
-  const [friendsSearchError, setFriendsSearchError] = useState<string | null>(null)
 
   useEffect(() => {
     loadUser()
@@ -133,155 +134,60 @@ export function FriendsContent({
     await fetchFollowersAndFollowing(userId)
   }
 
-  // Search users with debounce
-  useEffect(() => {
-    const q = friendsQuery.trim()
-    if (!q) {
-      setSearchResults([])
-      setFriendsSearchError(null)
-      setFriendsSearching(false)
-      return
-    }
-    let cancelled = false
-    const handle = setTimeout(async () => {
-      setFriendsSearching(true)
-      setFriendsSearchError(null)
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('id, username, full_name, avatar_url')
-        .or(`username.ilike.%${q}%,full_name.ilike.%${q}%,email.ilike.%${q}%`)
-        .limit(12)
+  const filteredFollowing = useMemo(() => {
+    if (!friendsQuery.trim()) return following
+    const q = friendsQuery.trim().toLowerCase()
+    return following.filter((p) =>
+      `${p.username ?? ''} ${p.full_name ?? ''}`.toLowerCase().includes(q)
+    )
+  }, [following, friendsQuery])
 
-      if (cancelled) return
-      if (error) {
-        setSearchResults([])
-        setFriendsSearchError('Search is unavailable. Try again in a moment.')
-        setFriendsSearching(false)
-        return
-      }
-      const cleaned = (data || []).filter((p) => p.id !== userId)
-      setSearchResults(cleaned as ProfileLite[])
-      setFriendsSearching(false)
-    }, 200)
-
-    return () => {
-      cancelled = true
-      clearTimeout(handle)
-    }
-  }, [friendsQuery, userId])
+  const filteredFollowers = useMemo(() => {
+    if (!friendsQuery.trim()) return followers
+    const q = friendsQuery.trim().toLowerCase()
+    return followers.filter((p) =>
+      `${p.username ?? ''} ${p.full_name ?? ''}`.toLowerCase().includes(q)
+    )
+  }, [followers, friendsQuery])
 
   return (
     <Wrapper>
-      <SectionHeader
-        title={username ? `${username}'s Friends` : 'Friends'}
-        rightSlot={
-          <div className="flex items-center gap-2 text-xs text-gray-500">
-            <UserGroupIcon className="h-4 w-4" />
-            {following.length} following • {followers.length} followers
+      <div className="space-y-6 pt-4 sm:pt-6">
+        <div className="flex flex-col gap-2 sm:gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex-1 min-w-0">
+            <PillTabs
+              items={[
+                { key: 'following', label: `Following (${following.length})` },
+                { key: 'followers', label: `Followers (${followers.length})` },
+              ]}
+              activeKey={activeTab}
+              onChange={(key) => setActiveTab(key as any)}
+            />
           </div>
-        }
-      />
-
-      {/* Search Section - only show when viewing own friends */}
-      {!forcedUserId && (
-        <div className="rounded-2xl border border-gray-200/70 bg-white/80 p-6 mb-6">
-          <div className="mb-3">
-            <label className="text-xs uppercase tracking-wide text-gray-500 mb-2 block">
-              Search users
-            </label>
-            <div className="relative">
-              <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <input
-                value={friendsQuery}
-                onChange={(e) => setFriendsQuery(e.target.value)}
-                placeholder="Search by username or name"
-                className="w-full pl-11 pr-4 py-2.5 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
-              />
-            </div>
+          <div className="flex flex-wrap items-center w-full gap-2 sm:gap-3 sm:justify-end sm:w-auto">
+            <SearchandFilters
+              value={friendsQuery}
+              onChange={setFriendsQuery}
+              onSearch={setFriendsQuery}
+              placeholder="Search people…"
+              showFiltersButton={false}
+              className="w-full mx-0 max-w-none sm:w-auto"
+            />
           </div>
-
-          {friendsQuery && (
-            <div className="mt-4 space-y-2">
-              {friendsSearching && (
-                <div className="text-sm text-gray-500 text-center py-4">
-                  Searching…
-                </div>
-              )}
-              {friendsSearchError && (
-                <div className="text-sm text-red-500 text-center py-4">
-                  {friendsSearchError}
-                </div>
-              )}
-              {!friendsSearching && !friendsSearchError && searchResults.length === 0 && (
-                <div className="text-sm text-gray-500 text-center py-4">
-                  No users found.
-                </div>
-              )}
-              {searchResults.map((p) => {
-                const isFollowing = following.some((f) => f.id === p.id)
-                return (
-                  <div
-                    key={p.id}
-                    className="flex items-center justify-between rounded-xl border border-gray-200/70 bg-white/70 px-4 py-3"
-                  >
-                    <Link 
-                      href={p.username ? `/${p.username}` : '#'}
-                      className="flex items-center gap-3 min-w-0 flex-1 hover:opacity-80 transition-opacity"
-                    >
-                      {p.avatar_url ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={p.avatar_url}
-                          alt=""
-                          className="w-10 h-10 rounded-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-sm font-semibold text-gray-500">
-                          {(p.username || p.full_name || 'U')
-                            .charAt(0)
-                            .toUpperCase()}
-                        </div>
-                      )}
-                      <div className="min-w-0">
-                        <div className="text-sm font-medium text-gray-900 truncate">
-                          {p.full_name || p.username || 'User'}
-                        </div>
-                        {p.username && (
-                          <div className="text-xs text-gray-500 truncate">
-                            @{p.username}
-                        </div>
-                      )}
-                    </div>
-                  </Link>
-                  <button
-                    onClick={() =>
-                      isFollowing ? unfollowUser(p.id) : followUser(p.id)
-                    }
-                    className={
-                      isFollowing
-                        ? 'inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold text-gray-600 border border-gray-200 hover:bg-gray-50'
-                        : 'inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold text-white bg-sky-600 hover:bg-sky-700'
-                    }
-                  >
-                    {isFollowing ? (
-                      <>
-                        <UserMinusIcon className="h-4 w-4" />
-                        Unfollow
-                      </>
-                    ) : (
-                      <>
-                        <UserPlusIcon className="h-4 w-4" />
-                        Follow
-                      </>
-                    )}
-                  </button>
-                </div>
-              )
-            })}
-          </div>
-        )}
         </div>
-      )}
+
+        <div className="sr-only">
+          <SectionHeader
+            title={username ? `${username}'s Friends` : 'Friends'}
+            rightSlot={
+              <div className="flex items-center gap-2 text-xs text-gray-500">
+                <UserGroupIcon className="h-4 w-4" />
+                {following.length} following • {followers.length} followers
+              </div>
+            }
+          />
+        </div>
+
 
       {/* Zero State */}
       {!friendsLoading && following.length === 0 && followers.length === 0 && !friendsQuery && (
@@ -298,120 +204,155 @@ export function FriendsContent({
 
       {/* Following and Followers Lists */}
       {(following.length > 0 || followers.length > 0) && (
-        <div className="grid gap-6 md:grid-cols-2">
-          {/* Following */}
-          <div className="rounded-2xl border border-gray-200/70 bg-white/80 p-6">
-            <div className="text-xs uppercase tracking-wide text-gray-500 mb-4">
-              Following ({following.length})
-            </div>
-            {friendsLoading && following.length === 0 ? (
-              <div className="text-sm text-gray-500 text-center py-8">
-                Loading…
-              </div>
-            ) : following.length === 0 ? (
-              <div className="text-sm text-gray-500 text-center py-8">
-                You aren't following anyone yet.
+        <div className="space-y-6 lg:grid lg:grid-cols-2 lg:gap-6 lg:space-y-0">
+          <div>
+            {activeTab === 'following' ? (
+              <div className="rounded-2xl border border-gray-200/70 bg-white/80 p-6">
+                <div className="text-xs uppercase tracking-wide text-gray-500 mb-4">
+                  Following ({filteredFollowing.length})
+                </div>
+                {friendsLoading && following.length === 0 ? (
+                  <div className="text-sm text-gray-500 text-center py-8">
+                    Loading…
+                  </div>
+                ) : filteredFollowing.length === 0 ? (
+                  <div className="text-sm text-gray-500 text-center py-8">
+                    You aren't following anyone yet.
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {filteredFollowing.map((p) => (
+                      <div
+                        key={p.id}
+                        className="flex items-center justify-between rounded-lg px-3 py-2 hover:bg-gray-50 transition-colors"
+                      >
+                        <Link
+                          href={p.username ? `/${p.username}` : '#'}
+                          className="flex items-center gap-3 min-w-0 flex-1 hover:opacity-80 transition-opacity"
+                        >
+                          {p.avatar_url ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={p.avatar_url}
+                              alt=""
+                              className="w-9 h-9 rounded-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center text-xs font-semibold text-gray-500">
+                              {(p.username || p.full_name || 'U')
+                                .charAt(0)
+                                .toUpperCase()}
+                            </div>
+                          )}
+                          <div className="min-w-0">
+                            <div className="text-sm font-medium text-gray-900 truncate">
+                              {p.full_name || p.username || 'User'}
+                            </div>
+                            {p.username && (
+                              <div className="text-xs text-gray-500 truncate">
+                                @{p.username}
+                              </div>
+                            )}
+                          </div>
+                        </Link>
+                        <button
+                          onClick={() => unfollowUser(p.id)}
+                          className="group inline-flex items-center justify-center rounded-full border border-gray-200 px-3 py-1 text-xs font-medium text-gray-600 hover:border-red-200 hover:bg-red-50 hover:text-red-600"
+                        >
+                          <span className="group-hover:hidden">Following</span>
+                          <span className="hidden group-hover:inline text-red-600">
+                            Unfollow
+                          </span>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             ) : (
-              <div className="space-y-2">
-                {following.map((p) => (
-                  <div
-                    key={p.id}
-                    className="flex items-center justify-between rounded-lg px-3 py-2 hover:bg-gray-50 transition-colors"
-                  >
-                    <Link
-                      href={p.username ? `/${p.username}` : '#'}
-                      className="flex items-center gap-3 min-w-0 flex-1 hover:opacity-80 transition-opacity"
-                    >
-                      {p.avatar_url ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={p.avatar_url}
-                          alt=""
-                          className="w-9 h-9 rounded-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center text-xs font-semibold text-gray-500">
-                          {(p.username || p.full_name || 'U')
-                            .charAt(0)
-                            .toUpperCase()}
-                        </div>
-                      )}
-                      <div className="min-w-0">
-                        <div className="text-sm font-medium text-gray-900 truncate">
-                          {p.full_name || p.username || 'User'}
-                        </div>
-                        {p.username && (
-                          <div className="text-xs text-gray-500 truncate">
-                            @{p.username}
-                          </div>
-                        )}
-                      </div>
-                    </Link>
-                    <button
-                      onClick={() => unfollowUser(p.id)}
-                      className="text-xs text-gray-500 hover:text-gray-700 font-medium"
-                    >
-                      Unfollow
-                    </button>
+              <div className="rounded-2xl border border-gray-200/70 bg-white/80 p-6">
+                <div className="text-xs uppercase tracking-wide text-gray-500 mb-4">
+                  Followers ({filteredFollowers.length})
+                </div>
+                {friendsLoading && followers.length === 0 ? (
+                  <div className="text-sm text-gray-500 text-center py-8">
+                    Loading…
                   </div>
-                ))}
+                ) : filteredFollowers.length === 0 ? (
+                  <div className="text-sm text-gray-500 text-center py-8">
+                    No followers yet.
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {filteredFollowers.map((p) => {
+                      const isFollowing = following.some((f) => f.id === p.id)
+                      return (
+                        <div
+                          key={p.id}
+                          className="flex items-center justify-between rounded-lg px-3 py-2 hover:bg-gray-50 transition-colors"
+                        >
+                          <Link
+                            href={p.username ? `/${p.username}` : '#'}
+                            className="flex items-center gap-3 min-w-0 flex-1 hover:opacity-80 transition-opacity"
+                          >
+                            {p.avatar_url ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img
+                                src={p.avatar_url}
+                                alt=""
+                                className="w-9 h-9 rounded-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center text-xs font-semibold text-gray-500">
+                                {(p.username || p.full_name || 'U')
+                                  .charAt(0)
+                                  .toUpperCase()}
+                              </div>
+                            )}
+                            <div className="min-w-0">
+                              <div className="text-sm font-medium text-gray-900 truncate">
+                                {p.full_name || p.username || 'User'}
+                              </div>
+                              {p.username && (
+                                <div className="text-xs text-gray-500 truncate">
+                                  @{p.username}
+                                </div>
+                              )}
+                            </div>
+                          </Link>
+                          {isFollowing ? (
+                            <button
+                              onClick={() => unfollowUser(p.id)}
+                              className="group inline-flex items-center justify-center rounded-full border border-gray-200 px-3 py-1 text-xs font-medium text-gray-600 hover:border-red-200 hover:bg-red-50 hover:text-red-600"
+                            >
+                              <span className="group-hover:hidden">Following</span>
+                              <span className="hidden group-hover:inline text-red-600">
+                                Unfollow
+                              </span>
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => followUser(p.id)}
+                              className="inline-flex items-center justify-center rounded-full bg-sky-600 px-3 py-1 text-xs font-semibold text-white hover:bg-sky-700"
+                            >
+                              Follow Back
+                            </button>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
               </div>
             )}
           </div>
 
-          {/* Followers */}
-          <div className="rounded-2xl border border-gray-200/70 bg-white/80 p-6">
-            <div className="text-xs uppercase tracking-wide text-gray-500 mb-4">
-              Followers ({followers.length})
-            </div>
-            {friendsLoading && followers.length === 0 ? (
-              <div className="text-sm text-gray-500 text-center py-8">
-                Loading…
-              </div>
-            ) : followers.length === 0 ? (
-              <div className="text-sm text-gray-500 text-center py-8">
-                No followers yet.
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {followers.map((p) => (
-                  <Link
-                    key={p.id}
-                    href={p.username ? `/${p.username}` : '#'}
-                    className="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-gray-50 transition-colors"
-                  >
-                    {p.avatar_url ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={p.avatar_url}
-                        alt=""
-                        className="w-9 h-9 rounded-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center text-xs font-semibold text-gray-500">
-                        {(p.username || p.full_name || 'U')
-                          .charAt(0)
-                          .toUpperCase()}
-                      </div>
-                    )}
-                    <div className="min-w-0">
-                      <div className="text-sm font-medium text-gray-900 truncate">
-                        {p.full_name || p.username || 'User'}
-                      </div>
-                      {p.username && (
-                        <div className="text-xs text-gray-500 truncate">
-                          @{p.username}
-                        </div>
-                      )}
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            )}
+          <div className="hidden lg:block rounded-2xl border border-dashed border-gray-200 bg-gray-50/70 p-6 text-sm text-gray-500">
+            Recommendations coming soon — friends of friends, local players, and popular community members.
           </div>
         </div>
       )}
+      </div>
     </Wrapper>
   )
 }
