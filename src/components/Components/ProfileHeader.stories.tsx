@@ -52,3 +52,41 @@ export const NoBanner: Story = {
     showBanner: false,
   },
 }
+
+export const WithAvatar: Story = {
+  args: {
+    profile: {
+      username: 'robleto',
+      full_name: 'Greg Robleto',
+      avatar_url: 'https://i.pravatar.cc/300?img=12',
+      bio: null,
+      banner_url: null,
+    },
+    stats: {
+      gamesOwned: 417,
+      gamesPlayed: 194,
+      listsCreated: 4,
+    },
+    isOwnProfile: true,
+    showBanner: false,
+  },
+}
+
+export const OtherProfile: Story = {
+  args: {
+    profile: {
+      username: 'meeple_fan',
+      full_name: 'Meeple Fan',
+      avatar_url: null,
+      bio: 'I love Catan and Wingspan!',
+      banner_url: null,
+    },
+    stats: {
+      gamesOwned: 52,
+      gamesPlayed: 88,
+      listsCreated: 1,
+    },
+    isOwnProfile: false,
+    showBanner: false,
+  },
+}
