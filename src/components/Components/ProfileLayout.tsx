@@ -4,13 +4,9 @@ import { useEffect, useState, type ReactNode } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+import { cn } from '@/utils/helpers'
 import PageLayout from '@/components/Components/PageLayout'
 import ProfileHeader from '@/components/Components/ProfileHeader'
-import {
-  ChartBarIcon,
-  PencilSquareIcon,
-  UserGroupIcon,
-} from '@heroicons/react/24/outline'
 
 interface Profile {
   id: string
@@ -60,7 +56,7 @@ export default function ProfileLayout({
   const [isOwnProfile, setIsOwnProfile] = useState(false)
 
   const baseUrl = username ? `/${username}` : '/profile'
-  
+
   const tabs = [
     { key: 'overview', label: 'Overview', href: baseUrl },
     { key: 'activity', label: 'Activity', href: `${baseUrl}/activity` },
@@ -85,7 +81,7 @@ export default function ProfileLayout({
     if (pathname.endsWith('/stats')) return 'stats'
     return 'overview'
   }
-  
+
   const activeTab = getActiveTab()
 
   useEffect(() => {
@@ -223,40 +219,51 @@ export default function ProfileLayout({
   }
 
   const headerAndNav = (
-    <div className="space-y-4">
-      <ProfileHeader
-        profile={profile}
-        stats={{
-          gamesOwned: stats.gamesOwned,
-          gamesPlayed: stats.gamesPlayed,
-          listsCreated: stats.listsCreated,
-          followers: stats.followers,
-          following: stats.following,
-        }}
-        isOwnProfile={isOwnProfile}
-        showBanner={Boolean(profile?.banner_url)}
-      />
+    <div>
+      {/* Profile header section with opaque background */}
+      <div className="bg-gray-50 dark:bg-gray-950 pt-2 pb-4 sm:pt-4 sm:pb-5 px-4 sm:px-6 lg:px-8">
+        <ProfileHeader
+          profile={profile}
+          stats={{
+            gamesOwned: stats.gamesOwned,
+            gamesPlayed: stats.gamesPlayed,
+            listsCreated: stats.listsCreated,
+            followers: stats.followers,
+            following: stats.following,
+          }}
+          isOwnProfile={isOwnProfile}
+          showBanner={Boolean(profile?.banner_url)}
+        />
+      </div>
 
-      {/* Navigation - Underlined */}
-      <div className="border-b border-gray-200">
-        <div className="flex gap-6 overflow-x-auto scrollbar-hide">
+      {/* Navigation tabs - sticky with opaque bg on scroll */}
+      <div className="sticky top-14 z-30 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 px-4 sm:px-6 lg:px-8">
+        <nav
+          className="flex gap-1 overflow-x-auto scrollbar-hide -mb-px"
+          aria-label="Profile tabs"
+        >
           {tabs.map((tab) => {
             const isActive = activeTab === tab.key
             return (
               <Link
                 key={tab.key}
                 href={tab.href}
-                className={`unstyled py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
+                className={cn(
+                  'unstyled relative py-3 px-3 text-sm font-medium whitespace-nowrap transition-colors duration-150',
                   isActive
-                    ? 'border-gray-900 text-gray-900'
-                    : 'border-transparent text-gray-600 hover:text-gray-900'
-                }`}
+                    ? 'text-gray-900 dark:text-gray-100'
+                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
+                )}
               >
                 {tab.label}
+                {/* Active indicator bar */}
+                {isActive && (
+                  <span className="absolute inset-x-0 bottom-0 h-[2.5px] rounded-full bg-gray-900 dark:bg-gray-100" />
+                )}
               </Link>
             )
           })}
-        </div>
+        </nav>
       </div>
     </div>
   )
