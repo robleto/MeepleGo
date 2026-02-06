@@ -43,7 +43,7 @@ export function AwardCard({
   return (
     <Wrapper
       href={href as any}
-      className={`group relative flex flex-col items-center text-center rounded-2xl border border-gray-100 hover:border-amber-200 bg-white p-8 shadow-sm hover:shadow-lg transition-all duration-200 min-h-[320px] ${className}`}
+      className={`group relative flex flex-col items-center text-center rounded-2xl border border-gray-100 dark:border-gray-800 hover:border-amber-200 dark:hover:border-amber-700 bg-white dark:bg-gray-900 p-8 shadow-sm hover:shadow-lg transition-all duration-200 min-h-[320px] ${className}`}
     >
       {icon ? (
         <div
@@ -58,44 +58,44 @@ export function AwardCard({
           </IconCircle>
         </div>
       )}
-      <h3 className="heading-display text-xl font-semibold text-gray-900 group-hover:text-gray-700 transition-colors mb-2 tracking-wide">
+      <h3 className="heading-display text-xl font-semibold text-gray-900 dark:text-gray-100 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors mb-2 tracking-wide">
         {title}
       </h3>
       {yearSpan && (
-        <p className="text-xs font-medium text-gray-400 mb-3 flex items-center justify-center gap-1">
+        <p className="text-xs font-medium text-gray-400 dark:text-gray-500 mb-3 flex items-center justify-center gap-1">
           <CalendarIcon className="w-3.5 h-3.5" /> {yearSpan}
         </p>
       )}
       {description && (
-        <p className="text-left text-sm leading-tight text-gray-400 mb-6 line-clamp-4 flex-grow">
+        <p className="text-left text-sm leading-tight text-gray-400 dark:text-gray-500 mb-6 line-clamp-4 flex-grow">
           {description}
         </p>
       )}
       {showStats && (
         <>
-          <div className="w-full h-px bg-gray-100 mb-4" />
+          <div className="w-full h-px bg-gray-100 dark:bg-gray-800 mb-4" />
           <div className="grid w-full grid-cols-3 gap-2">
             <div className="flex flex-col items-center">
-              <span className="text-lg font-medium text-gray-900">
+              <span className="text-lg font-medium text-gray-900 dark:text-gray-100">
                 {categories}
               </span>
-              <span className="mt-0.5 text-[11px] uppercase tracking-wide text-gray-500">
+              <span className="mt-0.5 text-[11px] uppercase tracking-wide text-gray-500 dark:text-gray-400">
                 Categories
               </span>
             </div>
             <div className="flex flex-col items-center">
-              <span className="text-lg font-medium text-gray-900">
+              <span className="text-lg font-medium text-gray-900 dark:text-gray-100">
                 {winners}
               </span>
-              <span className="mt-0.5 text-[11px] uppercase tracking-wide text-gray-500">
+              <span className="mt-0.5 text-[11px] uppercase tracking-wide text-gray-500 dark:text-gray-400">
                 Winners
               </span>
             </div>
             <div className="flex flex-col items-center">
-              <span className="text-lg font-medium text-gray-900">
+              <span className="text-lg font-medium text-gray-900 dark:text-gray-100">
                 {nominees}
               </span>
-              <span className="mt-0.5 text-[11px] uppercase tracking-wide text-gray-500">
+              <span className="mt-0.5 text-[11px] uppercase tracking-wide text-gray-500 dark:text-gray-400">
                 Nominees
               </span>
             </div>

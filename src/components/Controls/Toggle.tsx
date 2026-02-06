@@ -67,17 +67,17 @@ const Toggle = forwardRef<HTMLInputElement, ToggleProps>(
 
     const stateClasses = {
       default: {
-        bg: 'bg-gray-200',
+        bg: 'bg-gray-200 dark:bg-gray-700',
         bgChecked: 'bg-sky-600',
         focus: 'focus:ring-sky-500',
       },
       error: {
-        bg: 'bg-red-100',
+        bg: 'bg-red-100 dark:bg-red-900/40',
         bgChecked: 'bg-red-600',
         focus: 'focus:ring-red-500',
       },
       success: {
-        bg: 'bg-green-100',
+        bg: 'bg-green-100 dark:bg-green-900/40',
         bgChecked: 'bg-green-600',
         focus: 'focus:ring-green-500',
       },
@@ -123,7 +123,7 @@ const Toggle = forwardRef<HTMLInputElement, ToggleProps>(
             // State and color styles
             checked ? currentStateClasses.bgChecked : currentStateClasses.bg,
             currentStateClasses.focus,
-            'focus-within:ring-2 focus-within:ring-offset-2',
+            'focus-within:ring-2 focus-within:ring-offset-2 dark:focus-within:ring-offset-gray-900',
 
             // Disabled styles
             disabled && 'opacity-50 cursor-not-allowed'
@@ -153,7 +153,7 @@ const Toggle = forwardRef<HTMLInputElement, ToggleProps>(
               <label
                 htmlFor={toggleId}
                 className={cn(
-                  'font-medium text-gray-900 cursor-pointer block',
+                  'font-medium text-gray-900 dark:text-gray-100 cursor-pointer block',
                   labelSize[size],
                   disabled && 'opacity-50 cursor-not-allowed'
                 )}
@@ -164,7 +164,7 @@ const Toggle = forwardRef<HTMLInputElement, ToggleProps>(
             {description && (
               <p
                 className={cn(
-                  'text-gray-500',
+                  'text-gray-500 dark:text-gray-400',
                   descriptionSize[size],
                   disabled && 'opacity-50'
                 )}
@@ -183,7 +183,7 @@ const Toggle = forwardRef<HTMLInputElement, ToggleProps>(
               <label
                 htmlFor={toggleId}
                 className={cn(
-                  'font-medium text-gray-900 cursor-pointer block',
+                  'font-medium text-gray-900 dark:text-gray-100 cursor-pointer block',
                   labelSize[size],
                   disabled && 'opacity-50 cursor-not-allowed'
                 )}
@@ -194,7 +194,7 @@ const Toggle = forwardRef<HTMLInputElement, ToggleProps>(
             {description && (
               <p
                 className={cn(
-                  'text-gray-500',
+                  'text-gray-500 dark:text-gray-400',
                   descriptionSize[size],
                   disabled && 'opacity-50'
                 )}

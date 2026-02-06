@@ -77,8 +77,8 @@ export function Heading({
   const color = gradient
     ? 'bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-400 bg-clip-text text-transparent'
     : subtle
-      ? 'text-gray-600'
-      : 'text-gray-900'
+      ? 'text-gray-600 dark:text-gray-400'
+      : 'text-gray-900 dark:text-gray-100'
   const alignment =
     align === 'center' ? 'text-center' : align === 'right' ? 'text-right' : ''
   const transform = uppercase ? 'uppercase tracking-wide' : ''

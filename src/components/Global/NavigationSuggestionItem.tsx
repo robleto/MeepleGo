@@ -39,7 +39,7 @@ export default function SuggestionItem({
       }
       if (match) {
         parts.push(
-          <span key={i} className="bg-yellow-200 rounded px-0.5">
+          <span key={i} className="bg-yellow-200 dark:bg-yellow-800 rounded px-0.5">
             {match}
           </span>
         )
@@ -63,7 +63,7 @@ export default function SuggestionItem({
       onClick={() => onSelect(game)}
       className={cn(
         'w-full flex items-center gap-4 px-6 py-3 text-left transition-colors',
-        active ? 'bg-primary-50' : 'hover:bg-gray-50'
+        active ? 'bg-primary-50 dark:bg-primary-900/30' : 'hover:bg-gray-50 dark:hover:bg-gray-800'
       )}
     >
       {game.thumbnail_url ? (
@@ -71,15 +71,15 @@ export default function SuggestionItem({
         <img
           src={game.thumbnail_url}
           alt=""
-          className="object-cover w-10 h-10 rounded-lg ring-1 ring-gray-200"
+          className="object-cover w-10 h-10 rounded-lg ring-1 ring-gray-200 dark:ring-gray-700"
         />
       ) : (
-        <div className="w-10 h-10 rounded-lg bg-gray-200 flex items-center justify-center text-[10px] font-semibold text-gray-600">
+        <div className="w-10 h-10 rounded-lg bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-[10px] font-semibold text-gray-600 dark:text-gray-400">
           {game.name.slice(0, 2).toUpperCase()}
         </div>
       )}
       <div className="flex-1 min-w-0">
-        <div className="text-sm font-medium text-gray-900 truncate">
+        <div className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
           {highlight(game.name)}
         </div>
         <div className="text-[11px] text-gray-500 flex items-center gap-2">

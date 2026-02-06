@@ -79,25 +79,25 @@ const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
 
     const variantClasses = {
       default: subtle
-        ? 'bg-gray-100 text-gray-800'
+        ? 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200'
         : 'bg-gray-500 text-white',
       primary: subtle
-        ? 'bg-sky-100 text-sky-800'
+        ? 'bg-sky-100 dark:bg-sky-900/40 text-sky-800 dark:text-sky-200'
         : 'bg-sky-500 text-white',
       secondary: subtle
-        ? 'bg-purple-100 text-purple-800'
+        ? 'bg-purple-100 dark:bg-purple-900/40 text-purple-800 dark:text-purple-200'
         : 'bg-purple-500 text-white',
       success: subtle
-        ? 'bg-green-100 text-green-800'
+        ? 'bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-200'
         : 'bg-green-500 text-white',
       warning: subtle
-        ? 'bg-yellow-100 text-yellow-800'
+        ? 'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-200'
         : 'bg-yellow-500 text-white',
       error: subtle
-        ? 'bg-red-100 text-red-800'
+        ? 'bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200'
         : 'bg-red-500 text-white',
       info: subtle
-        ? 'bg-blue-100 text-blue-800'
+        ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-200'
         : 'bg-blue-500 text-white',
     }
 
@@ -119,7 +119,7 @@ const Badge = forwardRef<HTMLSpanElement, BadgeProps>(
 
           // Variant styles (or custom color)
           customColor
-            ? `${customColor} text-gray-900`
+            ? `${customColor} text-gray-900 dark:text-gray-100`
             : variantClasses[variant],
 
           // Shape styles

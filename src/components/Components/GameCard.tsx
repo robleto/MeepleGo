@@ -325,7 +325,7 @@ export default function GameCard({
   if (viewMode === 'list') {
     return (
       <div
-        className={`bg-white hover:bg-gray-50 transition-colors cursor-pointer relative ${
+        className={`bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer relative ${
           variant === 'compact' ? 'p-3' : 'p-3 sm:p-4'
         }`}
         onClick={() => {
@@ -356,7 +356,7 @@ export default function GameCard({
                   type="button"
                   title="Drag to reorder"
                   aria-label="Drag to reorder"
-                  className="flex items-center justify-center w-6 h-6 text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing"
+                  className="flex items-center justify-center w-6 h-6 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 cursor-grab active:cursor-grabbing"
                   onClick={(e) => e.stopPropagation()}
                   ref={dragHandleProps?.setActivatorNodeRef as any}
                   {...(dragHandleProps?.attributes || {})}
@@ -374,14 +374,14 @@ export default function GameCard({
                 </button>
               )}
               <div className="w-6 text-center sm:w-8">
-                <div className="inline-flex items-center justify-center w-6 h-6 text-xs font-semibold text-gray-700 bg-gray-100 rounded-md sm:w-7 sm:h-7 ring-1 ring-gray-200">
+                <div className="inline-flex items-center justify-center w-6 h-6 text-xs font-semibold text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 rounded-md sm:w-7 sm:h-7 ring-1 ring-gray-200 dark:ring-gray-700">
                   {listRank}
                 </div>
               </div>
             </div>
           )}
           <div
-            className={`flex-shrink-0 rounded-lg overflow-hidden flex items-center justify-center border border-gray-200 bg-gray-100 ${
+            className={`flex-shrink-0 rounded-lg overflow-hidden flex items-center justify-center border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 ${
               variant === 'compact'
                 ? 'w-14 h-14 sm:w-16 sm:h-16'
                 : 'w-14 h-14 sm:w-20 sm:h-20'
@@ -405,7 +405,7 @@ export default function GameCard({
           </div>
           <div className="flex-1 min-w-0">
             <h3
-              className={`font-semibold text-gray-900 line-clamp-1 flex items-center gap-1 ${
+              className={`font-semibold text-gray-900 dark:text-gray-100 line-clamp-1 flex items-center gap-1 ${
                   variant === 'compact'
                     ? 'text-sm'
                     : 'text-sm sm:text-base'
@@ -426,7 +426,7 @@ export default function GameCard({
             {variant === 'detailed' && 
              metadata?.showTagline !== false && 
              (game as any).tagline && (
-              <p className="hidden mb-1 text-xs text-gray-600 truncate sm:block">
+              <p className="hidden mb-1 text-xs text-gray-600 dark:text-gray-400 truncate sm:block">
                 {game.tagline}
               </p>
             )}
@@ -434,7 +434,7 @@ export default function GameCard({
             {/* Metadata - show based on metadata config or showMeta prop for backward compat */}
             {(variant === 'balanced' || variant === 'detailed') && 
              (metadata ? true : showMeta) && (
-              <div className="flex items-center gap-2 text-xs text-gray-500 mt-0.5 flex-wrap">
+              <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mt-0.5 flex-wrap">
                 {(metadata?.showYear !== false) && (
                   <span className="tabular-nums">{formatYear(game.year_published)}</span>
                 )}
@@ -468,7 +468,7 @@ export default function GameCard({
                 )}
                 {/* Custom subtext */}
                 {metadata?.customSubtext && (
-                  <span className="text-gray-600">
+                  <span className="text-gray-600 dark:text-gray-400">
                     {metadata.customSubtext}
                   </span>
                 )}
@@ -477,7 +477,7 @@ export default function GameCard({
 
             {/* Compact variant shows only year inline */}
             {variant === 'compact' && (metadata?.showYear !== false) && (
-              <div className="text-xs text-gray-500 tabular-nums mt-0.5">
+              <div className="text-xs text-gray-500 dark:text-gray-400 tabular-nums mt-0.5">
                 {formatYear(game.year_published)}
               </div>
             )}
@@ -586,7 +586,7 @@ export default function GameCard({
     >
       {/* Game Image + Hover Overlay */}
       <div
-        className={`aspect-square relative w-full mx-auto rounded-t-lg overflow-visible border border-gray-200 cursor-pointer ${variant === 'compact' ? 'bg-gradient-to-b from-gray-200 to-gray-100' : 'bg-gradient-to-b from-gray-300 to-gray-200'}`}
+        className={`aspect-square relative w-full mx-auto rounded-t-lg overflow-visible border border-gray-200 dark:border-gray-700 cursor-pointer ${variant === 'compact' ? 'bg-gradient-to-b from-gray-200 dark:from-gray-700 to-gray-100 dark:to-gray-800' : 'bg-gradient-to-b from-gray-300 dark:from-gray-700 to-gray-200 dark:to-gray-800'}`}
       >
         <div className="absolute inset-0 overflow-hidden rounded-t-lg">
           {game.image_url || game.thumbnail_url ? (
@@ -610,7 +610,7 @@ export default function GameCard({
         {/* Grid view rank badge (top-left), if provided */}
         {listRank != null && (
           <div className="absolute z-10 top-1 left-1">
-            <div className="inline-flex items-center justify-center w-6 h-6 text-xs font-semibold text-gray-800 bg-white rounded-md shadow-sm ring-1 ring-gray-200">
+            <div className="inline-flex items-center justify-center w-6 h-6 text-xs font-semibold text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-900 rounded-md shadow-sm ring-1 ring-gray-200 dark:ring-gray-700">
               {listRank}
             </div>
           </div>
@@ -918,7 +918,7 @@ export default function GameCard({
             {/* Legacy rendering when no metadata config provided */}
             <div className="flex-shrink-0">
               <h3
-                className={`font-bold text-gray-900 leading-tight line-clamp-2 ${
+                className={`font-bold text-gray-900 dark:text-gray-100 leading-tight line-clamp-2 ${
                   titleClassName || ''
                 } ${variant === 'compact' ? 'text-[0.67rem]' : 'text-[0.74rem]'} `}
               >
@@ -926,7 +926,7 @@ export default function GameCard({
                   ? `${(game.name || 'Untitled Game').substring(0, 48)}...`
                   : (game.name || 'Untitled Game')}
                 {variant === 'compact' && (
-                  <span className="ml-2 text-xs font-normal text-gray-500 tabular-nums">
+                  <span className="ml-2 text-xs font-normal text-gray-500 dark:text-gray-400 tabular-nums">
                     {formatYear(game.year_published)}
                   </span>
                 )}
@@ -934,14 +934,14 @@ export default function GameCard({
 
               {/* Description/tagline - only show for non-compact variants */}
               {variant === 'detailed' && (game as any).tagline && (
-                <p className="mt-0.5 text-[0.8rem] leading-snug text-gray-600 line-clamp-2 min-h-[1.2rem]">
+                <p className="mt-0.5 text-[0.8rem] leading-snug text-gray-600 dark:text-gray-400 line-clamp-2 min-h-[1.2rem]">
                   {truncate(game.tagline || '', 90)}
                 </p>
               )}
 
               {/* Year below title for balanced and detailed variants */}
               {(variant === 'balanced' || variant === 'detailed') && (
-                <div className="mt-0.5 text-[0.7rem] text-gray-500 tabular-nums">
+                <div className="mt-0.5 text-[0.7rem] text-gray-500 dark:text-gray-400 tabular-nums">
                   {formatYear(game.year_published)}
                 </div>
               )}
@@ -949,7 +949,7 @@ export default function GameCard({
 
             {/* Bottom-aligned metadata section - for balanced and detailed variants */}
             <div
-              className={`mt-auto pt-2 space-y-1 ${emphasizeMeta ? 'text-gray-700' : 'text-gray-500'} flex-shrink-0 text-[0.7rem]`}
+              className={`mt-auto pt-2 space-y-1 ${emphasizeMeta ? 'text-gray-700 dark:text-gray-300' : 'text-gray-500 dark:text-gray-400'} flex-shrink-0 text-[0.7rem]`}
             >
               {(variant === 'balanced' || variant === 'detailed') && showMeta && (
                 <div className="flex items-center justify-between text-xs">
@@ -1011,20 +1011,20 @@ export default function GameCard({
           onClick={() => setShowPlayLog(false)}
         >
           <div
-            className="bg-white w-full sm:max-w-xl rounded-t-2xl sm:rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[90vh]"
+            className="bg-white dark:bg-gray-900 w-full sm:max-w-xl rounded-t-2xl sm:rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[90vh]"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+            <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
               <h3 className="text-lg font-semibold">
                 Log Your Play – {game.name}
               </h3>
               <button
                 onClick={() => setShowPlayLog(false)}
-                className="p-2 rounded-md hover:bg-gray-100"
+                className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
                 aria-label="Close"
               >
-                <XMarkIcon className="w-6 h-6 text-gray-500" />
+                <XMarkIcon className="w-6 h-6 text-gray-500 dark:text-gray-400" />
               </button>
             </div>
             {/* Body */}

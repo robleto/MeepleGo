@@ -38,10 +38,10 @@ export default function NavigationAddMenu({
       />
       {showAddMenu && (
         <div
-          className="absolute top-0 z-50 p-2 mt-10 mr-2 bg-white border border-gray-200 shadow-xl right-full w-60 rounded-xl"
+          className="absolute top-0 z-50 p-2 mt-10 mr-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-xl right-full w-60 rounded-xl"
           role="menu"
         >
-          <div className="text-[11px] uppercase tracking-wide font-semibold text-gray-500 px-2 pb-1">
+          <div className="text-[11px] uppercase tracking-wide font-semibold text-gray-500 dark:text-gray-400 px-2 pb-1">
             Quick Add
           </div>
           <button
@@ -49,27 +49,27 @@ export default function NavigationAddMenu({
               setShowAddMenu(false)
               onLogPlay()
             }}
-            className="flex items-center w-full gap-3 px-3 py-2 text-sm transition rounded-lg hover:bg-gray-50"
+            className="flex items-center w-full gap-3 px-3 py-2 text-sm transition rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
           >
-            <PlayIcon className="w-4 h-4 text-gray-400" /> Log a Play
+            <PlayIcon className="w-4 h-4 text-gray-400 dark:text-gray-500" /> Log a Play
           </button>
           <button
             onClick={() => {
               setShowAddMenu(false)
               onCreateList()
             }}
-            className="flex items-center w-full gap-3 px-3 py-2 text-sm transition rounded-lg hover:bg-gray-50"
+            className="flex items-center w-full gap-3 px-3 py-2 text-sm transition rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
           >
-            <ListBulletIcon className="w-4 h-4 text-gray-400" /> New List
+            <ListBulletIcon className="w-4 h-4 text-gray-400 dark:text-gray-500" /> New List
           </button>
           <button
             onClick={() => {
               setShowAddMenu(false)
               onAddGame()
             }}
-            className="flex items-center w-full gap-3 px-3 py-2 text-sm transition rounded-lg hover:bg-gray-50"
+            className="flex items-center w-full gap-3 px-3 py-2 text-sm transition rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
           >
-            <CubeIcon className="w-4 h-4 text-gray-400" /> Missing Game
+            <CubeIcon className="w-4 h-4 text-gray-400 dark:text-gray-500" /> Missing Game
           </button>
         </div>
       )}

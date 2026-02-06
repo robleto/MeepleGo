@@ -51,20 +51,20 @@ export default function AddMissingGamePage() {
         {!done && (
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wide text-gray-500 mb-1">
+              <label className="block text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-1">
                 Game Name
               </label>
               <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500"
+                className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500"
                 placeholder="Game title"
                 required
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <label className="flex flex-col gap-1">
-                <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                <span className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
                   Year
                 </span>
                 <input
@@ -73,18 +73,18 @@ export default function AddMissingGamePage() {
                   type="number"
                   min={1900}
                   max={2100}
-                  className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500"
+                  className="border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500"
                   placeholder="2024"
                 />
               </label>
               <label className="flex flex-col gap-1">
-                <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                <span className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
                   Publisher
                 </span>
                 <input
                   value={publisher}
                   onChange={(e) => setPublisher(e.target.value)}
-                  className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500"
+                  className="border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500"
                   placeholder="Publisher"
                 />
               </label>
@@ -104,18 +104,18 @@ export default function AddMissingGamePage() {
                 Log a play instead
               </a>
             </div>
-            <p className="text-[11px] text-gray-500">
+            <p className="text-[11px] text-gray-500 dark:text-gray-400">
               We'll review and add it soon. You can log your play after it's in
               the database.
             </p>
           </form>
         )}
         {done && (
-          <div className="p-6 border border-green-200 rounded-lg bg-green-50">
-            <div className="font-medium text-green-700 mb-2">
+          <div className="p-6 border border-green-200 dark:border-green-800 rounded-lg bg-green-50 dark:bg-green-900/20">
+            <div className="font-medium text-green-700 dark:text-green-300 mb-2">
               Request received!
             </div>
-            <p className="text-sm text-green-700">
+            <p className="text-sm text-green-700 dark:text-green-300">
               Thanks. We'll vet and import the game shortly.
             </p>
             <div className="mt-4 flex gap-3">
@@ -127,7 +127,7 @@ export default function AddMissingGamePage() {
               </a>
               <a
                 href="/games"
-                className="text-sm text-gray-600 hover:underline"
+                className="text-sm text-gray-600 dark:text-gray-400 hover:underline"
               >
                 Browse games
               </a>

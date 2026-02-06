@@ -24,7 +24,7 @@ export default function PageLayout({
         </section>
       )}
       {/* Main slot: white full-bleed with max-width inner wrapper */}
-      <main className="bg-white main-content-section">
+      <main className="bg-white dark:bg-gray-900 main-content-section">
         <div className="mx-auto max-w-7xl">
           {children}
         </div>

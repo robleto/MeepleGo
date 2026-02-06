@@ -13,7 +13,7 @@ export default function WinnerCard({ game, className = '' }: WinnerCardProps) {
     <div className={`space-y-4 ${className}`}>
       <div className="flex items-center gap-2 font-display">
         <TrophyIcon className="w-5 h-5 text-amber-500" />
-        <h4 className="text-base font-semibold text-gray-800">
+        <h4 className="text-base font-semibold text-gray-800 dark:text-gray-200">
           Winner
         </h4>
       </div>

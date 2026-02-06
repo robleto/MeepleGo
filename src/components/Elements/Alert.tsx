@@ -52,27 +52,27 @@ export interface AlertProps {
 const variants = {
   success: {
     container:
-      'bg-green-50 border-green-200 text-green-800',
+      'bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-800 text-green-800 dark:text-green-200',
     icon: CheckCircleIcon,
-    iconColor: 'text-green-400',
+    iconColor: 'text-green-400 dark:text-green-500',
   },
   error: {
     container:
-      'bg-red-50 border-red-200 text-red-800',
+      'bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-800 text-red-800 dark:text-red-200',
     icon: XCircleIcon,
-    iconColor: 'text-red-400',
+    iconColor: 'text-red-400 dark:text-red-500',
   },
   warning: {
     container:
-      'bg-yellow-50 border-yellow-200 text-yellow-800',
+      'bg-yellow-50 dark:bg-yellow-900/30 border-yellow-200 dark:border-yellow-800 text-yellow-800 dark:text-yellow-200',
     icon: ExclamationTriangleIcon,
-    iconColor: 'text-yellow-400',
+    iconColor: 'text-yellow-400 dark:text-yellow-500',
   },
   info: {
     container:
-      'bg-blue-50 border-blue-200 text-blue-800',
+      'bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-200',
     icon: InformationCircleIcon,
-    iconColor: 'text-blue-400',
+    iconColor: 'text-blue-400 dark:text-blue-500',
   },
 }
 

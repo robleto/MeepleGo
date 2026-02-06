@@ -300,7 +300,7 @@ export default async function AwardsPage({
               <ChevronDownIcon className="w-6 h-6 text-gray-500" /> Debug: Raw
               Award Data
             </Heading>
-            <p className="text-sm text-gray-500 mb-6">
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
               Showing per-year breakdown sourced directly from games.honors.
               Duplicate game appearances in multiple categories are shown unless
               de-duplicated in import logic.
@@ -309,11 +309,11 @@ export default async function AwardsPage({
               {debugData.map((block) => (
                 <div
                   key={block.id}
-                  className="border border-gray-200 rounded-lg p-4 bg-white shadow-sm"
+                  className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-white dark:bg-gray-900 shadow-sm"
                 >
                   <Heading as="h3" size="sm" subtle className="mb-2">
                     {block.name}{' '}
-                    <span className="text-xs text-gray-400">
+                    <span className="text-xs text-gray-400 dark:text-gray-500">
                       ({block.awardType})
                     </span>
                   </Heading>
@@ -326,7 +326,7 @@ export default async function AwardsPage({
                         key={y.year}
                         className="border-b last:border-b-0 pb-3"
                       >
-                        <div className="font-medium text-gray-700 mb-1">
+                        <div className="font-medium text-gray-700 dark:text-gray-300 mb-1">
                           {y.year}
                         </div>
                         <div className="grid gap-2 md:grid-cols-3">
@@ -334,27 +334,27 @@ export default async function AwardsPage({
                             <div className="text-yellow-700 font-semibold">
                               Winners ({y.winners.length})
                             </div>
-                            <ul className="list-disc ml-4 text-gray-600 space-y-0.5">
+                            <ul className="list-disc ml-4 text-gray-600 dark:text-gray-400 space-y-0.5">
                               {y.winners.slice(0, 8).map((n) => (
                                 <li key={n}>{n}</li>
                               ))}
                               {y.winners.length > 8 && (
-                                <li className="italic text-gray-400">
+                                <li className="italic text-gray-400 dark:text-gray-500">
                                   +{y.winners.length - 8} more
                                 </li>
                               )}
                             </ul>
                           </div>
                           <div>
-                            <div className="text-gray-700 font-semibold">
+                            <div className="text-gray-700 dark:text-gray-300 font-semibold">
                               Nominees ({y.nominees.length})
                             </div>
-                            <ul className="list-disc ml-4 text-gray-600 space-y-0.5">
+                            <ul className="list-disc ml-4 text-gray-600 dark:text-gray-400 space-y-0.5">
                               {y.nominees.slice(0, 8).map((n) => (
                                 <li key={n}>{n}</li>
                               ))}
                               {y.nominees.length > 8 && (
-                                <li className="italic text-gray-400">
+                                <li className="italic text-gray-400 dark:text-gray-500">
                                   +{y.nominees.length - 8} more
                                 </li>
                               )}
@@ -364,12 +364,12 @@ export default async function AwardsPage({
                             <div className="text-blue-700 font-semibold">
                               Special / Recommended ({y.special.length})
                             </div>
-                            <ul className="list-disc ml-4 text-gray-600 space-y-0.5">
+                            <ul className="list-disc ml-4 text-gray-600 dark:text-gray-400 space-y-0.5">
                               {y.special.slice(0, 8).map((n) => (
                                 <li key={n}>{n}</li>
                               ))}
                               {y.special.length > 8 && (
-                                <li className="italic text-gray-400">
+                                <li className="italic text-gray-400 dark:text-gray-500">
                                   +{y.special.length - 8} more
                                 </li>
                               )}

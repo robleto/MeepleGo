@@ -36,7 +36,7 @@ export default function StatCard({
   size = 'default',
 }: StatCardProps) {
   const baseClasses =
-    'border border-gray-200 rounded-2xl transition-all duration-200'
+    'border border-gray-200 dark:border-gray-700 rounded-2xl transition-all duration-200'
   const interactiveClasses = onClick
     ? 'cursor-pointer hover:scale-105 hover:shadow-lg'
     : ''
@@ -51,9 +51,9 @@ export default function StatCard({
           <div className={`flex items-center justify-center w-5 h-5 ${iconBg} rounded-full`}>
             <Icon className={`w-2.5 h-2.5 ${iconColor}`} />
           </div>
-          <div className="text-base font-bold text-gray-900">{value}</div>
+          <div className="text-base font-bold text-gray-900 dark:text-gray-100">{value}</div>
         </div>
-        <div className="text-[9px] font-medium text-gray-600">{label}</div>
+        <div className="text-[9px] font-medium text-gray-600 dark:text-gray-400">{label}</div>
       </div>
     )
   }
@@ -68,9 +68,9 @@ export default function StatCard({
           <div className={`flex items-center justify-center w-7 h-7 ${iconBg} rounded-full`}>
             <Icon className={`w-3.5 h-3.5 ${iconColor}`} />
           </div>
-          <div className="text-xl font-bold text-gray-900">{value}</div>
+          <div className="text-xl font-bold text-gray-900 dark:text-gray-100">{value}</div>
         </div>
-        <div className="text-[11px] font-medium text-gray-600">{label}</div>
+        <div className="text-[11px] font-medium text-gray-600 dark:text-gray-400">{label}</div>
       </div>
     )
   }
@@ -85,9 +85,9 @@ export default function StatCard({
         <div className={`flex items-center justify-center w-8 h-8 ${iconBg} rounded-full`}>
           <Icon className={`w-4 h-4 ${iconColor}`} />
         </div>
-        <div className="text-sm font-medium text-gray-600">{label}</div>
+        <div className="text-sm font-medium text-gray-600 dark:text-gray-400">{label}</div>
       </div>
-      <div className="text-4xl font-bold text-gray-900">{value}</div>
+      <div className="text-4xl font-bold text-gray-900 dark:text-gray-100">{value}</div>
     </div>
   )
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
@@ -280,19 +280,27 @@ function Navigation() {
     }
   }, [])
 
-  const applyTheme = (mode: 'system' | 'light' | 'dark') => {
+  const applyTheme = useCallback((mode: 'system' | 'light' | 'dark') => {
+    if (typeof window === 'undefined') return
     const sysDark = window.matchMedia('(prefers-color-scheme: dark)').matches
     const dark = mode === 'dark' || (mode === 'system' && sysDark)
+    console.log('[applyTheme] mode:', mode, 'sysDark:', sysDark, 'dark:', dark)
+    console.log('[applyTheme] classList before:', document.documentElement.classList.toString())
     document.documentElement.classList.toggle('dark', dark)
-  }
-  const setTheme = (mode: 'system' | 'light' | 'dark') => {
+    console.log('[applyTheme] classList after:', document.documentElement.classList.toString())
+  }, [])
+  const setTheme = useCallback((mode: 'system' | 'light' | 'dark') => {
+    console.log('[setTheme] called with mode:', mode)
     setThemeMode(mode)
-    localStorage.setItem('themeMode', mode)
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('themeMode', mode)
+      console.log('[setTheme] saved to localStorage:', localStorage.getItem('themeMode'))
+    }
     applyTheme(mode)
-  }
+  }, [applyTheme])
   useEffect(() => {
-    if (typeof window !== 'undefined') applyTheme(themeMode)
-  }, [themeMode])
+    applyTheme(themeMode)
+  }, [themeMode, applyTheme])
   useEffect(() => {
     if (themeMode === 'system') {
       const mq = window.matchMedia('(prefers-color-scheme: dark)')
@@ -300,7 +308,7 @@ function Navigation() {
       mq.addEventListener('change', listener)
       return () => mq.removeEventListener('change', listener)
     }
-  }, [themeMode])
+  }, [themeMode, applyTheme])
 
   // Fetch suggestions (debounced, cached, abortable)
   useEffect(() => {
@@ -506,7 +514,7 @@ function Navigation() {
         className={cn(
           'absolute inset-0 pointer-events-none border-b z-0 transition-all duration-300',
           scrolled
-            ? 'bg-white border-gray-200/70'
+            ? 'bg-white dark:bg-gray-900 border-gray-200/70 dark:border-gray-700/70'
             : 'border-transparent'
         )}
       />
@@ -520,7 +528,7 @@ function Navigation() {
               ref={navContainerRef}
               className={cn(
                 "relative rounded-2xl px-2 backdrop-blur-xl shadow-[0_6px_30px_rgba(0,0,0,0.06)] border transition-all duration-300",
-                'bg-white/60 border-gray-200/60'
+                'bg-white/60 dark:bg-gray-900/60 border-gray-200/60 dark:border-gray-700/60'
               )}
               onMouseLeave={() => {
                 const active = linkRefs.current[pathname] || null
@@ -556,8 +564,8 @@ function Navigation() {
                         className={cn(
                           'block px-4 py-2.5 relative transition-colors duration-200 rounded-lg text-center',
                           active
-                            ? 'text-gray-900'
-                            : 'text-black hover:text-gray-900'
+                            ? 'text-gray-900 dark:text-gray-100'
+                            : 'text-black dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100'
                         )}
                         href={item.href}
                       >
@@ -644,18 +652,18 @@ function Navigation() {
           }}
         >
           <div
-            className="relative w-full max-w-md bg-white shadow-xl rounded-2xl"
+            className="relative w-full max-w-md bg-white dark:bg-gray-900 shadow-xl rounded-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-6">
               {/* Header */}
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-medium text-gray-900">
+                <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">
                   Create New List
                 </h3>
                 <button
                   onClick={() => setShowCreateListModal(false)}
-                  className="text-gray-400 hover:text-gray-600"
+                  className="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
                 >
                   <XMarkIcon className="w-6 h-6" />
                 </button>
@@ -666,7 +674,7 @@ function Navigation() {
                 <div>
                   <label
                     htmlFor="listName"
-                    className="block mb-1 text-sm font-medium text-gray-700"
+                    className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300"
                   >
                     List Name
                   </label>
@@ -676,7 +684,7 @@ function Navigation() {
                     value={listName}
                     onChange={(e) => setListName(e.target.value)}
                     placeholder="My Awesome Games"
-                    className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                    className="w-full px-3 py-2 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 placeholder-gray-500 dark:placeholder-gray-400"
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
                         handleCreateList()
@@ -692,7 +700,7 @@ function Navigation() {
                       setShowCreateListModal(false)
                       setListName('')
                     }}
-                    className="px-4 py-2 text-gray-700 hover:text-gray-900"
+                    className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
                     disabled={isCreatingList}
                   >
                     Cancel
@@ -730,13 +738,13 @@ function Navigation() {
           }}
         >
           <div
-            className="relative w-full max-w-md bg-white shadow-xl rounded-2xl"
+            className="relative w-full max-w-md bg-white dark:bg-gray-900 shadow-xl rounded-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-6">
               {/* Header */}
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-medium text-gray-900">
+                <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">
                   Add Missing Game
                 </h3>
                 <button
@@ -747,7 +755,7 @@ function Navigation() {
                     setGamePublisher('')
                     setGameSubmitted(false)
                   }}
-                  className="text-gray-400 hover:text-gray-600"
+                  className="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
                 >
                   <XMarkIcon className="w-6 h-6" />
                 </button>
@@ -759,7 +767,7 @@ function Navigation() {
                   <div>
                     <label
                       htmlFor="gameName"
-                      className="block mb-1 text-sm font-medium text-gray-700"
+                      className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300"
                     >
                       Game Name
                     </label>
@@ -769,7 +777,7 @@ function Navigation() {
                       value={gameName}
                       onChange={(e) => setGameName(e.target.value)}
                       placeholder="Game title"
-                      className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                      className="w-full px-3 py-2 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 placeholder-gray-500 dark:placeholder-gray-400"
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') {
                           handleAddGame()
@@ -783,7 +791,7 @@ function Navigation() {
                     <div>
                       <label
                         htmlFor="gameYear"
-                        className="block mb-1 text-sm font-medium text-gray-700"
+                        className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300"
                       >
                         Year
                       </label>
@@ -793,14 +801,14 @@ function Navigation() {
                         value={gameYear}
                         onChange={(e) => setGameYear(e.target.value)}
                         placeholder="2024"
-                        className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                        className="w-full px-3 py-2 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 placeholder-gray-500 dark:placeholder-gray-400"
                       />
                     </div>
 
                     <div>
                       <label
                         htmlFor="gamePublisher"
-                        className="block mb-1 text-sm font-medium text-gray-700"
+                        className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300"
                       >
                         Publisher
                       </label>
@@ -810,7 +818,7 @@ function Navigation() {
                         value={gamePublisher}
                         onChange={(e) => setGamePublisher(e.target.value)}
                         placeholder="Publisher"
-                        className="w-full px-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                        className="w-full px-3 py-2 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 placeholder-gray-500 dark:placeholder-gray-400"
                       />
                     </div>
                   </div>
@@ -824,7 +832,7 @@ function Navigation() {
                         setGamePublisher('')
                         setGameSubmitted(false)
                       }}
-                      className="px-4 py-2 text-gray-700 hover:text-gray-900"
+                      className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
                       disabled={isSubmittingGame}
                     >
                       Cancel
@@ -839,7 +847,7 @@ function Navigation() {
                   </div>
                 </div>
               ) : (
-                <div className="p-4 text-sm text-green-700 border border-green-200 rounded-lg bg-green-50">
+                <div className="p-4 text-sm text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800 rounded-lg bg-green-50 dark:bg-green-900/30">
                   Thanks! We'll review and import it soon.
                 </div>
               )}
@@ -851,7 +859,7 @@ function Navigation() {
 
       {/* Mobile Bottom Navigation - Only render on client to avoid hydration mismatch */}
       {isMounted && (
-        <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 md:hidden">
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 md:hidden">
           <div className="flex items-center justify-around h-16 px-2">
           {NAV_ITEMS.map((item) => {
             const active = pathname === item.href
@@ -864,7 +872,7 @@ function Navigation() {
                   'flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-lg transition-colors min-w-[60px]',
                   active
                     ? 'text-primary-600'
-                    : 'text-gray-600 hover:text-gray-900'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
                 )}
               >
                 <Icon className="w-6 h-6" />
@@ -877,17 +885,17 @@ function Navigation() {
               onClick={() => setShowUserMenu((v) => !v)}
               className={cn(
                 'flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-lg transition-colors min-w-[60px]',
-                showUserMenu ? 'text-primary-600' : 'text-gray-600'
+                showUserMenu ? 'text-primary-600' : 'text-gray-600 dark:text-gray-400'
               )}
             >
               {profile?.avatar_url ? (
                 <img
                   src={profile.avatar_url}
                   alt="Profile"
-                  className="object-cover w-6 h-6 rounded-full ring-2 ring-gray-200"
+                  className="object-cover w-6 h-6 rounded-full ring-2 ring-gray-200 dark:ring-gray-700"
                 />
               ) : (
-                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white text-[10px] font-medium ring-2 ring-gray-200">
+                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white text-[10px] font-medium ring-2 ring-gray-200 dark:ring-gray-700">
                   {(
                     profile?.username ||
                     profile?.full_name ||
@@ -903,7 +911,7 @@ function Navigation() {
           ) : (
             <Link
               href="/login"
-              className="flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-lg transition-colors text-gray-600 hover:text-gray-900 min-w-[60px]"
+              className="flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-lg transition-colors text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 min-w-[60px]"
             >
               <UserCircleIcon className="w-6 h-6" />
               <span className="text-[10px] font-medium">Sign In</span>

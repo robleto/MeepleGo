@@ -175,7 +175,7 @@ export default function RatingPopup({
       {/* Popup */}
       <div
         ref={popupRef}
-        className="bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border border-gray-200/60 z-[9999] overflow-hidden w-[90px] py-2 px-2"
+        className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm rounded-xl shadow-lg border border-gray-200/60 dark:border-gray-700/60 z-[9999] overflow-hidden w-[90px] py-2 px-2"
         style={style}
         onClick={(e) => e.stopPropagation()}
         onMouseDown={(e) => e.stopPropagation()}
@@ -195,7 +195,7 @@ export default function RatingPopup({
                   }
                 }}
                 disabled={saving}
-                className={`w-8 h-8 mb-1 text-xs font-bold rounded-md flex items-center justify-center transition-all duration-150 focus:outline-none focus:ring-1 focus:ring-primary-500 disabled:opacity-50 ${r === null ? 'bg-gray-200 text-gray-600' : getRatingSubtleClass(r)} ${currentRating === r || (r === null && currentRating == null) ? 'ring-1 ring-white ring-offset-1 ring-offset-primary-500/30' : 'hover:scale-105 active:scale-95'}`}
+                className={`w-8 h-8 mb-1 text-xs font-bold rounded-md flex items-center justify-center transition-all duration-150 focus:outline-none focus:ring-1 focus:ring-primary-500 disabled:opacity-50 ${r === null ? 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300' : getRatingSubtleClass(r)} ${currentRating === r || (r === null && currentRating == null) ? 'ring-1 ring-white ring-offset-1 ring-offset-primary-500/30' : 'hover:scale-105 active:scale-95'}`}
                 style={{ zIndex: 120 - idx }}
                 title={r === null ? 'Clear rating' : `Rate ${r}`}
               >

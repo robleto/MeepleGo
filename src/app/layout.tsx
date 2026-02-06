@@ -87,8 +87,15 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${inter.variable} ${outfit.variable}`}
+      suppressHydrationWarning
     >
       <head>
+        {/* Prevent flash of wrong theme (FOUC) by applying dark class before paint */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('themeMode');var d=t==='dark'||(t!=='light'&&window.matchMedia('(prefers-color-scheme:dark)').matches);if(d)document.documentElement.classList.add('dark')}catch(e){}})()`,
+          }}
+        />
         {/* Preconnect to external image domains for performance */}
         <link rel="preconnect" href="https://cf.geekdo-images.com" />
         <link rel="dns-prefetch" href="https://cf.geekdo-images.com" />
@@ -106,11 +113,7 @@ export default function RootLayout({
         )}
       </head>
       <body
-        className={
-          'font-sans min-h-screen bg-gray-50 text-gray-900'
-          /* TODO: Re-enable dark mode - see GitHub issue */
-          /* 'font-sans min-h-screen bg-gray-50 text-gray-900' */
-        }
+        className="font-sans min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100"
       >
         {/* Skip to main content link for accessibility */}
         <a

@@ -42,16 +42,16 @@ export default function ListCard({
     return (
       <div
         onClick={onCreateClick}
-        className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl p-6 hover:border-gray-400 transition-colors cursor-pointer group"
+        className="bg-gray-50 dark:bg-gray-800 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-6 hover:border-gray-400 dark:hover:border-gray-500 transition-colors cursor-pointer group"
       >
         <div className="text-center">
-          <div className="w-16 h-16 bg-gray-200 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-300 transition-colors">
-            <PlusIcon className="w-8 h-8 text-gray-400" />
+          <div className="w-16 h-16 bg-gray-200 dark:bg-gray-700 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-gray-300 dark:group-hover:bg-gray-600 transition-colors">
+            <PlusIcon className="w-8 h-8 text-gray-400 dark:text-gray-500" />
           </div>
-          <h3 className="heading-display text-xl font-semibold text-gray-900 mb-2 tracking-wide uppercase text-[11px]">
+          <h3 className="heading-display text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2 tracking-wide uppercase text-[11px]">
             {createTitle}
           </h3>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
             {createDescription}
           </p>
         </div>
@@ -140,7 +140,7 @@ export default function ListCard({
     <div className="relative">
       <Link
         href={getListHref()}
-        className="block bg-white rounded-xl shadow hover:shadow-lg transition-shadow duration-200 group overflow-visible"
+        className="block bg-white dark:bg-gray-900 rounded-xl shadow hover:shadow-lg transition-shadow duration-200 group overflow-visible"
       >
         {/* Fanned Game Images Header */}
         <div className="relative h-24">
@@ -174,8 +174,8 @@ export default function ListCard({
                         onError={() => handleImageError(gid)}
                       />
                     ) : (
-                      <div className="w-full h-full bg-gray-300 rounded-xl border-2 border-white flex items-center justify-center">
-                        <span className="text-xs text-gray-500 font-medium">
+                      <div className="w-full h-full bg-gray-300 dark:bg-gray-700 rounded-xl border-2 border-white dark:border-gray-800 flex items-center justify-center">
+                        <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">
                           {(game.name || '?').substring(0, 3).toUpperCase()}
                         </span>
                       </div>
@@ -200,7 +200,7 @@ export default function ListCard({
           {/* List Title and Type */}
           <div className="flex items-start justify-between mb-2">
             <div className="min-w-0 flex-1">
-              <h3 className="font-bold text-gray-900 truncate leading-tight text-[0.9rem] sm:text-[1rem]">
+              <h3 className="font-bold text-gray-900 dark:text-gray-100 truncate leading-tight text-[0.9rem] sm:text-[1rem]">
                 {list.name}
               </h3>
             </div>
@@ -208,12 +208,12 @@ export default function ListCard({
             {/* Privacy Indicator */}
             <div className="flex items-center gap-1 flex-shrink-0 ml-2">
               {list.is_public ? (
-                <span className="inline-flex items-center gap-1 rounded-full bg-green-100 text-green-700 px-2.5 py-1 text-xs font-semibold">
+                <span className="inline-flex items-center gap-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-2.5 py-1 text-xs font-semibold">
                   <EyeIcon className="w-3.5 h-3.5" />
                   Public
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 text-gray-600 px-2.5 py-1 text-xs font-semibold">
+                <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 px-2.5 py-1 text-xs font-semibold">
                   <LockClosedIcon className="w-3.5 h-3.5" />
                   Private
                 </span>
@@ -223,28 +223,28 @@ export default function ListCard({
 
           {/* Description */}
           {list.description && (
-            <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
               {list.description}
             </p>
           )}
 
-          <div className="h-px w-full bg-gray-200 mb-4" />
+          <div className="h-px w-full bg-gray-200 dark:bg-gray-700 mb-4" />
 
           {/* Metadata */}
-          <div className="grid grid-cols-2 gap-4 text-xs text-gray-500">
+          <div className="grid grid-cols-2 gap-4 text-xs text-gray-500 dark:text-gray-400">
             <div>
-              <div className="uppercase tracking-wider text-[10px] text-gray-400 mb-1">
+              <div className="uppercase tracking-wider text-[10px] text-gray-400 dark:text-gray-500 mb-1">
                 Games
               </div>
-              <div className="text-base font-semibold text-gray-900">
+              <div className="text-base font-semibold text-gray-900 dark:text-gray-100">
                 {itemCount}
               </div>
             </div>
             <div className="text-right">
-              <div className="uppercase tracking-wider text-[10px] text-gray-400 mb-1">
+              <div className="uppercase tracking-wider text-[10px] text-gray-400 dark:text-gray-500 mb-1">
                 Updated
               </div>
-              <div className="text-sm font-semibold text-gray-700">
+              <div className="text-sm font-semibold text-gray-700 dark:text-gray-300">
                 {formatTimeAgo(list.updated_at || list.created_at)}
               </div>
             </div>
@@ -260,7 +260,7 @@ export default function ListCard({
             e.stopPropagation()
             onEdit(list)
           }}
-          className="absolute top-2 right-2 p-2 bg-white/90 hover:bg-white rounded-lg shadow-sm hover:shadow-md transition-all opacity-0 group-hover:opacity-100"
+          className="absolute top-2 right-2 p-2 bg-white/90 dark:bg-gray-800/90 hover:bg-white dark:hover:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-all opacity-0 group-hover:opacity-100"
           title="Edit list"
         >
           <PencilIcon className="w-4 h-4 text-gray-600" />

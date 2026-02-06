@@ -5,9 +5,7 @@ module.exports = {
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
-  // TODO: Re-enable dark mode - see GitHub issue #27
-  // darkMode: 'class',
-  darkMode: false,
+  darkMode: 'class',
   safelist: [
     // Ensure NEW rating colors are never purged - Notion-inspired color scheme
     // Solid variant (for buttons, overlays)
@@ -69,6 +67,20 @@ module.exports = {
     'bg-gray-100/80',
     'text-gray-600',
     'border-gray-200/60',
+    // Dark mode rating subtle variants
+    'dark:bg-red-950/90', 'dark:text-red-300', 'dark:border-red-800/60',
+    'dark:bg-orange-950/90', 'dark:text-orange-300', 'dark:border-orange-800/60',
+    'dark:bg-amber-950/90', 'dark:text-amber-300', 'dark:border-amber-800/60',
+    'dark:bg-yellow-950/90', 'dark:text-yellow-300', 'dark:border-yellow-800/60',
+    'dark:bg-lime-950/90', 'dark:text-lime-300', 'dark:border-lime-800/60',
+    'dark:bg-green-950/90', 'dark:text-green-300', 'dark:border-green-800/60',
+    'dark:bg-emerald-950/90', 'dark:text-emerald-300', 'dark:border-emerald-800/60',
+    'dark:bg-teal-950/90', 'dark:text-teal-300', 'dark:border-teal-800/60',
+    'dark:bg-cyan-950/90', 'dark:text-cyan-300', 'dark:border-cyan-800/60',
+    'dark:bg-purple-950/90', 'dark:text-purple-300', 'dark:border-purple-800/60',
+    // Dark mode empty state
+    'dark:text-gray-400', 'dark:bg-gray-800/70', 'dark:bg-gray-800/80',
+    'dark:border-gray-700/60', 'dark:bg-gray-700', 'dark:text-gray-900',
     // Award category dynamic color utilities (from awards.json) safelisted so JIT doesn't purge
     {
       pattern:

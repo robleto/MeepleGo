@@ -625,8 +625,8 @@ export default function GameDetailModal({
       : { className: 'w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 max-w-6xl' }
   const panelClasses =
     variant === 'modal'
-      ? 'relative w-full max-w-xl md:h-[calc(100vh-6rem)] h-[100dvh] md:rounded-2xl rounded-none shadow-xl ring-1 ring-black/5 border border-gray-100 bg-white/95 backdrop-blur-sm text-gray-900 focus:outline-none overflow-hidden flex flex-col z-10'
-      : 'relative w-full rounded-2xl bg-white text-gray-900 flex flex-col shadow-sm border border-gray-100'
+      ? 'relative w-full max-w-xl md:h-[calc(100vh-6rem)] h-[100dvh] md:rounded-2xl rounded-none shadow-xl ring-1 ring-black/5 border border-gray-100 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm text-gray-900 dark:text-gray-100 focus:outline-none overflow-hidden flex flex-col z-10'
+      : 'relative w-full rounded-2xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 flex flex-col shadow-sm border border-gray-100'
 
   return (
     <Container {...outerProps}>
@@ -649,7 +649,7 @@ export default function GameDetailModal({
         onClick={(e) => variant === 'modal' && e.stopPropagation()}
       >
         {/* Header simplified for readability */}
-        <div className="relative flex-shrink-0 px-4 pt-4 pb-3 border-b border-gray-200 sm:px-8 sm:pt-8 sm:pb-4">
+        <div className="relative flex-shrink-0 px-4 pt-4 pb-3 border-b border-gray-200 dark:border-gray-700 sm:px-8 sm:pt-8 sm:pb-4">
           {variant === 'page' && (
             <div className="mb-3">
               <span className="inline-flex items-center rounded-full bg-emerald-50 text-emerald-700 px-2.5 py-1 text-[11px] font-semibold ring-1 ring-emerald-100">
@@ -671,27 +671,27 @@ export default function GameDetailModal({
                     router.push(getGameUrl(game))
                   }
                 }}
-                className="p-2 rounded-md hover:bg-gray-100"
+                className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
                 aria-label="Open full page"
                 title="Open full page"
               >
-                <ArrowsPointingOutIcon className="w-5 h-5 text-gray-500" />
+                <ArrowsPointingOutIcon className="w-5 h-5 text-gray-500 dark:text-gray-400" />
               </button>
               <button
                 onClick={(e) => {
                   e.stopPropagation()
                   onClose?.()
                 }}
-                className="p-2 rounded-md hover:bg-gray-100"
+                className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
                 aria-label="Close"
               >
-                <XMarkIcon className="w-6 h-6 text-gray-500" />
+                <XMarkIcon className="w-6 h-6 text-gray-500 dark:text-gray-400" />
               </button>
             </div>
           )}
           <div className="grid gap-4 sm:gap-6 sm:grid-cols-[128px,1fr]">
             <div className="flex-shrink-0 w-28 sm:w-32">
-              <div className="overflow-hidden rounded-lg shadow-sm w-28 h-28 sm:w-32 sm:h-32 ring-1 ring-gray-200 bg-gradient-to-b from-gray-300 to-gray-200">
+              <div className="overflow-hidden rounded-lg shadow-sm w-28 h-28 sm:w-32 sm:h-32 ring-1 ring-gray-200 dark:ring-gray-700 bg-gradient-to-b from-gray-300 to-gray-200 dark:from-gray-700 dark:to-gray-800">
                 <Image
                   src={
                     EG.image_url || EG.thumbnail_url || '/placeholder-game.svg'
@@ -711,14 +711,14 @@ export default function GameDetailModal({
                     <div className="flex flex-wrap items-center gap-2 mr-20">
                       <h1
                         id="game-detail-title"
-                        className="text-2xl font-bold leading-tight text-gray-900"
+                        className="text-2xl font-bold leading-tight text-gray-900 dark:text-gray-100"
                       >
                         <span>{EG.name}</span>
                       </h1>
                     </div>
                   </div>
                   {(tagline || summary || description) && (
-                    <p className="text-sm leading-snug text-gray-600">
+                    <p className="text-sm leading-snug text-gray-600 dark:text-gray-400">
                       {tagline ||
                         summaryDisplay ||
                         (description
@@ -741,7 +741,7 @@ export default function GameDetailModal({
                             router.push(`/games?year=${EG.year_published}`)
                             if (variant === 'modal') onClose?.()
                           }}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-50 hover:bg-gray-100 text-gray-600 hover:text-gray-700 text-xs font-medium ring-1 ring-gray-200 transition-colors"
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 text-xs font-medium ring-1 ring-gray-200 dark:ring-gray-700 transition-colors"
                         >
                           <CalendarIcon className="w-3 h-3" />
                           {EG.year_published}
@@ -760,7 +760,7 @@ export default function GameDetailModal({
                                 router.push(`/games?weight=${w.toFixed(2)}`)
                                 if (variant === 'modal') onClose?.()
                               }}
-                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-50 hover:bg-gray-100 text-gray-600 hover:text-gray-700 text-xs font-medium ring-1 ring-gray-200 transition-colors"
+                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 text-xs font-medium ring-1 ring-gray-200 dark:ring-gray-700 transition-colors"
                             >
                               <ChartBarIcon className="w-3 h-3" />
                               {w.toFixed(2)}
@@ -774,7 +774,7 @@ export default function GameDetailModal({
                             router.push(`/games?players=${EG.max_players}`)
                             if (variant === 'modal') onClose?.()
                           }}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-50 hover:bg-gray-100 text-gray-600 hover:text-gray-700 text-xs font-medium ring-1 ring-gray-200 transition-colors"
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 text-xs font-medium ring-1 ring-gray-200 dark:ring-gray-700 transition-colors"
                         >
                           <UsersIcon className="w-3 h-3" />
                           {formatPlayerCount(EG.min_players, EG.max_players)}
@@ -787,7 +787,7 @@ export default function GameDetailModal({
                             router.push(`/games?playtime=${EG.playtime_minutes}`)
                             if (variant === 'modal') onClose?.()
                           }}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-50 hover:bg-gray-100 text-gray-600 hover:text-gray-700 text-xs font-medium ring-1 ring-gray-200 transition-colors"
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 text-xs font-medium ring-1 ring-gray-200 dark:ring-gray-700 transition-colors"
                         >
                           <TimeIcon className="w-3 h-3" />
                           {formatPlayingTime(EG.playtime_minutes)}
@@ -839,7 +839,7 @@ export default function GameDetailModal({
               !wantToPlayActive &&
               !localRanking?.played_it &&
               !playedCollectionActive && (
-                <span className="text-[11px] text-gray-400">
+                <span className="text-[11px] text-gray-400 dark:text-gray-500">
                   No status yet
                 </span>
               )}
@@ -847,7 +847,7 @@ export default function GameDetailModal({
         </div>
 
         {/* Tabs */}
-        <div className="px-4 sm:px-8 border-b border-gray-200">
+        <div className="px-4 sm:px-8 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-2 py-3">
             {[
               { id: 'gamelog', label: 'GameLog' },
@@ -868,8 +868,8 @@ export default function GameDetailModal({
                   }
                   className={`px-3 py-1.5 text-xs font-semibold tracking-wide rounded-full transition-colors ${
                     isActive
-                      ? 'bg-gray-900 text-white'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      ? 'bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900'
+                      : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
                   }`}
                 >
                   {tab.label}
@@ -884,11 +884,11 @@ export default function GameDetailModal({
           {activeTab === 'gamelog' && (
             <div className="space-y-5">
               <section id="gd-mygames" className="space-y-5">
-                <h3 className="flex items-center gap-3 text-2xl font-medium tracking-tight text-gray-900">
-                  <BookOpenIcon className="w-6 h-6 text-gray-400" /> Game Log
+                <h3 className="flex items-center gap-3 text-2xl font-medium tracking-tight text-gray-900 dark:text-gray-100">
+                  <BookOpenIcon className="w-6 h-6 text-gray-400 dark:text-gray-500" /> Game Log
                 </h3>
                 {!localRanking?.played_it && (
-                  <div className="p-6 space-y-2 text-xs text-center text-gray-500 border border-gray-300 border-dashed rounded-lg">
+                  <div className="p-6 space-y-2 text-xs text-center text-gray-500 dark:text-gray-400 border border-gray-300 dark:border-gray-600 border-dashed rounded-lg">
                     <p>
                       Mark this game as{' '}
                       <span className="font-medium">Played</span> to start
@@ -896,14 +896,14 @@ export default function GameDetailModal({
                     </p>
                     <button
                       onClick={handlePlayedToggle}
-                      className="inline-flex items-center gap-1 px-4 py-1.5 rounded-full border text-xs font-medium transition shadow-sm bg-white text-gray-600 border-gray-300 hover:bg-gray-50"
+                      className="inline-flex items-center gap-1 px-4 py-1.5 rounded-full border text-xs font-medium transition shadow-sm bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800"
                     >
                       <PlayIcon className="w-4 h-4" /> I Played This
                     </button>
                   </div>
                 )}
                 {localRanking?.played_it && !showJournal && (
-                  <p className="max-w-md text-xs leading-relaxed text-gray-500">
+                  <p className="max-w-md text-xs leading-relaxed text-gray-500 dark:text-gray-400">
                     Build your personal play history: each log captures the
                     date and what stood out so you can spot trends, remember
                     favorites, and power future stats. Add a quick note
@@ -913,13 +913,13 @@ export default function GameDetailModal({
                 {localRanking?.played_it && !showJournal && (
                   <button
                     onClick={() => setShowJournal(true)}
-                    className="inline-flex items-center gap-2 px-4 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-full shadow-sm hover:bg-gray-50"
+                    className="inline-flex items-center gap-2 px-4 py-2 text-xs font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-full shadow-sm hover:bg-gray-50 dark:hover:bg-gray-800"
                   >
                     <BookOpenIcon className="w-4 h-4" /> Log Play
                   </button>
                 )}
                 {localRanking?.played_it && showJournal && (
-                  <div className="p-4 border border-gray-300 border-dashed rounded-lg">
+                  <div className="p-4 border border-gray-300 dark:border-gray-600 border-dashed rounded-lg">
                     <PlayLogEditor
                       gameId={game.id}
                       gameName={game.name}
@@ -929,7 +929,7 @@ export default function GameDetailModal({
                     <div className="mt-3">
                       <button
                         onClick={() => setShowJournal(false)}
-                        className="text-[10px] font-medium text-gray-500 hover:text-gray-700 underline"
+                        className="text-[10px] font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 underline"
                       >
                         Close Log Form
                       </button>
@@ -944,7 +944,7 @@ export default function GameDetailModal({
             <div className="space-y-8">
               {hasAnyAwards ? (
                 <section id="gd-awards" className="space-y-8">
-                  <h3 className="flex items-center gap-2 mb-3 text-lg font-medium text-gray-900">
+                  <h3 className="flex items-center gap-2 mb-3 text-lg font-medium text-gray-900 dark:text-gray-100">
                     <TrophyIcon className="w-5 h-5 text-amber-500" />
                     Awards & Honors
                   </h3>
@@ -980,14 +980,14 @@ export default function GameDetailModal({
                         return (
                           <li
                             key={i}
-                            className="p-3 border border-gray-200 rounded-lg bg-white/60"
+                            className="p-3 border border-gray-200 dark:border-gray-700 rounded-lg bg-white/60 dark:bg-gray-800/60"
                           >
                             <div className="flex items-start justify-between gap-4">
                               <div className="min-w-0">
-                                <div className="flex flex-wrap items-center gap-2 text-sm font-medium text-gray-900">
+                                <div className="flex flex-wrap items-center gap-2 text-sm font-medium text-gray-900 dark:text-gray-100">
                                   {label}
                                   {year && (
-                                    <span className="text-[10px] font-semibold text-gray-400">
+                                    <span className="text-[10px] font-semibold text-gray-400 dark:text-gray-500">
                                       {year}
                                     </span>
                                   )}
@@ -998,14 +998,14 @@ export default function GameDetailModal({
                                   )}
                                 </div>
                                 {(cleanCategory || cleanResult) && (
-                                  <div className="text-[11px] text-gray-600 mt-1 flex flex-wrap gap-2">
+                                  <div className="text-[11px] text-gray-600 dark:text-gray-400 mt-1 flex flex-wrap gap-2">
                                     {cleanCategory && (
-                                      <span className="inline-block bg-gray-100 px-1.5 py-0.5 rounded">
+                                      <span className="inline-block bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">
                                         {cleanCategory}
                                       </span>
                                     )}
                                     {cleanResult && (
-                                      <span className="inline-block bg-gray-50 px-1.5 py-0.5 rounded text-gray-500">
+                                      <span className="inline-block bg-gray-50 dark:bg-gray-800 px-1.5 py-0.5 rounded text-gray-500 dark:text-gray-400">
                                         {cleanResult}
                                       </span>
                                     )}
@@ -1018,13 +1018,13 @@ export default function GameDetailModal({
                       })}
                     </ul>
                   ) : (
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
                       No industry awards yet.
                     </p>
                   )}
                   {personalHonors.length > 0 && (
-                    <div className="pt-4 border-t border-gray-200">
-                      <h4 className="mb-2 text-xs font-semibold tracking-wide text-gray-500 uppercase">
+                    <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                      <h4 className="mb-2 text-xs font-semibold tracking-wide text-gray-500 dark:text-gray-400 uppercase">
                         Personal Honors
                       </h4>
                       <ul className="space-y-2">
@@ -1036,14 +1036,14 @@ export default function GameDetailModal({
                           .map((h: any, i: number) => (
                             <li
                               key={i}
-                              className="flex items-center gap-2 text-xs text-gray-700"
+                              className="flex items-center gap-2 text-xs text-gray-700 dark:text-gray-300"
                             >
                               <span className="inline-block w-2 h-2 rounded-full bg-amber-400" />
                               <span className="font-medium">
                                 {h.name || h.title || 'Honor'}
                               </span>
                               {h.year && (
-                                <span className="text-[10px] text-gray-400">
+                                <span className="text-[10px] text-gray-400 dark:text-gray-500">
                                   {h.year}
                                 </span>
                               )}
@@ -1062,7 +1062,7 @@ export default function GameDetailModal({
                   )}
                 </section>
               ) : (
-                <div className="p-6 text-xs text-gray-500 border border-gray-300 border-dashed rounded-lg">
+                <div className="p-6 text-xs text-gray-500 dark:text-gray-400 border border-gray-300 dark:border-gray-600 border-dashed rounded-lg">
                   No awards to show yet.
                 </div>
               )}
@@ -1075,8 +1075,8 @@ export default function GameDetailModal({
 
               {(stackSections || activeSection === 'overview') && (
                 <section id="gd-overview" className="space-y-8">
-                  <h3 className="flex items-center gap-3 text-2xl font-medium tracking-tight text-gray-900">
-                    <AdjustmentsHorizontalIcon className="w-6 h-6 text-gray-400" />{' '}
+                  <h3 className="flex items-center gap-3 text-2xl font-medium tracking-tight text-gray-900 dark:text-gray-100">
+                    <AdjustmentsHorizontalIcon className="w-6 h-6 text-gray-400 dark:text-gray-500" />{' '}
                     Overview
                   </h3>
                   <div className="space-y-8">
@@ -1084,12 +1084,12 @@ export default function GameDetailModal({
                       {((Array.isArray(EG.designers) && EG.designers.length) ||
                         EG.designer) && (
                         <div className="flex items-start gap-3 sm:col-span-1 col-span-full">
-                          <div className="flex items-center justify-center bg-gray-100 rounded-md w-7 h-7">
-                            <UserIcon className="w-4 h-4 text-gray-500" />
+                          <div className="flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-md w-7 h-7">
+                            <UserIcon className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                           </div>
                           <div>
-                            <div className="text-gray-500">Designer</div>
-                            <div className="font-medium text-gray-900 space-y-0.5">
+                            <div className="text-gray-500 dark:text-gray-400">Designer</div>
+                            <div className="font-medium text-gray-900 dark:text-gray-100 space-y-0.5">
                               {(Array.isArray(EG.designers) && EG.designers.length
                                 ? EG.designers
                                 : [EG.designer]
@@ -1105,16 +1105,16 @@ export default function GameDetailModal({
                       {((Array.isArray(EG.artists) && EG.artists.length > 0) ||
                         EG.artist) && (
                         <div className="flex items-start gap-3 sm:col-span-1 col-span-full">
-                          <div className="flex items-center justify-center bg-gray-100 rounded-md w-7 h-7">
-                            <PaintBrushIcon className="w-4 h-4 text-gray-500" />
+                          <div className="flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-md w-7 h-7">
+                            <PaintBrushIcon className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                           </div>
                           <div>
-                            <div className="text-gray-500">
+                            <div className="text-gray-500 dark:text-gray-400">
                               Artist
                               {EG.artists && EG.artists.length > 1 ? 's' : ''}
                             </div>
                             <div
-                              className="font-medium text-gray-900 space-y-0.5"
+                              className="font-medium text-gray-900 dark:text-gray-100 space-y-0.5"
                               title={(Array.isArray(EG.artists)
                                 ? EG.artists
                                 : [EG.artist]
@@ -1140,7 +1140,7 @@ export default function GameDetailModal({
                       <div className="space-y-8">
                         {parentGame && (
                           <div>
-                            <h5 className="mb-2 text-xl font-normal tracking-wide text-gray-700 heading-display">
+                            <h5 className="mb-2 text-xl font-normal tracking-wide text-gray-700 dark:text-gray-300 heading-display">
                               Parent Game
                             </h5>
                             <RelationGrid
@@ -1151,9 +1151,9 @@ export default function GameDetailModal({
                         )}
                         {expansions && expansions.length > 0 && (
                           <div>
-                            <h5 className="flex items-center gap-2 mb-2 text-xl font-normal tracking-wide text-gray-700 heading-display">
+                            <h5 className="flex items-center gap-2 mb-2 text-xl font-normal tracking-wide text-gray-700 dark:text-gray-300 heading-display">
                               Expansions{' '}
-                              <span className="text-sm font-normal text-gray-400">
+                              <span className="text-sm font-normal text-gray-400 dark:text-gray-500">
                                 {expansions.length}
                               </span>
                             </h5>
@@ -1165,9 +1165,9 @@ export default function GameDetailModal({
                         )}
                         {integrations && integrations.length > 0 && (
                           <div>
-                            <h5 className="flex items-center gap-2 mb-2 text-xl font-normal tracking-wide text-gray-700 heading-display">
+                            <h5 className="flex items-center gap-2 mb-2 text-xl font-normal tracking-wide text-gray-700 dark:text-gray-300 heading-display">
                               Integrates With{' '}
-                              <span className="text-sm font-normal text-gray-400">
+                              <span className="text-sm font-normal text-gray-400 dark:text-gray-500">
                                 {integrations.length}
                               </span>
                             </h5>
@@ -1178,7 +1178,7 @@ export default function GameDetailModal({
                           </div>
                         )}
                         {loadingRelations && (
-                          <div className="text-xs text-gray-400">
+                          <div className="text-xs text-gray-400 dark:text-gray-500">
                             Loading related games…
                           </div>
                         )}
@@ -1190,14 +1190,14 @@ export default function GameDetailModal({
               {/* Categories & Mechanics */}
               {(stackSections || activeSection === 'tags') && (
                 <section className="space-y-8">
-                  <h3 className="flex items-center gap-2 text-lg font-medium text-gray-900">
-                    <TagIcon className="w-5 h-5 text-gray-400" />{' '}
+                  <h3 className="flex items-center gap-2 text-lg font-medium text-gray-900 dark:text-gray-100">
+                    <TagIcon className="w-5 h-5 text-gray-400 dark:text-gray-500" />{' '}
                     Classifications
                   </h3>
                   {/* Type */}
                   {game.bgg_type && (
                     <div>
-                      <h4 className="mb-2 text-xs font-semibold tracking-wide text-gray-500 uppercase">
+                      <h4 className="mb-2 text-xs font-semibold tracking-wide text-gray-500 dark:text-gray-400 uppercase">
                         Type
                       </h4>
                       <div className="flex flex-wrap gap-2">
@@ -1228,7 +1228,7 @@ export default function GameDetailModal({
                   )}
                   {/* Categories */}
                   <div>
-                    <h4 className="mb-2 text-xs font-semibold tracking-wide text-gray-500 uppercase">
+                    <h4 className="mb-2 text-xs font-semibold tracking-wide text-gray-500 dark:text-gray-400 uppercase">
                       Categories
                     </h4>
                     <div className="flex flex-wrap gap-2">
@@ -1253,13 +1253,13 @@ export default function GameDetailModal({
                           )
                         })
                       ) : (
-                        <span className="text-xs text-gray-400">None</span>
+                        <span className="text-xs text-gray-400 dark:text-gray-500">None</span>
                       )}
                     </div>
                   </div>
                   {/* Mechanisms */}
                   <div>
-                    <h4 className="mb-2 text-xs font-semibold tracking-wide text-gray-500 uppercase">
+                    <h4 className="mb-2 text-xs font-semibold tracking-wide text-gray-500 dark:text-gray-400 uppercase">
                       Mechanisms
                     </h4>
                     <div className="flex flex-wrap gap-2">
@@ -1284,13 +1284,13 @@ export default function GameDetailModal({
                           )
                         })
                       ) : (
-                        <span className="text-xs text-gray-400">None</span>
+                        <span className="text-xs text-gray-400 dark:text-gray-500">None</span>
                       )}
                     </div>
                   </div>
                   {/* Families */}
                   <div>
-                    <h4 className="mb-2 text-xs font-semibold tracking-wide text-gray-500 uppercase">
+                    <h4 className="mb-2 text-xs font-semibold tracking-wide text-gray-500 dark:text-gray-400 uppercase">
                       Families
                     </h4>
                     <div className="flex flex-wrap gap-2">
@@ -1318,7 +1318,7 @@ export default function GameDetailModal({
                           )
                         })
                       ) : (
-                        <span className="text-xs text-gray-400">None</span>
+                        <span className="text-xs text-gray-400 dark:text-gray-500">None</span>
                       )}
                     </div>
                   </div>
@@ -1350,9 +1350,9 @@ function RelationGrid({ games, onNavigate }: RelationGridProps) {
         <li key={g.id}>
           <button
             onClick={() => onNavigate(g)}
-            className="flex items-center w-full gap-3 p-2 text-left transition bg-white border border-gray-200 rounded-lg group hover:border-sky-300 hover:bg-sky-50"
+            className="flex items-center w-full gap-3 p-2 text-left transition bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg group hover:border-sky-300 hover:bg-sky-50 dark:hover:bg-gray-800"
           >
-            <div className="flex items-center justify-center flex-shrink-0 w-10 h-10 overflow-hidden rounded-md bg-gray-50 ring-1 ring-gray-200">
+            <div className="flex items-center justify-center flex-shrink-0 w-10 h-10 overflow-hidden rounded-md bg-gray-50 dark:bg-gray-800 ring-1 ring-gray-200 dark:ring-gray-700">
               {g.thumbnail_url ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -1361,12 +1361,12 @@ function RelationGrid({ games, onNavigate }: RelationGridProps) {
                   className="object-contain w-full h-full"
                 />
               ) : (
-                <span className="text-[10px] text-gray-400 font-medium">
+                <span className="text-[10px] text-gray-400 dark:text-gray-500 font-medium">
                   No Img
                 </span>
               )}
             </div>
-            <span className="text-xs font-medium text-gray-700 group-hover:text-sky-700 line-clamp-2">
+            <span className="text-xs font-medium text-gray-700 dark:text-gray-300 group-hover:text-sky-700 line-clamp-2">
               {g.name}
             </span>
           </button>

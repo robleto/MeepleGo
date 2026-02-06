@@ -202,11 +202,11 @@ export const FilterModal: React.FC<FilterModalProps> = ({
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
         onClick={onClose}
       />
-      <div className="relative bg-white md:rounded-xl rounded-none shadow-2xl max-w-2xl w-full md:max-h-[80vh] h-[100dvh] overflow-y-auto">
+      <div className="relative bg-white dark:bg-gray-900 md:rounded-xl rounded-none shadow-2xl max-w-2xl w-full md:max-h-[80vh] h-[100dvh] overflow-y-auto">
         {/* Close button positioned absolutely in top-right corner */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-10 p-2 rounded-md hover:bg-gray-100"
+          className="absolute top-4 right-4 z-10 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
           aria-label="Close"
         >
           <XMarkIcon className="w-6 h-6 text-gray-500" />

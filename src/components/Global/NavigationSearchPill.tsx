@@ -46,7 +46,7 @@ export default function NavigationSearchPill({
     <div className="relative">
       <div
         className={cn(
-          'flex items-center gap-2 rounded-full border border-gray-200 bg-white/90 shadow-sm backdrop-blur-sm transition-all duration-200 overflow-hidden',
+          'flex items-center gap-2 rounded-full border border-gray-200 dark:border-gray-700 bg-white/90 dark:bg-gray-900/90 shadow-sm backdrop-blur-sm transition-all duration-200 overflow-hidden',
           searchOpen ? 'w-72 pl-2 pr-2 py-1.5' : 'w-9 h-9 justify-center p-0'
         )}
       >
@@ -64,8 +64,8 @@ export default function NavigationSearchPill({
           }
           aria-label="Search"
           className={cn(
-            'shrink-0 flex items-center justify-center rounded-full text-gray-600',
-            searchOpen ? 'h-7 w-7 hover:bg-gray-100' : 'h-9 w-9'
+            'shrink-0 flex items-center justify-center rounded-full text-gray-600 dark:text-gray-400',
+            searchOpen ? 'h-7 w-7 hover:bg-gray-100 dark:hover:bg-gray-800' : 'h-9 w-9'
           )}
         >
           <MagnifyingGlassIcon className="w-4 h-4 ml-2" />
@@ -101,14 +101,14 @@ export default function NavigationSearchPill({
           ref={dropdownRef}
           id="nav-suggestions"
           role="listbox"
-          className="absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-2xl shadow-xl overflow-hidden max-h-[400px] overflow-y-auto z-50 text-sm"
+          className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-xl overflow-hidden max-h-[400px] overflow-y-auto z-50 text-sm"
         >
           {loading && (
             <div className="px-6 py-4 text-gray-500">Searching…</div>
           )}
           {!loading && !flat.length && (
             <div className="px-6 py-6 text-center">
-              <div className="flex items-center justify-center w-10 h-10 mx-auto mb-2 bg-gray-100 rounded-full">
+              <div className="flex items-center justify-center w-10 h-10 mx-auto mb-2 bg-gray-100 dark:bg-gray-800 rounded-full">
                 <MagnifyingGlassIcon className="w-5 h-5 text-gray-400" />
               </div>
               <div className="mb-1 text-sm font-medium text-gray-500">
@@ -122,8 +122,8 @@ export default function NavigationSearchPill({
           {!loading && flat.length > 0 && (
             <>
               {grouped.exactMatches.length > 0 && (
-                <div className="border-b border-gray-100">
-                  <div className="px-6 py-2 bg-gray-50 text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+                <div className="border-b border-gray-100 dark:border-gray-700">
+                  <div className="px-6 py-2 bg-gray-50 dark:bg-gray-800 text-[11px] font-semibold uppercase tracking-wide text-gray-500">
                     Exact Match
                   </div>
                   {grouped.exactMatches.map((g, i) => (
@@ -140,8 +140,8 @@ export default function NavigationSearchPill({
                 </div>
               )}
               {grouped.popular.length > 0 && (
-                <div className="border-b border-gray-100">
-                  <div className="px-6 py-2 bg-gray-50 text-[11px] font-semibold uppercase tracking-wide text-gray-500 flex items-center gap-2">
+                <div className="border-b border-gray-100 dark:border-gray-700">
+                  <div className="px-6 py-2 bg-gray-50 dark:bg-gray-800 text-[11px] font-semibold uppercase tracking-wide text-gray-500 flex items-center gap-2">
                     <TrophyIcon className="w-3.5 h-3.5" /> Popular
                   </div>
                   {grouped.popular.map((g, i) => {
@@ -162,7 +162,7 @@ export default function NavigationSearchPill({
               )}
               {grouped.other.length > 0 && (
                 <div>
-                  <div className="px-6 py-2 bg-gray-50 text-[11px] font-semibold uppercase tracking-wide text-gray-500 flex items-center gap-2">
+                  <div className="px-6 py-2 bg-gray-50 dark:bg-gray-800 text-[11px] font-semibold uppercase tracking-wide text-gray-500 flex items-center gap-2">
                     <CubeIcon className="w-3.5 h-3.5" /> Other
                   </div>
                   {grouped.other.map((g, i) => {
@@ -186,7 +186,7 @@ export default function NavigationSearchPill({
               )}
             </>
           )}
-          <div className="border-t border-gray-100">
+          <div className="border-t border-gray-100 dark:border-gray-700">
             <div className="px-6 py-2 text-[11px] text-gray-400">
               Press Enter to search • ↑↓ navigate
             </div>
