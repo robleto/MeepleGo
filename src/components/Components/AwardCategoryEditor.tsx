@@ -550,9 +550,6 @@ export default function AwardCategoryEditor({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [row.category])
 
-  // Winner game data
-  const winnerGame = winnerId ? internalGameMap[winnerId] : null
-
   // Dirty state detection
   const isDirty = JSON.stringify(nominees) !== JSON.stringify(initialNominees)
     || winnerId !== initialWinner
@@ -561,65 +558,60 @@ export default function AwardCategoryEditor({
     <DndContext sensors={sensors} onDragStart={onDragStart} onDragEnd={onDragEnd} collisionDetection={closestCenter}>
       <div className="rounded-2xl border border-gray-200/80 bg-white shadow-sm overflow-hidden">
         {/* ── Header ──────────────────────────────────────── */}
-        <div className="flex items-center justify-between gap-3 px-5 py-3.5 border-b border-gray-100 bg-gray-50/60">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <TrophySolid className="w-4.5 h-4.5 text-amber-500 shrink-0" />
-            <h3 className="font-display text-base font-semibold text-gray-900 truncate">
+        <div className="flex items-center justify-between gap-2 px-4 py-2.5 border-b border-gray-100 bg-gray-50/60">
+          <div className="flex items-center gap-2 min-w-0">
+            <TrophySolid className="w-4 h-4 text-amber-500 shrink-0" />
+            <h3 className="font-display text-sm font-semibold text-gray-900 truncate">
               {getCategoryLabel(categoryLabel)}
             </h3>
-            <span className="text-[11px] text-gray-400 font-medium shrink-0">{year}</span>
+            <span className="text-[10px] text-gray-400 font-medium shrink-0">{year}</span>
           </div>
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-1.5 shrink-0">
             {saving && (
-              <span className="text-[11px] text-gray-400">Saving...</span>
+              <span className="text-[10px] text-gray-400 mr-1">Saving...</span>
             )}
             {info && (
-              <span className="inline-flex items-center gap-1 text-[11px] text-green-600 font-medium">
-                <CheckIcon className="w-3.5 h-3.5" />
+              <span className="inline-flex items-center gap-1 text-[10px] text-green-600 font-medium mr-1">
+                <CheckIcon className="w-3 h-3" />
                 {info}
               </span>
             )}
-            {/* Show Cancel when unsaved, or when dirty after a previous save */}
             {(!saved || isDirty) && (
               <button
                 onClick={cancel}
-                className="text-[12px] px-3 py-1.5 rounded-md border border-gray-200 bg-white hover:bg-gray-50 text-gray-600 font-medium transition-colors"
+                className="text-[11px] px-2.5 py-1 rounded-md border border-gray-200 bg-white hover:bg-gray-50 text-gray-600 font-medium transition-colors"
               >
                 Cancel
               </button>
             )}
-            {/* Save button — primary when dirty */}
             <button
               onClick={save}
               disabled={saving || !isDirty}
               className={cn(
-                'text-[12px] px-4 py-1.5 rounded-md font-medium transition-colors shadow-sm',
+                'text-[11px] px-3 py-1 rounded-md font-medium transition-colors',
                 isDirty
-                  ? 'bg-brand hover:bg-brand-light text-white'
+                  ? 'bg-brand hover:bg-brand-light text-white shadow-sm'
                   : 'bg-gray-100 text-gray-300 cursor-not-allowed'
               )}
             >
               {saving ? 'Saving...' : 'Save'}
             </button>
-            {/* Done button — appears after save, primary close affordance */}
             {onClose && saved && !isDirty && (
               <button
                 onClick={handleClose}
-                className="text-[12px] px-4 py-1.5 rounded-md bg-brand hover:bg-brand-light text-white font-medium transition-colors shadow-sm inline-flex items-center gap-1.5"
+                className="text-[11px] px-3 py-1 rounded-md bg-brand hover:bg-brand-light text-white font-medium transition-colors shadow-sm inline-flex items-center gap-1"
               >
-                <CheckIcon className="w-3.5 h-3.5" />
                 Done
               </button>
             )}
-            {/* X close — always available when onClose is provided */}
             {onClose && (
               <button
                 onClick={handleClose}
-                className="p-1.5 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+                className="p-1 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
                 title="Close editor"
                 aria-label="Close editor"
               >
-                <XMarkIcon className="w-4 h-4" />
+                <XMarkIcon className="w-3.5 h-3.5" />
               </button>
             )}
           </div>
@@ -627,101 +619,63 @@ export default function AwardCategoryEditor({
 
         {/* ── Body ────────────────────────────────────────── */}
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] xl:grid-cols-[1fr_320px]">
-          {/* Left panel: Winner + Nominees */}
-          <div className="p-5 space-y-5">
-            {/* Winner spotlight */}
-            <div>
-              <div className="flex items-center gap-2 mb-2.5">
-                <TrophySolid className="w-4 h-4 text-amber-500" />
-                <span className="text-xs font-bold uppercase tracking-wider text-amber-600">
-                  Winner
+          {/* Left panel: Nominees (winner highlighted inline) */}
+          <div className="p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-gray-400">
+                  Nominees
+                </span>
+                <span className="text-[10px] font-medium text-gray-400 tabular-nums">
+                  {nominees.length}/{effectiveMax}
                 </span>
               </div>
-              {winnerGame ? (
-                <div className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-amber-50 to-amber-50/30 border border-amber-200/60">
-                  <div className="w-14 h-14 rounded-lg overflow-hidden shadow-sm shrink-0">
-                    <GameImage
-                      src={winnerGame.thumbnail_url || null}
-                      alt={winnerGame.name}
-                      name={winnerGame.name}
-                      variant="thumb"
-                      fit="cover"
-                      className="w-full h-full"
-                    />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="font-display text-sm font-semibold text-gray-900 truncate">
-                      {winnerGame.name}
-                    </div>
-                    {winnerGame.rating != null && winnerGame.rating > 0 && (
-                      <span className={cn('inline-block px-1.5 py-px rounded text-[10px] font-bold mt-1', getRatingSolidClass(winnerGame.rating))}>
-                        {winnerGame.rating}
-                      </span>
-                    )}
-                  </div>
-                  <TrophySolid className="w-6 h-6 text-amber-400/70 shrink-0" />
-                </div>
-              ) : (
-                <div className="flex items-center justify-center p-4 rounded-xl border-2 border-dashed border-amber-200/60 bg-amber-50/20">
-                  <p className="text-[12px] text-amber-600/60">
-                    Click the trophy icon on any nominee to set a winner
-                  </p>
-                </div>
+              {!winnerId && nominees.length > 0 && (
+                <span className="text-[10px] text-amber-500 font-medium flex items-center gap-1">
+                  <TrophyIcon className="w-3 h-3" />
+                  Click trophy to set winner
+                </span>
               )}
             </div>
-
-            {/* Nominees grid */}
-            <div>
-              <div className="flex items-center justify-between mb-2.5">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold uppercase tracking-wider text-gray-400">
-                    Nominees
-                  </span>
-                  <span className="text-[11px] font-medium text-gray-400 tabular-nums">
-                    {nominees.length}/{effectiveMax}
-                  </span>
+            <NomineesDropZone>
+              <SortableContext items={nominees} strategy={rectSortingStrategy}>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {Array.from({ length: effectiveMax }).map((_, i) => {
+                    const id = nominees[i]
+                    return (
+                      <div key={`${ns}-row-${i}`}>
+                        {id ? (
+                          <NomineeCard
+                            id={id}
+                            name={internalGameMap[id]?.name || `#${id}`}
+                            thumbnail_url={internalGameMap[id]?.thumbnail_url || null}
+                            rating={(internalGameMap[id] as any)?.rating || null}
+                            isWinner={id === winnerId}
+                            index={i}
+                            onSetWinner={() => setWinner(id)}
+                            onRemove={() => removeNominee(id)}
+                          />
+                        ) : (
+                          <EmptySlot index={i} />
+                        )}
+                      </div>
+                    )
+                  })}
                 </div>
+              </SortableContext>
+            </NomineesDropZone>
+            {error && (
+              <div className="mt-2 text-[12px] text-red-600 font-medium bg-red-50 px-3 py-1.5 rounded-md">
+                {error}
               </div>
-              <NomineesDropZone>
-                <SortableContext items={nominees} strategy={rectSortingStrategy}>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    {Array.from({ length: effectiveMax }).map((_, i) => {
-                      const id = nominees[i]
-                      return (
-                        <div key={`${ns}-row-${i}`}>
-                          {id ? (
-                            <NomineeCard
-                              id={id}
-                              name={internalGameMap[id]?.name || `#${id}`}
-                              thumbnail_url={internalGameMap[id]?.thumbnail_url || null}
-                              rating={(internalGameMap[id] as any)?.rating || null}
-                              isWinner={id === winnerId}
-                              index={i}
-                              onSetWinner={() => setWinner(id)}
-                              onRemove={() => removeNominee(id)}
-                            />
-                          ) : (
-                            <EmptySlot index={i} />
-                          )}
-                        </div>
-                      )
-                    })}
-                  </div>
-                </SortableContext>
-              </NomineesDropZone>
-              {error && (
-                <div className="mt-2 text-[12px] text-red-600 font-medium bg-red-50 px-3 py-1.5 rounded-md">
-                  {error}
-                </div>
-              )}
-            </div>
+            )}
           </div>
 
           {/* Right panel: Available Games */}
           <div className="border-t lg:border-t-0 lg:border-l border-gray-100 bg-gray-50/30 flex flex-col">
-            <div className="px-4 pt-4 pb-2">
-              <div className="flex items-center justify-between mb-2.5">
-                <span className="text-xs font-bold uppercase tracking-wider text-gray-400">
+            <div className="px-3 pt-3 pb-1.5">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-gray-400">
                   Available Games
                 </span>
                 <span className="text-[10px] font-medium text-gray-400 tabular-nums">
