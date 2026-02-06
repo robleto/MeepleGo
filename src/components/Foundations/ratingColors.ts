@@ -27,6 +27,19 @@ export const RATING_SUBTLE_CLASS: Record<number, string> = {
   10: 'bg-purple-50/90 dark:bg-purple-950/90 text-purple-700 dark:text-purple-300 border border-purple-200/60 dark:border-purple-800/60',
 }
 
+export const RATING_TEXT_CLASS: Record<number, string> = {
+  1: 'text-red-500 dark:text-red-400',
+  2: 'text-orange-500 dark:text-orange-400',
+  3: 'text-amber-500 dark:text-amber-400',
+  4: 'text-yellow-500 dark:text-yellow-400',
+  5: 'text-lime-500 dark:text-lime-400',
+  6: 'text-green-500 dark:text-green-400',
+  7: 'text-emerald-500 dark:text-emerald-400',
+  8: 'text-teal-500 dark:text-teal-400',
+  9: 'text-cyan-500 dark:text-cyan-400',
+  10: 'text-purple-500 dark:text-purple-400',
+}
+
 export const RATING_EMPTY_CLASS = 'text-gray-500 dark:text-gray-400 bg-white/70 dark:bg-gray-800/70 backdrop-blur'
 
 export function getRatingSolidClass(rating: number | null | undefined) {
@@ -38,6 +51,11 @@ export function getRatingSubtleClass(rating: number | null | undefined) {
   if (!rating || rating < 1 || rating > 10)
     return 'bg-gray-100/80 dark:bg-gray-800/80 text-gray-600 dark:text-gray-400 border border-gray-200/60 dark:border-gray-700/60'
   return RATING_SUBTLE_CLASS[rating] || 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
+}
+
+export function getRatingTextClass(rating: number | null | undefined): string {
+  if (!rating || rating < 1 || rating > 10) return 'text-gray-400 dark:text-gray-500'
+  return RATING_TEXT_CLASS[rating] || 'text-gray-400 dark:text-gray-500'
 }
 
 export const RATING_SELECTION_VALUES = [10, 9, 8, 7, 6, 5, 4, 3, 2, 1] as const

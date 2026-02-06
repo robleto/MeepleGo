@@ -759,7 +759,7 @@ export default function GameCard({
                     e.stopPropagation()
                     const rect = e.currentTarget.getBoundingClientRect()
                     setQuickMenuAnchor(rect)
-                    setQuickMenuStyle({ position: 'fixed', width: 260 })
+                    setQuickMenuStyle({ position: 'fixed', width: 280 })
                     setShowQuickMenu((v) => !v)
                   }}
                   className={cn(
@@ -813,6 +813,9 @@ export default function GameCard({
                     setShowQuickMenu(false)
                     router.push(`/awards?gameId=${game.id}`)
                   }}
+                  gameName={game.name}
+                  gameImageUrl={game.image_url || game.thumbnail_url}
+                  gameYear={game.year_published}
                 />
               </div>
             </div>
