@@ -61,7 +61,7 @@ export default function ProfileLayout({
     { key: 'overview', label: 'Overview', href: baseUrl },
     { key: 'activity', label: 'Activity', href: `${baseUrl}/activity` },
     { key: 'games', label: 'Games', href: `${baseUrl}/games` },
-    { key: 'plays', label: 'Journal', href: `${baseUrl}/plays` },
+    { key: 'journal', label: 'Journal', href: `${baseUrl}/journal` },
     { key: 'rankings', label: 'Rankings', href: `${baseUrl}/rankings` },
     { key: 'lists', label: 'Lists', href: `${baseUrl}/lists` },
     { key: 'awards', label: 'Awards', href: `${baseUrl}/awards` },
@@ -73,7 +73,7 @@ export default function ProfileLayout({
   const getActiveTab = () => {
     if (pathname.endsWith('/activity')) return 'activity'
     if (pathname.endsWith('/games')) return 'games'
-    if (pathname.endsWith('/plays')) return 'plays'
+    if (pathname.endsWith('/journal')) return 'journal'
     if (pathname.endsWith('/rankings')) return 'rankings'
     if (pathname.endsWith('/lists')) return 'lists'
     if (pathname.endsWith('/awards')) return 'awards'

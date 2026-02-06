@@ -8,7 +8,7 @@ import {
   StarIcon,
   Squares2X2Icon,
 } from '@heroicons/react/24/outline'
-import GameCard from '@/components/Components/GameCard'
+import AwardCategoryPanel from '@/components/Components/Awards/AwardCategoryPanel'
 import Heading from '@/components/Components/Heading'
 import PageLayout from '@/components/Components/PageLayout'
 
@@ -723,16 +723,6 @@ async function getAwardData(awardType: string): Promise<AwardYearGroup[]> {
   }
 }
 
-// Helper to adapt awards Game type to GameCard expected shape
-function toGameWithRanking(g: Game) {
-  return {
-    ...g,
-    id: String(g.bgg_id), // fabricate stable id from bgg_id for GameCard
-    ranking: null,
-    list_membership: { library: false, wishlist: false },
-  } as any
-}
-
 function YearSection({
   yearData,
   awardType,
@@ -887,127 +877,14 @@ function YearSection({
               /* Awards Winner/Nom Card */
             }
             return (
-              <div key={category.name} className="panel">
-                <Heading
-                  as="h3"
-                  size="lg"
-                  className="mb-6 flex items-center font-semibold gap-2"
-                >
-                  <TrophyIcon className="w-5 h-5 text-yellow-500" />
-                  <span className="text-yellow-500 text-sm font-semibold leading-none">{yearData.year}</span>
-                  <span>{category.name}</span>
-                </Heading>
-                <div
-                  className={`${nomineeOnly ? '' : 'md:grid md:grid-cols-12 md:gap-8'} items-start`}
-                >
-                  {!nomineeOnly && (
-                    <div className="md:col-span-4 mb-6 md:mb-0">
-                      <div className="flex items-center gap-2 mb-3 font-display">
-                        <TrophyIcon className="w-4 h-4 text-amber-500" />
-                        <h4 className="text-sm font-semibold text-gray-700">
-                          Winner
-                        </h4>
-                      </div>
-                      {category.winner ? (
-                        <div className="relative group">
-                          <GameCard
-                            game={toGameWithRanking(category.winner)}
-                            viewMode="grid"
-                            className=""
-                            hideWinnerBadge
-                            showSummary
-                            emphasizeMeta
-                            showMeta={false}
-                            titleClassName="text-base font-semibold"
-                          />
-                        </div>
-                      ) : (
-                        <div className="text-sm text-gray-500 italic">
-                          No winner recorded
-                        </div>
-                      )}
-                    </div>
-                  )}
-                  {hasRightContent && combinedNominees.length > 0 && (
-                    <div className={`${nomineeOnly ? '' : 'md:col-span-8'}`}>
-                      <div className="flex items-center gap-2 mb-3 font-display">
-                        <UserGroupIcon className="w-4 h-4 text-gray-500" />
-                        <h4 className="text-sm font-semibold text-gray-700">
-                          Nominees
-                        </h4>
-                        <span className="text-xs text-gray-400">
-                          ({combinedNominees.length})
-                        </span>
-                      </div>
-                      {!nomineeOnly ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                          {combinedNominees.map((game) => (
-                            <div
-                              key={`${game.bgg_id}-nominee-name`}
-                              className="flex items-center gap-3 p-2 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
-                            >
-                              {game.thumbnail_url ? (
-                                // eslint-disable-next-line @next/next/no-img-element
-                                <img
-                                  src={game.thumbnail_url}
-                                  alt={game.name}
-                                  className="w-12 h-12 object-cover rounded border border-gray-200 flex-shrink-0"
-                                />
-                              ) : (
-                                <div className="w-10 h-10 bg-gray-100 border border-gray-200 rounded flex items-center justify-center flex-shrink-0">
-                                  <span className="text-gray-400 text-xs">
-                                    ?
-                                  </span>
-                                </div>
-                              )}
-                              <div className="flex-1 min-w-0">
-                                <div
-                                  className="text-gray-800 font-medium hover:text-gray-900 transition-colors truncate text-sm"
-                                  title={game.name}
-                                >
-                                  {game.name}
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                          {combinedNominees.map((game) => (
-                            <div
-                              key={`${game.bgg_id}-nominee-unified`}
-                              className="flex items-center gap-3 p-2 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
-                            >
-                              {game.thumbnail_url ? (
-                                // eslint-disable-next-line @next/next/no-img-element
-                                <img
-                                  src={game.thumbnail_url}
-                                  alt={game.name}
-                                  className="w-12 h-12 object-cover rounded border border-gray-200 flex-shrink-0"
-                                />
-                              ) : (
-                                <div className="w-10 h-10 bg-gray-100 border border-gray-200 rounded flex items-center justify-center flex-shrink-0">
-                                  <span className="text-gray-400 text-xs">
-                                    ?
-                                  </span>
-                                </div>
-                              )}
-                              <div className="flex-1 min-w-0">
-                                <div
-                                  className="text-gray-800 font-medium hover:text-gray-900 transition-colors truncate text-sm"
-                                  title={game.name}
-                                >
-                                  {game.name}
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
+              <AwardCategoryPanel
+                key={category.name}
+                title={category.name}
+                yearLabel={yearData.year}
+                winner={category.winner}
+                nominees={combinedNominees}
+                nomineeOnly={nomineeOnly}
+              />
             )
           })}
       </div>

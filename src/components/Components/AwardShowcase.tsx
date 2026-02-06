@@ -1,7 +1,5 @@
 'use client'
-import Heading from '@/components/Components/Heading'
-import WinnerCard from './WinnerCard'
-import NomineeGrid from './NomineeGrid'
+import AwardCategoryPanel from '@/components/Components/Awards/AwardCategoryPanel'
 import type { GameWithRanking } from '@/types'
 import { useEffect, useMemo, useState } from 'react'
 import AwardCategoryEditor from '@/components/Components/AwardCategoryEditor'
@@ -191,97 +189,44 @@ export default function AwardShowcase({
   const nomineeGames = displayGames.slice(1)
 
   return (
-    <section
-      id={`award-${id}`}
-      className={`bg-white border border-gray-200 rounded-lg p-5 shadow-sm ${className}`}
-    >
-      {/* Header */}
-      <div className="flex items-start justify-between mb-6">
-        <div>
-          <Heading as="h3" size="md" className="mb-2 flex items-center gap-2">
-            <span>{title}</span>
-            <span className="text-xs font-normal text-gray-400 bg-gray-100 px-2 py-1 rounded-full">
-              Top {games.length}
-            </span>
-          </Heading>
-          {description && (
-            <p className="text-sm text-gray-600 leading-relaxed max-w-lg">
-              {description}
-            </p>
-          )}
+    <section id={`award-${id}`} className={className}>
+      {inlineEditable && showEditor && row ? (
+        <div className="panel">
+          <AwardCategoryEditor
+            year={currentYear}
+            row={row}
+            categoryLabel={title}
+            gameMap={gameMap}
+            seedGames={seedGames}
+            onChange={(patch) => setRow((r: any) => ({ ...r, ...patch }))}
+          />
         </div>
-        {inlineEditable ? (
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setShowEditor((s) => !s)}
-              className="text-[11px] inline-flex items-center gap-1 px-2 py-1 rounded border bg-white hover:bg-gray-50"
-            >
-              {showEditor ? 'Close' : editLabel}
-            </button>
-          </div>
-        ) : (
-          editHref && (
-            <a
-              href={editHref}
-              className="text-[11px] inline-flex items-center gap-1 px-2 py-1 rounded border bg-white hover:bg-gray-50"
-            >
-              {editLabel}
-            </a>
-          )
-        )}
-      </div>
-
-      {/* Winner and Nominees or Inline Editor */}
-      <div className="space-y-6">
-        {inlineEditable && showEditor && row ? (
-          <div className="border rounded p-3 bg-white">
-            <AwardCategoryEditor
-              year={currentYear}
-              row={row}
-              categoryLabel={title}
-              gameMap={gameMap}
-              seedGames={seedGames}
-              onChange={(patch) => setRow((r: any) => ({ ...r, ...patch }))}
-            />
-          </div>
-        ) : (
-          <>
-        {/* Mobile/Tablet: Stacked Layout */}
-        <div className="block lg:hidden">
-          {/* Winner Section */}
-          <div className="flex justify-center md:justify-start mb-6">
-            <div className="w-full max-w-xs">
-              <WinnerCard game={winnerGame} />
-            </div>
-          </div>
-
-          {/* Nominees Section - Horizontal Scroll */}
-          {nomineeGames.length > 0 && (
-            <div>
-              <NomineeGrid nominees={nomineeGames} layout="scroll" />
-            </div>
-          )}
-        </div>
-
-        {/* Desktop: Side-by-side with Compact Grid */}
-        <div className="hidden lg:block">
-          <div className="grid grid-cols-12 gap-8 items-start">
-            {/* Winner - Takes 4 columns */}
-            <div className="col-span-4">
-              <WinnerCard game={winnerGame} />
-            </div>
-
-            {/* Nominees - Takes 8 columns with dense grid */}
-            <div className="col-span-8">
-              {nomineeGames.length > 0 && (
-                <NomineeGrid nominees={nomineeGames} layout="grid" />
-              )}
-            </div>
-          </div>
-        </div>
-          </>
-        )}
-      </div>
+      ) : (
+        <AwardCategoryPanel
+          title={title}
+          description={description}
+          winner={winnerGame as any}
+          nominees={nomineeGames as any}
+          className=""
+          headerExtra={
+            inlineEditable ? (
+              <button
+                onClick={() => setShowEditor((s) => !s)}
+                className="text-[11px] inline-flex items-center gap-1 px-2 py-1 rounded border bg-white hover:bg-gray-50"
+              >
+                {showEditor ? 'Close' : editLabel}
+              </button>
+            ) : editHref ? (
+              <a
+                href={editHref}
+                className="text-[11px] inline-flex items-center gap-1 px-2 py-1 rounded border bg-white hover:bg-gray-50"
+              >
+                {editLabel}
+              </a>
+            ) : null
+          }
+        />
+      )}
     </section>
   )
 }

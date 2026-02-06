@@ -24,8 +24,6 @@ import {
   ListBulletIcon,
   PencilSquareIcon,
   UserCircleIcon,
-  BookmarkIcon,
-  HeartIcon,
   XMarkIcon,
   UserGroupIcon,
 } from '@heroicons/react/24/outline'
@@ -42,13 +40,14 @@ const NAV_ITEMS: NavLinkItem[] = [
 ]
 const PROFILE_MENU_ITEMS: ProfileMenuItem[] = [
   { label: 'Overview', href: '/profile', Icon: UserCircleIcon },
-  { label: 'Library', href: '/profile/library', Icon: BookmarkIcon },
-  { label: 'Wishlist', href: '/profile/wishlist', Icon: HeartIcon },
+  { label: 'Activity', href: '/profile/activity', Icon: PencilSquareIcon },
+  { label: 'Games', href: '/profile/games', Icon: GamesIcon },
+  { label: 'Journal', href: '/profile/journal', Icon: PencilSquareIcon },
   { label: 'Rankings', href: '/profile/rankings', Icon: ChartBarIcon },
   { label: 'Lists', href: '/profile/lists', Icon: ListBulletIcon },
   { label: 'Awards', href: '/profile/awards', Icon: TrophyIcon },
-  { label: 'Journal', href: '/profile/plays', Icon: PencilSquareIcon },
   { label: 'Friends', href: '/profile/friends', Icon: UserGroupIcon },
+  { label: 'Stats', href: '/profile/stats', Icon: ChartBarIcon },
 ]
 
 function Navigation() {

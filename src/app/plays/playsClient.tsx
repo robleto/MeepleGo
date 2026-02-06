@@ -12,6 +12,9 @@ import type { SuggestionGame } from '@/components/Components/GameSearchSelect'
 import { JournalTimelineMarker } from '@/components/Elements'
 import Portal from '@/components/Elements/Portal'
 import SearchDropdown from '@/components/Elements/SearchDropdown'
+import PageLayout from '@/components/Components/PageLayout'
+import PillTabs from '@/components/Components/PillTabs'
+import SearchandFilters from '@/components/Components/SearchandFilters'
 import {
   getMembershipSets,
   addGameToDefaultList,
@@ -21,11 +24,8 @@ import {
   BookmarkIcon,
   HeartIcon,
   XMarkIcon,
-  CubeIcon,
   HashtagIcon,
-  DocumentTextIcon,
 } from '@heroicons/react/24/outline'
-import { PlayIcon } from '@heroicons/react/24/solid'
 import { getRatingSolidClass } from '@/components/Foundations/ratingColors'
 import PlayLogEditor from '@/components/Components/PlayLogEditor'
 import Heading from '@/components/Components/Heading'
@@ -53,6 +53,7 @@ interface SearchResultGame {
 interface PlaysClientPageProps {
   forcedUserId?: string
   readOnly?: boolean
+  embedded?: boolean
 }
 type PlayerFilter = 'all' | 'solo' | '2p' | '3-4' | '5+'
 type DurationFilter = 'all' | '<=30' | '31-60' | '61-120' | '120+'
@@ -65,6 +66,7 @@ interface UndoToast {
 export default function PlaysClientPage({
   forcedUserId,
   readOnly,
+  embedded = false,
 }: PlaysClientPageProps) {
   // State
   const [logs, setLogs] = useState<PlayLog[]>([])
@@ -96,6 +98,7 @@ export default function PlaysClientPage({
   const [tagFilter, setTagFilter] = useState<string | null>(null)
   const [playerFilter, setPlayerFilter] = useState<PlayerFilter>('all')
   const [durationFilter, setDurationFilter] = useState<DurationFilter>('all')
+  const [searchTerm, setSearchTerm] = useState('')
   const [animatedStats, setAnimatedStats] = useState<{
     plays: number
     unique: number
@@ -363,6 +366,21 @@ export default function PlaysClientPage({
         }
       })
     }
+    if (searchTerm.trim()) {
+      const term = searchTerm.trim().toLowerCase()
+      list = list.filter((l) => {
+        const name = gameMeta[l.game_id]?.name || ''
+        const haystack = [
+          name,
+          l.notes || '',
+          l.location || '',
+          (l.tags || []).join(' '),
+        ]
+          .join(' ')
+          .toLowerCase()
+        return haystack.includes(term)
+      })
+    }
     if (targetUserId && sessionUserId && targetUserId !== sessionUserId)
       list = list.filter((l) => l.is_public)
     return list
@@ -372,6 +390,8 @@ export default function PlaysClientPage({
     tagFilter,
     playerFilter,
     durationFilter,
+    searchTerm,
+    gameMeta,
     targetUserId,
     sessionUserId,
   ])
@@ -610,180 +630,72 @@ export default function PlaysClientPage({
     )
   const zeroStateActive = !loading && initialLoaded && logs.length === 0
 
-  return (
-    <div className="bg-gray-50 min-h-[calc(100vh-4rem)]">
-      <div className="max-w-5xl px-4 py-6 mx-auto space-y-6 sm:px-6 sm:py-10">
-        {/* Compact Header with Title, Stats, and Add Button */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:gap-6">
-            <h1 className="text-2xl font-normal tracking-tight text-gray-900 sm:text-3xl md:text-4xl" style={{ fontFamily: 'var(--font-display)' }}>
-              Game Journal
-            </h1>
-            {/* Compact Stats - inline on desktop */}
-            <div className="items-center hidden gap-4 lg:flex">
-              {[
-                {
-                  iconBg: 'bg-blue-500',
-                  Icon: PlayIcon,
-                  label: 'Plays',
-                  value: animatedStats.plays,
-                },
-                {
-                  iconBg: 'bg-green-500',
-                  Icon: CubeIcon,
-                  label: 'Unique Games',
-                  value: animatedStats.unique,
-                },
-                {
-                  iconBg: 'bg-purple-500',
-                  Icon: DocumentTextIcon,
-                  label: 'Games w/ Notes',
-                  value: animatedStats.gamesWithNotes,
-                },
-              ].map((item) => (
-                <div key={item.label} className="flex items-center gap-2">
-                  <div
-                    className={`flex items-center justify-center w-7 h-7 rounded-lg ${item.iconBg}`}
-                  >
-                    <item.Icon className="w-4 h-4 text-white" />
-                  </div>
-                  <div className="leading-tight">
-                    <div className="text-sm font-medium text-gray-900">
-                      {item.value}
-                    </div>
-                    <div className="text-[10px] font-medium text-gray-500">
-                      {item.label}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-          {/* Add Button */}
-          {isOwner && !zeroStateActive && (
-            <button
-              onClick={() => setShowPlayLogModal(true)}
-              className="inline-flex items-center self-start flex-shrink-0 gap-2 px-4 py-2 text-sm font-medium rounded-full btn-brand sm:self-auto"
-            >
-              Add New
-            </button>
-          )}
+  const content = (
+    <>
+      <div className="max-w-5xl px-4 py-6 mx-auto space-y-6 sm:px-6 sm:py-8">
+      <div className="flex flex-col gap-2 sm:gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex-1 min-w-0">
+          <PillTabs
+            items={[
+              { key: 'all', label: 'All' },
+              { key: 'month', label: 'This Month' },
+              { key: 'notes', label: 'With Notes' },
+            ]}
+            activeKey={filter}
+            onChange={(key) => setFilter(key as any)}
+          />
         </div>
+        <div className="flex flex-wrap items-center w-full gap-2 sm:gap-3 sm:justify-end sm:w-auto">
+          <SearchandFilters
+            value={searchTerm}
+            onChange={setSearchTerm}
+            onSearch={setSearchTerm}
+            placeholder="Search plays…"
+            showFiltersButton={false}
+            className="w-full mx-0 max-w-none sm:w-auto"
+          />
+        </div>
+      </div>
 
-        {/* Mobile/Tablet Stats - Below title on smaller screens */}
-        <div className="grid grid-cols-3 gap-3 lg:hidden">
+      {tagFilter && (
+        <div className="flex items-center gap-1 px-2 py-1 text-xs border rounded-full bg-sky-50 text-sky-700 border-sky-200 w-fit">
+          <span className="font-medium">Tag:</span>
+          <span>{tagFilter}</span>
+          <button
+            onClick={() => setTagFilter(null)}
+            className="rounded text-sky-600 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600"
+          >
+            ×
+          </button>
+        </div>
+      )}
+
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-wrap items-center gap-4">
           {[
-            {
-              iconBg: 'bg-blue-500',
-              Icon: PlayIcon,
-              label: 'Plays',
-              value: animatedStats.plays,
-            },
-            {
-              iconBg: 'bg-green-500',
-              Icon: CubeIcon,
-              label: 'Unique Games',
-              value: animatedStats.unique,
-            },
-            {
-              iconBg: 'bg-purple-500',
-              Icon: DocumentTextIcon,
-              label: 'Games w/ Notes',
-              value: animatedStats.gamesWithNotes,
-            },
+            { label: 'Plays', value: animatedStats.plays },
+            { label: 'Unique Games', value: animatedStats.unique },
+            { label: 'Games w/ Notes', value: animatedStats.gamesWithNotes },
           ].map((item) => (
-            <div key={item.label} className="flex items-center gap-2">
-              <div
-                className={`flex items-center justify-center w-7 h-7 rounded-lg ${item.iconBg}`}
-              >
-                <item.Icon className="w-4 h-4 text-white" />
-              </div>
-              <div className="min-w-0 leading-tight">
-                <div className="text-sm font-medium text-gray-900">
-                  {item.value}
-                </div>
-                <div className="text-[9px] sm:text-[10px] font-medium text-gray-500 truncate">
-                  {item.label}
-                </div>
-              </div>
+            <div key={item.label} className="flex items-baseline gap-2">
+              <span className="text-lg font-semibold text-gray-900">
+                {item.value}
+              </span>
+              <span className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                {item.label}
+              </span>
             </div>
           ))}
         </div>
-
-        {/* Filters */}
-        {!zeroStateActive && (
-          <div className="flex flex-wrap items-center gap-2 text-xs">
-            {['all', 'week', 'month', 'rated', 'notes'].map((f) => (
-              <button
-                key={f}
-                onClick={() => setFilter(f as any)}
-                className={`px-3 py-1.5 rounded-full border transition font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 ${filter === f ? 'bg-sky-600 text-white border-sky-600 shadow-sm' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`}
-              >
-                {f === 'all'
-                  ? 'All'
-                  : f === 'week'
-                    ? 'This Week'
-                    : f === 'month'
-                      ? 'This Month'
-                      : f === 'rated'
-                        ? 'Rated'
-                        : 'With Notes'}
-              </button>
-            ))}
-            <select
-              value={playerFilter}
-              onChange={(e) => setPlayerFilter(e.target.value as PlayerFilter)}
-              className="px-3 py-1.5 rounded-full border bg-white border-gray-200 text-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600"
-            >
-              <option value="all">All Players</option>
-              <option value="solo">Solo</option>
-              <option value="2p">2p</option>
-              <option value="3-4">3–4p</option>
-              <option value="5+">5+p</option>
-            </select>
-            <select
-              value={durationFilter}
-              onChange={(e) =>
-                setDurationFilter(e.target.value as DurationFilter)
-              }
-              className="px-3 py-1.5 rounded-full border bg-white border-gray-200 text-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600"
-            >
-              <option value="all">Any Length</option>
-              <option value="<=30">≤30m</option>
-              <option value="31-60">31–60m</option>
-              <option value="61-120">61–120m</option>
-              <option value="120+">120m+</option>
-            </select>
-            {tagFilter && (
-              <div className="flex items-center gap-1 px-2 py-1 text-xs border rounded-full bg-sky-50 text-sky-700 border-sky-200">
-                <span className="font-medium">Tag:</span>
-                <span>{tagFilter}</span>
-                <button
-                  onClick={() => setTagFilter(null)}
-                  className="rounded text-sky-600 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-600"
-                >
-                  ×
-                </button>
-              </div>
-            )}
-            {(filter !== 'all' ||
-              tagFilter ||
-              playerFilter !== 'all' ||
-              durationFilter !== 'all') && (
-              <button
-                onClick={() => {
-                  setFilter('all')
-                  setTagFilter(null)
-                  setPlayerFilter('all')
-                  setDurationFilter('all')
-                }}
-                className="ml-auto text-xs text-gray-500 underline hover:text-gray-700"
-              >
-                Reset Filters
-              </button>
-            )}
-          </div>
+        {isOwner && (
+          <button
+            onClick={() => setShowPlayLogModal(true)}
+            className="inline-flex items-center self-start flex-shrink-0 gap-2 px-4 py-2 text-sm font-medium rounded-full btn-brand sm:self-auto"
+          >
+            Add New
+          </button>
         )}
+      </div>
 
         {/* Zero state for own journal */}
         {zeroStateActive && isOwner && (
@@ -1416,6 +1328,8 @@ export default function PlaysClientPage({
           </div>
         </Portal>
       )}
-    </div>
+    </>
   )
+
+  return embedded ? content : <PageLayout>{content}</PageLayout>
 }

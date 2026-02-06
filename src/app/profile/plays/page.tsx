@@ -1,12 +1,5 @@
-import ProfileLayout from '@/components/Components/ProfileLayout'
-import { PlaysContent } from '@/app/plays/PlaysContent'
+import { redirect } from 'next/navigation'
 
 export default function ProfilePlaysPage() {
-  return (
-    <ProfileLayout>
-      <div className="mt-6">
-        <PlaysContent embedded />
-      </div>
-    </ProfileLayout>
-  )
+  redirect('/profile/journal')
 }
