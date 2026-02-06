@@ -50,6 +50,8 @@ interface Props {
   categoryLabel: string
   gameMap: Record<string, GameLite>
   onChange?: (row: Partial<AwardRow>) => void
+  /** Called with the editor's full game map on save, so the parent can update its own game data */
+  onGameMapUpdate?: (map: Record<string, GameLite>) => void
   onClose?: () => void
   onSave?: () => void
   maxNominees?: number
@@ -228,6 +230,7 @@ export default function AwardCategoryEditor({
   categoryLabel,
   gameMap,
   onChange,
+  onGameMapUpdate,
   onClose,
   onSave,
   maxNominees = 10,
@@ -244,6 +247,7 @@ export default function AwardCategoryEditor({
   const [nominees, setNominees] = useState<string[]>(row.nominees)
   const [winnerId, setWinnerId] = useState<string | null>(row.winner_id)
   const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
   const [info, setInfo] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [search, setSearch] = useState('')
@@ -454,8 +458,10 @@ export default function AwardCategoryEditor({
         setError(js?.error || 'Update failed')
       } else {
         onChange?.({ nominees, winner_id: winnerId })
+        onGameMapUpdate?.(internalGameMap)
         setInitialNominees(nominees)
         setInitialWinner(winnerId)
+        setSaved(true)
         setInfo('Saved')
         setTimeout(() => setInfo(null), 2000)
         onSave?.()
@@ -564,33 +570,48 @@ export default function AwardCategoryEditor({
             <span className="text-[11px] text-gray-400 font-medium shrink-0">{year}</span>
           </div>
           <div className="flex items-center gap-2 shrink-0">
+            {saving && (
+              <span className="text-[11px] text-gray-400">Saving...</span>
+            )}
             {info && (
               <span className="inline-flex items-center gap-1 text-[11px] text-green-600 font-medium">
                 <CheckIcon className="w-3.5 h-3.5" />
                 {info}
               </span>
             )}
-            {saving && (
-              <span className="text-[11px] text-gray-400">Saving...</span>
+            {/* Show Cancel when unsaved, or when dirty after a previous save */}
+            {(!saved || isDirty) && (
+              <button
+                onClick={cancel}
+                className="text-[12px] px-3 py-1.5 rounded-md border border-gray-200 bg-white hover:bg-gray-50 text-gray-600 font-medium transition-colors"
+              >
+                Cancel
+              </button>
             )}
-            <button
-              onClick={cancel}
-              className="text-[12px] px-3 py-1.5 rounded-md border border-gray-200 bg-white hover:bg-gray-50 text-gray-600 font-medium transition-colors"
-            >
-              Cancel
-            </button>
+            {/* Save button — primary when dirty */}
             <button
               onClick={save}
-              disabled={saving}
+              disabled={saving || !isDirty}
               className={cn(
                 'text-[12px] px-4 py-1.5 rounded-md font-medium transition-colors shadow-sm',
                 isDirty
                   ? 'bg-brand hover:bg-brand-light text-white'
-                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  : 'bg-gray-100 text-gray-300 cursor-not-allowed'
               )}
             >
               {saving ? 'Saving...' : 'Save'}
             </button>
+            {/* Done button — appears after save, primary close affordance */}
+            {onClose && saved && !isDirty && (
+              <button
+                onClick={handleClose}
+                className="text-[12px] px-4 py-1.5 rounded-md bg-brand hover:bg-brand-light text-white font-medium transition-colors shadow-sm inline-flex items-center gap-1.5"
+              >
+                <CheckIcon className="w-3.5 h-3.5" />
+                Done
+              </button>
+            )}
+            {/* X close — always available when onClose is provided */}
             {onClose && (
               <button
                 onClick={handleClose}
@@ -598,7 +619,7 @@ export default function AwardCategoryEditor({
                 title="Close editor"
                 aria-label="Close editor"
               >
-                <XMarkIcon className="w-4.5 h-4.5" />
+                <XMarkIcon className="w-4 h-4" />
               </button>
             )}
           </div>

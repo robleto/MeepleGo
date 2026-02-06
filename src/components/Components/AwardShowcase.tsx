@@ -196,6 +196,20 @@ export default function AwardShowcase({
           gameMap={gameMap}
           seedGames={seedGames}
           onChange={(patch) => setRow((r: any) => ({ ...r, ...patch }))}
+          onGameMapUpdate={(editorMap) => {
+            setGameMap((prev) => {
+              const next = { ...prev }
+              Object.entries(editorMap).forEach(([id, g]) => {
+                next[id] = {
+                  id: g.id,
+                  name: g.name,
+                  thumbnail_url: g.thumbnail_url ?? null,
+                  rating: (g as any).rating ?? null,
+                }
+              })
+              return next
+            })
+          }}
           onClose={() => setShowEditor(false)}
         />
       ) : (
