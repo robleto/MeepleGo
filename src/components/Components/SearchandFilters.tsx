@@ -23,6 +23,7 @@ export interface SearchandFiltersProps {
   // Filters meta
   filtersCount?: number // number of active filters (for badge)
   onOpenFilters?: () => void // open advanced filters modal/panel
+  showFiltersButton?: boolean
 
   // Meta
   className?: string
@@ -40,6 +41,7 @@ export default function SearchandFilters(props: SearchandFiltersProps) {
     placeholder = 'Search games…',
     filtersCount = 0,
     onOpenFilters,
+    showFiltersButton = true,
     className,
   } = props
 
@@ -60,27 +62,29 @@ export default function SearchandFilters(props: SearchandFiltersProps) {
         </div>
 
         {/* Filters trigger */}
-        <button
-          type="button"
-          onClick={onOpenFilters}
-          aria-label={
-            filtersCount ? `${filtersCount} filters active` : 'Open filters'
-          }
-          className={clsx(
-            'relative inline-flex items-center gap-2 h-11 px-4 rounded-full border text-sm font-medium transition shadow-sm',
-            filtersCount
-              ? 'bg-primary-50 border-primary-300 text-primary-700 hover:bg-primary-100'
-              : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
-          )}
-        >
-          <FunnelIcon className="h-4 w-4" />
-          <span className="hidden sm:inline">Filters</span>
-          {filtersCount > 0 && (
-            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold rounded-full h-5 min-w-[1.25rem] px-1 flex items-center justify-center shadow-lg ring-2 ring-white">
-              {filtersCount}
-            </span>
-          )}
-        </button>
+        {showFiltersButton && (
+          <button
+            type="button"
+            onClick={onOpenFilters}
+            aria-label={
+              filtersCount ? `${filtersCount} filters active` : 'Open filters'
+            }
+            className={clsx(
+              'relative inline-flex items-center gap-2 h-11 px-4 rounded-full border text-sm font-medium transition shadow-sm',
+              filtersCount
+                ? 'bg-primary-50 border-primary-300 text-primary-700 hover:bg-primary-100'
+                : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+            )}
+          >
+            <FunnelIcon className="h-4 w-4" />
+            <span className="hidden sm:inline">Filters</span>
+            {filtersCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold rounded-full h-5 min-w-[1.25rem] px-1 flex items-center justify-center shadow-lg ring-2 ring-white">
+                {filtersCount}
+              </span>
+            )}
+          </button>
+        )}
       </div>
     </div>
   )

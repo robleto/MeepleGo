@@ -15,25 +15,15 @@ import {
   truncate,
 } from '@/utils/helpers'
 import {
-  getRatingSubtleClass,
-} from '@/components/Foundations/ratingColors'
-import {
   PlayIcon,
   ClockIcon,
   UserGroupIcon,
-  BookmarkIcon,
   BookOpenIcon,
-  TrophyIcon,
-  StarIcon,
   XMarkIcon,
-  PencilSquareIcon,
   EllipsisHorizontalIcon,
-  QueueListIcon,
-  ArrowTopRightOnSquareIcon,
 } from '@heroicons/react/24/outline'
-import { Button } from '../Elements/Button'
-import { Chip } from '../Elements/Chip'
 import { supabase } from '@/lib/supabase'
+import { useRouter } from 'next/navigation'
 // Lazy-load heavy modal components so Storybook (without Next App Router context) doesn't mount them unless needed
 const GameDetailModal = dynamic(() => import('./GameDetailModal'), {
   ssr: false,
@@ -42,13 +32,12 @@ const PlayStepper = dynamic(() => import('./PlayStepper'), {
   ssr: false,
 })
 import RatingPopup from '../Elements/RatingPopup'
-import { RatingChip } from '../Elements/Chip'
 const AddToModal = dynamic(() => import('./AddToModal'), { ssr: false })
 // Subcomponents for GameCard
-import GameCardListActions from './GameCardListActions'
 import type { GameCardMetadata } from './GameCardTypes'
 import GameCardMeta from './GameCardMeta'
 import { GameCardDeltaBadge, GameCardAverageRatingBadge } from './GameCardBadges'
+import GameQuickMenu from './GameQuickMenu'
 const CollectionStepper = dynamic(() => import('./CollectionStepper'), {
   ssr: false,
 })
@@ -70,16 +59,7 @@ interface GameCardProps {
   emphasizeMeta?: boolean
   showMeta?: boolean
   titleClassName?: string
-  allowWinnerBadgeInListView?: boolean
   listRank?: number | null
-  // Optional list context actions for list pages
-  showDragHandle?: boolean
-  dragHandleProps?: {
-    attributes?: any
-    listeners?: any
-    setActivatorNodeRef?: (el: HTMLElement | null) => void
-  }
-  onRemoveFromCurrentList?: () => void
   // Controls object-fit for grid image (default cover for tighter layouts)
   imageFit?: 'cover' | 'contain'
   // Optional metadata configuration for controlling what info to display
@@ -97,14 +77,12 @@ export default function GameCard({
   emphasizeMeta = false,
   showMeta = true,
   titleClassName,
-  allowWinnerBadgeInListView = false,
   listRank = null,
-  showDragHandle,
-  dragHandleProps,
-  onRemoveFromCurrentList,
   imageFit = 'cover',
   metadata,
 }: GameCardProps) {
+  const router = useRouter()
+  void viewMode
   const initialLibrary = game.list_membership?.library ?? false
   const initialWishlist = game.list_membership?.wishlist ?? false
   const [isRating, setIsRating] = useState(false)
@@ -124,6 +102,10 @@ export default function GameCard({
   >(undefined)
   const [showCollectionStepper, setShowCollectionStepper] = useState(false)
   const [showPlayStepper, setShowPlayStepper] = useState(false)
+  const [showQuickMenu, setShowQuickMenu] = useState(false)
+  const [overlayPinned, setOverlayPinned] = useState(false)
+  const [quickMenuStyle, setQuickMenuStyle] = useState<React.CSSProperties>()
+  const [quickMenuAnchor, setQuickMenuAnchor] = useState<DOMRect | null>(null)
   const [playStepperStyle, setPlayStepperStyle] =
     useState<React.CSSProperties>()
   const [playStepperAnchor, setPlayStepperAnchor] = useState<{
@@ -139,9 +121,11 @@ export default function GameCard({
   >('status')
   const [collectionStepperStyle, setCollectionStepperStyle] =
     useState<React.CSSProperties>()
-  const collectionButtonRef = useRef<HTMLButtonElement | null>(null)
+  const quickMenuButtonRef = useRef<HTMLButtonElement | null>(null)
   const [saving, setSaving] = useState(false)
   const [showPlayLog, setShowPlayLog] = useState(false)
+  const [wantToPlayActive, setWantToPlayActive] = useState(false)
+  const [wantToPlayListId, setWantToPlayListId] = useState<string | null>(null)
   const PlayLogEditor = dynamic(
     () => import('@/components/Components/PlayLogEditor'),
     { ssr: false }
@@ -255,17 +239,18 @@ export default function GameCard({
     }
   }
 
-  const handleRatingClick = async (rating: number) => {
-    await upsertRanking({ ranking: rating })
+  const handleRatingClick = async (rating: number | null) => {
+    const normalized = rating && rating > 0 ? rating : null
+    await upsertRanking({ ranking: normalized })
     setIsRating(false)
   }
 
-  const handlePlayedToggle = async () => {
+  const handlePlayedToggle = async (opts?: { openLog?: boolean }) => {
     const next = !localRanking?.played_it
     await upsertRanking({ played_it: next })
     // Only open the full play-log modal if the PlayStepper is NOT open
     // (the PlayStepper has its own compact log step)
-    if (next && !showPlayStepper) setShowPlayLog(true)
+    if (next && !showPlayStepper && opts?.openLog) setShowPlayLog(true)
   }
 
   const handleRemove = async (type: 'library' | 'wishlist') => {
@@ -287,6 +272,10 @@ export default function GameCard({
       await handleRemove(type)
       return
     }
+    const otherType = type === 'library' ? 'wishlist' : 'library'
+    if (membership[otherType]) {
+      await handleRemove(otherType)
+    }
     const prev = { ...membership }
     setMembership((p) => ({ ...p, [type]: true }))
     onMembershipChange?.(game.id, { [type]: true })
@@ -301,6 +290,71 @@ export default function GameCard({
     }
   }
 
+  const loadWantToPlayStatus = async () => {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
+    if (!session) return
+    const { data: list } = await supabase
+      .from('game_lists')
+      .select('id')
+      .eq('user_id', session.user.id)
+      .eq('list_type', 'custom')
+      .eq('name', 'Want to Play')
+      .maybeSingle()
+    if (!list?.id) {
+      setWantToPlayListId(null)
+      setWantToPlayActive(false)
+      return
+    }
+    setWantToPlayListId(list.id)
+    const { data: item } = await supabase
+      .from('game_list_items')
+      .select('id')
+      .eq('list_id', list.id)
+      .eq('game_id', game.id)
+      .maybeSingle()
+    setWantToPlayActive(!!item)
+  }
+
+  const toggleWantToPlay = async () => {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
+    if (!session) return
+    let listId = wantToPlayListId
+    if (!listId) {
+      const { data: created } = await supabase
+        .from('game_lists')
+        .insert({
+          user_id: session.user.id,
+          name: 'Want to Play',
+          list_type: 'custom',
+          description: 'Games I want to play',
+          is_public: false,
+        })
+        .select('id')
+        .maybeSingle()
+      listId = created?.id || null
+      setWantToPlayListId(listId)
+    }
+    if (!listId) return
+    const next = !wantToPlayActive
+    setWantToPlayActive(next)
+    if (next) {
+      await supabase.from('game_list_items').insert({
+        list_id: listId,
+        game_id: game.id,
+      })
+    } else {
+      await supabase
+        .from('game_list_items')
+        .delete()
+        .eq('list_id', listId)
+        .eq('game_id', game.id)
+    }
+  }
+
   useEffect(() => {
     // Normalize ranking again if parent supplies primitive number later
     setLocalRanking(
@@ -310,11 +364,18 @@ export default function GameCard({
     )
   }, [game.ranking, (game as any).played_it])
 
+  useEffect(() => {
+    if (!showQuickMenu) return
+    loadWantToPlayStatus()
+  }, [showQuickMenu])
+
+
   // Convenience numeric rating value
   const ratingValue: number | null =
     typeof localRanking === 'number'
       ? localRanking
       : (localRanking?.ranking ?? null)
+
 
   // Removed overflow-hidden so popovers are not clipped
   const cardClass =
@@ -423,8 +484,8 @@ export default function GameCard({
             </h3>
 
             {/* Tagline - only show if metadata config allows and detailed variant */}
-            {variant === 'detailed' && 
-             metadata?.showTagline !== false && 
+            {variant === 'detailed' &&
+             metadata?.showTagline !== false &&
              (game as any).tagline && (
               <p className="hidden mb-1 text-xs text-gray-600 dark:text-gray-400 truncate sm:block">
                 {game.tagline}
@@ -432,7 +493,7 @@ export default function GameCard({
             )}
 
             {/* Metadata - show based on metadata config or showMeta prop for backward compat */}
-            {(variant === 'balanced' || variant === 'detailed') && 
+            {(variant === 'balanced' || variant === 'detailed') &&
              (metadata ? true : showMeta) && (
               <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mt-0.5 flex-wrap">
                 {(metadata?.showYear !== false) && (
@@ -573,15 +634,13 @@ export default function GameCard({
     return () => document.removeEventListener('mousedown', handler)
   }, [showMoreMenu])
 
+
   return (
     <div
       className={`${cardClass} flex flex-col`}
-      onMouseEnter={() => setShowOverlay(true)}
       onMouseLeave={() => {
-        if (showCollectionStepper || showPlayStepper || showMoreMenu) return
-        setShowOverlay(false)
-        setShowMoreMenu(false)
-        setShowAddMenu(false)
+        if (showQuickMenu || showPlayStepper || showCollectionStepper) return
+        setOverlayPinned(false)
       }}
     >
       {/* Game Image + Hover Overlay */}
@@ -622,15 +681,19 @@ export default function GameCard({
              Pattern: Played | Rate | ··· (more menu) */}
         <div
           className={cn(
-            'absolute inset-0 flex flex-col items-stretch justify-between p-2 rounded-t-lg transition-opacity duration-150',
-            (showOverlay || showCollectionStepper || showPlayStepper || showMoreMenu)
+            'absolute inset-0 flex flex-col items-stretch justify-end p-2 rounded-t-lg transition-opacity duration-150',
+            overlayPinned || showQuickMenu || showPlayStepper || showCollectionStepper
               ? 'opacity-100 pointer-events-auto'
-              : 'opacity-0 pointer-events-none'
+              : 'opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto'
           )}
-          style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.05) 40%, rgba(0,0,0,0.05) 60%, rgba(0,0,0,0.3) 100%)' }}
+          style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.2) 40%, rgba(0,0,0,0.2) 60%, rgba(0,0,0,0.5) 100%)' }}
           onClick={() => {
             if (suppressNextCardOpen) {
               setSuppressNextCardOpen(false)
+              return
+            }
+            if (!overlayPinned && !showQuickMenu && !showPlayStepper && !showCollectionStepper) {
+              setOverlayPinned(true)
               return
             }
             setModalInitialTab(undefined)
@@ -638,228 +701,156 @@ export default function GameCard({
             setShowModal(true)
           }}
         >
-          {/* Top right: Collection bookmark */}
-          <div className="flex justify-end">
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation()
-                const dismissKey = `collection_stepper_dismissed_${game.id}`
-                const dismissed =
-                  typeof window !== 'undefined' &&
-                  sessionStorage.getItem(dismissKey) === '1'
-                if (dismissed) {
-                  setModalInitialTab('collections')
-                  setModalInitialPlayStep(undefined)
-                  setShowModal(true)
-                  return
-                }
-                const rect = collectionButtonRef.current?.getBoundingClientRect()
-                if (rect && typeof window !== 'undefined') {
-                  const width = 320
-                  const left = Math.min(
-                    Math.max(12, rect.right - width),
-                    window.innerWidth - width - 12
-                  )
-                  const top = Math.min(
-                    rect.bottom + 8,
-                    window.innerHeight - 12
-                  )
-                  setCollectionStepperStyle({
-                    position: 'fixed',
-                    top,
-                    left,
-                  })
-                }
-                setShowCollectionStepper(true)
-              }}
-              aria-label={
-                membership.library
-                  ? 'In collection - manage lists'
-                  : 'Add to collection'
-              }
-              title={
-                membership.library
-                  ? 'In collection - click to manage'
-                  : 'Add to collection'
-              }
-              className={cn(
-                'w-8 h-8 rounded-md flex items-center justify-center shadow-sm transition-colors',
-                membership.library
-                  ? 'bg-green-600 text-white hover:bg-green-700'
-                  : membership.wishlist
-                    ? 'bg-pink-500 text-white hover:bg-pink-600'
-                    : 'bg-white/90 text-gray-600 hover:text-gray-800 hover:bg-white'
-              )}
-              ref={collectionButtonRef}
-            >
-              <BookmarkIcon className="w-4 h-4" />
-            </button>
-          </div>
-
-          {/* Bottom center: Played | Rate | ··· pill */}
+          {/* Bottom actions: Played | Own | ··· menu */}
           <div className="flex items-center justify-center">
-            <div className="relative inline-flex overflow-visible rounded-lg shadow-sm bg-white/90 backdrop-blur-sm border border-white/60">
-              {/* Played */}
+            <div className="inline-flex items-center overflow-hidden rounded-lg border border-white/70 bg-white/80 shadow-sm">
               <button
                 onClick={(e) => {
                   e.stopPropagation()
                   handlePlayedToggle()
                 }}
                 className={cn(
-                  'w-9 h-8 flex items-center justify-center transition-colors rounded-l-lg',
+                  'w-9 h-8 flex items-center justify-center transition-colors',
                   localRanking?.played_it
-                    ? 'bg-green-600 text-white hover:bg-green-700'
-                    : 'text-gray-600 hover:text-gray-800 hover:bg-white'
+                    ? 'text-green-600'
+                    : 'text-gray-600 hover:text-gray-800'
                 )}
                 title={localRanking?.played_it ? 'Played' : 'Mark as played'}
                 aria-label="Mark as played"
               >
-                <PlayIcon className="w-4 h-4" />
-              </button>
-
-              {/* Rate */}
-              <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  openPlayStepper('rate', e.currentTarget)
-                }}
-                className={cn(
-                  'w-9 h-8 flex items-center justify-center transition-colors border-l border-gray-200/60',
-                  ratingValue != null
-                    ? 'bg-amber-500 text-white hover:bg-amber-600'
-                    : 'text-gray-600 hover:text-gray-800 hover:bg-white'
-                )}
-                title="Rate this game"
-                aria-label="Rate this game"
-              >
-                <StarIcon className="w-4 h-4" />
-              </button>
-
-              {/* More ··· */}
-              <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  setShowMoreMenu((v) => !v)
-                }}
-                className={cn(
-                  'w-9 h-8 flex items-center justify-center transition-colors border-l border-gray-200/60 rounded-r-lg',
-                  showMoreMenu
-                    ? 'bg-gray-700 text-white'
-                    : 'text-gray-600 hover:text-gray-800 hover:bg-white'
-                )}
-                title="More actions"
-                aria-label="More actions"
-                ref={moreMenuButtonRef}
-              >
-                <EllipsisHorizontalIcon className="w-4 h-4" />
-              </button>
-
-              {/* ── More Menu Popover ───────────────── */}
-              {showMoreMenu && (
-                <div
-                  className="absolute bottom-full right-0 mb-2 w-48 bg-gray-800/95 backdrop-blur-md rounded-xl shadow-xl border border-white/10 overflow-hidden z-50"
-                  onClick={(e) => e.stopPropagation()}
+                <span
+                  className={cn(
+                    'w-6 h-6 rounded-md flex items-center justify-center',
+                    localRanking?.played_it ? 'bg-white/80' : 'bg-transparent'
+                  )}
                 >
-                  <div className="py-1">
-                    {/* Log a play */}
-                    <button
-                      onClick={() => {
-                        setShowMoreMenu(false)
-                        openPlayStepper('log', moreMenuButtonRef.current)
-                      }}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-200 hover:bg-white/10 transition-colors"
-                    >
-                      <PencilSquareIcon className="w-4 h-4 text-gray-400" />
-                      <span>Log a play</span>
-                    </button>
+                  <PlayIcon className="w-4 h-4" />
+                </span>
+              </button>
 
-                    {/* Add to list */}
-                    <button
-                      onClick={() => {
-                        setShowMoreMenu(false)
-                        const rect = collectionButtonRef.current?.getBoundingClientRect()
-                        if (rect && typeof window !== 'undefined') {
-                          const width = 320
-                          const left = Math.min(
-                            Math.max(12, rect.right - width),
-                            window.innerWidth - width - 12
-                          )
-                          const top = Math.min(
-                            rect.bottom + 8,
-                            window.innerHeight - 12
-                          )
-                          setCollectionStepperStyle({
-                            position: 'fixed',
-                            top,
-                            left,
-                          })
-                        }
-                        setShowCollectionStepper(true)
-                      }}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-200 hover:bg-white/10 transition-colors"
-                    >
-                      <QueueListIcon className="w-4 h-4 text-gray-400" />
-                      <span>Add to list</span>
-                    </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleToggle('library')
+                }}
+                className={cn(
+                  'w-9 h-8 flex items-center justify-center transition-colors border-l border-white/70',
+                  membership.library
+                    ? 'text-emerald-600'
+                    : 'text-gray-600 hover:text-gray-800'
+                )}
+                title={membership.library ? 'Owned' : 'Mark as owned'}
+                aria-label="Mark as owned"
+              >
+                <span
+                  className={cn(
+                    'w-6 h-6 rounded-md flex items-center justify-center',
+                    membership.library ? 'bg-white/80' : 'bg-transparent'
+                  )}
+                >
+                  <BookOpenIcon className="w-4 h-4" />
+                </span>
+              </button>
 
-                    {/* Divider */}
-                    <div className="my-1 border-t border-white/10" />
+              <div className="relative">
+                <button
+                  ref={quickMenuButtonRef}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    const rect = e.currentTarget.getBoundingClientRect()
+                    setQuickMenuAnchor(rect)
+                    setQuickMenuStyle({ position: 'fixed', width: 260 })
+                    setShowQuickMenu((v) => !v)
+                  }}
+                  className={cn(
+                    'w-9 h-8 flex items-center justify-center transition-colors border-l border-white/70',
+                    showQuickMenu ? 'text-gray-900' : 'text-gray-600 hover:text-gray-800'
+                  )}
+                  title="More actions"
+                  aria-label="More actions"
+                >
+                  <EllipsisHorizontalIcon className="w-5 h-5" />
+                </button>
 
-                    {/* View details */}
-                    <button
-                      onClick={() => {
-                        setShowMoreMenu(false)
-                        setModalInitialTab(undefined)
-                        setModalInitialPlayStep(undefined)
-                        setShowModal(true)
-                      }}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-200 hover:bg-white/10 transition-colors"
-                    >
-                      <ArrowTopRightOnSquareIcon className="w-4 h-4 text-gray-400" />
-                      <span>View details</span>
-                    </button>
-                  </div>
-                </div>
-              )}
+                <GameQuickMenu
+                  open={showQuickMenu}
+                  anchorRect={quickMenuAnchor}
+                  style={quickMenuStyle}
+                  triggerRef={quickMenuButtonRef}
+                  onRequestClose={() => setShowQuickMenu(false)}
+                  playedIt={Boolean(localRanking?.played_it)}
+                  wantToPlayActive={wantToPlayActive}
+                  owned={membership.library}
+                  wantToOwnActive={membership.wishlist}
+                  ratingValue={ratingValue}
+                  onTogglePlayed={() => handlePlayedToggle()}
+                  onToggleWantToPlay={() => toggleWantToPlay()}
+                  onToggleOwned={() => handleToggle('library')}
+                  onToggleWantToOwn={() => handleToggle('wishlist')}
+                  onRateSelect={(value) =>
+                    handleRatingClick(value > 0 ? value : null)
+                  }
+                  onOpenPlayLog={() => {
+                    setShowQuickMenu(false)
+                    if (!localRanking?.played_it) {
+                      upsertRanking({ played_it: true })
+                    }
+                    setShowPlayLog(true)
+                  }}
+                  onAddToLists={() => {
+                    setShowQuickMenu(false)
+                    setShowAddModal(true)
+                  }}
+                  onShowInLists={() => {
+                    setShowQuickMenu(false)
+                    router.push(`/lists?gameId=${game.id}`)
+                  }}
+                  onAddAwards={() => {
+                    setShowQuickMenu(false)
+                    router.push(`/profile/awards?gameId=${game.id}`)
+                  }}
+                  onShowAwards={() => {
+                    setShowQuickMenu(false)
+                    router.push(`/awards?gameId=${game.id}`)
+                  }}
+                />
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Steppers render from image container (positioned fixed) */}
-        {showCollectionStepper && (
-          <CollectionStepper
-            gameId={game.id}
-            gameName={game.name}
-            membership={membership}
-            onMembershipChange={(next) => {
-              setMembership(next)
-              onMembershipChange?.(game.id, next)
-            }}
-            onClose={() => setShowCollectionStepper(false)}
-            onOpenCollections={() => {
-              setShowCollectionStepper(false)
-              setModalInitialTab('collections')
-              setModalInitialPlayStep(undefined)
-              setShowModal(true)
-            }}
-            onDismiss={() => {
-              const dismissKey = `collection_stepper_dismissed_${game.id}`
-              if (typeof window !== 'undefined') {
-                sessionStorage.setItem(dismissKey, '1')
-              }
-              setShowCollectionStepper(false)
-            }}
-            className="z-[999]"
-            style={collectionStepperStyle}
-            playedIt={localRanking?.played_it ?? false}
-            onTogglePlayed={handlePlayedToggle}
-            suggestedLists={suggestedLists}
-          />
-        )}
+          {showCollectionStepper && (
+            <CollectionStepper
+              gameId={game.id}
+              gameName={game.name}
+              membership={membership}
+              onMembershipChange={(next) => {
+                setMembership(next)
+                onMembershipChange?.(game.id, next)
+              }}
+              onClose={() => setShowCollectionStepper(false)}
+              onOpenCollections={() => {
+                setShowCollectionStepper(false)
+                setModalInitialTab('collections')
+                setModalInitialPlayStep(undefined)
+                setShowModal(true)
+              }}
+              onDismiss={() => {
+                const dismissKey = `collection_stepper_dismissed_${game.id}`
+                if (typeof window !== 'undefined') {
+                  sessionStorage.setItem(dismissKey, '1')
+                }
+                setShowCollectionStepper(false)
+              }}
+              className="z-[999]"
+              style={collectionStepperStyle}
+              playedIt={localRanking?.played_it ?? false}
+              onTogglePlayed={handlePlayedToggle}
+              suggestedLists={suggestedLists}
+            />
+          )}
 
-        {showPlayStepper && (
-          <PlayStepper
+          {showPlayStepper && (
+            <PlayStepper
             gameId={game.id}
             gameName={game.name}
             gameImage={game.image_url || game.thumbnail_url || null}
@@ -886,8 +877,9 @@ export default function GameCard({
             initialStep={playStepperInitialStep}
             className="z-[999]"
             style={playStepperStyle}
-          />
-        )}
+            />
+          )}
+        </div>
       </div>
 
       {/* Game Info */}

@@ -23,6 +23,13 @@ interface GameListItemWithGame {
   game: any
 }
 
+const bggDefaultDescriptions: Record<string, string> = {
+  bgg_bestsellers: 'Top-selling games on BoardGameGeek right now.',
+  bgg_hotness: 'What’s heating up on BoardGameGeek today.',
+  bgg_trendingplays: 'Games getting the most plays lately on BGG.',
+  bgg_mostplayed: 'All-time most played games on BoardGameGeek.',
+}
+
 export default function ListDetailPage() {
   const params = useParams()
   const router = useRouter()
@@ -65,6 +72,7 @@ export default function ListDetailPage() {
   const [guestActionsSincePrompt, setGuestActionsSincePrompt] = useState(0)
   const [selectedGameForGuest, setSelectedGameForGuest] = useState<SuggestionGame | null>(null)
   const [showGameModal, setShowGameModal] = useState(false)
+  const isBgg = list?.list_type?.startsWith('bgg_') ?? false
 
   useEffect(() => {
     if (!listId) return

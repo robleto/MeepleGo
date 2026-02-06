@@ -6,6 +6,7 @@ interface GameImageProps {
   alt: string
   name: string
   variant?: 'square' | 'thumb'
+  fit?: 'cover' | 'contain'
   className?: string
   onError?: () => void
   onLoad?: () => void
@@ -19,6 +20,7 @@ export function GameImage({
   alt,
   name,
   variant = 'square',
+  fit = 'cover',
   className = '',
   onError,
   onLoad,
@@ -99,7 +101,9 @@ export function GameImage({
       <Image
         src={src}
         alt={alt}
-        className={`w-full h-full object-cover rounded ${
+        className={`w-full h-full rounded ${
+          fit === 'contain' ? 'object-contain p-1' : 'object-cover'
+        } ${
           imageState === 'loading' ? 'opacity-0' : 'opacity-100'
         } transition-opacity duration-200`}
         width={400}

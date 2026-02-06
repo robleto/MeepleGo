@@ -8,6 +8,7 @@ import awardsData from '@/data/awards.json'
 import { getSupabaseServerClient } from '@/lib/supabaseServer'
 // Removed IndustryAwards component in favor of direct AwardCard composition (subset of AwardCard story patterns)
 import AwardCard from '@/components/Components/AwardCard'
+import AwardsSearchBar from './AwardsSearchBar'
 
 // Award categories loaded from JSON (icon string mapped to actual component below)
 const AWARD_CATEGORIES = (awardsData as any).categories.map((c: any) => ({
@@ -224,6 +225,14 @@ export default async function AwardsPage({
   searchParams?: Promise<Record<string, string | string[] | undefined>>
 }) {
   const params = await searchParams
+  const query = (params?.search as string | undefined)?.toLowerCase().trim() || ''
+  const visibleCategories = query
+    ? AWARD_CATEGORIES.filter((category) => {
+        const name = category.name.toLowerCase()
+        const description = category.description.toLowerCase()
+        return name.includes(query) || description.includes(query)
+      })
+    : AWARD_CATEGORIES
   // Map award IDs to database award_type values
   const awardTypeMap: Record<string, string> = (awardsData as any).awardTypeMap
 
@@ -259,12 +268,13 @@ export default async function AwardsPage({
   }
 
   return (
-    <PageLayout>
+    <PageLayout subHeader={<AwardsSearchBar />}>
       <div className="max-w-6xl mx-auto px-4 py-8">
         {/* Industry Awards */}
         <section>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {AWARD_CATEGORIES.map((category, idx) => {
+            {visibleCategories.map((category) => {
+              const idx = AWARD_CATEGORIES.findIndex((c) => c.id === category.id)
               const stat = allStats[idx]
               if (!stat) return null
               const zero =
@@ -292,6 +302,16 @@ export default async function AwardsPage({
               )
             })}
           </div>
+          {visibleCategories.length === 0 && (
+            <div className="mt-10">
+              <ZeroState
+                title="No awards found"
+                description="Try a different search to find awards or award categories."
+                ctaText="Clear search"
+                ctaLink="/awards"
+              />
+            </div>
+          )}
         </section>
 
         {debugEnabled && (

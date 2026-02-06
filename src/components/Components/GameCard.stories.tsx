@@ -112,12 +112,11 @@ const meta: Meta<typeof GameCard> = {
     ),
   ],
   argTypes: {
-    viewMode: { control: 'select', options: ['grid', 'list'] },
+    viewMode: { control: 'select', options: ['grid'] },
     hideWinnerBadge: { control: 'boolean' },
     showSummary: { control: 'boolean' },
     emphasizeMeta: { control: 'boolean' },
     showMeta: { control: 'boolean' },
-    allowWinnerBadgeInListView: { control: 'boolean' },
     variant: {
       control: 'select',
       options: ['detailed', 'balanced', 'compact'],

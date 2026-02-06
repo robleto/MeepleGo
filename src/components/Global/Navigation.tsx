@@ -55,6 +55,7 @@ function Navigation() {
   // Always call hooks unconditionally.
   const pathname = usePathname() || '/'
   const router = useRouter()
+  const isProfilePage = pathname.startsWith('/profile')
   const [isMounted, setIsMounted] = useState(false)
   const [session, setSession] = useState<
     import('@supabase/supabase-js').Session | null
@@ -183,34 +184,7 @@ function Navigation() {
   const cacheRef = useRef<Record<string, SuggestionGame[]>>({})
   const abortRef = useRef<AbortController | null>(null)
 
-  // Moving highlighter refs/state
-  const navContainerRef = useRef<HTMLDivElement>(null!)
-  const highlighterRef = useRef<HTMLDivElement>(null!)
-  const linkRefs = useRef<Record<string, HTMLAnchorElement | null>>({})
-
-  const moveHighlighterTo = (el: HTMLAnchorElement | null) => {
-    const highlighter = highlighterRef.current
-    const container = navContainerRef.current
-    if (!highlighter || !container || !el) {
-      if (highlighter) highlighter.style.opacity = '0'
-      return
-    }
-    const cRect = container.getBoundingClientRect()
-    const r = el.getBoundingClientRect()
-    const left = r.left - cRect.left
-    const width = r.width
-    // Slight vertical inset for a pill look
-    highlighter.style.opacity = '1'
-    highlighter.style.transform = `translateX(${left}px)`
-    highlighter.style.width = `${width}px`
-  }
-
-  // Update on route changes to the active link
-  useEffect(() => {
-    const activeLink = linkRefs.current[pathname]
-    // Delay until after layout so refs have sizes
-    requestAnimationFrame(() => moveHighlighterTo(activeLink || null))
-  }, [pathname])
+  // Nav highlighting is handled with a simple active underline.
 
   // Session/profile
   useEffect(() => {
@@ -501,10 +475,10 @@ function Navigation() {
 
   return (
     <>
-      <nav
-        aria-label="Primary navigation"
-        className={cn(
-          'fixed inset-x-0 top-0 z-50 transition-[transform] duration-300 border-b-[.1rem] border-gray-150',
+    <nav
+      aria-label="Primary navigation"
+      className={cn(
+          'fixed inset-x-0 top-0 z-50 transition-[transform] duration-300',
           visible ? 'translate-y-0' : '-translate-y-full'
         )}
       >
@@ -512,63 +486,40 @@ function Navigation() {
       <div
         aria-hidden
         className={cn(
-          'absolute inset-0 pointer-events-none border-b z-0 transition-all duration-300',
+          'absolute inset-0 pointer-events-none z-0 transition-all duration-300',
           scrolled
-            ? 'bg-white dark:bg-gray-900 border-gray-200/70 dark:border-gray-700/70'
-            : 'border-transparent'
+            ? 'bg-white dark:bg-gray-900 shadow-[0_6px_20px_rgba(15,23,42,0.12)] dark:shadow-[0_6px_20px_rgba(0,0,0,0.3)]'
+            : 'bg-transparent'
         )}
       />
       <div className="relative z-10 px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
         <div className="flex items-center gap-4 h-14">
-          <Logo size="lg" href="/" className="flex-shrink-0" />
+          <Logo
+            size="lg"
+            href="/"
+            showText={!isProfilePage}
+            className="flex-shrink-0"
+          />
 
-          {/* Reawarding-style nav container */}
-          <div className="hidden min-w-0 md:block">
-            <div
-              ref={navContainerRef}
-              className={cn(
-                "relative rounded-2xl px-2 backdrop-blur-xl shadow-[0_6px_30px_rgba(0,0,0,0.06)] border transition-all duration-300",
-                'bg-white/60 dark:bg-gray-900/60 border-gray-200/60 dark:border-gray-700/60'
-              )}
-              onMouseLeave={() => {
-                const active = linkRefs.current[pathname] || null
-                moveHighlighterTo(active)
-              }}
-            >
-              {/* Animated highlighter */}
-              <div
-                ref={highlighterRef}
-                className="absolute left-0 rounded-xl pointer-events-none border transition-all duration-300 ease-out will-change-[transform,width]"
-                style={{
-                  top: 6,
-                  bottom: 6,
-                  opacity: 0,
-                  width: 0,
-                  transform: 'translate3d(0,0,0)',
-                  backgroundColor: 'rgba(224, 242, 254, 0.7)',
-                  borderColor: 'rgba(186, 230, 253, 0.6)',
-                  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.6), 0 6px 12px rgba(0,0,0,0.06)'
-                }}
-                aria-hidden="true"
-              />
-              <ul className="relative z-10 flex items-center text-xs font-medium font-inter">
+          {/* Centered nav links */}
+          {!isProfilePage && (
+            <div className="hidden min-w-0 md:flex flex-1 justify-center">
+              <ul className="flex items-center gap-8 text-xs font-medium font-inter">
                 {NAV_ITEMS.map((item) => {
                   const active = pathname === item.href
+                  const Icon = item.icon
                   return (
                     <li key={item.href}>
                       <Link
-                        ref={(el) => {
-                          linkRefs.current[item.href] = el
-                        }}
-                        onMouseEnter={(e) => moveHighlighterTo(e.currentTarget)}
                         className={cn(
-                          'block px-4 py-2.5 relative transition-colors duration-200 rounded-lg text-center',
+                          'flex items-center gap-2.5 px-1.5 py-2 transition-colors duration-200 border-b-2',
                           active
-                            ? 'text-gray-900 dark:text-gray-100'
-                            : 'text-black dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100'
+                            ? 'text-gray-900 dark:text-gray-100 border-gray-900 dark:border-gray-100'
+                            : 'text-gray-600 dark:text-gray-400 border-transparent hover:text-gray-900 dark:hover:text-gray-100'
                         )}
                         href={item.href}
                       >
+                        <Icon className="w-[18px] h-[18px]" />
                         {item.name}
                       </Link>
                     </li>
@@ -576,9 +527,9 @@ function Navigation() {
                 })}
               </ul>
             </div>
-          </div>
+          )}
 
-          <div className="flex-1" />
+          {isProfilePage && <div className="flex-1" />}
 
           {/* Actions */}
           {isMounted && (

@@ -9,6 +9,7 @@ import {
 import SearchandFilters from '@/components/Components/SearchandFilters'
 import FilterModal from '@/components/Components/FilterModal'
 import GameCard from '@/components/Components/GameCard'
+import GameRowCard from '@/components/Components/GameRowCard'
 import supabase from '@/lib/supabase'
 import { GameWithRanking } from '@/types'
 import { useMemo, useState, useRef, useEffect } from 'react'
@@ -59,6 +60,7 @@ interface ListExplorerProps {
   }
   // Optional drag-and-drop reorder callback receiving new ordered game IDs
   onReorder?: (ids: string[]) => void
+  renderGroupHeader?: (key: string, group: GameWithRanking[]) => React.ReactNode
 }
 
 export default function ListExplorer({
@@ -86,6 +88,7 @@ export default function ListExplorer({
   storageKeyPrefix,
   getListItemControls,
   onReorder,
+  renderGroupHeader,
 }: ListExplorerProps) {
   // Sanitize incoming games to avoid runtime errors when upstream provides nulls
   const safeGames = useMemo(
@@ -140,6 +143,7 @@ export default function ListExplorer({
     defaultGroupSortOrder,
     storageKeyPrefix: storageKeyPrefix ?? 'lists',
   })
+
 
   // Calculate active filter count (same logic as Games page)
   const getActiveFilterCount = () => {
@@ -276,7 +280,7 @@ export default function ListExplorer({
           <div
             className={
               stickyHeader
-                ? `sticky top-0 z-20 py-2 sm:py-3 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 backdrop-blur transition-colors duration-200 ${
+                ? `sticky top-0 z-20 pt-0 pb-2 sm:pb-3 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 backdrop-blur transition-colors duration-200 ${
                     isHeaderStuck
                       ? 'bg-gray-50/96 border-b border-gray-200/70'
                       : 'bg-transparent border-b border-transparent'
@@ -322,7 +326,13 @@ export default function ListExplorer({
         groupedGames.map(({ key, games: group }) => (
           <div key={key} className="mb-8">
             {groupBy !== 'none' && (
-              <h2 className="text-xl font-semibold mb-4">{key}</h2>
+              <>
+                {renderGroupHeader ? (
+                  renderGroupHeader(key, group)
+                ) : (
+                  <h2 className="text-xl font-semibold mb-4">{key}</h2>
+                )}
+              </>
             )}
             {viewMode === 'grid' ? (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-6 gap-4">
@@ -390,17 +400,16 @@ export default function ListExplorer({
                         return (
                           <SortableRow key={game.id} id={game.id}>
                             {(handleProps) => (
-                              <GameCard
-                                key={game.id}
+                              <GameRowCard
                                 game={{ ...game, list_membership: membership }}
-                                viewMode="list"
-                                variant={cardVariant}
+                                index={idx}
+                                onUpdate={onRankingUpdate}
                                 onMembershipChange={onMembershipChange}
                                 listRank={showListRanking ? rank : null}
-                                imageFit="contain"
-                                showDragHandle={true}
+                                showIndex={!!showListRanking}
+                                showDragHandle
                                 dragHandleProps={handleProps}
-                                onRemoveFromCurrentList={controls?.onRemove}
+                                onClick={undefined}
                               />
                             )}
                           </SortableRow>
@@ -422,15 +431,14 @@ export default function ListExplorer({
                         : null
                     const controls = getListItemControls?.(game, idx)
                     return (
-                      <GameCard
+                      <GameRowCard
                         key={game.id}
                         game={{ ...game, list_membership: membership }}
-                        viewMode="list"
-                        variant={cardVariant}
+                        index={idx}
+                        onUpdate={onRankingUpdate}
                         onMembershipChange={onMembershipChange}
                         listRank={showListRanking ? rank : null}
-                        imageFit="contain"
-                        onRemoveFromCurrentList={controls?.onRemove}
+                        showIndex={!!showListRanking}
                       />
                     )
                   })

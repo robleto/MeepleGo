@@ -31,6 +31,11 @@ import type {
   HotTakeGame,
   ComebackGame,
 } from '@/types'
+import {
+  HOT_TAKE_MIN_DELTA,
+  HOT_TAKE_MIN_NUM_RATINGS,
+  SLEEPER_MAX_NUM_RATINGS,
+} from '@/utils/discoveryThresholds'
 
 // ---------- Types ----------
 
@@ -79,7 +84,9 @@ function mapSleeperHits(games: SleeperHitGame[]): HighlightGameItem[] {
 }
 
 function mapHotTakes(games: HotTakeGame[]): HighlightGameItem[] {
-  return games.map((g) => {
+  return games
+    .filter((g) => Math.abs(Number(g.abs_delta ?? g.delta ?? 0)) >= HOT_TAKE_MIN_DELTA)
+    .map((g) => {
     const sign = g.delta > 0 ? '+' : ''
     const isPositive = g.delta >= 0
     const deltaValue = Math.abs(Number(g.delta)).toFixed(1)
@@ -200,11 +207,11 @@ export default function ForYouOverview({
         ] = await Promise.all([
           safeRpc<SleeperHitGame>('get_sleeper_hits', {
             user_uuid: userId,
-            max_num_ratings: 2000,
+            max_num_ratings: SLEEPER_MAX_NUM_RATINGS,
           }),
           safeRpc<HotTakeGame>('get_hot_takes', {
             user_uuid: userId,
-            min_num_ratings: 500,
+            min_num_ratings: HOT_TAKE_MIN_NUM_RATINGS,
           }),
           safeRpc<MostAwardedGame>('get_most_awarded_this_year', {
             user_uuid: userId,

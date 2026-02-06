@@ -1,0 +1,3 @@
+export const HOT_TAKE_MIN_DELTA = 3
+export const HOT_TAKE_MIN_NUM_RATINGS = 750
+export const SLEEPER_MAX_NUM_RATINGS = 3000

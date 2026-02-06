@@ -5,33 +5,36 @@ import {
   formatYear,
   formatPlayingTime,
   formatPlayerCount,
-  getRatingLabel,
 } from '@/utils/helpers'
 import {
   StarIcon,
-  BookmarkIcon,
-  HeartIcon,
   XMarkIcon,
+  EllipsisHorizontalIcon,
+  PlayIcon,
+  BookOpenIcon,
 } from '@heroicons/react/24/outline'
 import GameDetailModal from '@/components/Components/GameDetailModal'
 import dynamic from 'next/dynamic'
+import { useRouter } from 'next/navigation'
+import { addGameToDefaultList, removeGameFromDefaultList } from '@/lib/lists'
+import { supabase } from '@/lib/supabase'
 const PlayLogEditor = dynamic(
   () => import('@/components/Components/PlayLogEditor'),
   { ssr: false }
 )
-const CollectionStepper = dynamic(
-  () => import('@/components/Components/CollectionStepper'),
-  { ssr: false }
-)
 import { RatingChip } from '../Elements/Chip'
-import { EyeIcon } from '@heroicons/react/24/solid'
+import { cn } from '@/utils/helpers'
 import { useState, useEffect, useRef } from 'react'
-import RatingPicker from '@/components/Components/Rankings/RatingPicker'
 import { GameImage } from '../Elements/GameImage'
-import dynamic from 'next/dynamic'
+import { GameCardDeltaBadge } from './GameCardBadges'
+import GameQuickMenu from './GameQuickMenu'
+import { SleepinessBadge } from '@/components/Elements/SleepinessBadge'
+import type { SleepinessClassification } from '@/utils/sleepinessClassification'
 const CollectionStepper = dynamic(() => import('./CollectionStepper'), {
   ssr: false,
 })
+const AddToModal = dynamic(() => import('./AddToModal'), { ssr: false })
+const PlayStepper = dynamic(() => import('./PlayStepper'), { ssr: false })
 
 interface GameRowCardProps {
   game: GameWithRanking & { tagline?: string | null }
@@ -40,25 +43,61 @@ interface GameRowCardProps {
     gameId: string,
     patch: { ranking?: number | null; played_it?: boolean }
   ) => void
+  onMembershipChange?: (
+    gameId: string,
+    change: { library?: boolean; wishlist?: boolean }
+  ) => void
   onClick?: () => void
   listRank?: number | null
   showTagline?: boolean
+  showDragHandle?: boolean
+  showIndex?: boolean
+  hotTakeDelta?: number | null
+  sleepinessClassification?: SleepinessClassification | null
+  dragHandleProps?: {
+    attributes?: Record<string, any>
+    listeners?: Record<string, any>
+    setActivatorNodeRef?: (node: HTMLElement | null) => void
+  }
 }
 
 export default function GameRowCard({
   game,
   index,
   onUpdate,
+  onMembershipChange,
   onClick,
   listRank = null,
   showTagline = false,
+  showDragHandle = false,
+  showIndex = true,
+  hotTakeDelta = null,
+  sleepinessClassification = null,
+  dragHandleProps,
 }: GameRowCardProps) {
-  const [isRating, setIsRating] = useState(false)
   const [showModal, setShowModal] = useState(false)
   const [modalInitialTab, setModalInitialTab] = useState<
     'play' | 'collections' | 'gamelog' | 'awards' | 'details' | undefined
   >(undefined)
   const [showCollectionStepper, setShowCollectionStepper] = useState(false)
+  const [showQuickMenu, setShowQuickMenu] = useState(false)
+  const [quickMenuStyle, setQuickMenuStyle] = useState<React.CSSProperties>()
+  const [quickMenuAnchor, setQuickMenuAnchor] = useState<DOMRect | null>(null)
+  const quickMenuButtonRef = useRef<HTMLButtonElement | null>(null)
+  const [showPlayStepper, setShowPlayStepper] = useState(false)
+  const [playStepperStyle, setPlayStepperStyle] =
+    useState<React.CSSProperties>()
+  const [playStepperAnchor, setPlayStepperAnchor] = useState<{
+    top: number
+    bottom: number
+    left: number
+    right: number
+    width: number
+    height: number
+  } | null>(null)
+  const [playStepperInitialStep, setPlayStepperInitialStep] = useState<
+    'status' | 'rate' | 'log' | undefined
+  >(undefined)
   const [collectionStepperStyle, setCollectionStepperStyle] =
     useState<React.CSSProperties>()
   const collectionButtonRef = useRef<HTMLButtonElement | null>(null)
@@ -79,6 +118,8 @@ export default function GameRowCard({
       wishlist: (game as any).wishlist || false,
     }
   )
+  const [wantToPlayActive, setWantToPlayActive] = useState(false)
+  const [wantToPlayListId, setWantToPlayListId] = useState<string | null>(null)
   const suggestedLists = [
     ...(Array.isArray((game as any).categories)
       ? (game as any).categories
@@ -105,9 +146,11 @@ export default function GameRowCard({
     return () => window.removeEventListener('list-density-change', handler)
   }, [])
   const [showPlayLog, setShowPlayLog] = useState(false)
+  const [showAddModal, setShowAddModal] = useState(false)
+  const router = useRouter()
   const togglePlayed = () => {
     if (!onUpdate) return
-    const next = !r?.played_it
+    const next = !playedIt
     onUpdate(game.id, { played_it: next })
     if (next) {
       setTimeout(() => setShowPlayLog(true), 30)
@@ -118,13 +161,184 @@ export default function GameRowCard({
     onUpdate(game.id, { ranking: value })
   }
 
+  const handleRemove = async (type: 'library' | 'wishlist') => {
+    const prev = { ...membership }
+    setMembership((current) => ({ ...current, [type]: false }))
+    onMembershipChange?.(game.id, { [type]: false })
+    try {
+      await removeGameFromDefaultList(game.id, type)
+    } catch (e) {
+      setMembership(prev)
+      onMembershipChange?.(game.id, { [type]: prev[type] })
+    }
+  }
+
+  const handleToggle = async (type: 'library' | 'wishlist') => {
+    if (membership[type]) {
+      await handleRemove(type)
+      return
+    }
+    const otherType = type === 'library' ? 'wishlist' : 'library'
+    if (membership[otherType]) {
+      await handleRemove(otherType)
+    }
+    const prev = { ...membership }
+    setMembership((current) => ({ ...current, [type]: true }))
+    onMembershipChange?.(game.id, { [type]: true })
+    try {
+      await addGameToDefaultList(game.id, type)
+    } catch (e) {
+      setMembership(prev)
+      onMembershipChange?.(game.id, { [type]: prev[type] })
+    }
+  }
+
+  const loadWantToPlayStatus = async () => {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
+    if (!session) return
+    const { data: list } = await supabase
+      .from('game_lists')
+      .select('id')
+      .eq('user_id', session.user.id)
+      .eq('list_type', 'custom')
+      .eq('name', 'Want to Play')
+      .maybeSingle()
+    if (!list?.id) {
+      setWantToPlayListId(null)
+      setWantToPlayActive(false)
+      return
+    }
+    setWantToPlayListId(list.id)
+    const { data: item } = await supabase
+      .from('game_list_items')
+      .select('id')
+      .eq('list_id', list.id)
+      .eq('game_id', game.id)
+      .maybeSingle()
+    setWantToPlayActive(!!item)
+  }
+
+  const toggleWantToPlay = async () => {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
+    if (!session) return
+    let listId = wantToPlayListId
+    if (!listId) {
+      const { data: created } = await supabase
+        .from('game_lists')
+        .insert({
+          name: 'Want to Play',
+          list_type: 'custom',
+          description: 'Games I want to play',
+          is_public: false,
+        })
+        .select('id')
+        .maybeSingle()
+      listId = created?.id || null
+      setWantToPlayListId(listId)
+    }
+    if (!listId) return
+    const next = !wantToPlayActive
+    setWantToPlayActive(next)
+    if (next) {
+      await supabase.from('game_list_items').insert({
+        list_id: listId,
+        game_id: game.id,
+      })
+    } else {
+      await supabase
+        .from('game_list_items')
+        .delete()
+        .eq('list_id', listId)
+        .eq('game_id', game.id)
+    }
+  }
+
+  const openPlayStepper = (step: 'status' | 'rate' | 'log', rect?: DOMRect | null) => {
+    if (rect && typeof window !== 'undefined') {
+      const width = 380
+      const left = Math.min(
+        Math.max(12, rect.left),
+        window.innerWidth - width - 12
+      )
+      const top = Math.min(rect.bottom + 8, window.innerHeight - 12)
+      setPlayStepperStyle({ position: 'fixed', top, left })
+      setPlayStepperAnchor({
+        top: rect.top,
+        bottom: rect.bottom,
+        left: rect.left,
+        right: rect.right,
+        width: rect.width,
+        height: rect.height,
+      })
+    }
+    setPlayStepperInitialStep(step)
+    setShowPlayStepper(true)
+  }
+
+  const openCollectionStepper = async () => {
+    const dismissKey = `collection_stepper_dismissed_${game.id}`
+    const dismissed =
+      typeof window !== 'undefined' &&
+      sessionStorage.getItem(dismissKey) === '1'
+    if (dismissed) {
+      setModalInitialTab('collections')
+      setShowModal(true)
+      return
+    }
+    const rect = collectionButtonRef.current?.getBoundingClientRect()
+    if (rect && typeof window !== 'undefined') {
+      const width = 320
+      const left = Math.min(
+        Math.max(12, rect.right - width),
+        window.innerWidth - width - 12
+      )
+      const top = Math.min(rect.bottom + 8, window.innerHeight - 12)
+      setCollectionStepperStyle({
+        position: 'fixed',
+        top,
+        left,
+      })
+    }
+    setShowCollectionStepper(true)
+  }
+
+  const openQuickMenu = () => {
+    if (typeof window === 'undefined') return
+    const rect = quickMenuButtonRef.current?.getBoundingClientRect()
+    if (!rect) return
+    setQuickMenuAnchor(rect)
+    setQuickMenuStyle({ position: 'fixed', width: 260 })
+    setShowQuickMenu((v) => !v)
+  }
+
+  useEffect(() => {
+    if (!showQuickMenu) return
+    loadWantToPlayStatus()
+  }, [showQuickMenu])
+
   // ratingTone replaced by HexRatingBadge
 
+  const imageSize =
+    density === 'compact'
+      ? 'w-12 h-12'
+      : density === 'balanced'
+        ? 'w-14 h-14'
+        : 'w-16 h-16'
+
   return (
-    <div className="flex items-center gap-4 py-3 px-4 rounded-md relative">
+    <div
+      className={cn(
+        'flex items-center gap-3 py-2 px-3 rounded-md relative',
+        index % 2 === 1 && 'bg-gray-50'
+      )}
+    >
       {/* Left clickable region */}
       <div
-        className="flex items-center gap-4 flex-1 min-w-0 cursor-pointer hover:bg-gray-50 rounded-md -m-2 p-2"
+        className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer hover:bg-gray-50 rounded-md -m-1.5 p-1.5"
         onClick={() => {
           if (onClick) onClick()
           else {
@@ -143,32 +357,58 @@ export default function GameRowCard({
         }}
         aria-label={onClick ? `Open ${game.name} details` : undefined}
       >
-        <div className="w-8 text-gray-500 tabular-nums text-xs font-semibold select-none text-center">
-          {listRank != null ? listRank : index + 1}
-        </div>
-
-        {/* Game thumbnail (consistent with GameCard proportions) */}
-        <div className="relative w-20 h-20 flex-shrink-0 rounded-md overflow-hidden bg-gray-100 border border-gray-200">
-          {game.thumbnail_url ? (
-            <img
-              src={game.thumbnail_url}
-              alt={`${game.name} thumbnail`}
-              className="absolute inset-0 w-full h-full object-contain p-1"
-              loading="lazy"
-            />
-          ) : (
-            <GameImage
-              src={null}
-              alt={`${game.name} thumbnail`}
-              name={game.name}
-              variant="thumb"
-              className="!w-full !h-full"
-            />
+        <div className="flex items-center gap-2">
+          {showDragHandle && (
+            <button
+              type="button"
+              title="Drag to reorder"
+              aria-label="Drag to reorder"
+              className="flex items-center justify-center w-6 h-6 text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing"
+              onClick={(e) => e.stopPropagation()}
+              ref={dragHandleProps?.setActivatorNodeRef as any}
+              {...(dragHandleProps?.attributes || {})}
+              {...(dragHandleProps?.listeners || {})}
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                aria-hidden="true"
+                className='mb-2'
+              >
+                <circle cx="7" cy="5" r="1.5" />
+                <circle cx="13" cy="5" r="1.5" />
+                <circle cx="7" cy="10" r="1.5" />
+                <circle cx="13" cy="10" r="1.5" />
+                <circle cx="7" cy="15" r="1.5" />
+                <circle cx="13" cy="15" r="1.5" />
+              </svg>
+            </button>
+          )}
+          {showIndex && (
+            <div className="w-8 text-xs font-semibold text-center text-gray-500 select-none tabular-nums">
+              {listRank != null ? listRank : index + 1}
+            </div>
           )}
         </div>
 
+        {/* Game thumbnail (consistent with GameCard proportions) */}
+        <div
+          className={`relative ${imageSize} flex-shrink-0 rounded-md overflow-hidden bg-gray-100 border border-gray-200`}
+        >
+          <GameImage
+            src={game.thumbnail_url}
+            alt={`${game.name} thumbnail`}
+            name={game.name}
+            variant="thumb"
+            fit="contain"
+            className="!w-full !h-full"
+          />
+        </div>
+
         <div className="flex-1 min-w-0 pr-2">
-          <h3 className="text-md font-semibold leading-tight flex items-center gap-2">
+          <h3 className="flex items-center gap-2 text-sm font-semibold leading-tight">
             {game.name}
             {density === 'compact' && (
               <span className="text-[11px] text-gray-400 font-medium tabular-nums">
@@ -202,7 +442,10 @@ export default function GameRowCard({
           gameId={game.id}
           gameName={game.name}
           membership={membership}
-          onMembershipChange={(next) => setMembership(next)}
+          onMembershipChange={(next) => {
+            setMembership(next)
+            onMembershipChange?.(game.id, next)
+          }}
           onClose={() => setShowCollectionStepper(false)}
           onOpenCollections={() => {
             setShowCollectionStepper(false)
@@ -224,10 +467,101 @@ export default function GameRowCard({
         />
       )}
 
-      {/* Status indicators (non-click area) */}
-      <div className="flex items-center gap-3 pl-2">
-        {/* Played It Toggle */}
-        <div className="flex items-center">
+      <GameQuickMenu
+        open={showQuickMenu}
+        anchorRect={quickMenuAnchor}
+        style={quickMenuStyle}
+        triggerRef={quickMenuButtonRef}
+        onRequestClose={() => setShowQuickMenu(false)}
+        playedIt={playedIt}
+        wantToPlayActive={wantToPlayActive}
+        owned={membership.library}
+        wantToOwnActive={membership.wishlist}
+        ratingValue={rankingValue}
+        onTogglePlayed={() => {
+          togglePlayed()
+        }}
+        onToggleWantToPlay={() => {
+          toggleWantToPlay()
+        }}
+        onToggleOwned={() => {
+          handleToggle('library')
+        }}
+        onToggleWantToOwn={() => {
+          handleToggle('wishlist')
+        }}
+        onRateSelect={(value) => {
+          setRanking(value > 0 ? value : null)
+        }}
+        onOpenPlayLog={() => {
+          setShowQuickMenu(false)
+          if (!playedIt) {
+            togglePlayed()
+          }
+          setShowPlayLog(true)
+        }}
+        onAddToLists={() => {
+          setShowQuickMenu(false)
+          setShowAddModal(true)
+        }}
+        onShowInLists={() => {
+          setShowQuickMenu(false)
+          router.push(`/lists?gameId=${game.id}`)
+        }}
+        onAddAwards={() => {
+          setShowQuickMenu(false)
+          router.push(`/profile/awards?gameId=${game.id}`)
+        }}
+        onShowAwards={() => {
+          setShowQuickMenu(false)
+          router.push(`/awards?gameId=${game.id}`)
+        }}
+      />
+
+      {/* Right-side actions (match GameCard overlay pill) */}
+      <div className="flex items-center gap-2 pl-2 ml-auto">
+        {hotTakeDelta != null && !Number.isNaN(hotTakeDelta) && (
+          <GameCardDeltaBadge delta={hotTakeDelta} />
+        )}
+        {sleepinessClassification && (
+          <SleepinessBadge classification={sleepinessClassification} />
+        )}
+        {onUpdate ? (
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              const rect = e.currentTarget.getBoundingClientRect()
+              openPlayStepper('rate', rect)
+            }}
+            className="transition rounded-md"
+            aria-label={rankingValue ? `Rating ${rankingValue}` : 'Rate game'}
+          >
+            {rankingValue ? (
+              <RatingChip
+                value={rankingValue}
+                size="sm"
+                shape="circle"
+                variant="subtle"
+              />
+            ) : (
+              <span className="inline-flex items-center justify-center text-gray-400 bg-gray-100 rounded-full w-7 h-7 ring-1 ring-inset ring-gray-200">
+                <StarIcon className="h-3.5 w-3.5" />
+              </span>
+            )}
+          </button>
+        ) : (
+          <div className="min-w-[2rem] flex items-center justify-center">
+            {rankingValue ? (
+              <RatingChip
+                value={rankingValue}
+                size="sm"
+                shape="circle"
+                variant="subtle"
+              />
+            ) : null}
+          </div>
+        )}
+        <div className="inline-flex items-center overflow-hidden border border-gray-200 rounded-lg shadow-sm bg-gray-50">
           <button
             onClick={(e) => {
               e.stopPropagation()
@@ -238,171 +572,86 @@ export default function GameRowCard({
                 togglePlayed()
               }
             }}
-            className={`flex items-center gap-1 transition-colors text-xs font-medium ${playedIt ? 'text-green-600 hover:text-green-500' : 'text-gray-300 hover:text-blue-600'} `}
-            title={playedIt ? 'Mark unplayed' : 'Mark as played'}
+            className={cn(
+              'w-8 h-7 flex items-center justify-center transition-colors',
+              playedIt ? 'text-gray-800' : 'text-gray-600 hover:text-gray-800'
+            )}
+            title={playedIt ? 'Played' : 'Mark as played'}
+            aria-label="Mark as played"
           >
-            <EyeIcon
-              className={`h-4 w-4 ${playedIt ? 'text-green-600' : ''}`}
-            />
-            <span className="hidden md:inline">
-              {playedIt ? 'Played It' : 'Played It'}
+            <span
+              className={cn(
+                'w-5 h-5 rounded-md flex items-center justify-center',
+                playedIt ? 'bg-white/80' : 'bg-transparent'
+              )}
+            >
+              <PlayIcon className="w-3.5 h-3.5" />
             </span>
           </button>
-        </div>
 
-        {/* Own It (Library) Toggle */}
-        <div className="flex items-center">
           <button
             onClick={async (e) => {
               e.stopPropagation()
-              const dismissKey = `collection_stepper_dismissed_${game.id}`
-              const dismissed =
-                typeof window !== 'undefined' &&
-                sessionStorage.getItem(dismissKey) === '1'
-              if (dismissed) {
-                setModalInitialTab('collections')
-                setShowModal(true)
-                return
-              }
-              const rect = collectionButtonRef.current?.getBoundingClientRect()
-              if (rect && typeof window !== 'undefined') {
-                const width = 320
-                const left = Math.min(
-                  Math.max(12, rect.right - width),
-                  window.innerWidth - width - 12
-                )
-                const top = Math.min(
-                  rect.bottom + 8,
-                  window.innerHeight - 12
-                )
-                setCollectionStepperStyle({
-                  position: 'fixed',
-                  top,
-                  left,
-                })
-              }
-              setShowCollectionStepper(true)
+              await openCollectionStepper()
             }}
-            className={`flex items-center gap-1 transition-colors ${membership.library ? 'text-green-600' : 'text-gray-300 hover:text-green-600'}`}
-            title={
-              membership.library ? 'Remove from Library' : 'Add to Library'
-            }
+            className={cn(
+              'w-8 h-7 flex items-center justify-center transition-colors border-l border-gray-200',
+              membership.library
+                ? 'text-gray-800'
+                : 'text-gray-600 hover:text-gray-800'
+            )}
+            title={membership.library ? 'Owned' : 'Mark as owned'}
+            aria-label="Mark as owned"
             ref={collectionButtonRef}
           >
-            <BookmarkIcon
-              className={`h-4 w-4 ${membership.library ? 'fill-current' : ''}`}
-            />
-            <span className="text-sm hidden md:inline font-medium">Own It</span>
-          </button>
-        </div>
-        {/* Wishlist Toggle */}
-        <div className="flex items-center">
-          <button
-            onClick={async (e) => {
-              e.stopPropagation()
-              const dismissKey = `collection_stepper_dismissed_${game.id}`
-              const dismissed =
-                typeof window !== 'undefined' &&
-                sessionStorage.getItem(dismissKey) === '1'
-              if (dismissed) {
-                setModalInitialTab('collections')
-                setShowModal(true)
-                return
-              }
-              const rect = collectionButtonRef.current?.getBoundingClientRect()
-              if (rect && typeof window !== 'undefined') {
-                const width = 320
-                const left = Math.min(
-                  Math.max(12, rect.right - width),
-                  window.innerWidth - width - 12
-                )
-                const top = Math.min(
-                  rect.bottom + 8,
-                  window.innerHeight - 12
-                )
-                setCollectionStepperStyle({
-                  position: 'fixed',
-                  top,
-                  left,
-                })
-              }
-              setShowCollectionStepper(true)
-            }}
-            className={`flex items-center gap-1 transition-colors ${membership.wishlist ? 'text-pink-600' : 'text-gray-300 hover:text-pink-500'}`}
-            title={
-              membership.wishlist ? 'Remove from Wishlist' : 'Add to Wishlist'
-            }
-          >
-            <HeartIcon className="h-4 w-4" />
-            <span className="text-xs hidden md:inline font-medium">
-              Wishlist
+            <span
+              className={cn(
+                'w-5 h-5 rounded-md flex items-center justify-center',
+                membership.library ? 'bg-white/80' : 'bg-transparent'
+              )}
+            >
+              <BookOpenIcon className="w-3.5 h-3.5" />
             </span>
           </button>
-        </div>
 
-        {/* Rating */}
-        {onUpdate ? (
           <button
             onClick={(e) => {
               e.stopPropagation()
-              setIsRating(true)
+              openQuickMenu()
             }}
-            className="rounded-md hover:brightness-110 transition"
-            aria-label={rankingValue ? `Rating ${rankingValue}` : 'Rate game'}
-          >
-            {rankingValue ? (
-              <div className="flex items-center gap-2">
-                <RatingChip
-                  value={rankingValue}
-                  size="sm"
-                  shape="circle"
-                  variant="subtle"
-                />
-                <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-600">
-                  {getRatingLabel(rankingValue)}
-                </span>
-              </div>
-            ) : (
-              <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-gray-400 ring-1 ring-inset ring-gray-200">
-                <StarIcon className="h-4 w-4" />
-              </span>
+            className={cn(
+              'w-8 h-7 flex items-center justify-center transition-colors border-l border-gray-200',
+              'text-gray-600 hover:text-gray-800'
             )}
+            title="More actions"
+            aria-label="More actions"
+            ref={quickMenuButtonRef}
+          >
+            <EllipsisHorizontalIcon className="w-4 h-4" />
           </button>
-        ) : (
-          <div className="min-w-[2.25rem] flex items-center justify-center">
-            {rankingValue ? (
-              <div className="flex items-center gap-2">
-                <RatingChip
-                  value={rankingValue}
-                  size="sm"
-                  shape="circle"
-                  variant="subtle"
-                />
-                <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-600">
-                  {getRatingLabel(rankingValue)}
-                </span>
-              </div>
-            ) : null}
-          </div>
-        )}
+        </div>
       </div>
 
-      {onUpdate && isRating && (
-        <div className="absolute inset-0 z-50 pointer-events-none">
-          <div
-            className="absolute inset-0 bg-black/10 backdrop-blur-[1px] pointer-events-auto"
-            onClick={() => setIsRating(false)}
-          />
-          <div className="absolute top-1/2 right-0 -translate-y-1/2 mr-0 pointer-events-auto">
-            <RatingPicker
-              current={rankingValue}
-              onSelect={(val) => setRanking(val)}
-              onClear={() => setRanking(null)}
-              onClose={() => setIsRating(false)}
-              size="sm"
-            />
-          </div>
-        </div>
+      {showPlayStepper && (
+        <PlayStepper
+          gameId={game.id}
+          gameName={game.name}
+          gameImage={game.image_url || game.thumbnail_url || null}
+          anchorRect={playStepperAnchor}
+          playedIt={playedIt}
+          owned={membership.library}
+          currentRating={rankingValue ?? null}
+          onTogglePlayed={togglePlayed}
+          onToggleOwned={async () => {
+            await openCollectionStepper()
+          }}
+          onRate={async (rating) => setRanking(rating)}
+          onClearRating={async () => setRanking(null)}
+          onClose={() => setShowPlayStepper(false)}
+          initialStep={playStepperInitialStep}
+          className="z-[999]"
+          style={playStepperStyle}
+        />
       )}
       {/* Inline Game Detail Modal (fallback if parent didn't supply onClick) */}
       {!onClick && (
@@ -419,6 +668,7 @@ export default function GameRowCard({
           onMembershipChange={(gid, change) => {
             if (gid !== game.id) return
             setMembership((m) => ({ ...m, ...change }))
+            onMembershipChange?.(gid, change)
           }}
         />
       )}
@@ -448,6 +698,14 @@ export default function GameRowCard({
             />
           </div>
         </div>
+      )}
+
+      {showAddModal && (
+        <AddToModal
+          game={{ ...game, list_membership: membership } as any}
+          open={showAddModal}
+          onClose={() => setShowAddModal(false)}
+        />
       )}
     </div>
   )

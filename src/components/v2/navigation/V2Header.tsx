@@ -13,7 +13,7 @@ const leftLinks = [
 
 const rightLinks = [
   { label: 'Profile', href: '/profile' },
-  { label: 'Journal', href: '/plays' },
+  { label: 'Journal', href: '/profile/plays' },
   { label: 'Rankings', href: '/rankings' },
   { label: 'My Lists', href: '/lists' },
   { label: 'My Awards', href: '/awards' },

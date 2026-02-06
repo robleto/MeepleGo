@@ -18,6 +18,9 @@ interface ListCardProps {
   isPublic?: boolean
   onUpdate?: () => void
   onEdit?: (list: GameListWithItems) => void
+  titleOverride?: string
+  hrefOverride?: string
+  itemCountOverride?: number
   // Create new list variant
   variant?: 'list' | 'create'
   onCreateClick?: () => void
@@ -30,6 +33,9 @@ export default function ListCard({
   isPublic = false,
   onUpdate,
   onEdit,
+  titleOverride,
+  hrefOverride,
+  itemCountOverride,
   variant = 'list',
   onCreateClick,
   createTitle = 'Create New List',
@@ -109,6 +115,17 @@ export default function ListCard({
     }
   }
 
+  const getDisplayName = () => {
+    switch (list.list_type) {
+      case 'library':
+        return 'Own'
+      case 'wishlist':
+        return 'Want to Own'
+      default:
+        return list.name
+    }
+  }
+
   // Get top 5 games for the fanned display
   // Guard against null items and missing game objects
   const isCollectionList = list.list_type === 'library'
@@ -116,7 +133,9 @@ export default function ListCard({
   const topGames = (list.game_list_items || [])
     .filter((it: any) => it?.game?.id)
     .slice(0, fanLimit)
-  const itemCount = (list.game_list_items || []).filter((it: any) => it?.game?.id).length
+  const itemCount =
+    itemCountOverride ??
+    (list.game_list_items || []).filter((it: any) => it?.game?.id).length
 
   // Determine the correct route based on list type
   const slugify = (s: string) =>
@@ -126,6 +145,7 @@ export default function ListCard({
       .replace(/^-+|-+$/g, '')
       .slice(0, 60)
   const getListHref = () => {
+    if (hrefOverride) return hrefOverride
     switch (list.list_type) {
       case 'library':
         return '/library'
@@ -135,6 +155,8 @@ export default function ListCard({
         return `/lists/${slugify(list.name)}-${list.id}`
     }
   }
+
+  const getDisplayTitle = () => titleOverride || getDisplayName()
 
   return (
     <div className="relative">
@@ -225,6 +247,11 @@ export default function ListCard({
           {list.description && (
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
               {list.description}
+            </p>
+          )}
+          {!list.description && itemCount === 0 && (
+            <p className="text-sm text-gray-500 mb-3">
+              No games yet. Add your first pick to get this list going.
             </p>
           )}
 

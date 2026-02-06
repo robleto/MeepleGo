@@ -1,16 +1,19 @@
 'use client'
 
 import { useState, useEffect, useMemo, type ReactNode } from 'react'
+import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import PageLayout from '@/components/Components/PageLayout'
 import Heading from '@/components/Components/Heading'
 import SectionHeader from '@/components/Components/SectionHeader'
+import SearchandFilters from '@/components/Components/SearchandFilters'
 import { supabase } from '@/lib/supabase'
 import { trackEvent } from '@/lib/analytics'
 import { captureError } from '@/lib/errorTracking'
-import { GameList, GameListWithItems, Profile } from '@/types/supabase'
+import { GameListWithItems } from '@/types/supabase'
 import ListCard from '@/components/Components/ListCard'
 import CreateListModal from '@/components/Components/CreateListModal'
 import EditListModal from '@/components/Components/EditListModal'
+import { HOT_TAKE_MIN_DELTA } from '@/utils/discoveryThresholds'
 
 export function ListsContent({
   embedded = false,
@@ -25,6 +28,11 @@ export function ListsContent({
   publicOnly?: boolean
   showDiscoveryLists?: boolean
 }) {
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const pathname = usePathname()
+  const gameIdFilter = searchParams.get('gameId')
+  const searchParam = searchParams.get('search') || ''
   const Wrapper = embedded
     ? (({ children }: { children: ReactNode }) => <>{children}</>)
     : PageLayout
@@ -51,6 +59,8 @@ export function ListsContent({
   const [editingList, setEditingList] = useState<GameListWithItems | null>(null)
   const [userId, setUserId] = useState<string | null>(null)
   const [isAdmin, setIsAdmin] = useState(false)
+  const [searchTerm, setSearchTerm] = useState(searchParam)
+  const [playedCount, setPlayedCount] = useState(0)
 
   const fetchProfile = async (uid: string) => {
     const { data, error } = await supabase
@@ -86,6 +96,7 @@ export function ListsContent({
         fetchUserLists(session.user.id),
         fetchPublicLists(),
         fetchProfile(session.user.id),
+        fetchPlayedCount(session.user.id),
         showDiscoveryLists ? fetchDiscoveryLists(session.user.id) : Promise.resolve(),
       ])
     } finally {
@@ -96,6 +107,10 @@ export function ListsContent({
   useEffect(() => {
     fetchLists()
   }, [])
+
+  useEffect(() => {
+    setSearchTerm(searchParam)
+  }, [searchParam])
 
   const fetchUserLists = async (userId: string) => {
     const { data, error } = await supabase
@@ -120,6 +135,19 @@ export function ListsContent({
     setUserLists(data || [])
   }
 
+  const fetchPlayedCount = async (userId: string) => {
+    const { count, error } = await supabase
+      .from('rankings')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .eq('played_it', true)
+    if (error) {
+      console.error('Error fetching played count:', error)
+      return
+    }
+    setPlayedCount(count || 0)
+  }
+
   const fetchPublicLists = async () => {
     const { data, error } = await supabase
       .from('game_lists')
@@ -133,6 +161,7 @@ export function ListsContent({
       `
       )
       .eq('is_public', true)
+      .eq('list_type', 'custom')
       .not('list_type', 'in', '(bgg_bestsellers,bgg_hotness,bgg_trendingplays,bgg_mostplayed)')
       .order('updated_at', { ascending: false })
       .limit(20)
@@ -156,11 +185,17 @@ export function ListsContent({
         supabase.rpc('get_comeback_games', { user_id_input: userId }),
       ])
 
+      const filteredHotTakes = (hotTakes.data || []).filter(
+        (item: any) =>
+          Math.abs(Number(item?.abs_delta ?? item?.delta ?? 0)) >=
+          HOT_TAKE_MIN_DELTA
+      )
+
       setDiscoveryLists({
         mostAwarded: mostAwarded.data || [],
         highestRanked: highestRanked.data || [],
         sleeperHits: sleeperHits.data || [],
-        hotTakes: hotTakes.data || [],
+        hotTakes: filteredHotTakes,
         comebackGames: comebackGames.data || [],
       })
     } catch (error) {
@@ -170,32 +205,123 @@ export function ListsContent({
     }
   }
 
+  const matchesSearch = (list: GameListWithItems, query: string) => {
+    if (!query) return true
+    const q = query.trim().toLowerCase()
+    if (!q) return true
+    if ((list.name || '').toLowerCase().includes(q)) return true
+    return (list.game_list_items || []).some((item: any) =>
+      (item.game?.name || '').toLowerCase().includes(q)
+    )
+  }
+
+  const listHasGame = (list: GameListWithItems) => {
+    if (!gameIdFilter) return true
+    return (list.game_list_items || []).some(
+      (item: any) => String(item.game?.id || item.game_id) === gameIdFilter
+    )
+  }
+
+  const filteredUserLists = useMemo(() => {
+    if (!gameIdFilter) return userLists
+    return userLists.filter(listHasGame)
+  }, [userLists, gameIdFilter])
+
+  const filteredPublicLists = useMemo(() => {
+    if (!gameIdFilter) return publicLists
+    return publicLists.filter(listHasGame)
+  }, [publicLists, gameIdFilter])
+
+  const viewUserLists = useMemo(() => {
+    const base = gameIdFilter ? filteredUserLists : userLists
+    if (!searchTerm) return base
+    return base.filter((list) => matchesSearch(list, searchTerm))
+  }, [gameIdFilter, filteredUserLists, searchTerm, userLists])
+
+  const viewPublicLists = useMemo(() => {
+    const base = gameIdFilter ? filteredPublicLists : publicLists
+    if (!searchTerm) return base
+    return base.filter((list) => matchesSearch(list, searchTerm))
+  }, [gameIdFilter, filteredPublicLists, searchTerm, publicLists])
+
   const defaultLists = useMemo(() => {
-    return userLists.filter((list) =>
+    return viewUserLists.filter((list) =>
       ['library', 'wishlist'].includes(list.list_type)
     )
-  }, [userLists])
+  }, [viewUserLists])
+
+  const libraryList = useMemo(
+    () => viewUserLists.find((list) => list.list_type === 'library') || null,
+    [viewUserLists]
+  )
+  const wishlistList = useMemo(
+    () => viewUserLists.find((list) => list.list_type === 'wishlist') || null,
+    [viewUserLists]
+  )
+  const wantToPlayList = useMemo(
+    () =>
+      viewUserLists.find(
+        (list) => (list.name || '').toLowerCase() === 'want to play'
+      ) || null,
+    [viewUserLists]
+  )
+
+  const wantToPlayCard: GameListWithItems =
+    wantToPlayList || ({
+      id: 'collection-want-to-play',
+      name: 'Want to Play',
+      description: 'Games I want to play',
+      list_type: 'custom',
+      is_public: false,
+      user_id: userId || '',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      game_list_items: [],
+    } as GameListWithItems)
+
+  const playedCard: GameListWithItems = {
+    id: 'collection-played',
+    name: 'Plays',
+    description: 'Games I have played',
+    list_type: 'custom',
+    is_public: false,
+    user_id: userId || '',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    game_list_items: [],
+  } as GameListWithItems
+
+  const collectionsRow = [
+    defaultLists.find((list) => list.list_type === 'wishlist') || null,
+    defaultLists.find((list) => list.list_type === 'library') || null,
+    wantToPlayCard,
+    playedCard,
+  ].filter(Boolean) as GameListWithItems[]
 
   const customLists = useMemo(() => {
-    return userLists.filter((list) => list.list_type === 'custom')
-  }, [userLists])
+    return viewUserLists.filter((list) => list.list_type === 'custom')
+  }, [viewUserLists])
 
   // Separate private and public custom lists
   const privateLists = useMemo(() => {
-    return customLists.filter((list) => !list.is_public)
-  }, [customLists])
+    return customLists.filter(
+      (list) => !list.is_public && list.id !== wantToPlayList?.id
+    )
+  }, [customLists, wantToPlayList?.id])
 
   const publicUserLists = useMemo(() => {
-    return customLists.filter((list) => list.is_public)
-  }, [customLists])
+    return customLists.filter(
+      (list) => list.is_public && list.id !== wantToPlayList?.id
+    )
+  }, [customLists, wantToPlayList?.id])
 
   // If admin, treat public lists as editable (show within "My Lists" as well for convenience)
   const adminEditablePublic = useMemo(() => {
     if (!isAdmin) return []
-    return publicLists.filter(
-      (pl) => !userLists.find((ul) => ul.id === pl.id) // avoid duplicates
+    return viewPublicLists.filter(
+      (pl) => !viewUserLists.find((ul) => ul.id === pl.id) // avoid duplicates
     )
-  }, [isAdmin, publicLists, userLists])
+  }, [isAdmin, viewPublicLists, viewUserLists])
 
   const handleCreateList = async (listData: {
     name: string
@@ -258,18 +384,40 @@ export function ListsContent({
   }
 
   return (
-    <Wrapper>
-      <div className="space-y-8">
+    <Wrapper
+      {...(!embedded && {
+        subHeader: (
+          <SearchandFilters
+            value={searchTerm}
+            placeholder="Search lists or games…"
+            showFiltersButton={false}
+            onChange={(val) => {
+              const params = new URLSearchParams(searchParams.toString())
+              if (val) params.set('search', val)
+              else params.delete('search')
+              router.replace(`${pathname}?${params.toString()}`)
+            }}
+            onSearch={(val) => {
+              const params = new URLSearchParams(searchParams.toString())
+              if (val) params.set('search', val)
+              else params.delete('search')
+              router.replace(`${pathname}?${params.toString()}`)
+            }}
+          />
+        ),
+      })}
+    >
+      <div className="space-y-8 pt-4 sm:pt-6">
+        {gameIdFilter &&
+          viewUserLists.length === 0 &&
+          viewPublicLists.length === 0 && (
+            <div className="rounded-xl border border-dashed border-gray-200 bg-gray-50/60 p-6 text-sm text-gray-600">
+              No lists include this game yet.
+            </div>
+          )}
         {/* My Lists Section */}
         {!publicOnly && (
           <div>
-            {!isGuest && (
-            <>
-              <div className="mb-2">
-                <SectionHeader title="My Lists" containerClassName="mb-0" />
-              </div>
-            </>
-            )}
           {/* <p className="text-sm text-gray-600 dark:text-gray-400 mb-6 max-w-2xl">
             {isGuest
               ? 'Browse public community and BGG powered lists. Sign in to build and curate your own collections.'
@@ -359,20 +507,33 @@ export function ListsContent({
             </div>
             ) : (
             <>
-              {/* Default Lists (Library & Wishlist) */}
+              {/* Collections */}
               {showDefaults && defaultLists.length > 0 && (
                 <div className="mb-8">
                   <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">
                     Collections
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {defaultLists.map((list) => (
-                      <ListCard
-                        key={list.id}
-                        list={list}
-                        onUpdate={() => fetchUserLists(userId!)}
-                      />
-                    ))}
+                    {collectionsRow.map((list) => {
+                      const listName = (list.name || '').toLowerCase()
+                      const isWantToPlay = listName === 'want to play'
+                      const isPlayed = list.id === 'collection-played'
+                      return (
+                        <ListCard
+                          key={list.id}
+                          list={list}
+                          hrefOverride={
+                            isPlayed
+                              ? '/profile/games?collection=played'
+                              : isWantToPlay
+                                ? '/profile/games?collection=wantToPlay'
+                                : undefined
+                          }
+                          itemCountOverride={isPlayed ? playedCount : undefined}
+                          onUpdate={() => fetchUserLists(userId!)}
+                        />
+                      )
+                    })}
                   </div>
                 </div>
               )}
@@ -588,7 +749,7 @@ export function ListsContent({
         )}
 
         {/* Public Lists Section */}
-        {showPublic && publicLists.length > 0 && (
+        {showPublic && viewPublicLists.length > 0 && (
           <div>
             {!publicOnly && (
               <SectionHeader title="Public Lists" containerClassName="mb-2" />
@@ -597,7 +758,7 @@ export function ListsContent({
               Recently updated public & system generated (BGG) lists.
             </p> */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {publicLists.map((list) => (
+              {viewPublicLists.map((list) => (
                 <ListCard
                   key={list.id}
                   list={list}

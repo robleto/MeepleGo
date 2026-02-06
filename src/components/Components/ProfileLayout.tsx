@@ -4,14 +4,9 @@ import { useEffect, useState, type ReactNode } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
-import Heading from '@/components/Components/Heading'
 import PageLayout from '@/components/Components/PageLayout'
+import ProfileHeader from '@/components/Components/ProfileHeader'
 import {
-  BookmarkIcon,
-  CubeIcon,
-  StarIcon,
-  ListBulletIcon,
-  TrophyIcon,
   ChartBarIcon,
   PencilSquareIcon,
   UserGroupIcon,
@@ -22,6 +17,7 @@ interface Profile {
   username: string | null
   full_name: string | null
   avatar_url: string | null
+  banner_url?: string | null
   bio: string | null
   email?: string | null
 }
@@ -64,12 +60,11 @@ export default function ProfileLayout({
   const tabs = [
     { key: 'overview', label: 'Overview', href: baseUrl },
     { key: 'activity', label: 'Activity', href: `${baseUrl}/activity` },
-    { key: 'library', label: 'Library', href: `${baseUrl}/library` },
-    { key: 'wishlist', label: 'Wishlist', href: `${baseUrl}/wishlist` },
+    { key: 'games', label: 'Games', href: `${baseUrl}/games` },
+    { key: 'plays', label: 'Journal', href: `${baseUrl}/plays` },
     { key: 'rankings', label: 'Rankings', href: `${baseUrl}/rankings` },
     { key: 'lists', label: 'Lists', href: `${baseUrl}/lists` },
     { key: 'awards', label: 'Awards', href: `${baseUrl}/awards` },
-    { key: 'plays', label: 'Plays', href: `${baseUrl}/plays` },
     { key: 'friends', label: 'Friends', href: `${baseUrl}/friends` },
     { key: 'stats', label: 'Stats', href: `${baseUrl}/stats` },
   ]
@@ -77,12 +72,11 @@ export default function ProfileLayout({
   // Determine active tab from pathname
   const getActiveTab = () => {
     if (pathname.endsWith('/activity')) return 'activity'
-    if (pathname.endsWith('/library')) return 'library'
-    if (pathname.endsWith('/wishlist')) return 'wishlist'
+    if (pathname.endsWith('/games')) return 'games'
+    if (pathname.endsWith('/plays')) return 'plays'
     if (pathname.endsWith('/rankings')) return 'rankings'
     if (pathname.endsWith('/lists')) return 'lists'
     if (pathname.endsWith('/awards')) return 'awards'
-    if (pathname.endsWith('/plays')) return 'plays'
     if (pathname.endsWith('/friends')) return 'friends'
     if (pathname.endsWith('/stats')) return 'stats'
     return 'overview'
@@ -189,7 +183,7 @@ export default function ProfileLayout({
     return (
       <PageLayout>
         <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+          <div className="w-8 h-8 border-b-2 rounded-full animate-spin border-primary-600"></div>
         </div>
       </PageLayout>
     )
@@ -198,7 +192,7 @@ export default function ProfileLayout({
   if (!profile) {
     return (
       <PageLayout>
-        <div className="text-center py-12">
+        <div className="py-12 text-center">
           <p className="text-gray-600">Profile not found</p>
         </div>
       </PageLayout>
@@ -206,140 +200,47 @@ export default function ProfileLayout({
   }
 
   const headerAndNav = (
-    <div className="space-y-3">
-      {/* Profile Header - Ultra-Compact Mobile */}
-      <div className="bg-white sm:rounded-2xl sm:shadow-sm sm:border sm:border-gray-100 sm:dark:border-gray-800 p-3 sm:p-4">
-        {/* Desktop: Side-by-side layout | Mobile: Stacked */}
-        <div className="sm:flex sm:items-center sm:gap-6">
-          {/* Left Side: Avatar and Name */}
-          <div className="sm:flex-1 sm:min-w-0">
-            <div className="flex items-center gap-3">
+    <div className="space-y-4">
+      <ProfileHeader
+        profile={profile}
+        stats={{
+          gamesOwned: stats.gamesOwned,
+          gamesPlayed: stats.gamesPlayed,
+          listsCreated: stats.listsCreated,
+        }}
+        isOwnProfile={isOwnProfile}
+        showBanner={Boolean(profile?.banner_url)}
+      />
+
+      {/* Navigation - Underlined */}
+      <div className="border-b border-gray-200">
+        <div className="flex gap-6 overflow-x-auto scrollbar-hide">
+          {tabs.map((tab) => {
+            const isActive = activeTab === tab.key
+            return (
               <Link
-                href={isOwnProfile ? '/settings' : '#'}
-                className={`group relative h-12 w-12 sm:h-12 sm:w-12 aspect-square rounded-full overflow-hidden bg-gray-200 flex items-center justify-center flex-shrink-0 ${
-                  isOwnProfile ? 'cursor-pointer' : 'cursor-default'
+                key={tab.key}
+                href={tab.href}
+                className={`unstyled py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
+                  isActive
+                    ? 'border-gray-900 text-gray-900'
+                    : 'border-transparent text-gray-600 hover:text-gray-900'
                 }`}
-                aria-label={isOwnProfile ? 'Edit profile photo' : 'Profile photo'}
               >
-                {profile.avatar_url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={profile.avatar_url}
-                    alt="Profile"
-                    className="w-full h-full aspect-square object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full aspect-square bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white text-lg sm:text-xl font-semibold">
-                    {(
-                      profile.username ||
-                      profile.full_name ||
-                      profile.email ||
-                      'U'
-                    )
-                      .charAt(0)
-                      .toUpperCase()}
-                  </div>
-                )}
-                {isOwnProfile && (
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-xs font-medium text-white">
-                    Edit
-                  </div>
-                )}
+                {tab.label}
               </Link>
-              <div className="flex-1 min-w-0">
-                <Heading as="h1" size="lg" className="font-medium truncate text-lg sm:text-2xl">
-                  {profile.username || profile.full_name || 'User Profile'}
-                </Heading>
-                {profile.full_name && (
-                  <p className="text-xs sm:text-sm text-gray-600 mt-0.5 truncate">
-                    {profile.full_name}
-                  </p>
-                )}
-              </div>
-            </div>
-
-          </div>
-
-          {/* Right Side (Desktop) / Below (Mobile): Stats - Single Row */}
-          <div className="mt-3 sm:mt-0 grid grid-cols-4 gap-2 sm:flex sm:flex-wrap lg:flex-nowrap sm:gap-2 sm:flex-shrink-0">
-            {[
-              {
-                iconBg: 'bg-blue-500',
-                Icon: BookmarkIcon,
-                label: 'Owned',
-                value: stats.gamesOwned,
-              },
-              {
-                iconBg: 'bg-green-500',
-                Icon: CubeIcon,
-                label: 'Played',
-                value: stats.gamesPlayed,
-              },
-              {
-                iconBg: 'bg-yellow-500',
-                Icon: StarIcon,
-                label: 'Avg Rating',
-                value: stats.avgRating || '—',
-              },
-              {
-                iconBg: 'bg-purple-500',
-                Icon: ListBulletIcon,
-                label: 'Lists',
-                value: stats.listsCreated,
-              },
-            ].map((item) => (
-              <div
-                key={item.label}
-                className="text-center sm:bg-gray-50 sm:dark:bg-gray-800/50 sm:rounded-lg sm:p-2 sm:flex sm:items-center sm:gap-2 sm:text-left sm:min-w-[110px] lg:min-w-[120px]"
-              >
-                <div
-                  className={`hidden sm:flex items-center justify-center w-8 h-8 rounded-lg ${item.iconBg} flex-shrink-0`}
-                >
-                  <item.Icon className="w-4 h-4 text-white" />
-                </div>
-                <div className="sm:min-w-0 sm:flex-1">
-                  <div className="text-lg sm:text-base font-medium text-gray-900 truncate">
-                    {item.value}
-                  </div>
-                  <div className="text-[10px] sm:text-xs font-medium text-gray-500 uppercase sm:normal-case truncate mt-0.5 sm:mt-0">
-                    {item.label}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Navigation - Horizontal Scrollable Pills */}
-      <div className="relative -mx-4 px-4 sm:mx-0 sm:px-0">
-        <div className="overflow-x-auto scrollbar-hide">
-          <div className="flex gap-2 pb-1 min-w-max">
-            {tabs.map((tab) => {
-              const isActive = activeTab === tab.key
-              return (
-                <Link
-                  key={tab.key}
-                  href={tab.href}
-                  className={`unstyled px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
-                    isActive
-                      ? 'bg-primary-600 !text-white shadow-sm'
-                      : 'bg-gray-100 !text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  {tab.label}
-                </Link>
-              )
-            })}
-          </div>
+            )
+          })}
         </div>
       </div>
     </div>
   )
 
   return (
-    <PageLayout subHeader={headerAndNav}>
-      <div className="space-y-3">{children}</div>
+    <PageLayout subHeader={headerAndNav} subHeaderSpacing={false}>
+      <div className="space-y-3 -mt-10 sm:-mt-12 lg:-mt-12">
+        {children}
+      </div>
     </PageLayout>
   )
 }

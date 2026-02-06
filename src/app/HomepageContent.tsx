@@ -29,6 +29,11 @@ import {
   hydrateDiscoveryListsWithUserMeta,
   hydrateItemsWithUserMeta,
 } from '@/lib/gameHydration'
+import {
+  HOT_TAKE_MIN_DELTA,
+  HOT_TAKE_MIN_NUM_RATINGS,
+  SLEEPER_MAX_NUM_RATINGS,
+} from '@/utils/discoveryThresholds'
 
 // Module-level cache for React Strict Mode stability
 let cachedFeaturedGames: Game[] | null = null
@@ -455,13 +460,13 @@ export default function HomepageContent() {
                 phase.canShowSleeperHits
                   ? supabase.rpc('get_sleeper_hits', {
                       user_uuid: session.user.id,
-                      max_num_ratings: 3000,
+                      max_num_ratings: SLEEPER_MAX_NUM_RATINGS,
                     })
                   : noData,
                 phase.canShowHotTakes
                   ? supabase.rpc('get_hot_takes', {
                       user_uuid: session.user.id,
-                      min_num_ratings: 750,
+                      min_num_ratings: HOT_TAKE_MIN_NUM_RATINGS,
                     })
                   : noData,
                 phase.canShowComebackGames
@@ -476,6 +481,11 @@ export default function HomepageContent() {
                   : noData,
               ])
               if (!cancelled) {
+                const filteredHotTakes = (hotTakesResult.data || []).filter(
+                  (item: any) =>
+                    Math.abs(Number(item?.abs_delta ?? item?.delta ?? 0)) >=
+                    HOT_TAKE_MIN_DELTA
+                ) as HotTakeGame[]
                 const merged = await hydrateDiscoveryListsWithUserMeta(
                   supabase,
                   session.user.id,
@@ -483,7 +493,7 @@ export default function HomepageContent() {
                   mostAwarded: (mostAwardedResult.data || []) as MostAwardedGame[],
                   highestRanked: (highestRankedResult.data || []) as HighestRankedGame[],
                   sleeperHits: (sleeperHitsResult.data || []) as SleeperHitGame[],
-                  hotTakes: (hotTakesResult.data || []) as HotTakeGame[],
+                  hotTakes: filteredHotTakes,
                   comebackGames: (comebackGamesResult.data || []) as ComebackGame[],
                   }
                 )

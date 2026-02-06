@@ -174,31 +174,32 @@ body {
 /* PageLayout utility + main section styling */
 .utility-section {
   background: transparent;
-  padding: 1.5rem 1rem 0.5rem;
+  padding: 0 1rem 0;
 }
 @media (min-width: 640px) {
   .utility-section {
-    padding: 1.5rem 1.5rem 0.75rem;
+    padding: 0 1.5rem 0;
   }
 }
 @media (min-width: 1024px) {
   .utility-section {
-    padding: 1.75rem 2rem 1rem;
+    padding: 0 2rem 0;
   }
 }
 
 .main-content-section {
   background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
   padding: 1.5rem 1rem 5rem;
 }
 @media (min-width: 640px) {
   .main-content-section {
-    padding: 2rem 1.5rem 5rem;
+    padding: 2.75rem 1.5rem 5rem;
   }
 }
 @media (min-width: 1024px) {
   .main-content-section {
-    padding: 2.25rem 2rem 5rem;
+    padding: 3rem 2rem 5rem;
   }
 }
 

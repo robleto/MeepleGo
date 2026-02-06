@@ -239,11 +239,43 @@ export default function PlayStepper({
   const [statusTouched, setStatusTouched] = useState(
     initialStep === 'status' ? false : (playedIt || owned)
   )
+  const [wantToPlayActive, setWantToPlayActive] = useState(false)
+  const [wantToPlayListId, setWantToPlayListId] = useState<string | null>(null)
 
   useEffect(() => {
     // If playedIt or owned changes while component is mounted, mark status as touched
     if (playedIt || owned) setStatusTouched(true)
   }, [playedIt, owned])
+
+  useEffect(() => {
+    const loadWantToPlay = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+      if (!session) return
+      const { data: list } = await supabase
+        .from('game_lists')
+        .select('id')
+        .eq('user_id', session.user.id)
+        .eq('list_type', 'custom')
+        .eq('name', 'Want to Play')
+        .maybeSingle()
+      if (!list?.id) {
+        setWantToPlayListId(null)
+        setWantToPlayActive(false)
+        return
+      }
+      setWantToPlayListId(list.id)
+      const { data: item } = await supabase
+        .from('game_list_items')
+        .select('id')
+        .eq('list_id', list.id)
+        .eq('game_id', gameId)
+        .maybeSingle()
+      setWantToPlayActive(!!item)
+    }
+    loadWantToPlay()
+  }, [gameId])
 
   useEffect(() => {
     requestAnimationFrame(() => setMounted(true))
@@ -370,14 +402,66 @@ export default function PlayStepper({
     }
   }
 
-  const handleTogglePlayed = () => {
+  const handleTogglePlayed = async () => {
     setStatusTouched(true)
-    onTogglePlayed()
+    await onTogglePlayed()
+    if (!playedIt && wantToPlayActive) {
+      await removeWantToPlay()
+    }
   }
 
-  const handleToggleOwned = () => {
+  const handleToggleOwned = async () => {
     setStatusTouched(true)
-    onToggleOwned()
+    await onToggleOwned()
+  }
+
+  const removeWantToPlay = async () => {
+    if (!wantToPlayListId) return
+    setWantToPlayActive(false)
+    await supabase
+      .from('game_list_items')
+      .delete()
+      .eq('list_id', wantToPlayListId)
+      .eq('game_id', gameId)
+  }
+
+  const handleToggleWantToPlay = async () => {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
+    if (!session) return
+    let listId = wantToPlayListId
+    if (!listId) {
+      const { data: created } = await supabase
+        .from('game_lists')
+        .insert({
+          user_id: session.user.id,
+          name: 'Want to Play',
+          list_type: 'custom',
+          description: 'Games I want to play',
+          is_public: false,
+        })
+        .select('id')
+        .maybeSingle()
+      listId = created?.id || null
+      setWantToPlayListId(listId)
+    }
+    if (!listId) return
+    const next = !wantToPlayActive
+    setWantToPlayActive(next)
+    if (next) {
+      await supabase.from('game_list_items').insert({
+        list_id: listId,
+        game_id: gameId,
+      })
+    } else {
+      await supabase
+        .from('game_list_items')
+        .delete()
+        .eq('list_id', listId)
+        .eq('game_id', gameId)
+    }
+    setStatusTouched(true)
   }
 
   /** Determine if a step pill should show as "done" */
@@ -499,7 +583,7 @@ export default function PlayStepper({
               </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-3 gap-3">
               {/* Played It */}
               <button
                 onClick={handleTogglePlayed}
@@ -548,6 +632,31 @@ export default function PlayStepper({
                   )}
                 </div>
                 <span>{owned ? 'Owned ✓' : 'I Own It'}</span>
+              </button>
+
+              {/* Want to Play */}
+              <button
+                onClick={handleToggleWantToPlay}
+                className={cn(
+                  'group relative flex flex-col items-center gap-2 px-4 py-4 rounded-xl border-2 text-xs font-semibold transition-all duration-200',
+                  wantToPlayActive
+                    ? 'border-blue-500 bg-blue-50 text-blue-700 shadow-sm'
+                    : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300 hover:bg-gray-50'
+                )}
+              >
+                <div
+                  className={cn(
+                    'w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200',
+                    wantToPlayActive ? 'bg-blue-100' : 'bg-gray-100'
+                  )}
+                >
+                  {wantToPlayActive ? (
+                    <CheckCircleIcon className="w-6 h-6 text-blue-600" />
+                  ) : (
+                    <ClockIcon className="w-6 h-6 text-gray-400" />
+                  )}
+                </div>
+                <span>{wantToPlayActive ? 'Want ✓' : 'Want to Play'}</span>
               </button>
             </div>
 

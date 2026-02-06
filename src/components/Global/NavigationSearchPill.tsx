@@ -46,8 +46,8 @@ export default function NavigationSearchPill({
     <div className="relative">
       <div
         className={cn(
-          'flex items-center gap-2 rounded-full border border-gray-200 dark:border-gray-700 bg-white/90 dark:bg-gray-900/90 shadow-sm backdrop-blur-sm transition-all duration-200 overflow-hidden',
-          searchOpen ? 'w-72 pl-2 pr-2 py-1.5' : 'w-9 h-9 justify-center p-0'
+          'flex items-center gap-2 rounded-full border border-gray-200 dark:border-gray-700 bg-white/90 dark:bg-gray-900/90 shadow-[0_10px_28px_rgba(15,23,42,0.18)] dark:shadow-[0_10px_28px_rgba(0,0,0,0.3)] backdrop-blur-sm transition-all duration-200 overflow-hidden',
+          searchOpen ? 'w-[420px] pl-3 pr-3 py-2' : 'w-9 h-9 justify-center p-0'
         )}
       >
         <button
@@ -65,7 +65,7 @@ export default function NavigationSearchPill({
           aria-label="Search"
           className={cn(
             'shrink-0 flex items-center justify-center rounded-full text-gray-600 dark:text-gray-400',
-            searchOpen ? 'h-7 w-7 hover:bg-gray-100 dark:hover:bg-gray-800' : 'h-9 w-9'
+            searchOpen ? 'h-8 w-8 hover:bg-gray-100 dark:hover:bg-gray-800' : 'h-9 w-9'
           )}
         >
           <MagnifyingGlassIcon className="w-4 h-4 ml-2" />

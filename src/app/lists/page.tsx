@@ -5,5 +5,11 @@ import { ListsContent } from './ListsContent'
 export { ListsContent }
 
 export default function ListsPage() {
-  return <ListsContent publicOnly />
+  return (
+    <ListsContent
+      showDefaults={false}
+      publicOnly
+      showPublic
+    />
+  )
 }

@@ -28,6 +28,8 @@ interface ActivityEntry {
   timestamp: string
   game?: Game
   rating?: number
+  listName?: string
+  awardName?: string
 }
 
 interface ActivityFeedProps {
@@ -36,6 +38,10 @@ interface ActivityFeedProps {
   limit?: number
   showHeader?: boolean
   showViewAll?: boolean
+  variant?: 'card' | 'flush'
+  filterKey?: 'all' | 'rankings' | 'lists' | 'awards'
+  searchTerm?: string
+  emptyState?: { title: string; body?: string }
 }
 
 export default function ActivityFeed({
@@ -44,9 +50,16 @@ export default function ActivityFeed({
   limit = 10,
   showHeader = true,
   showViewAll = false,
+  variant = 'card',
+  filterKey = 'all',
+  searchTerm = '',
+  emptyState,
 }: ActivityFeedProps) {
   const [loading, setLoading] = useState(true)
   const [activity, setActivity] = useState<ActivityEntry[]>([])
+  const containerClass =
+    variant === 'flush' ? '' : 'rounded-2xl border border-gray-200/70 bg-white/80'
+  const showHeaderResolved = showHeader && variant !== 'flush'
 
   useEffect(() => {
     loadActivity()
@@ -122,6 +135,7 @@ export default function ActivityFeed({
               message: `Added ${item.game.name} to Library`,
               timestamp: item.created_at,
               game: item.game,
+              listName,
             })
           } else if (listName === 'Wishlist') {
             entries.push({
@@ -130,6 +144,7 @@ export default function ActivityFeed({
               message: `Added ${item.game.name} to Wishlist`,
               timestamp: item.created_at,
               game: item.game,
+              listName,
             })
           } else {
             entries.push({
@@ -138,6 +153,7 @@ export default function ActivityFeed({
               message: `Added ${item.game.name} to ${listName}`,
               timestamp: item.created_at,
               game: item.game,
+              listName,
             })
           }
         })
@@ -159,6 +175,7 @@ export default function ActivityFeed({
               type: 'list_create',
               message: `Created list ${l.name}`,
               timestamp: l.created_at,
+              listName: l.name,
             })
           })
       }
@@ -188,21 +205,63 @@ export default function ActivityFeed({
     return `${Math.floor(diffDays / 365)} years ago`
   }
 
+  const formatMetaLine = (entry: ActivityEntry) => {
+    const base = formatTimeAgo(entry.timestamp)
+    const suffix = entry.listName || entry.awardName
+    return suffix ? `${base} | ${suffix}` : base
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+        <div className="w-8 h-8 border-b-2 rounded-full animate-spin border-primary-600"></div>
       </div>
     )
   }
 
-  if (activity.length === 0) {
+  const normalizedSearch = searchTerm.trim().toLowerCase()
+  const isRankings = filterKey === 'rankings'
+  const isLists = filterKey === 'lists'
+  const isAwards = filterKey === 'awards'
+
+  const filteredActivity = activity.filter((entry) => {
+    if (filterKey !== 'all') {
+      if (isRankings && !(entry.type === 'rating' || entry.type === 'journal')) {
+        return false
+      }
+      if (
+        isLists &&
+        !(
+          entry.type === 'list_add' ||
+          entry.type === 'list_create' ||
+          entry.type === 'library_add' ||
+          entry.type === 'wishlist_add'
+        )
+      ) {
+        return false
+      }
+      if (isAwards) {
+        return false
+      }
+    }
+    if (!normalizedSearch) return true
+    const name = entry.game?.name?.toLowerCase() || ''
+    const message = entry.message?.toLowerCase() || ''
+    return name.includes(normalizedSearch) || message.includes(normalizedSearch)
+  })
+
+  if (activity.length === 0 || filteredActivity.length === 0) {
+    const fallbackEmpty = {
+      title: 'No recent activity yet.',
+      body: 'When you rate, log, or list games, you’ll see them here.',
+    }
+    const resolvedEmpty = emptyState || fallbackEmpty
     return (
-      <div className="rounded-2xl border border-gray-200/70 bg-white/80">
-        {showHeader && (
+      <div className={containerClass}>
+        {showHeaderResolved && (
           <div className="flex items-center justify-between p-6 border-b border-gray-200/50">
             <div className="flex items-center gap-2">
-              <ClockIcon className="h-5 w-5 text-primary-600" />
+              <ClockIcon className="w-5 h-5 text-primary-600" />
               <h2 className="text-lg font-semibold text-gray-900">
                 Activity
               </h2>
@@ -210,9 +269,14 @@ export default function ActivityFeed({
           </div>
         )}
         <div className="p-6">
-          <p className="text-sm text-gray-500">
-            No recent activity yet.
-          </p>
+          <div className="text-sm font-semibold text-gray-900">
+            {resolvedEmpty.title}
+          </div>
+          {resolvedEmpty.body && (
+            <p className="mt-1 text-sm text-gray-500">
+              {resolvedEmpty.body}
+            </p>
+          )}
         </div>
       </div>
     )
@@ -271,11 +335,11 @@ export default function ActivityFeed({
   }
 
   return (
-    <div className="rounded-2xl border border-gray-200/70 bg-white/80">
-      {showHeader && (
+    <div className={containerClass}>
+      {showHeaderResolved && (
         <div className="flex items-center justify-between p-6 border-b border-gray-200/50">
           <div className="flex items-center gap-2">
-            <ClockIcon className="h-5 w-5 text-primary-600" />
+            <ClockIcon className="w-5 h-5 text-primary-600" />
             <h2 className="text-lg font-semibold text-gray-900">
               Activity
             </h2>
@@ -292,9 +356,9 @@ export default function ActivityFeed({
       )}
 
       <div className="relative p-6 pl-8">
-        <div className="absolute left-8 top-6 bottom-6 w-px bg-gray-200" />
+        <div className="absolute w-px bg-gray-200 left-8 top-6 bottom-6" />
         <div className="space-y-3">
-          {activity.map((item) => {
+          {filteredActivity.map((item) => {
             const style = getEntryStyle(item.type)
             return (
               <div key={item.id} className="relative">
@@ -315,7 +379,7 @@ export default function ActivityFeed({
                           {item.message}
                         </p>
                         <p className={`${style.subtext} text-gray-400`}>
-                          {formatTimeAgo(item.timestamp)}
+                          {formatMetaLine(item)}
                         </p>
                       </div>
                     </>
@@ -334,7 +398,7 @@ export default function ActivityFeed({
                           {item.message}
                         </p>
                         <p className={`${style.subtext} text-gray-500`}>
-                          {formatTimeAgo(item.timestamp)}
+                          {formatMetaLine(item)}
                         </p>
                       </div>
                       {item.type === 'rating' && item.rating && (
