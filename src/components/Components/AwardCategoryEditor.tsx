@@ -13,10 +13,20 @@ import {
 } from '@dnd-kit/core'
 import { SortableContext, rectSortingStrategy, useSortable, arrayMove } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { Bars3Icon, TrophyIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import {
+  Bars3Icon,
+  TrophyIcon,
+  XMarkIcon,
+  PlusIcon,
+  MagnifyingGlassIcon,
+  CheckIcon,
+} from '@heroicons/react/24/outline'
+import { TrophyIcon as TrophySolid } from '@heroicons/react/24/solid'
 import { supabase } from '@/lib/supabase'
-import { CATEGORY_CONFIGS } from '@/lib/awards/deriveUserAwards'
+import { CATEGORY_CONFIGS, getCategoryLabel } from '@/lib/awards/deriveUserAwards'
 import { getRatingSolidClass } from '@/components/Foundations/ratingColors'
+import { cn } from '@/utils/helpers'
+import GameImage from '@/components/Elements/GameImage'
 
 interface GameLite {
   id: string
@@ -40,101 +50,199 @@ interface Props {
   categoryLabel: string
   gameMap: Record<string, GameLite>
   onChange?: (row: Partial<AwardRow>) => void
+  onClose?: () => void
+  onSave?: () => void
   maxNominees?: number
   seedGames?: GameLite[]
 }
 
-function NomineeItem({
+/* ─── Sortable nominee card ─────────────────────────────── */
+function NomineeCard({
   id,
   name,
   thumbnail_url,
   rating,
   isWinner,
   index,
+  onSetWinner,
+  onRemove,
 }: {
   id: string
   name: string
   thumbnail_url?: string | null
   rating?: number | null
   isWinner: boolean
-  index?: number
+  index: number
+  onSetWinner: () => void
+  onRemove: () => void
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id })
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : 1,
+    opacity: isDragging ? 0.4 : 1,
   }
-  const thumb = thumbnail_url || '/placeholder-game.svg'
-  const ratingClass = getRatingSolidClass(rating)
-  
+
   return (
     <div
       ref={setNodeRef}
       style={style}
-      className={`group relative flex items-center gap-3 px-3 py-3 rounded-lg border bg-white cursor-grab active:cursor-grabbing transition-shadow hover:shadow-md ${
-        isWinner 
-          ? 'border-amber-400 shadow-amber-100' 
-          : 'border-gray-200'
-      }`}
-      {...attributes}
-      {...listeners}
-      title={name}
-      role="button"
-      tabIndex={0}
+      className={cn(
+        'group relative flex items-center gap-2.5 rounded-lg border bg-white transition-all',
+        isWinner
+          ? 'border-amber-300 ring-1 ring-amber-200/60 shadow-sm'
+          : 'border-gray-200 hover:border-gray-300 hover:shadow-sm'
+      )}
     >
-      <Bars3Icon className="w-4 h-4 text-gray-400 shrink-0" aria-hidden="true" />
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={thumb} alt="" className="w-16 h-16 object-cover rounded shadow-sm" />
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-2 mb-1">
-          {typeof index === 'number' && (
-            <span className="shrink-0 inline-flex items-center justify-center w-5 h-5 rounded-full bg-gray-200 text-gray-700 text-[10px] font-semibold">
-              {index + 1}
-            </span>
-          )}
-          <span className="truncate font-medium text-[14px] text-gray-900">{name}</span>
-        </div>
+      {/* Drag handle */}
+      <div
+        {...attributes}
+        {...listeners}
+        className="flex items-center self-stretch px-1.5 cursor-grab active:cursor-grabbing text-gray-300 hover:text-gray-400 shrink-0"
+        title="Drag to reorder"
+      >
+        <Bars3Icon className="w-3.5 h-3.5" aria-hidden="true" />
+      </div>
+
+      {/* Thumbnail */}
+      <div className="w-11 h-11 rounded overflow-hidden shrink-0 my-1.5">
+        <GameImage
+          src={thumbnail_url || null}
+          alt={name}
+          name={name}
+          variant="thumb"
+          fit="cover"
+          className="w-full h-full"
+        />
+      </div>
+
+      {/* Info */}
+      <div className="min-w-0 flex-1 py-1.5 pr-1">
         <div className="flex items-center gap-1.5">
-          {rating && (
-            <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-bold ${ratingClass}`}>
+          <span className="shrink-0 text-[10px] font-semibold text-gray-400 tabular-nums w-4 text-right">
+            {index + 1}.
+          </span>
+          <span className="truncate text-[13px] font-medium text-gray-900">{name}</span>
+        </div>
+        {rating != null && rating > 0 && (
+          <div className="mt-0.5 ml-[22px]">
+            <span className={cn('inline-block px-1.5 py-px rounded text-[10px] font-bold', getRatingSolidClass(rating))}>
               {rating}
             </span>
+          </div>
+        )}
+      </div>
+
+      {/* Actions — visible on hover, always visible for winner */}
+      <div className={cn(
+        'flex items-center gap-0.5 pr-1.5 transition-opacity',
+        isWinner ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+      )}>
+        <button
+          onClick={onSetWinner}
+          className={cn(
+            'p-1 rounded transition-colors',
+            isWinner
+              ? 'text-amber-500'
+              : 'text-gray-300 hover:text-amber-500'
           )}
-          {isWinner && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-semibold">
-              <TrophyIcon className="w-3 h-3" />
-              Winner
-            </span>
+          title={isWinner ? 'Current winner' : 'Set as winner'}
+          aria-label={isWinner ? 'Current winner' : 'Set as winner'}
+        >
+          {isWinner ? (
+            <TrophySolid className="w-3.5 h-3.5" aria-hidden="true" />
+          ) : (
+            <TrophyIcon className="w-3.5 h-3.5" aria-hidden="true" />
           )}
-        </div>
+        </button>
+        <button
+          onClick={onRemove}
+          className="p-1 rounded text-gray-300 hover:text-red-500 transition-colors"
+          title="Remove nominee"
+          aria-label="Remove nominee"
+        >
+          <XMarkIcon className="w-3.5 h-3.5" aria-hidden="true" />
+        </button>
       </div>
     </div>
   )
 }
 
+/* ─── Available game item ───────────────────────────────── */
+function AvailableGameItem({
+  g,
+  onAdd,
+}: {
+  g: GameLite
+  onAdd: () => void
+}) {
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: g.id })
+
+  return (
+    <div
+      ref={setNodeRef}
+      {...attributes}
+      {...listeners}
+      className={cn(
+        'flex items-center gap-2.5 px-3 py-2 hover:bg-gray-50/80 transition-colors cursor-grab active:cursor-grabbing border-b border-gray-100/80 last:border-b-0',
+        isDragging && 'opacity-40'
+      )}
+    >
+      <div className="w-9 h-9 rounded overflow-hidden shrink-0">
+        <GameImage
+          src={g.thumbnail_url || null}
+          alt={g.name}
+          name={g.name}
+          variant="thumb"
+          fit="cover"
+          className="w-full h-full"
+        />
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="truncate text-[12px] font-medium text-gray-800">{g.name}</div>
+        {g.rating != null && g.rating > 0 && (
+          <span className={cn('inline-block px-1 py-px rounded text-[9px] font-bold mt-0.5', getRatingSolidClass(g.rating))}>
+            {g.rating}
+          </span>
+        )}
+      </div>
+      <button
+        onClick={onAdd}
+        className="shrink-0 p-1 rounded-md text-gray-400 hover:text-brand hover:bg-brand-subtle transition-colors"
+        title={`Add ${g.name}`}
+        aria-label={`Add ${g.name}`}
+      >
+        <PlusIcon className="w-4 h-4" />
+      </button>
+    </div>
+  )
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Main editor component
+   ═══════════════════════════════════════════════════════════ */
 export default function AwardCategoryEditor({
   year,
   row,
   categoryLabel,
   gameMap,
   onChange,
+  onClose,
+  onSave,
   maxNominees = 10,
   seedGames = [],
 }: Props) {
-  // Namespace for DnD ids to avoid cross-editor collisions if multiple editors are open
   const ns = `ace-${row.category}-${year}`
   const nomineesDropId = `${ns}-nominees`
 
-  // Derive per-category max nominees when not provided
   const cfgMax = CATEGORY_CONFIGS.find((c) => c.id === row.category)?.maxNominees
   const effectiveMax = maxNominees ?? cfgMax ?? 10
+
   const [initialNominees, setInitialNominees] = useState<string[]>(row.nominees)
   const [initialWinner, setInitialWinner] = useState<string | null>(row.winner_id)
   const [nominees, setNominees] = useState<string[]>(row.nominees)
   const [winnerId, setWinnerId] = useState<string | null>(row.winner_id)
-  const [addingId, setAddingId] = useState('')
   const [saving, setSaving] = useState(false)
   const [info, setInfo] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -143,36 +251,22 @@ export default function AwardCategoryEditor({
   const [results, setResults] = useState<GameLite[]>([])
   const [activeId, setActiveId] = useState<string | null>(null)
   const [prefilled, setPrefilled] = useState(false)
-  // Seed list to show in Available when no search input
+
   const seedList: GameLite[] = (seedGames || []).filter(Boolean)
   const [autoSeeds, setAutoSeeds] = useState<GameLite[]>([])
   const [autoSeedsLoading, setAutoSeedsLoading] = useState(false)
-  
-  // Internal game map that extends the parent's with data from Available items
-  // Built dynamically from all sources to avoid circular dependency
+
+  // Internal game map that extends the parent's with data from all sources
   const internalGameMap = useMemo(() => {
     const map: Record<string, GameLite> = { ...gameMap }
-    
-    // Add seed games
-    seedList.forEach((g) => {
-      if (g && g.id) map[g.id] = g
-    })
-    
-    // Add auto-seeded games
-    autoSeeds.forEach((g) => {
-      if (g && g.id) map[g.id] = g
-    })
-    
-    // Add search results
-    results.forEach((g) => {
-      if (g && g.id) map[g.id] = g
-    })
-    
+    seedList.forEach((g) => { if (g?.id) map[g.id] = g })
+    autoSeeds.forEach((g) => { if (g?.id) map[g.id] = g })
+    results.forEach((g) => { if (g?.id) map[g.id] = g })
     return map
   }, [gameMap, seedList, autoSeeds, results])
 
+  // Sync from row prop
   useEffect(() => {
-    // Only overwrite nominees from the row when there are saved nominees.
     if (row.nominees && row.nominees.length > 0) {
       setNominees(row.nominees)
       setInitialNominees(row.nominees)
@@ -181,23 +275,22 @@ export default function AwardCategoryEditor({
     setInitialWinner(row.winner_id)
   }, [row.id, row.nominees, row.winner_id])
 
-  // Combined seeds (prefer explicit seeds, but augment with autoSeeds for a larger pool)
+  // Combined seeds
   const combinedSeeds: GameLite[] = (() => {
     const base = seedList.length > 0 ? seedList : autoSeeds
     const extra = seedList.length > 0 ? autoSeeds : []
     const all = [...base, ...extra]
     const seen = new Set<string>()
-    const deduped = [] as GameLite[]
+    const deduped: GameLite[] = []
     for (const g of all) {
-      if (!g?.id) continue
-      if (seen.has(g.id)) continue
+      if (!g?.id || seen.has(g.id)) continue
       seen.add(g.id)
       deduped.push(g)
     }
     return deduped
   })()
 
-  // Prefill nominees from the combined, ordered pool
+  // Prefill nominees
   useEffect(() => {
     if (prefilled) return
     if (row.nominees && row.nominees.length > 0) return
@@ -211,7 +304,7 @@ export default function AwardCategoryEditor({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [combinedSeeds, effectiveMax, row.nominees])
 
-  // Default options when not searching: everything after the top N (N = effectiveMax), minus already-added nominees
+  // Available options (not already nominated)
   const defaultOptions = combinedSeeds.slice(effectiveMax).filter((g) => !nominees.includes(g.id))
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }))
@@ -219,44 +312,8 @@ export default function AwardCategoryEditor({
   function NomineesDropZone({ children }: { children: React.ReactNode }) {
     const { isOver, setNodeRef } = useDroppable({ id: nomineesDropId })
     return (
-      <div ref={setNodeRef} className={isOver ? 'ring-1 ring-primary-500 rounded' : ''}>
+      <div ref={setNodeRef} className={cn(isOver && 'ring-1 ring-brand/30 rounded-lg')}>
         {children}
-      </div>
-    )
-  }
-
-  function AvailableItem({ g }: { g: GameLite }) {
-    const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: g.id })
-    const thumb = g.thumbnail_url || '/placeholder-game.svg'
-    const ratingClass = getRatingSolidClass(g.rating)
-    
-    return (
-      <div
-        ref={setNodeRef}
-        {...attributes}
-        {...listeners}
-        className={`flex items-center justify-between p-3 bg-white border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition-colors cursor-grab active:cursor-grabbing ${
-          isDragging ? 'opacity-50' : ''
-        }`}
-      >
-        <div className="flex items-center gap-3 min-w-0 flex-1">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={thumb} alt="" className="w-14 h-14 object-cover rounded shadow-sm" />
-          <div className="min-w-0 flex-1">
-            <div className="truncate font-medium text-[13px] text-gray-900 mb-1">{g.name}</div>
-            {g.rating && (
-              <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-bold ${ratingClass}`}>
-                {g.rating}
-              </span>
-            )}
-          </div>
-        </div>
-        <button 
-          onClick={() => addNomineeById(g.id)} 
-          className="ml-2 px-3 py-1.5 rounded-md bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-medium transition-colors shadow-sm"
-        >
-          Add
-        </button>
       </div>
     )
   }
@@ -267,30 +324,34 @@ export default function AwardCategoryEditor({
     return (
       <div
         ref={setNodeRef}
-        className={`flex items-center justify-center h-9 text-[10px] rounded border border-dashed ${
-          isOver ? 'border-primary-500 bg-primary-50' : 'border-gray-300'
-        }`}
+        className={cn(
+          'flex items-center justify-center rounded-lg border-2 border-dashed transition-colors',
+          isOver
+            ? 'border-brand bg-brand-subtle/40'
+            : 'border-gray-200 bg-gray-50/50'
+        )}
+        style={{ minHeight: '52px' }}
       >
-        <span className="text-gray-400">Slot {index + 1}</span>
+        <span className="text-[11px] text-gray-400">{index + 1}</span>
       </div>
     )
   }
 
-  // Search (debounced)
+  // Debounced search
   useEffect(() => {
     const term = search.trim()
     const handle = setTimeout(async () => {
-      if (!term) {
-        setResults([])
-        return
-      }
+      if (!term) { setResults([]); return }
       try {
         setSearching(true)
         const res = await fetch(`/api/games?q=${encodeURIComponent(term)}&limit=12`)
         const js = await res.json().catch(() => null)
         const games: any[] = js?.games || []
-        const lite: GameLite[] = games.map((g) => ({ id: String(g.id), name: g.name, thumbnail_url: g.thumbnail_url || null }))
-        setResults(lite)
+        setResults(games.map((g) => ({
+          id: String(g.id),
+          name: g.name,
+          thumbnail_url: g.thumbnail_url || null,
+        })))
       } finally {
         setSearching(false)
       }
@@ -306,80 +367,62 @@ export default function AwardCategoryEditor({
     const { active, over } = e
     setActiveId(null)
     if (!over) return
+
     if (over.id === nomineesDropId && typeof active.id === 'string') {
       addNomineeById(String(active.id))
       return
     }
-    // Slot-targeted drops (e.g., ace-cat-year-slot-2)
+    // Slot-targeted drops
     if (typeof over.id === 'string' && over.id.startsWith(`${ns}-slot-`)) {
       const idxStr = over.id.substring((`${ns}-slot-`).length)
       const targetIndex = Math.max(0, Math.min(Number(idxStr) || 0, effectiveMax - 1))
-      const activeId = String(active.id)
-      const fromIndex = nominees.indexOf(activeId)
-      // Reorder within nominees to the slot index
+      const aid = String(active.id)
+      const fromIndex = nominees.indexOf(aid)
       if (fromIndex !== -1) {
-        const toIndex = Math.max(0, Math.min(targetIndex, nominees.length - 1))
-        const reordered = arrayMove(nominees, fromIndex, toIndex)
-        setNominees(reordered)
+        setNominees(arrayMove(nominees, fromIndex, Math.min(targetIndex, nominees.length - 1)))
         return
       }
-      // Insert from Available at the slot index
-      if (nominees.includes(activeId)) return
+      if (nominees.includes(aid)) return
       if (nominees.length >= effectiveMax) {
-        setError(`Max nominees reached (${effectiveMax}).`)
+        setError(`Maximum ${effectiveMax} nominees reached.`)
         return
       }
       const next = [...nominees]
-      next.splice(Math.min(targetIndex, next.length), 0, activeId)
+      next.splice(Math.min(targetIndex, next.length), 0, aid)
       setNominees(next)
       return
     }
+
     if (active.id === over.id) return
     const oldIndex = nominees.indexOf(String(active.id))
     const newIndex = nominees.indexOf(String(over.id))
-    // If dragging an already-present nominee, reorder
     if (oldIndex !== -1 && newIndex !== -1) {
-      const reordered = arrayMove(nominees, oldIndex, newIndex)
-      setNominees(reordered)
+      setNominees(arrayMove(nominees, oldIndex, newIndex))
       return
     }
-    // If dragging from Available onto a nominee row, insert at that position
     if (oldIndex === -1 && newIndex !== -1 && typeof active.id === 'string') {
       if (nominees.includes(String(active.id))) return
       if (nominees.length >= effectiveMax) {
-        setError(`Max nominees reached (${effectiveMax}).`)
+        setError(`Maximum ${effectiveMax} nominees reached.`)
         return
       }
       const next = [...nominees]
       next.splice(newIndex, 0, String(active.id))
       setNominees(next)
-      return
     }
-  }
-
-  function addNominee() {
-    const idVal = addingId.trim()
-    if (!idVal || nominees.includes(idVal)) return
-    if (nominees.length >= effectiveMax) {
-      setError(`Max nominees reached (${effectiveMax}).`)
-      return
-    }
-    setNominees([...nominees, idVal])
-    setAddingId('')
   }
 
   function addNomineeById(id: string) {
     if (!id || nominees.includes(id)) return
     if (nominees.length >= effectiveMax) {
-      setError(`Max nominees reached (${effectiveMax}).`)
+      setError(`Maximum ${effectiveMax} nominees reached.`)
       return
     }
     setNominees([...nominees, id])
   }
 
   function removeNominee(id: string) {
-    const next = nominees.filter((n) => n !== id)
-    setNominees(next)
+    setNominees((prev) => prev.filter((n) => n !== id))
     if (winnerId === id) setWinnerId(null)
   }
 
@@ -387,7 +430,7 @@ export default function AwardCategoryEditor({
     setWinnerId(id)
     if (!nominees.includes(id)) {
       if (nominees.length >= effectiveMax) {
-        setError(`Max nominees reached (${effectiveMax}).`)
+        setError(`Maximum ${effectiveMax} nominees reached.`)
         return
       }
       setNominees((n) => [...n, id])
@@ -414,7 +457,8 @@ export default function AwardCategoryEditor({
         setInitialNominees(nominees)
         setInitialWinner(winnerId)
         setInfo('Saved')
-        setTimeout(() => setInfo(null), 1200)
+        setTimeout(() => setInfo(null), 2000)
+        onSave?.()
       }
     } finally {
       setSaving(false)
@@ -425,14 +469,17 @@ export default function AwardCategoryEditor({
     setNominees(initialNominees)
     setWinnerId(initialWinner)
     setError(null)
+    onClose?.()
   }
 
-  function resetAll() {
-    setNominees([])
-    setWinnerId(null)
+  function handleClose() {
+    setNominees(initialNominees)
+    setWinnerId(initialWinner)
+    setError(null)
+    onClose?.()
   }
 
-  // Auto-seed from user's top-ranked games in this category if no explicit seeds were passed
+  // Auto-seed from user's top-ranked games in this category
   useEffect(() => {
     if (seedList.length > 0) return
     let cancelled = false
@@ -441,7 +488,6 @@ export default function AwardCategoryEditor({
         setAutoSeedsLoading(true)
         const { data: { session } } = await supabase.auth.getSession()
         if (!session) return
-        // Pull all rankings and join minimal game info
         const { data } = await supabase
           .from('rankings')
           .select('game_id, ranking, played_it, games:game_id ( id, name, thumbnail_url, categories, mechanics, min_players, max_players )')
@@ -465,7 +511,6 @@ export default function AwardCategoryEditor({
 
         let matches = filtered
         if (cfg) {
-          // Mirror server logic: rating >= 7 and predicate
           matches = filtered.filter((r: any) => (r.ranking ?? 0) >= 7 && cfg.predicate({
             game_id: r.game!.id,
             rating: r.ranking,
@@ -499,141 +544,218 @@ export default function AwardCategoryEditor({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [row.category])
 
+  // Winner game data
+  const winnerGame = winnerId ? internalGameMap[winnerId] : null
+
+  // Dirty state detection
+  const isDirty = JSON.stringify(nominees) !== JSON.stringify(initialNominees)
+    || winnerId !== initialWinner
+
   return (
     <DndContext sensors={sensors} onDragStart={onDragStart} onDragEnd={onDragEnd} collisionDetection={closestCenter}>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Left (2/3): Nominees editor */}
-        <div className="lg:col-span-2 space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <h3 className="text-[15px] font-semibold text-gray-900">
-                Nominees
-              </h3>
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-gray-100 text-[11px] font-medium text-gray-600">
-                {nominees.length}/{effectiveMax}
-              </span>
-              {winnerId && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[11px] font-medium">
-                  <TrophyIcon className="w-3 h-3" />
-                  Winner: {internalGameMap[winnerId]?.name || `#${winnerId}`}
-                </span>
-              )}
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={resetAll}
-                className="text-[12px] px-3 py-1.5 rounded-md border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 font-medium transition-colors"
-                title="Reset nominees & winner"
-              >
-                Reset
-              </button>
-              <button
-                onClick={cancel}
-                className="text-[12px] px-3 py-1.5 rounded-md border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 font-medium transition-colors"
-              >
-                Cancel
-              </button>
-              <button 
-                onClick={save} 
-                className="text-[12px] px-4 py-1.5 rounded-md bg-green-600 hover:bg-green-700 text-white font-medium transition-colors shadow-sm"
-              >
-                Save
-              </button>
-              {info && <span className="text-[11px] text-green-600 font-medium">{info}</span>}
-              {saving && <span className="text-[11px] text-gray-500">Saving…</span>}
-            </div>
+      <div className="rounded-2xl border border-gray-200/80 bg-white shadow-sm overflow-hidden">
+        {/* ── Header ──────────────────────────────────────── */}
+        <div className="flex items-center justify-between gap-3 px-5 py-3.5 border-b border-gray-100 bg-gray-50/60">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <TrophySolid className="w-4.5 h-4.5 text-amber-500 shrink-0" />
+            <h3 className="font-display text-base font-semibold text-gray-900 truncate">
+              {getCategoryLabel(categoryLabel)}
+            </h3>
+            <span className="text-[11px] text-gray-400 font-medium shrink-0">{year}</span>
           </div>
-          <NomineesDropZone>
-            <SortableContext items={nominees} strategy={rectSortingStrategy}>
-              <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {Array.from({ length: effectiveMax }).map((_, i) => {
-                  const id = nominees[i]
-                  return (
-                    <li key={`${ns}-row-${i}`} className="min-h-20">
-                      {id ? (
-                        <div className="relative group">
-                          <NomineeItem
-                            id={id}
-                            name={internalGameMap[id]?.name || `#${id}`}
-                            thumbnail_url={internalGameMap[id]?.thumbnail_url || null}
-                            rating={(internalGameMap[id] as any)?.rating || null}
-                            isWinner={id === winnerId}
-                            index={i}
-                          />
-                          <div className="absolute top-2 right-2 flex gap-2 items-center">
-                            <button
-                              onClick={() => setWinner(id)}
-                              className="p-1.5 rounded-md bg-white/90 backdrop-blur-sm hover:bg-white transition-colors shadow-sm"
-                              title="Set winner"
-                              aria-label="Set winner"
-                            >
-                              <TrophyIcon
-                                className={id === winnerId ? 'w-4 h-4 text-amber-500' : 'w-4 h-4 text-gray-400 hover:text-amber-500'}
-                                aria-hidden="true"
-                              />
-                            </button>
-                            <button
-                              onClick={() => removeNominee(id)}
-                              className="p-1.5 rounded-md bg-white/90 backdrop-blur-sm hover:bg-white transition-colors shadow-sm"
-                              title="Remove nominee"
-                              aria-label="Remove nominee"
-                            >
-                              <XMarkIcon className="w-4 h-4 text-gray-400 hover:text-red-600 transition-colors" aria-hidden="true" />
-                            </button>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="rounded-lg border-2 border-dashed border-gray-200 text-[11px] text-gray-400 h-20 flex items-center justify-center bg-gray-50/50">
-                          Empty slot
-                        </div>
-                      )}
-                    </li>
-                  )
-                })}
-              </ul>
-            </SortableContext>
-          </NomineesDropZone>
-          {error && <div className="mt-2 text-[12px] text-red-600 font-medium">{error}</div>}
+          <div className="flex items-center gap-2 shrink-0">
+            {info && (
+              <span className="inline-flex items-center gap-1 text-[11px] text-green-600 font-medium">
+                <CheckIcon className="w-3.5 h-3.5" />
+                {info}
+              </span>
+            )}
+            {saving && (
+              <span className="text-[11px] text-gray-400">Saving...</span>
+            )}
+            <button
+              onClick={cancel}
+              className="text-[12px] px-3 py-1.5 rounded-md border border-gray-200 bg-white hover:bg-gray-50 text-gray-600 font-medium transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={save}
+              disabled={saving}
+              className={cn(
+                'text-[12px] px-4 py-1.5 rounded-md font-medium transition-colors shadow-sm',
+                isDirty
+                  ? 'bg-brand hover:bg-brand-light text-white'
+                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+              )}
+            >
+              {saving ? 'Saving...' : 'Save'}
+            </button>
+            {onClose && (
+              <button
+                onClick={handleClose}
+                className="p-1.5 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+                title="Close editor"
+                aria-label="Close editor"
+              >
+                <XMarkIcon className="w-4.5 h-4.5" />
+              </button>
+            )}
+          </div>
         </div>
 
-        {/* Right (1/3): Available pool with independent scroll */}
-        <div className="flex flex-col gap-3">
-          <div className="flex items-center justify-between">
-            <h3 className="text-[15px] font-semibold text-gray-900">
-              Available Games
-            </h3>
-            <span className="text-[11px] font-medium text-gray-500">
-              {search
-                ? `${results.filter((g) => !nominees.includes(g.id)).length} matches`
-                : `${defaultOptions.length} options`}
-            </span>
+        {/* ── Body ────────────────────────────────────────── */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] xl:grid-cols-[1fr_320px]">
+          {/* Left panel: Winner + Nominees */}
+          <div className="p-5 space-y-5">
+            {/* Winner spotlight */}
+            <div>
+              <div className="flex items-center gap-2 mb-2.5">
+                <TrophySolid className="w-4 h-4 text-amber-500" />
+                <span className="text-xs font-bold uppercase tracking-wider text-amber-600">
+                  Winner
+                </span>
+              </div>
+              {winnerGame ? (
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-amber-50 to-amber-50/30 border border-amber-200/60">
+                  <div className="w-14 h-14 rounded-lg overflow-hidden shadow-sm shrink-0">
+                    <GameImage
+                      src={winnerGame.thumbnail_url || null}
+                      alt={winnerGame.name}
+                      name={winnerGame.name}
+                      variant="thumb"
+                      fit="cover"
+                      className="w-full h-full"
+                    />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="font-display text-sm font-semibold text-gray-900 truncate">
+                      {winnerGame.name}
+                    </div>
+                    {winnerGame.rating != null && winnerGame.rating > 0 && (
+                      <span className={cn('inline-block px-1.5 py-px rounded text-[10px] font-bold mt-1', getRatingSolidClass(winnerGame.rating))}>
+                        {winnerGame.rating}
+                      </span>
+                    )}
+                  </div>
+                  <TrophySolid className="w-6 h-6 text-amber-400/70 shrink-0" />
+                </div>
+              ) : (
+                <div className="flex items-center justify-center p-4 rounded-xl border-2 border-dashed border-amber-200/60 bg-amber-50/20">
+                  <p className="text-[12px] text-amber-600/60">
+                    Click the trophy icon on any nominee to set a winner
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Nominees grid */}
+            <div>
+              <div className="flex items-center justify-between mb-2.5">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold uppercase tracking-wider text-gray-400">
+                    Nominees
+                  </span>
+                  <span className="text-[11px] font-medium text-gray-400 tabular-nums">
+                    {nominees.length}/{effectiveMax}
+                  </span>
+                </div>
+              </div>
+              <NomineesDropZone>
+                <SortableContext items={nominees} strategy={rectSortingStrategy}>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {Array.from({ length: effectiveMax }).map((_, i) => {
+                      const id = nominees[i]
+                      return (
+                        <div key={`${ns}-row-${i}`}>
+                          {id ? (
+                            <NomineeCard
+                              id={id}
+                              name={internalGameMap[id]?.name || `#${id}`}
+                              thumbnail_url={internalGameMap[id]?.thumbnail_url || null}
+                              rating={(internalGameMap[id] as any)?.rating || null}
+                              isWinner={id === winnerId}
+                              index={i}
+                              onSetWinner={() => setWinner(id)}
+                              onRemove={() => removeNominee(id)}
+                            />
+                          ) : (
+                            <EmptySlot index={i} />
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                </SortableContext>
+              </NomineesDropZone>
+              {error && (
+                <div className="mt-2 text-[12px] text-red-600 font-medium bg-red-50 px-3 py-1.5 rounded-md">
+                  {error}
+                </div>
+              )}
+            </div>
           </div>
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            type="text"
-            placeholder="Search games…"
-            className="w-full text-[13px] px-3 py-2 rounded-md border border-gray-300 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow"
-          />
-          <div className="rounded-lg border border-gray-200 overflow-hidden bg-white shadow-sm max-h-[600px] overflow-y-auto">{search ? (
-              <>
-                {searching && <div className="p-4 text-[12px] text-gray-500 text-center">Searching…</div>}
-                {!searching && results.filter((g) => !nominees.includes(g.id)).length === 0 && (
-                  <div className="p-4 text-[12px] text-gray-400 text-center">No available matches</div>
+
+          {/* Right panel: Available Games */}
+          <div className="border-t lg:border-t-0 lg:border-l border-gray-100 bg-gray-50/30 flex flex-col">
+            <div className="px-4 pt-4 pb-2">
+              <div className="flex items-center justify-between mb-2.5">
+                <span className="text-xs font-bold uppercase tracking-wider text-gray-400">
+                  Available Games
+                </span>
+                <span className="text-[10px] font-medium text-gray-400 tabular-nums">
+                  {search
+                    ? `${results.filter((g) => !nominees.includes(g.id)).length} found`
+                    : `${defaultOptions.length} available`}
+                </span>
+              </div>
+              <div className="relative">
+                <MagnifyingGlassIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
+                <input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  type="text"
+                  placeholder="Search all games..."
+                  className="w-full text-[12px] pl-7 pr-3 py-1.5 rounded-md border border-gray-200 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-brand/40 focus:border-brand/40 transition-shadow"
+                />
+                {search && (
+                  <button
+                    onClick={() => setSearch('')}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 rounded text-gray-400 hover:text-gray-600"
+                  >
+                    <XMarkIcon className="w-3 h-3" />
+                  </button>
                 )}
-                {results
-                  .filter((g) => !nominees.includes(g.id))
-                  .map((g) => (
-                    <AvailableItem key={g.id} g={g} />
-                  ))}
-              </>
-            ) : defaultOptions.length > 0 ? (
-              defaultOptions.map((g) => <AvailableItem key={g.id} g={g} />)
-            ) : autoSeedsLoading ? (
-              <div className="p-4 text-[12px] text-gray-500 text-center">Loading options…</div>
-            ) : (
-              <div className="p-4 text-[12px] text-gray-400 text-center italic">No options available.</div>
-            )}
+              </div>
+            </div>
+            <div className="flex-1 overflow-y-auto max-h-[500px] lg:max-h-[calc(100vh-280px)]">
+              {search ? (
+                <>
+                  {searching && (
+                    <div className="p-4 text-[11px] text-gray-400 text-center">Searching...</div>
+                  )}
+                  {!searching && results.filter((g) => !nominees.includes(g.id)).length === 0 && (
+                    <div className="p-4 text-[11px] text-gray-400 text-center">No matches found</div>
+                  )}
+                  {results
+                    .filter((g) => !nominees.includes(g.id))
+                    .map((g) => (
+                      <AvailableGameItem key={g.id} g={g} onAdd={() => addNomineeById(g.id)} />
+                    ))}
+                </>
+              ) : defaultOptions.length > 0 ? (
+                defaultOptions.map((g) => (
+                  <AvailableGameItem key={g.id} g={g} onAdd={() => addNomineeById(g.id)} />
+                ))
+              ) : autoSeedsLoading ? (
+                <div className="p-4 text-[11px] text-gray-400 text-center">Loading...</div>
+              ) : (
+                <div className="p-6 text-center">
+                  <p className="text-[11px] text-gray-400">No additional games available</p>
+                  <p className="text-[10px] text-gray-300 mt-1">Use search to find more games</p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
