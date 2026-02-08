@@ -112,6 +112,12 @@ function Navigation() {
       playtime_minutes?: number | null
     }>
   >([])
+  const [manualMode, setManualMode] = useState(false)
+  const [manualPublisher, setManualPublisher] = useState('')
+  const [manualMinPlayers, setManualMinPlayers] = useState('')
+  const [manualMaxPlayers, setManualMaxPlayers] = useState('')
+  const [manualPlaytime, setManualPlaytime] = useState('')
+  const [manualDescription, setManualDescription] = useState('')
   const [selectedToAdd, setSelectedToAdd] = useState<string | null>(null)
   const [adding, setAdding] = useState(false)
   const [addError, setAddError] = useState<string | null>(null)
@@ -159,6 +165,12 @@ function Navigation() {
     setAddError(null)
     setAddedGame(null)
     setAddedExisting(false)
+    setManualMode(false)
+    setManualPublisher('')
+    setManualMinPlayers('')
+    setManualMaxPlayers('')
+    setManualPlaytime('')
+    setManualDescription('')
   }, [])
 
   const handleSearchAgain = useCallback(() => {
@@ -168,6 +180,98 @@ function Navigation() {
     setSelectedToAdd(null)
     setAdding(false)
   }, [])
+
+  const handleManualAdd = async () => {
+    if (!searchQuery.trim() || adding) return
+    setAdding(true)
+    setAddError(null)
+    setAddedGame(null)
+    setAddedExisting(false)
+
+    try {
+      const cachedAt = new Date().toISOString()
+      const name = searchQuery.trim()
+      const year = searchYear.trim() ? Number(searchYear.trim()) : null
+
+      const existingQuery = supabase
+        .from('games')
+        .select(
+          'id, name, year_published, min_players, max_players, playtime_minutes, publisher, description, source'
+        )
+        .eq('name', name)
+
+      const { data: existing, error: existingError } = year
+        ? await existingQuery.eq('year_published', year).maybeSingle()
+        : await existingQuery.maybeSingle()
+
+      if (existingError) throw existingError
+
+      const payload = {
+        name,
+        year_published: year,
+        publisher: manualPublisher.trim() || null,
+        min_players: manualMinPlayers ? Number(manualMinPlayers) : null,
+        max_players: manualMaxPlayers ? Number(manualMaxPlayers) : null,
+        playtime_minutes: manualPlaytime ? Number(manualPlaytime) : null,
+        description: manualDescription.trim() || null,
+      }
+
+      if (existing) {
+        const updatePayload: Record<string, any> = {
+          cached_at: cachedAt,
+          is_active: true,
+        }
+
+        const fillIfEmpty = (field: string, value: any) => {
+          if (value == null) return
+          const current = (existing as any)[field]
+          const emptyArray = Array.isArray(current) && current.length === 0
+          const emptyString =
+            typeof current === 'string' && current.trim().length === 0
+          if (current == null || emptyArray || emptyString) {
+            updatePayload[field] = value
+          }
+        }
+
+        Object.entries(payload).forEach(([field, value]) =>
+          fillIfEmpty(field, value)
+        )
+        fillIfEmpty('source', 'manual')
+
+        await supabase
+          .from('games')
+          .update(updatePayload as any)
+          .eq('id', existing.id)
+
+        setAddedGame({ id: existing.id, name: existing.name || name })
+        setAddedExisting(true)
+        return
+      }
+
+      const insertPayload = {
+        ...payload,
+        source: 'manual',
+        cached_at: cachedAt,
+        is_active: true,
+      }
+
+      const { data: inserted, error: insertError } = await supabase
+        .from('games')
+        .insert(insertPayload as any)
+        .select('id, name')
+        .single()
+
+      if (insertError) throw insertError
+
+      setAddedGame({ id: inserted.id, name: inserted.name })
+    } catch (error) {
+      console.error('Manual add error:', error)
+      setAddError('Could not add the game. Please try again.')
+    } finally {
+      setAdding(false)
+      setSelectedToAdd(null)
+    }
+  }
 
   // Add game search
   const handleSearch = async () => {
@@ -932,7 +1036,11 @@ function Navigation() {
                       className="w-full px-3 py-2 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 placeholder-gray-500 dark:placeholder-gray-400"
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') {
-                          handleSearch()
+                          if (manualMode) {
+                            handleManualAdd()
+                          } else {
+                            handleSearch()
+                          }
                         }
                       }}
                       autoFocus
@@ -962,71 +1070,167 @@ function Navigation() {
                     Wikidata lookup (public domain)
                   </p>
 
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setManualMode(false)}
+                      className={cn(
+                        'px-3 py-1.5 text-xs rounded-full border',
+                        !manualMode
+                          ? 'bg-primary-600 text-white border-primary-600'
+                          : 'text-gray-600 dark:text-gray-300 border-gray-300 dark:border-gray-600'
+                      )}
+                    >
+                      Wikidata search
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setManualMode(true)}
+                      className={cn(
+                        'px-3 py-1.5 text-xs rounded-full border',
+                        manualMode
+                          ? 'bg-primary-600 text-white border-primary-600'
+                          : 'text-gray-600 dark:text-gray-300 border-gray-300 dark:border-gray-600'
+                      )}
+                    >
+                      Manual entry
+                    </button>
+                  </div>
+
                   {addError && (
                     <div className="p-3 text-sm text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800 rounded-lg bg-red-50 dark:bg-red-900/30">
                       {addError}
                     </div>
                   )}
 
-                  <div className="max-h-64 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-lg divide-y divide-gray-200 dark:divide-gray-700">
-                    {searching ? (
-                      <div className="px-3 py-4 text-sm text-gray-600 dark:text-gray-300">
-                        Searching…
+                  {manualMode ? (
+                    <div className="space-y-3">
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block mb-1 text-xs font-medium text-gray-700 dark:text-gray-300">
+                            Publisher
+                          </label>
+                          <input
+                            type="text"
+                            value={manualPublisher}
+                            onChange={(e) => setManualPublisher(e.target.value)}
+                            placeholder="Publisher"
+                            className="w-full px-3 py-2 text-sm text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 placeholder-gray-500 dark:placeholder-gray-400"
+                          />
+                        </div>
+                        <div>
+                          <label className="block mb-1 text-xs font-medium text-gray-700 dark:text-gray-300">
+                            Playtime (min)
+                          </label>
+                          <input
+                            type="number"
+                            value={manualPlaytime}
+                            onChange={(e) => setManualPlaytime(e.target.value)}
+                            placeholder="90"
+                            className="w-full px-3 py-2 text-sm text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 placeholder-gray-500 dark:placeholder-gray-400"
+                          />
+                        </div>
                       </div>
-                    ) : searchResults.length === 0 ? (
-                      <div className="px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
-                        No results yet. Try a search.
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block mb-1 text-xs font-medium text-gray-700 dark:text-gray-300">
+                            Min players
+                          </label>
+                          <input
+                            type="number"
+                            value={manualMinPlayers}
+                            onChange={(e) => setManualMinPlayers(e.target.value)}
+                            placeholder="1"
+                            className="w-full px-3 py-2 text-sm text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 placeholder-gray-500 dark:placeholder-gray-400"
+                          />
+                        </div>
+                        <div>
+                          <label className="block mb-1 text-xs font-medium text-gray-700 dark:text-gray-300">
+                            Max players
+                          </label>
+                          <input
+                            type="number"
+                            value={manualMaxPlayers}
+                            onChange={(e) => setManualMaxPlayers(e.target.value)}
+                            placeholder="4"
+                            className="w-full px-3 py-2 text-sm text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 placeholder-gray-500 dark:placeholder-gray-400"
+                          />
+                        </div>
                       </div>
-                    ) : (
-                      searchResults.map((result) => {
-                        const playersLabel =
-                          result.min_players || result.max_players
-                            ? `${result.min_players ?? '?'}-${result.max_players ?? '?'} players`
+                      <div>
+                        <label className="block mb-1 text-xs font-medium text-gray-700 dark:text-gray-300">
+                          Description
+                        </label>
+                        <textarea
+                          value={manualDescription}
+                          onChange={(e) => setManualDescription(e.target.value)}
+                          placeholder="Short description"
+                          rows={3}
+                          className="w-full px-3 py-2 text-sm text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 placeholder-gray-500 dark:placeholder-gray-400"
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="max-h-64 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-lg divide-y divide-gray-200 dark:divide-gray-700">
+                      {searching ? (
+                        <div className="px-3 py-4 text-sm text-gray-600 dark:text-gray-300">
+                          Searching…
+                        </div>
+                      ) : searchResults.length === 0 ? (
+                        <div className="px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
+                          No results yet. Try a search.
+                        </div>
+                      ) : (
+                        searchResults.map((result) => {
+                          const playersLabel =
+                            result.min_players || result.max_players
+                              ? `${result.min_players ?? '?'}-${result.max_players ?? '?'} players`
+                              : null
+                          const playtimeLabel = result.playtime_minutes
+                            ? `${result.playtime_minutes} min`
                             : null
-                        const playtimeLabel = result.playtime_minutes
-                          ? `${result.playtime_minutes} min`
-                          : null
-                        const metaParts = [
-                          result.year_published
-                            ? String(result.year_published)
-                            : null,
-                          result.publisher ?? null,
-                          playersLabel,
-                          playtimeLabel,
-                        ].filter(Boolean)
+                          const metaParts = [
+                            result.year_published
+                              ? String(result.year_published)
+                              : null,
+                            result.publisher ?? null,
+                            playersLabel,
+                            playtimeLabel,
+                          ].filter(Boolean)
 
-                        return (
-                          <div
-                            key={result.wikidata_id}
-                            className="flex items-center gap-3 px-3 py-3"
-                          >
-                            <div className="w-10 h-10 rounded bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-xs text-gray-500">
-                              WD
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
-                                {result.name}
-                              </div>
-                              <div className="text-xs text-gray-500 dark:text-gray-400">
-                                {metaParts.length
-                                  ? metaParts.join(' • ')
-                                  : 'Metadata unavailable'}
-                              </div>
-                            </div>
-                            <button
-                              onClick={() => handleAddFromResult(result)}
-                              disabled={adding || searching}
-                              className="px-3 py-1.5 text-sm text-white rounded-lg bg-primary-600 hover:bg-primary-700 focus:ring-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                          return (
+                            <div
+                              key={result.wikidata_id}
+                              className="flex items-center gap-3 px-3 py-3"
                             >
-                              {adding && selectedToAdd === result.wikidata_id
-                                ? 'Adding...'
-                                : 'Add'}
-                            </button>
-                          </div>
-                        )
-                      })
-                    )}
-                  </div>
+                              <div className="w-10 h-10 rounded bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-xs text-gray-500">
+                                WD
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                                  {result.name}
+                                </div>
+                                <div className="text-xs text-gray-500 dark:text-gray-400">
+                                  {metaParts.length
+                                    ? metaParts.join(' • ')
+                                    : 'Metadata unavailable'}
+                                </div>
+                              </div>
+                              <button
+                                onClick={() => handleAddFromResult(result)}
+                                disabled={adding || searching}
+                                className="px-3 py-1.5 text-sm text-white rounded-lg bg-primary-600 hover:bg-primary-700 focus:ring-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                {adding && selectedToAdd === result.wikidata_id
+                                  ? 'Adding...'
+                                  : 'Add'}
+                              </button>
+                            </div>
+                          )
+                        })
+                      )}
+                    </div>
+                  )}
 
                   <div className="flex justify-end space-x-3">
                     <button
@@ -1046,11 +1250,19 @@ function Navigation() {
                       Cancel
                     </button>
                     <button
-                      onClick={handleSearch}
-                      disabled={!searchQuery.trim() || searching || adding}
+                      onClick={manualMode ? handleManualAdd : handleSearch}
+                      disabled={
+                        !searchQuery.trim() || searching || adding
+                      }
                       className="px-4 py-2 text-white rounded-lg bg-primary-600 hover:bg-primary-700 focus:ring-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {searching ? 'Searching...' : 'Search'}
+                      {manualMode
+                        ? adding
+                          ? 'Adding...'
+                          : 'Add'
+                        : searching
+                          ? 'Searching...'
+                          : 'Search'}
                     </button>
                   </div>
                 </div>
