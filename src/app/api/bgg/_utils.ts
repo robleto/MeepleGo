@@ -15,14 +15,20 @@ export async function fetchBggXml(url: string): Promise<
   | { ok: false; error: string; status?: number }
 > {
   for (let attempt = 0; attempt <= BACKOFFS_MS.length; attempt += 1) {
-    const response = await fetch(url, { next: { revalidate: 0 } })
+    const response = await fetch(url, {
+      next: { revalidate: 0 },
+      headers: {
+        'User-Agent': 'MeepleGo/1.0 (+https://meeplego.com)',
+        Accept: 'text/xml,application/xml;q=0.9,*/*;q=0.8',
+      },
+    })
 
-    if (response.status === 202) {
+    if (response.status === 202 || response.status === 429) {
       if (attempt === BACKOFFS_MS.length) {
         return {
           ok: false,
           error: 'BGG is still preparing this request. Please try again.',
-          status: 202,
+          status: response.status,
         }
       }
       await sleep(BACKOFFS_MS[attempt])
