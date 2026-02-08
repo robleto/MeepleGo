@@ -30,6 +30,7 @@ export async function GET(req: NextRequest) {
         error: xmlResult.error,
         status: xmlResult.status,
         details: xmlResult.details,
+        bodySnippet: xmlResult.bodySnippet,
       },
       { status }
     )

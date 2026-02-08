@@ -191,9 +191,12 @@ function Navigation() {
         const detail = payload?.status
           ? `HTTP ${payload.status}${payload.details ? ` ${payload.details}` : ''}`
           : null
+        const snippet = payload?.bodySnippet
+          ? ` — ${payload.bodySnippet}`
+          : null
         setAddError(
           payload?.error
-            ? `${payload.error}${detail ? ` (${detail})` : ''}`
+            ? `${payload.error}${detail ? ` (${detail})` : ''}${snippet ?? ''}`
             : 'Search failed. Please try again.'
         )
         return
@@ -226,9 +229,12 @@ function Navigation() {
         const detail = payload?.status
           ? `HTTP ${payload.status}${payload.details ? ` ${payload.details}` : ''}`
           : null
+        const snippet = payload?.bodySnippet
+          ? ` — ${payload.bodySnippet}`
+          : null
         setAddError(
           payload?.error
-            ? `${payload.error}${detail ? ` (${detail})` : ''}`
+            ? `${payload.error}${detail ? ` (${detail})` : ''}${snippet ?? ''}`
             : 'Could not load game details.'
         )
         return

@@ -12,14 +12,23 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 export async function fetchBggXml(url: string): Promise<
   | { ok: true; xml: string }
-  | { ok: false; error: string; status?: number; details?: string }
+  | {
+      ok: false
+      error: string
+      status?: number
+      details?: string
+      bodySnippet?: string
+    }
 > {
   for (let attempt = 0; attempt <= BACKOFFS_MS.length; attempt += 1) {
     const response = await fetch(url, {
       next: { revalidate: 0 },
       headers: {
-        'User-Agent': 'MeepleGo/1.0 (+https://meeplego.com)',
+        'User-Agent':
+          'Mozilla/5.0 (MeepleGo; +https://meeplego.com) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36',
         Accept: 'text/xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9',
+        Referer: 'https://boardgamegeek.com/',
       },
     })
 
@@ -37,11 +46,20 @@ export async function fetchBggXml(url: string): Promise<
     }
 
     if (!response.ok) {
+      let bodySnippet: string | undefined
+      try {
+        const raw = await response.text()
+        const normalized = raw.replace(/\s+/g, ' ').trim()
+        bodySnippet = normalized ? normalized.slice(0, 200) : undefined
+      } catch {
+        bodySnippet = undefined
+      }
       return {
         ok: false,
         error: `BGG request failed (HTTP ${response.status}). Please try again.`,
         status: response.status,
         details: response.statusText || undefined,
+        bodySnippet,
       }
     }
 
