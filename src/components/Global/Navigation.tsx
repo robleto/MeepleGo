@@ -103,14 +103,16 @@ function Navigation() {
   const [searching, setSearching] = useState(false)
   const [searchResults, setSearchResults] = useState<
     Array<{
-      bgg_id: number
+      wikidata_id: string
       name: string
       year_published?: number | null
-      type?: string | null
-      thumbnail_url?: string | null
+      publisher?: string | null
+      min_players?: number | null
+      max_players?: number | null
+      playtime_minutes?: number | null
     }>
   >([])
-  const [selectedToAdd, setSelectedToAdd] = useState<number | null>(null)
+  const [selectedToAdd, setSelectedToAdd] = useState<string | null>(null)
   const [adding, setAdding] = useState(false)
   const [addError, setAddError] = useState<string | null>(null)
   const [addedGame, setAddedGame] = useState<{ id: string; name: string } | null>(
@@ -185,7 +187,7 @@ function Navigation() {
         params.set('year', searchYear.trim())
       }
 
-      const response = await fetch(`/api/bgg/search?${params.toString()}`)
+      const response = await fetch(`/api/wikidata/search?${params.toString()}`)
       const payload = await response.json().catch(() => null)
       if (!response.ok || !payload?.ok) {
         const detail = payload?.status
@@ -212,18 +214,18 @@ function Navigation() {
   }
 
   const handleAddFromResult = async (result: {
-    bgg_id: number
+    wikidata_id: string
     name: string
   }) => {
     if (adding) return
     setAdding(true)
-    setSelectedToAdd(result.bgg_id)
+    setSelectedToAdd(result.wikidata_id)
     setAddError(null)
     setAddedGame(null)
     setAddedExisting(false)
 
     try {
-      const response = await fetch(`/api/bgg/thing?id=${result.bgg_id}`)
+      const response = await fetch(`/api/wikidata/entity?id=${result.wikidata_id}`)
       const payload = await response.json().catch(() => null)
       if (!response.ok || !payload?.ok || !payload?.game) {
         const detail = payload?.status
@@ -241,35 +243,28 @@ function Navigation() {
       }
 
       const game = payload.game as {
-        bgg_id: number
+        wikidata_id: string
         name: string
         year_published?: number | null
         description?: string | null
-        image_url?: string | null
-        thumbnail_url?: string | null
         min_players?: number | null
         max_players?: number | null
         playtime_minutes?: number | null
-        categories?: string[] | null
-        mechanics?: string[] | null
-        designer?: string[] | null
-        artists?: string[] | null
         publisher?: string | null
-        weight?: number | null
-        rating?: number | null
-        num_ratings?: number | null
-        bgg_type?: string | null
       }
 
       const cachedAt = new Date().toISOString()
 
-      const { data: existing, error: existingError } = await supabase
+      const existingQuery = supabase
         .from('games')
         .select(
-          'id, name, bgg_id, year_published, image_url, thumbnail_url, categories, mechanics, min_players, max_players, playtime_minutes, publisher, description, rating, num_ratings'
+          'id, name, year_published, image_url, thumbnail_url, categories, mechanics, min_players, max_players, playtime_minutes, publisher, description, rating, num_ratings'
         )
-        .eq('bgg_id', game.bgg_id)
-        .maybeSingle()
+        .eq('name', game.name)
+
+      const { data: existing, error: existingError } = game.year_published
+        ? await existingQuery.eq('year_published', game.year_published).maybeSingle()
+        : await existingQuery.maybeSingle()
 
       if (existingError) throw existingError
 
@@ -292,21 +287,11 @@ function Navigation() {
 
         fillIfEmpty('name', game.name)
         fillIfEmpty('year_published', game.year_published)
-        fillIfEmpty('image_url', game.image_url)
-        fillIfEmpty('thumbnail_url', game.thumbnail_url)
         fillIfEmpty('min_players', game.min_players)
         fillIfEmpty('max_players', game.max_players)
         fillIfEmpty('playtime_minutes', game.playtime_minutes)
-        fillIfEmpty('categories', game.categories)
-        fillIfEmpty('mechanics', game.mechanics)
         fillIfEmpty('publisher', game.publisher)
         fillIfEmpty('description', game.description)
-        fillIfEmpty('rating', game.rating)
-        fillIfEmpty('num_ratings', game.num_ratings)
-        fillIfEmpty('designer', game.designer)
-        fillIfEmpty('artists', game.artists)
-        fillIfEmpty('weight', game.weight)
-        fillIfEmpty('bgg_type', game.bgg_type)
 
         await supabase
           .from('games')
@@ -319,24 +304,13 @@ function Navigation() {
       }
 
       const insertPayload: Record<string, any> = {
-        bgg_id: game.bgg_id,
         name: game.name,
         year_published: game.year_published ?? null,
         description: game.description ?? null,
-        image_url: game.image_url ?? null,
-        thumbnail_url: game.thumbnail_url ?? null,
         min_players: game.min_players ?? null,
         max_players: game.max_players ?? null,
         playtime_minutes: game.playtime_minutes ?? null,
-        categories: game.categories ?? null,
-        mechanics: game.mechanics ?? null,
         publisher: game.publisher ?? null,
-        rating: game.rating ?? null,
-        num_ratings: game.num_ratings ?? null,
-        designer: game.designer ?? null,
-        artists: game.artists ?? null,
-        weight: game.weight ?? null,
-        bgg_type: game.bgg_type ?? null,
         cached_at: cachedAt,
         is_active: true,
       }
@@ -348,11 +322,16 @@ function Navigation() {
         .single()
 
       if (insertError) {
-        const { data: fallback } = await supabase
+        const fallbackQuery = supabase
           .from('games')
           .select('id, name')
-          .eq('bgg_id', game.bgg_id)
-          .maybeSingle()
+          .eq('name', game.name)
+
+        const { data: fallback } = game.year_published
+          ? await fallbackQuery
+              .eq('year_published', game.year_published)
+              .maybeSingle()
+          : await fallbackQuery.maybeSingle()
         if (fallback) {
           setAddedGame({ id: fallback.id, name: fallback.name })
           setAddedExisting(true)
@@ -975,7 +954,7 @@ function Navigation() {
                   </div>
 
                   <p className="text-xs text-gray-500 dark:text-gray-400">
-                    BGG XML lookup (temporary)
+                    Wikidata lookup (public domain)
                   </p>
 
                   {addError && (
@@ -995,36 +974,30 @@ function Navigation() {
                       </div>
                     ) : (
                       searchResults.map((result) => {
-                        const typeLabel =
-                          result.type === 'boardgameexpansion'
-                            ? 'Expansion'
-                            : result.type === 'boardgame'
-                              ? 'Board Game'
-                              : result.type || null
+                        const playersLabel =
+                          result.min_players || result.max_players
+                            ? `${result.min_players ?? '?'}-${result.max_players ?? '?'} players`
+                            : null
+                        const playtimeLabel = result.playtime_minutes
+                          ? `${result.playtime_minutes} min`
+                          : null
                         const metaParts = [
                           result.year_published
                             ? String(result.year_published)
                             : null,
-                          typeLabel,
-                          `BGG ${result.bgg_id}`,
+                          result.publisher ?? null,
+                          playersLabel,
+                          playtimeLabel,
                         ].filter(Boolean)
 
                         return (
                           <div
-                            key={result.bgg_id}
+                            key={result.wikidata_id}
                             className="flex items-center gap-3 px-3 py-3"
                           >
-                            {result.thumbnail_url ? (
-                              <img
-                                src={result.thumbnail_url}
-                                alt=""
-                                className="w-10 h-10 rounded object-cover bg-gray-100 dark:bg-gray-800"
-                              />
-                            ) : (
-                              <div className="w-10 h-10 rounded bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-xs text-gray-500">
-                                BGG
-                              </div>
-                            )}
+                            <div className="w-10 h-10 rounded bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-xs text-gray-500">
+                              WD
+                            </div>
                             <div className="flex-1 min-w-0">
                               <div className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
                                 {result.name}
@@ -1040,7 +1013,7 @@ function Navigation() {
                               disabled={adding || searching}
                               className="px-3 py-1.5 text-sm text-white rounded-lg bg-primary-600 hover:bg-primary-700 focus:ring-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                              {adding && selectedToAdd === result.bgg_id
+                              {adding && selectedToAdd === result.wikidata_id
                                 ? 'Adding...'
                                 : 'Add'}
                             </button>
