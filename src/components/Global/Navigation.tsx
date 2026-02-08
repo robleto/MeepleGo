@@ -252,6 +252,7 @@ function Navigation() {
         playtime_minutes?: number | null
         publisher?: string | null
       }
+      const sourceUrl = `https://www.wikidata.org/wiki/${game.wikidata_id}`
 
       const cachedAt = new Date().toISOString()
 
@@ -292,6 +293,8 @@ function Navigation() {
         fillIfEmpty('playtime_minutes', game.playtime_minutes)
         fillIfEmpty('publisher', game.publisher)
         fillIfEmpty('description', game.description)
+        fillIfEmpty('source', 'wikidata')
+        fillIfEmpty('source_url', sourceUrl)
 
         await supabase
           .from('games')
@@ -311,6 +314,8 @@ function Navigation() {
         max_players: game.max_players ?? null,
         playtime_minutes: game.playtime_minutes ?? null,
         publisher: game.publisher ?? null,
+        source: 'wikidata',
+        source_url: sourceUrl,
         cached_at: cachedAt,
         is_active: true,
       }

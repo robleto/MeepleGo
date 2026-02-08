@@ -20,6 +20,9 @@ export interface Database {
           rank: number | null
           rating: number | null
           num_ratings: number | null
+          source: string | null
+          source_url: string | null
+          source_notes: string | null
           cached_at: string | null
           created_at: string
           updated_at: string
@@ -42,6 +45,9 @@ export interface Database {
           rank?: number | null
           rating?: number | null
           num_ratings?: number | null
+          source?: string | null
+          source_url?: string | null
+          source_notes?: string | null
           cached_at?: string | null
           created_at?: string
           updated_at?: string
@@ -64,6 +70,9 @@ export interface Database {
           rank?: number | null
           rating?: number | null
           num_ratings?: number | null
+          source?: string | null
+          source_url?: string | null
+          source_notes?: string | null
           cached_at?: string | null
           created_at?: string
           updated_at?: string
