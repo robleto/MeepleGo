@@ -98,11 +98,25 @@ function Navigation() {
   const [isCreatingList, setIsCreatingList] = useState(false)
 
   // Add game form state
-  const [gameName, setGameName] = useState('')
-  const [gameYear, setGameYear] = useState('')
-  const [gamePublisher, setGamePublisher] = useState('')
-  const [isSubmittingGame, setIsSubmittingGame] = useState(false)
-  const [gameSubmitted, setGameSubmitted] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchYear, setSearchYear] = useState('')
+  const [searching, setSearching] = useState(false)
+  const [searchResults, setSearchResults] = useState<
+    Array<{
+      bgg_id: number
+      name: string
+      year_published?: number | null
+      type?: string | null
+      thumbnail_url?: string | null
+    }>
+  >([])
+  const [selectedToAdd, setSelectedToAdd] = useState<number | null>(null)
+  const [adding, setAdding] = useState(false)
+  const [addError, setAddError] = useState<string | null>(null)
+  const [addedGame, setAddedGame] = useState<{ id: string; name: string } | null>(
+    null
+  )
+  const [addedExisting, setAddedExisting] = useState(false)
 
   // Create list function
   const handleCreateList = async () => {
@@ -133,33 +147,215 @@ function Navigation() {
     }
   }
 
-  // Add game function
-  const handleAddGame = async () => {
-    if (!gameName.trim() || isSubmittingGame) return
+  const resetAddGameState = useCallback(() => {
+    setSearchQuery('')
+    setSearchYear('')
+    setSearching(false)
+    setSearchResults([])
+    setSelectedToAdd(null)
+    setAdding(false)
+    setAddError(null)
+    setAddedGame(null)
+    setAddedExisting(false)
+  }, [])
 
-    setIsSubmittingGame(true)
+  // Add game search
+  const handleSearch = async () => {
+    if (!searchQuery.trim() || searching) return
+
+    setSearching(true)
+    setAddError(null)
+    setSearchResults([])
+    setAddedGame(null)
+    setAddedExisting(false)
+
     try {
-      await fetch('/api/missing-game-request', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: gameName.trim(),
-          year: gameYear ? Number(gameYear) : null,
-          publisher: gamePublisher.trim() || null,
-        }),
-      }).catch(() => {})
-      setGameSubmitted(true)
-      setTimeout(() => {
-        setShowAddGameModal(false)
-        setGameName('')
-        setGameYear('')
-        setGamePublisher('')
-        setGameSubmitted(false)
-      }, 1100)
+      const params = new URLSearchParams({
+        query: searchQuery.trim(),
+      })
+      if (searchYear.trim()) {
+        params.set('year', searchYear.trim())
+      }
+
+      const response = await fetch(`/api/bgg/search?${params.toString()}`)
+      const payload = await response.json().catch(() => null)
+      if (!response.ok || !payload?.ok) {
+        setAddError(payload?.error || 'Search failed. Please try again.')
+        return
+      }
+
+      setSearchResults(payload.results || [])
+    } catch (error) {
+      console.error('Search error:', error)
+      setAddError('Search failed. Please try again.')
     } finally {
-      setIsSubmittingGame(false)
+      setSearching(false)
     }
   }
+
+  const handleAddFromResult = async (result: {
+    bgg_id: number
+    name: string
+  }) => {
+    if (adding) return
+    setAdding(true)
+    setSelectedToAdd(result.bgg_id)
+    setAddError(null)
+    setAddedGame(null)
+    setAddedExisting(false)
+
+    try {
+      const response = await fetch(`/api/bgg/thing?id=${result.bgg_id}`)
+      const payload = await response.json().catch(() => null)
+      if (!response.ok || !payload?.ok || !payload?.game) {
+        setAddError(payload?.error || 'Could not load game details.')
+        return
+      }
+
+      const game = payload.game as {
+        bgg_id: number
+        name: string
+        year_published?: number | null
+        description?: string | null
+        image_url?: string | null
+        thumbnail_url?: string | null
+        min_players?: number | null
+        max_players?: number | null
+        playtime_minutes?: number | null
+        categories?: string[] | null
+        mechanics?: string[] | null
+        designer?: string[] | null
+        artists?: string[] | null
+        publisher?: string | null
+        weight?: number | null
+        rating?: number | null
+        num_ratings?: number | null
+        bgg_type?: string | null
+      }
+
+      const cachedAt = new Date().toISOString()
+
+      const { data: existing, error: existingError } = await supabase
+        .from('games')
+        .select(
+          'id, name, bgg_id, year_published, image_url, thumbnail_url, categories, mechanics, min_players, max_players, playtime_minutes, publisher, description, rating, num_ratings'
+        )
+        .eq('bgg_id', game.bgg_id)
+        .maybeSingle()
+
+      if (existingError) throw existingError
+
+      if (existing) {
+        const updatePayload: Record<string, any> = {
+          cached_at: cachedAt,
+          is_active: true,
+        }
+
+        const fillIfEmpty = (field: string, value: any) => {
+          if (value == null) return
+          const current = (existing as any)[field]
+          const emptyArray = Array.isArray(current) && current.length === 0
+          const emptyString =
+            typeof current === 'string' && current.trim().length === 0
+          if (current == null || emptyArray || emptyString) {
+            updatePayload[field] = value
+          }
+        }
+
+        fillIfEmpty('name', game.name)
+        fillIfEmpty('year_published', game.year_published)
+        fillIfEmpty('image_url', game.image_url)
+        fillIfEmpty('thumbnail_url', game.thumbnail_url)
+        fillIfEmpty('min_players', game.min_players)
+        fillIfEmpty('max_players', game.max_players)
+        fillIfEmpty('playtime_minutes', game.playtime_minutes)
+        fillIfEmpty('categories', game.categories)
+        fillIfEmpty('mechanics', game.mechanics)
+        fillIfEmpty('publisher', game.publisher)
+        fillIfEmpty('description', game.description)
+        fillIfEmpty('rating', game.rating)
+        fillIfEmpty('num_ratings', game.num_ratings)
+        fillIfEmpty('designer', game.designer)
+        fillIfEmpty('artists', game.artists)
+        fillIfEmpty('weight', game.weight)
+        fillIfEmpty('bgg_type', game.bgg_type)
+
+        await supabase
+          .from('games')
+          .update(updatePayload as any)
+          .eq('id', existing.id)
+
+        setAddedGame({ id: existing.id, name: existing.name || game.name })
+        setAddedExisting(true)
+        return
+      }
+
+      const insertPayload: Record<string, any> = {
+        bgg_id: game.bgg_id,
+        name: game.name,
+        year_published: game.year_published ?? null,
+        description: game.description ?? null,
+        image_url: game.image_url ?? null,
+        thumbnail_url: game.thumbnail_url ?? null,
+        min_players: game.min_players ?? null,
+        max_players: game.max_players ?? null,
+        playtime_minutes: game.playtime_minutes ?? null,
+        categories: game.categories ?? null,
+        mechanics: game.mechanics ?? null,
+        publisher: game.publisher ?? null,
+        rating: game.rating ?? null,
+        num_ratings: game.num_ratings ?? null,
+        designer: game.designer ?? null,
+        artists: game.artists ?? null,
+        weight: game.weight ?? null,
+        bgg_type: game.bgg_type ?? null,
+        cached_at: cachedAt,
+        is_active: true,
+      }
+
+      const { data: inserted, error: insertError } = await supabase
+        .from('games')
+        .insert(insertPayload as any)
+        .select('id, name')
+        .single()
+
+      if (insertError) {
+        const { data: fallback } = await supabase
+          .from('games')
+          .select('id, name')
+          .eq('bgg_id', game.bgg_id)
+          .maybeSingle()
+        if (fallback) {
+          setAddedGame({ id: fallback.id, name: fallback.name })
+          setAddedExisting(true)
+          return
+        }
+        throw insertError
+      }
+
+      setAddedGame({ id: inserted.id, name: inserted.name })
+    } catch (error) {
+      console.error('Add game error:', error)
+      setAddError('Could not add the game. Please try again.')
+    } finally {
+      setAdding(false)
+      setSelectedToAdd(null)
+    }
+  }
+
+  useEffect(() => {
+    if (!showAddGameModal) return
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setShowAddGameModal(false)
+        resetAddGameState()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [showAddGameModal, resetAddGameState])
 
   // Scroll hide/show
   const [visible, setVisible] = useState(true)
@@ -680,10 +876,7 @@ function Navigation() {
           onClick={(e) => {
             if (e.target === e.currentTarget) {
               setShowAddGameModal(false)
-              setGameName('')
-              setGameYear('')
-              setGamePublisher('')
-              setGameSubmitted(false)
+              resetAddGameState()
             }
           }}
         >
@@ -700,10 +893,7 @@ function Navigation() {
                 <button
                   onClick={() => {
                     setShowAddGameModal(false)
-                    setGameName('')
-                    setGameYear('')
-                    setGamePublisher('')
-                    setGameSubmitted(false)
+                    resetAddGameState()
                   }}
                   className="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
                 >
@@ -712,7 +902,7 @@ function Navigation() {
               </div>
 
               {/* Form Content */}
-              {!gameSubmitted ? (
+              {!addedGame ? (
                 <div className="space-y-4">
                   <div>
                     <label
@@ -724,13 +914,13 @@ function Navigation() {
                     <input
                       id="gameName"
                       type="text"
-                      value={gameName}
-                      onChange={(e) => setGameName(e.target.value)}
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
                       placeholder="Game title"
                       className="w-full px-3 py-2 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 placeholder-gray-500 dark:placeholder-gray-400"
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') {
-                          handleAddGame()
+                          handleSearch()
                         }
                       }}
                       autoFocus
@@ -748,57 +938,124 @@ function Navigation() {
                       <input
                         id="gameYear"
                         type="number"
-                        value={gameYear}
-                        onChange={(e) => setGameYear(e.target.value)}
+                        value={searchYear}
+                        onChange={(e) => setSearchYear(e.target.value)}
                         placeholder="2024"
                         className="w-full px-3 py-2 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 placeholder-gray-500 dark:placeholder-gray-400"
                       />
                     </div>
+                  </div>
 
-                    <div>
-                      <label
-                        htmlFor="gamePublisher"
-                        className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300"
-                      >
-                        Publisher
-                      </label>
-                      <input
-                        id="gamePublisher"
-                        type="text"
-                        value={gamePublisher}
-                        onChange={(e) => setGamePublisher(e.target.value)}
-                        placeholder="Publisher"
-                        className="w-full px-3 py-2 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 placeholder-gray-500 dark:placeholder-gray-400"
-                      />
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    BGG XML lookup (temporary)
+                  </p>
+
+                  {addError && (
+                    <div className="p-3 text-sm text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800 rounded-lg bg-red-50 dark:bg-red-900/30">
+                      {addError}
                     </div>
+                  )}
+
+                  <div className="max-h-64 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-lg divide-y divide-gray-200 dark:divide-gray-700">
+                    {searching ? (
+                      <div className="px-3 py-4 text-sm text-gray-600 dark:text-gray-300">
+                        Searching…
+                      </div>
+                    ) : searchResults.length === 0 ? (
+                      <div className="px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
+                        No results yet. Try a search.
+                      </div>
+                    ) : (
+                      searchResults.map((result) => (
+                        <div
+                          key={result.bgg_id}
+                          className="flex items-center gap-3 px-3 py-3"
+                        >
+                          {result.thumbnail_url ? (
+                            <img
+                              src={result.thumbnail_url}
+                              alt=""
+                              className="w-10 h-10 rounded object-cover bg-gray-100 dark:bg-gray-800"
+                            />
+                          ) : (
+                            <div className="w-10 h-10 rounded bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-xs text-gray-500">
+                              BGG
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <div className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                              {result.name}
+                            </div>
+                            <div className="text-xs text-gray-500 dark:text-gray-400">
+                              {result.year_published
+                                ? result.year_published
+                                : 'Year unknown'}
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => handleAddFromResult(result)}
+                            disabled={adding || searching}
+                            className="px-3 py-1.5 text-sm text-white rounded-lg bg-primary-600 hover:bg-primary-700 focus:ring-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {adding && selectedToAdd === result.bgg_id
+                              ? 'Adding...'
+                              : 'Add'}
+                          </button>
+                        </div>
+                      ))
+                    )}
                   </div>
 
                   <div className="flex justify-end space-x-3">
                     <button
                       onClick={() => {
                         setShowAddGameModal(false)
-                        setGameName('')
-                        setGameYear('')
-                        setGamePublisher('')
-                        setGameSubmitted(false)
+                        resetAddGameState()
                       }}
                       className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
-                      disabled={isSubmittingGame}
+                      disabled={searching || adding}
                     >
                       Cancel
                     </button>
                     <button
-                      onClick={handleAddGame}
-                      disabled={!gameName.trim() || isSubmittingGame}
+                      onClick={handleSearch}
+                      disabled={!searchQuery.trim() || searching || adding}
                       className="px-4 py-2 text-white rounded-lg bg-primary-600 hover:bg-primary-700 focus:ring-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {isSubmittingGame ? 'Submitting...' : 'Submit'}
+                      {searching ? 'Searching...' : 'Search'}
                     </button>
                   </div>
                 </div>
               ) : (
-                <div className="p-4 text-sm text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800 rounded-lg bg-green-50 dark:bg-green-900/30">
-                  Thanks! We'll review and import it soon.
+                <div className="space-y-4">
+                  <div className="p-4 text-sm text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800 rounded-lg bg-green-50 dark:bg-green-900/30">
+                    {addedExisting ? 'Already in MeepleGo.' : 'Added ✓'}
+                  </div>
+                  <div className="flex justify-end space-x-3">
+                    <button
+                      onClick={() => {
+                        setShowAddGameModal(false)
+                        resetAddGameState()
+                      }}
+                      className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
+                    >
+                      Close
+                    </button>
+                    <button
+                      onClick={() => {
+                        const url = getGameUrl({
+                          id: addedGame.id,
+                          name: addedGame.name,
+                        })
+                        setShowAddGameModal(false)
+                        resetAddGameState()
+                        router.push(url)
+                      }}
+                      className="px-4 py-2 text-white rounded-lg bg-primary-600 hover:bg-primary-700 focus:ring-2 focus:ring-primary-500"
+                    >
+                      View game
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
