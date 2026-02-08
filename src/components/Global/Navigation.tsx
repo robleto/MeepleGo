@@ -159,6 +159,14 @@ function Navigation() {
     setAddedExisting(false)
   }, [])
 
+  const handleSearchAgain = useCallback(() => {
+    setAddedGame(null)
+    setAddedExisting(false)
+    setAddError(null)
+    setSelectedToAdd(null)
+    setAdding(false)
+  }, [])
+
   // Add game search
   const handleSearch = async () => {
     if (!searchQuery.trim() || searching) return
@@ -966,47 +974,69 @@ function Navigation() {
                         No results yet. Try a search.
                       </div>
                     ) : (
-                      searchResults.map((result) => (
-                        <div
-                          key={result.bgg_id}
-                          className="flex items-center gap-3 px-3 py-3"
-                        >
-                          {result.thumbnail_url ? (
-                            <img
-                              src={result.thumbnail_url}
-                              alt=""
-                              className="w-10 h-10 rounded object-cover bg-gray-100 dark:bg-gray-800"
-                            />
-                          ) : (
-                            <div className="w-10 h-10 rounded bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-xs text-gray-500">
-                              BGG
-                            </div>
-                          )}
-                          <div className="flex-1 min-w-0">
-                            <div className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
-                              {result.name}
-                            </div>
-                            <div className="text-xs text-gray-500 dark:text-gray-400">
-                              {result.year_published
-                                ? result.year_published
-                                : 'Year unknown'}
-                            </div>
-                          </div>
-                          <button
-                            onClick={() => handleAddFromResult(result)}
-                            disabled={adding || searching}
-                            className="px-3 py-1.5 text-sm text-white rounded-lg bg-primary-600 hover:bg-primary-700 focus:ring-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                      searchResults.map((result) => {
+                        const typeLabel =
+                          result.type === 'boardgameexpansion'
+                            ? 'Expansion'
+                            : result.type === 'boardgame'
+                              ? 'Board Game'
+                              : result.type || null
+                        const metaParts = [
+                          result.year_published
+                            ? String(result.year_published)
+                            : null,
+                          typeLabel,
+                          `BGG ${result.bgg_id}`,
+                        ].filter(Boolean)
+
+                        return (
+                          <div
+                            key={result.bgg_id}
+                            className="flex items-center gap-3 px-3 py-3"
                           >
-                            {adding && selectedToAdd === result.bgg_id
-                              ? 'Adding...'
-                              : 'Add'}
-                          </button>
-                        </div>
-                      ))
+                            {result.thumbnail_url ? (
+                              <img
+                                src={result.thumbnail_url}
+                                alt=""
+                                className="w-10 h-10 rounded object-cover bg-gray-100 dark:bg-gray-800"
+                              />
+                            ) : (
+                              <div className="w-10 h-10 rounded bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-xs text-gray-500">
+                                BGG
+                              </div>
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <div className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                                {result.name}
+                              </div>
+                              <div className="text-xs text-gray-500 dark:text-gray-400">
+                                {metaParts.length
+                                  ? metaParts.join(' • ')
+                                  : 'Metadata unavailable'}
+                              </div>
+                            </div>
+                            <button
+                              onClick={() => handleAddFromResult(result)}
+                              disabled={adding || searching}
+                              className="px-3 py-1.5 text-sm text-white rounded-lg bg-primary-600 hover:bg-primary-700 focus:ring-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              {adding && selectedToAdd === result.bgg_id
+                                ? 'Adding...'
+                                : 'Add'}
+                            </button>
+                          </div>
+                        )
+                      })
                     )}
                   </div>
 
                   <div className="flex justify-end space-x-3">
+                    <button
+                      onClick={handleSearchAgain}
+                      className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
+                    >
+                      Search again
+                    </button>
                     <button
                       onClick={() => {
                         setShowAddGameModal(false)
