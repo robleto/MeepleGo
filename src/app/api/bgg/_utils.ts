@@ -12,7 +12,7 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 export async function fetchBggXml(url: string): Promise<
   | { ok: true; xml: string }
-  | { ok: false; error: string; status?: number }
+  | { ok: false; error: string; status?: number; details?: string }
 > {
   for (let attempt = 0; attempt <= BACKOFFS_MS.length; attempt += 1) {
     const response = await fetch(url, {
@@ -29,6 +29,7 @@ export async function fetchBggXml(url: string): Promise<
           ok: false,
           error: 'BGG is still preparing this request. Please try again.',
           status: response.status,
+          details: response.statusText || undefined,
         }
       }
       await sleep(BACKOFFS_MS[attempt])
@@ -38,8 +39,9 @@ export async function fetchBggXml(url: string): Promise<
     if (!response.ok) {
       return {
         ok: false,
-        error: 'BGG request failed. Please try again.',
+        error: `BGG request failed (HTTP ${response.status}). Please try again.`,
         status: response.status,
+        details: response.statusText || undefined,
       }
     }
 
@@ -51,6 +53,7 @@ export async function fetchBggXml(url: string): Promise<
     ok: false,
     error: 'BGG is still preparing this request. Please try again.',
     status: 202,
+    details: 'Accepted',
   }
 }
 

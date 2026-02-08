@@ -188,7 +188,14 @@ function Navigation() {
       const response = await fetch(`/api/bgg/search?${params.toString()}`)
       const payload = await response.json().catch(() => null)
       if (!response.ok || !payload?.ok) {
-        setAddError(payload?.error || 'Search failed. Please try again.')
+        const detail = payload?.status
+          ? `HTTP ${payload.status}${payload.details ? ` ${payload.details}` : ''}`
+          : null
+        setAddError(
+          payload?.error
+            ? `${payload.error}${detail ? ` (${detail})` : ''}`
+            : 'Search failed. Please try again.'
+        )
         return
       }
 
@@ -216,7 +223,14 @@ function Navigation() {
       const response = await fetch(`/api/bgg/thing?id=${result.bgg_id}`)
       const payload = await response.json().catch(() => null)
       if (!response.ok || !payload?.ok || !payload?.game) {
-        setAddError(payload?.error || 'Could not load game details.')
+        const detail = payload?.status
+          ? `HTTP ${payload.status}${payload.details ? ` ${payload.details}` : ''}`
+          : null
+        setAddError(
+          payload?.error
+            ? `${payload.error}${detail ? ` (${detail})` : ''}`
+            : 'Could not load game details.'
+        )
         return
       }
 

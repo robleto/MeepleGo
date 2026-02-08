@@ -24,7 +24,15 @@ export async function GET(req: NextRequest) {
   const xmlResult = await fetchBggXml(url)
   if (!xmlResult.ok) {
     const status = xmlResult.status === 202 ? 503 : 502
-    return NextResponse.json({ ok: false, error: xmlResult.error }, { status })
+    return NextResponse.json(
+      {
+        ok: false,
+        error: xmlResult.error,
+        status: xmlResult.status,
+        details: xmlResult.details,
+      },
+      { status }
+    )
   }
 
   const parsed = xmlParser.parse(xmlResult.xml)
