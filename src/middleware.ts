@@ -87,7 +87,28 @@ export async function middleware(req: NextRequest) {
   const res = NextResponse.next()
   try {
     const supabase = createMiddlewareSupabaseClient(req, res)
-    await supabase.auth.getUser()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    // Protected routes: redirect unauthenticated users to login
+    const protectedPrefixes = ['/profile', '/settings', '/import']
+    const isProtected = protectedPrefixes.some((prefix) => pathname.startsWith(prefix))
+
+    if (isProtected && !user) {
+      const loginUrl = req.nextUrl.clone()
+      loginUrl.pathname = '/login'
+      loginUrl.searchParams.set('next', pathname)
+      return NextResponse.redirect(loginUrl)
+    }
+
+    // Auth pages: redirect authenticated users away from login/signup
+    const authPrefixes = ['/login', '/signup']
+    const isAuthPage = authPrefixes.some((prefix) => pathname.startsWith(prefix))
+
+    if (isAuthPage && user) {
+      const homeUrl = req.nextUrl.clone()
+      homeUrl.pathname = '/profile'
+      return NextResponse.redirect(homeUrl)
+    }
   } catch {
     // Non-fatal: middleware should not block requests if Supabase is unavailable.
   }

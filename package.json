@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "next dev",
     "dev:3001": "PORT=3001 next dev",
-    "build": "NEXT_DISABLE_ESLINT=1 next build",
+    "build": "next build",
     "build:analyze": "ANALYZE=true npm run build",
     "start": "next start",
     "lint": "next lint",

@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
+import { Suspense } from 'react'
 import PageLayout from '@/components/Components/PageLayout'
 import Heading from '@/components/Components/Heading'
 import ZeroState from '@/components/Components/ZeroState'
@@ -268,7 +269,7 @@ export default async function AwardsPage({
   }
 
   return (
-    <PageLayout subHeader={<AwardsSearchBar />}>
+    <PageLayout subHeader={<Suspense fallback={null}><AwardsSearchBar /></Suspense>}>
       <div className="max-w-6xl mx-auto px-4 py-8">
         {/* Industry Awards */}
         <section>

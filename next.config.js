@@ -20,13 +20,13 @@ const nextConfig = {
     ],
   },
   eslint: {
-    // We temporarily ignore ESLint during production builds to allow shipping while
-    // we address the large backlog of warnings. Local "npm run lint" still shows them.
+    // ESLint warnings are non-blocking during builds.
+    // Run `npm run lint` locally to see warnings. Re-enable once warning count is under 50.
     ignoreDuringBuilds: true,
   },
   typescript: {
-    // We temporarily ignore TypeScript errors during builds
-    // The dev server and IDE will still show them for development
+    // 59 pre-existing TS errors (mostly Next.js async params pattern + type looseness).
+    // Re-enable once errors are fixed. Run `npx tsc --noEmit` to see current errors.
     ignoreBuildErrors: true,
   },
   // Performance optimizations
