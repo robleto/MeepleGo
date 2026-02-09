@@ -62,15 +62,21 @@ export default function AwardsPanelReadOnly({
 
       {/* ── Body: Winner + Nominees ───────────────────────── */}
       {hasNominees ? (
-        /* Side-by-side on desktop, stacked on mobile */
-        <div className="flex flex-col gap-6 lg:flex-row lg:gap-8">
-          {/* Winner — fixed width on desktop */}
+        /*
+         * Layout progression:
+         *   < md  (< 768):  Stacked — winner on top (constrained), nominees below in 1 col
+         *   md    (768–1023): Side-by-side — compact winner (w-36), nominees 1 col
+         *   lg    (1024–1279): Side-by-side — small winner (w-40), nominees 2 col
+         *   ≥ xl  (1280+):  Side-by-side — full winner (w-56), nominees 2 col
+         */
+        <div className="flex flex-col gap-6 md:flex-row md:gap-6 lg:gap-8">
+          {/* Winner — compact at md, grows at each breakpoint */}
           <AwardWinnerSpotlight
             winner={winner}
-            className="lg:w-56 lg:flex-shrink-0 xl:w-64"
+            className="max-w-[14rem] md:max-w-none md:w-36 md:flex-shrink-0 lg:w-40 xl:w-56"
           />
 
-          {/* Nominees — fills remaining space */}
+          {/* Nominees — 1 col on mobile/md, 2 col from lg up */}
           <AwardNomineeGrid nominees={nominees} className="flex-1" />
         </div>
       ) : (

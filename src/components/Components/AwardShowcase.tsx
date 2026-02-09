@@ -16,6 +16,7 @@ interface AwardShowcaseProps {
   editHref?: string
   editLabel?: string
   inlineEditable?: boolean
+  onEditorToggle?: (isOpen: boolean) => void
 }
 
 export default function AwardShowcase({
@@ -27,6 +28,7 @@ export default function AwardShowcase({
   editHref,
   editLabel = 'Edit',
   inlineEditable = false,
+  onEditorToggle,
 }: AwardShowcaseProps) {
   if (!games.length) return null
 
@@ -187,7 +189,7 @@ export default function AwardShowcase({
   const nomineeGames = displayGames.slice(1)
 
   return (
-    <section id={`award-${id}`} className={className}>
+    <section id={`award-${id}`} className={className} style={{ scrollMarginTop: '120px' }}>
       {inlineEditable && showEditor && row ? (
         <AwardCategoryEditor
           year={currentYear}
@@ -210,7 +212,7 @@ export default function AwardShowcase({
               return next
             })
           }}
-          onClose={() => setShowEditor(false)}
+          onClose={() => { setShowEditor(false); onEditorToggle?.(false) }}
         />
       ) : (
         <AwardsPanelReadOnly
@@ -221,7 +223,7 @@ export default function AwardShowcase({
           headerExtra={
             inlineEditable ? (
               <button
-                onClick={() => setShowEditor(true)}
+                onClick={() => { setShowEditor(true); onEditorToggle?.(true) }}
                 className="text-[11px] inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-gray-200 bg-white hover:bg-gray-50 text-gray-500 hover:text-gray-700 transition-colors"
               >
                 <PencilSquareIcon className="w-3.5 h-3.5" />

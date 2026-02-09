@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import AwardShowcase from '@/components/Components/AwardShowcase'
 import SectionHeader from '@/components/Components/SectionHeader'
@@ -24,36 +24,48 @@ interface RankingRow {
   } | null
 }
 
+export interface AwardCategory {
+  id: string
+  label: string
+}
+
 export default function PersonalAwardsAuto({
   forcedUserId,
   username,
   filterYear = 'all',
   searchTerm = '',
   showHeader = true,
+  onCategoriesReady,
+  categoryOrder,
+  onEditorToggle,
 }: {
   forcedUserId?: string
   username?: string
   filterYear?: 'all' | 'this' | 'last'
   searchTerm?: string
   showHeader?: boolean
+  onCategoriesReady?: (cats: AwardCategory[]) => void
+  categoryOrder?: string[]
+  onEditorToggle?: (isOpen: boolean) => void
 } = {}) {
   const [loading, setLoading] = useState(true)
   const [sessionUserId, setSessionUserId] = useState<string | null>(null)
   const [rows, setRows] = useState<RankingRow[]>([])
+  const [savedAwards, setSavedAwards] = useState<
+    Array<{ category: string; nominees: string[]; winner_id: string | null; manual_override?: boolean }>
+  >([])
 
   useEffect(() => {
     let cancelled = false
     async function load() {
       setLoading(true)
-      
+
       let userId: string
-      
+
       if (forcedUserId) {
-        // Viewing another user's awards
         userId = forcedUserId
         setSessionUserId(forcedUserId)
       } else {
-        // Viewing own awards
         const {
           data: { session },
         } = await supabase.auth.getSession()
@@ -64,14 +76,24 @@ export default function PersonalAwardsAuto({
         userId = session.user.id
         setSessionUserId(userId)
       }
-      
-      const { data } = await supabase
-        .from('rankings')
-        .select(
-          'game_id, ranking, played_it, games:game_id ( id, name, year_published, image_url, thumbnail_url, categories, mechanics, playtime_minutes, min_players, max_players, honors )'
-        )
-        .eq('user_id', userId)
-      if (!cancelled && data) setRows(data as any)
+
+      // Fetch rankings and saved awards in parallel
+      const currentYear = new Date().getFullYear()
+      const [rankingsResult, awardsResult] = await Promise.all([
+        supabase
+          .from('rankings')
+          .select(
+            'game_id, ranking, played_it, games:game_id ( id, name, year_published, image_url, thumbnail_url, categories, mechanics, playtime_minutes, min_players, max_players, honors )'
+          )
+          .eq('user_id', userId),
+        supabase
+          .from('awards')
+          .select('category, nominees, winner_id, manual_override')
+          .eq('user_id', userId)
+          .eq('year', currentYear),
+      ])
+      if (!cancelled && rankingsResult.data) setRows(rankingsResult.data as any)
+      if (!cancelled && awardsResult.data) setSavedAwards(awardsResult.data as any)
       if (!cancelled) setLoading(false)
     }
     load()
@@ -304,6 +326,112 @@ export default function PersonalAwardsAuto({
       .filter((b) => b.games.length > 0)
   }, [rows, filterYear, searchTerm])
 
+  // Reverse map: editor category id → PersonalAwardsAuto id
+  const reverseCategoryMap: Record<string, string> = useMemo(() => ({
+    best_overall: 'best',
+    best_strategy: 'strategy',
+    best_family: 'family',
+    best_two_player: 'duo',
+    best_kids: 'kids',
+    best_card_game: 'card',
+    best_wargame: 'wargame',
+    best_party: 'party',
+    best_trivia: 'trivia',
+    best_bluffing: 'bluffing',
+    best_print_play: 'pnp',
+    best_coop: 'coop',
+    best_deck_building: 'deckbuild',
+    best_solo: 'solo',
+  }), [])
+
+  // Build game lookup from all ranking rows for resolving saved award nominee ids
+  const gameLookup = useMemo(() => {
+    const map: Record<string, any> = {}
+    rows.forEach((r) => {
+      const game = (r as any).games
+      if (game) {
+        map[String(game.id)] = {
+          id: game.id,
+          name: game.name,
+          year_published: game.year_published,
+          image_url: game.image_url,
+          thumbnail_url: game.thumbnail_url,
+          honors: game.honors,
+          categories: game.categories,
+          min_players: game.min_players,
+          max_players: game.max_players,
+          ranking: (r as any).ranking,
+          played_it: (r as any).played_it,
+        }
+      }
+    })
+    return map
+  }, [rows])
+
+  // Merge saved awards into derived categories
+  const mergedCategories = useMemo(() => {
+    if (!savedAwards.length) return categories
+
+    // Index saved awards by their PersonalAwardsAuto category id
+    const savedByLocalId: Record<string, typeof savedAwards[0]> = {}
+    savedAwards.forEach((sa) => {
+      const localId = reverseCategoryMap[sa.category]
+      if (localId) savedByLocalId[localId] = sa
+    })
+
+    return categories.map((cat) => {
+      const saved = savedByLocalId[cat.id]
+      if (!saved || !saved.manual_override) return cat
+
+      // Reconstruct games list from saved nominees, with winner first
+      const nomineeIds = (saved.nominees || []).map(String)
+      const winnerId = saved.winner_id ? String(saved.winner_id) : null
+
+      // Order: winner first, then remaining nominees
+      const orderedIds = winnerId
+        ? [winnerId, ...nomineeIds.filter((id) => id !== winnerId)]
+        : nomineeIds
+
+      const games = orderedIds
+        .map((id) => gameLookup[id])
+        .filter(Boolean)
+
+      // Only use saved data if we can resolve at least the winner
+      if (games.length === 0) return cat
+
+      return { ...cat, games }
+    })
+  }, [categories, savedAwards, reverseCategoryMap, gameLookup])
+
+  // Notify parent of derived categories for sidebar nav
+  const prevCatJson = useRef('')
+  useEffect(() => {
+    if (!onCategoriesReady) return
+    const cats = mergedCategories.map((c) => ({ id: c.id, label: c.label }))
+    const json = JSON.stringify(cats)
+    if (json !== prevCatJson.current) {
+      prevCatJson.current = json
+      onCategoriesReady(cats)
+    }
+  }, [mergedCategories, onCategoriesReady])
+
+  // Apply custom category order if provided
+  const orderedCategories = useMemo(() => {
+    if (!categoryOrder || !categoryOrder.length) return mergedCategories
+    const byId = new Map(mergedCategories.map((c) => [c.id, c]))
+    const ordered: typeof categories = []
+    categoryOrder.forEach((id) => {
+      const cat = byId.get(id)
+      if (cat) {
+        ordered.push(cat)
+        byId.delete(id)
+      }
+    })
+    // Append any categories not in the custom order (e.g., newly derived ones)
+    byId.forEach((cat) => ordered.push(cat))
+    return ordered
+  }, [mergedCategories, categoryOrder])
+
   if (loading) {
     return (
       <div className="mb-14 animate-pulse">
@@ -339,7 +467,7 @@ export default function PersonalAwardsAuto({
         <SectionHeader title={username ? `${username}'s Awards` : 'My Awards'} />
       )}
       <div className="space-y-10">
-        {categories.map((block) => {
+        {orderedCategories.map((block) => {
           // Use current year as default for editing; user can switch years in editor
           const year = new Date().getFullYear()
           // The editor category uses the deriveUserAwards ids; we map some common ones from PersonalAwardsAuto ids
@@ -376,10 +504,11 @@ export default function PersonalAwardsAuto({
               editHref={editHref}
               editLabel="Edit"
               inlineEditable
+              onEditorToggle={onEditorToggle}
             />
           )
         })}
-        {categories.length === 0 && (
+        {orderedCategories.length === 0 && (
           <p className="text-xs text-center text-gray-500">
             Add rankings to see personalized categories.
           </p>
