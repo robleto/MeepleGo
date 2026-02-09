@@ -118,6 +118,9 @@ function Navigation() {
   const [manualMaxPlayers, setManualMaxPlayers] = useState('')
   const [manualPlaytime, setManualPlaytime] = useState('')
   const [manualDescription, setManualDescription] = useState('')
+  const [manualImageFile, setManualImageFile] = useState<File | null>(null)
+  const [manualImageConfirmed, setManualImageConfirmed] = useState(false)
+  const [manualImageUploading, setManualImageUploading] = useState(false)
   const [selectedToAdd, setSelectedToAdd] = useState<string | null>(null)
   const [adding, setAdding] = useState(false)
   const [addError, setAddError] = useState<string | null>(null)
@@ -171,6 +174,9 @@ function Navigation() {
     setManualMaxPlayers('')
     setManualPlaytime('')
     setManualDescription('')
+    setManualImageFile(null)
+    setManualImageConfirmed(false)
+    setManualImageUploading(false)
   }, [])
 
   const handleSearchAgain = useCallback(() => {
@@ -216,19 +222,23 @@ function Navigation() {
         description: manualDescription.trim() || null,
       }
 
+      const sourceConfidence = 0.8
+
       if (existing) {
         const updatePayload: Record<string, any> = {
           cached_at: cachedAt,
           is_active: true,
         }
 
-        const fillIfEmpty = (field: string, value: any) => {
+        const fillIfEmpty = (field: string, value: any, allowLegacy = false) => {
           if (value == null) return
           const current = (existing as any)[field]
           const emptyArray = Array.isArray(current) && current.length === 0
           const emptyString =
             typeof current === 'string' && current.trim().length === 0
-          if (current == null || emptyArray || emptyString) {
+          const legacy =
+            allowLegacy && typeof current === 'string' && current === 'legacy_unknown'
+          if (current == null || emptyArray || emptyString || legacy) {
             updatePayload[field] = value
           }
         }
@@ -236,7 +246,8 @@ function Navigation() {
         Object.entries(payload).forEach(([field, value]) =>
           fillIfEmpty(field, value)
         )
-        fillIfEmpty('source', 'manual')
+        fillIfEmpty('source', 'manual', true)
+        fillIfEmpty('source_confidence', sourceConfidence)
 
         await supabase
           .from('games')
@@ -244,6 +255,9 @@ function Navigation() {
           .eq('id', existing.id)
 
         setAddedGame({ id: existing.id, name: existing.name || name })
+        if (manualImageFile) {
+          await uploadManualImage(existing.id)
+        }
         setAddedExisting(true)
         return
       }
@@ -251,6 +265,7 @@ function Navigation() {
       const insertPayload = {
         ...payload,
         source: 'manual',
+        source_confidence: sourceConfidence,
         cached_at: cachedAt,
         is_active: true,
       }
@@ -264,12 +279,61 @@ function Navigation() {
       if (insertError) throw insertError
 
       setAddedGame({ id: inserted.id, name: inserted.name })
+      if (manualImageFile) {
+        await uploadManualImage(inserted.id)
+      }
     } catch (error) {
       console.error('Manual add error:', error)
       setAddError('Could not add the game. Please try again.')
     } finally {
       setAdding(false)
       setSelectedToAdd(null)
+    }
+  }
+
+  const uploadManualImage = async (gameId: string) => {
+    if (!manualImageFile) return
+    if (!manualImageConfirmed) {
+      setAddError('Please confirm you have rights to upload this image.')
+      return
+    }
+
+    setManualImageUploading(true)
+    try {
+      const fileExt = manualImageFile.name.split('.').pop() || 'jpg'
+      const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`
+      const filePath = `manual/${gameId}/${fileName}`
+
+      const { error: uploadError } = await supabase.storage
+        .from('game-images')
+        .upload(filePath, manualImageFile, { upsert: true })
+
+      if (uploadError) {
+        throw uploadError
+      }
+
+      const { data: publicUrl } = supabase.storage
+        .from('game-images')
+        .getPublicUrl(filePath)
+
+      if (publicUrl?.publicUrl) {
+        await supabase
+          .from('games')
+          .update({
+            image_url: publicUrl.publicUrl,
+            thumbnail_url: publicUrl.publicUrl,
+            source: 'manual',
+            source_url: publicUrl.publicUrl,
+            source_notes: 'user-uploaded image (rights confirmed)',
+            source_confidence: 0.8,
+          } as any)
+          .eq('id', gameId)
+      }
+    } catch (error) {
+      console.error('Image upload error:', error)
+      setAddError('Image upload failed. You can retry after saving the game.')
+    } finally {
+      setManualImageUploading(false)
     }
   }
 
@@ -357,6 +421,7 @@ function Navigation() {
         publisher?: string | null
       }
       const sourceUrl = `https://www.wikidata.org/wiki/${game.wikidata_id}`
+      const sourceConfidence = 0.6
 
       const cachedAt = new Date().toISOString()
 
@@ -379,13 +444,15 @@ function Navigation() {
           is_active: true,
         }
 
-        const fillIfEmpty = (field: string, value: any) => {
+        const fillIfEmpty = (field: string, value: any, allowLegacy = false) => {
           if (value == null) return
           const current = (existing as any)[field]
           const emptyArray = Array.isArray(current) && current.length === 0
           const emptyString =
             typeof current === 'string' && current.trim().length === 0
-          if (current == null || emptyArray || emptyString) {
+          const legacy =
+            allowLegacy && typeof current === 'string' && current === 'legacy_unknown'
+          if (current == null || emptyArray || emptyString || legacy) {
             updatePayload[field] = value
           }
         }
@@ -397,8 +464,9 @@ function Navigation() {
         fillIfEmpty('playtime_minutes', game.playtime_minutes)
         fillIfEmpty('publisher', game.publisher)
         fillIfEmpty('description', game.description)
-        fillIfEmpty('source', 'wikidata')
+        fillIfEmpty('source', 'wikidata', true)
         fillIfEmpty('source_url', sourceUrl)
+        fillIfEmpty('source_confidence', sourceConfidence)
 
         await supabase
           .from('games')
@@ -420,6 +488,7 @@ function Navigation() {
         publisher: game.publisher ?? null,
         source: 'wikidata',
         source_url: sourceUrl,
+        source_confidence: sourceConfidence,
         cached_at: cachedAt,
         is_active: true,
       }
@@ -1131,6 +1200,30 @@ function Navigation() {
                           />
                         </div>
                       </div>
+                      <div className="space-y-2">
+                        <label className="block mb-1 text-xs font-medium text-gray-700 dark:text-gray-300">
+                          Game image (optional)
+                        </label>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0] || null
+                            setManualImageFile(file)
+                            if (!file) setManualImageConfirmed(false)
+                          }}
+                          className="block w-full text-sm text-gray-700 dark:text-gray-300 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 dark:file:bg-gray-800 dark:file:text-gray-200 dark:hover:file:bg-gray-700"
+                        />
+                        <label className="flex items-start gap-2 text-xs text-gray-600 dark:text-gray-400">
+                          <input
+                            type="checkbox"
+                            checked={manualImageConfirmed}
+                            onChange={(e) => setManualImageConfirmed(e.target.checked)}
+                            className="mt-0.5"
+                          />
+                          I confirm I have rights to upload and display this image.
+                        </label>
+                      </div>
                       <div className="grid grid-cols-2 gap-3">
                         <div>
                           <label className="block mb-1 text-xs font-medium text-gray-700 dark:text-gray-300">
@@ -1252,14 +1345,20 @@ function Navigation() {
                     <button
                       onClick={manualMode ? handleManualAdd : handleSearch}
                       disabled={
-                        !searchQuery.trim() || searching || adding
+                        !searchQuery.trim() ||
+                        searching ||
+                        adding ||
+                        (manualMode && manualImageFile && !manualImageConfirmed) ||
+                        manualImageUploading
                       }
                       className="px-4 py-2 text-white rounded-lg bg-primary-600 hover:bg-primary-700 focus:ring-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {manualMode
-                        ? adding
-                          ? 'Adding...'
-                          : 'Add'
+                        ? manualImageUploading
+                          ? 'Uploading...'
+                          : adding
+                            ? 'Adding...'
+                            : 'Add'
                         : searching
                           ? 'Searching...'
                           : 'Search'}

@@ -111,6 +111,7 @@ def main() -> None:
         "source": row.get("source") or None,
         "source_url": row.get("source_url") or None,
         "source_notes": row.get("source_notes") or None,
+        "source_confidence": row.get("source_confidence") or None,
       }
 
       if not any(payload.values()):

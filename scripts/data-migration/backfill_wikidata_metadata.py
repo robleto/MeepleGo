@@ -103,7 +103,7 @@ def pick_best_match(bindings: List[Dict[str, Any]], name: str, year: Optional[in
   return extract_qid(bindings[0].get("item", {}).get("value", ""))
 
 
-def search_wikidata(name: str) -> Optional[str]:
+def search_wikidata(name: str, year: Optional[int]) -> Optional[str]:
   query = f"""
 PREFIX wd: <http://www.wikidata.org/entity/>
 PREFIX wdt: <http://www.wikidata.org/prop/direct/>
@@ -127,7 +127,7 @@ LIMIT 10
 """
   data = sparql(query)
   bindings = data.get("results", {}).get("bindings", [])
-  return pick_best_match(bindings, name, None)
+  return pick_best_match(bindings, name, year)
 
 
 def fetch_entity(qid: str) -> Dict[str, Any]:
@@ -264,6 +264,11 @@ def main() -> None:
       game_id = row.get("id")
       name = row.get("name")
       year = row.get("year_published")
+      year_int = None
+      try:
+        year_int = int(year) if year else None
+      except Exception:
+        year_int = None
 
       if not game_id or not name:
         continue
@@ -271,7 +276,7 @@ def main() -> None:
       if args.limit and processed >= args.limit:
         break
 
-      qid = search_wikidata(name)
+      qid = search_wikidata(name, year_int)
       if not qid:
         print(f"⚠️  No Wikidata match for {name}")
         processed += 1
@@ -293,11 +298,12 @@ def main() -> None:
         "is_active": True,
       }
 
-      def fill_if_empty(field: str, value: Any) -> None:
+      def fill_if_empty(field: str, value: Any, allow_legacy: bool = False) -> None:
         current = row.get(field)
         empty_array = current == "[]" or current == "{}"
         empty_string = isinstance(current, str) and current.strip() == ""
-        if current in (None, "", "null") or empty_array or empty_string:
+        legacy = allow_legacy and isinstance(current, str) and current == "legacy_unknown"
+        if current in (None, "", "null") or empty_array or empty_string or legacy:
           if value is None:
             return
           update_payload[field] = value
@@ -310,14 +316,16 @@ def main() -> None:
       fill_if_empty("playtime_minutes", reduced.get("playtime_minutes"))
       fill_if_empty("description", reduced.get("description"))
       fill_if_empty("image_url", reduced.get("image_url"))
+      fill_if_empty("thumbnail_url", reduced.get("image_url"))
       if reduced.get("mechanics"):
         fill_if_empty("mechanics", reduced.get("mechanics"))
       if reduced.get("categories"):
         fill_if_empty("categories", reduced.get("categories"))
 
       # provenance
-      fill_if_empty("source", "wikidata")
-      fill_if_empty("source_url", f"https://www.wikidata.org/wiki/{qid}")
+      fill_if_empty("source", "wikidata", True)
+      fill_if_empty("source_url", f"https://www.wikidata.org/wiki/{qid}", True)
+      fill_if_empty("source_confidence", 0.6, True)
       if reduced.get("image_url"):
         fill_if_empty("source_notes", f"image: {reduced.get('image_url')}")
 

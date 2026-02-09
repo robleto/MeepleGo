@@ -45,7 +45,7 @@ def main() -> None:
     sys.exit(1)
 
   headers = build_headers(supabase_key)
-  url = f"{supabase_url}/rest/v1/games?select=id,source,image_url,mechanics,categories&limit={args.limit}"
+  url = f"{supabase_url}/rest/v1/games?select=id,source,source_confidence,image_url,mechanics,categories&limit={args.limit}"
 
   response = requests.get(url, headers=headers, timeout=60)
   if response.status_code >= 400:
@@ -59,6 +59,7 @@ def main() -> None:
   mechanics = 0
   categories = 0
 
+  confidence_missing = 0
   for row in data:
     source_counts[row.get("source") or "(null)"] += 1
     if row.get("image_url"):
@@ -67,6 +68,8 @@ def main() -> None:
       mechanics += 1
     if row.get("categories"):
       categories += 1
+    if row.get("source_confidence") is None:
+      confidence_missing += 1
 
   total = len(data)
   print(f"Total rows: {total}")
@@ -76,6 +79,7 @@ def main() -> None:
   print(f"With images: {images}")
   print(f"With mechanics: {mechanics}")
   print(f"With categories: {categories}")
+  print(f"Missing source_confidence: {confidence_missing}")
 
 
 if __name__ == "__main__":

@@ -53,7 +53,7 @@ def main() -> None:
     sys.exit(1)
 
   headers = build_headers(supabase_key)
-  url = f"{supabase_url}/rest/v1/games?select=id,name,year_published,source,source_url,source_notes&order=name.asc"
+  url = f"{supabase_url}/rest/v1/games?select=id,name,year_published,source,source_url,source_notes,source_confidence&order=name.asc"
 
   response = requests.get(url, headers=headers, timeout=60)
   if response.status_code >= 400:
@@ -72,6 +72,7 @@ def main() -> None:
         "source",
         "source_url",
         "source_notes",
+        "source_confidence",
       ],
     )
     writer.writeheader()
@@ -84,6 +85,7 @@ def main() -> None:
           "source": row.get("source"),
           "source_url": row.get("source_url"),
           "source_notes": row.get("source_notes"),
+          "source_confidence": row.get("source_confidence"),
         }
       )
 
