@@ -2,7 +2,7 @@ import { type ReactNode } from 'react'
 import Heading from '@/components/Components/Heading'
 
 interface SectionHeaderProps {
-  title: string
+  title: ReactNode
   rightSlot?: ReactNode
   containerClassName?: string
   titleClassName?: string

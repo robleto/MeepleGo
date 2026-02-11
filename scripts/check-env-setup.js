@@ -44,19 +44,7 @@ if (!supabaseUrl || !supabaseServiceKey) {
 
 console.log('\n✅ Environment setup looks good!')
 console.log('\n📋 Next steps:')
-console.log('1. Run the migration to create the industry_awards tables:')
+console.log('Awards data now pulls from AwardsAPI.')
 console.log(
-  '   Copy the SQL from database/migrations/create_industry_awards.sql'
+  'If you need to validate the API, open /awards and /awards/industry in the app.'
 )
-console.log('   and run it in your Supabase SQL editor')
-console.log('')
-console.log('2. Populate the industry awards data:')
-console.log('   node scripts/populate-industry-awards.js')
-console.log('')
-console.log(
-  '💡 Note: The population script will only link awards to games that'
-)
-console.log(
-  '   already exist in your games table. Make sure you have populated'
-)
-console.log('   the games table first if you want full linking.')

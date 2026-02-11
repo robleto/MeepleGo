@@ -21,11 +21,9 @@ interface Game {
   publisher: string | null
   image_url: string | null
   thumbnail_url: string | null
-  bgg_id: number | null
   categories: string[]
   mechanics: string[]
   rating: number | null
-  rank: number | null
   num_ratings: number | null
   weight: number | null
 }
@@ -36,20 +34,10 @@ async function getGameBySlug(slug: string): Promise<Game | null> {
   let gameId: string
 
   // Handle different formats:
-  // 1. Legacy numeric BGG ID format: "123"
-  // 2. UUID format: "1cc4fcdf-2dce-430d-b336-b7f9f5358680"
-  // 3. SEO slug format: "game-name-uuid"
+  // 1. UUID format: "1cc4fcdf-2dce-430d-b336-b7f9f5358680"
+  // 2. SEO slug format: "game-name-uuid"
 
-  if (/^\d+$/.test(slug)) {
-    // Legacy numeric BGG ID - look up by bgg_id
-    const bggId = parseInt(slug, 10)
-    const { data: game } = await supabase
-      .from('games')
-      .select('*')
-      .eq('bgg_id', bggId)
-      .single()
-    return game as Game | null
-  } else if (
+  if (
     /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug)
   ) {
     // Raw UUID format
@@ -86,7 +74,6 @@ async function getGameBySlug(slug: string): Promise<Game | null> {
 
   // For slug format, verify it matches the game name
   if (
-    !/^\d+$/.test(slug) &&
     !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
       slug
     )
@@ -157,21 +144,7 @@ export default async function GamePage({ params }: PageProps) {
   const resolvedParams = await params
 
   // Handle different redirect scenarios
-  if (/^\d+$/.test(resolvedParams.slug)) {
-    // Legacy numeric BGG ID - redirect to SEO-friendly format
-    const supabase = await getSupabaseServerClient()
-    const { data: game } = await supabase
-      .from('games')
-      .select('id, name')
-      .eq('bgg_id', parseInt(resolvedParams.slug, 10))
-      .single()
-
-    if (game) {
-      redirect(getGameUrl(game))
-    } else {
-      return notFound()
-    }
-  } else if (
+  if (
     /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
       resolvedParams.slug
     )

@@ -6,10 +6,11 @@ import Heading from '@/components/Components/Heading'
 import ZeroState from '@/components/Components/ZeroState'
 import { TrophyIcon, ChevronDownIcon } from '@heroicons/react/24/outline'
 import awardsData from '@/data/awards.json'
-import { getSupabaseServerClient } from '@/lib/supabaseServer'
 // Removed IndustryAwards component in favor of direct AwardCard composition (subset of AwardCard story patterns)
 import AwardCard from '@/components/Components/AwardCard'
 import AwardsSearchBar from './AwardsSearchBar'
+import { searchAwards, type AwardsApiAward } from '@/lib/awardsApi'
+import { getAwardsForSet } from '@/lib/awardsCache'
 
 // Award categories loaded from JSON (icon string mapped to actual component below)
 const AWARD_CATEGORIES = (awardsData as any).categories.map((c: any) => ({
@@ -27,57 +28,25 @@ const AWARD_CATEGORIES = (awardsData as any).categories.map((c: any) => ({
   website: string
 }>
 
+function resolveAwardStatus(award: AwardsApiAward) {
+  if (award.isWinner) return 'Winner'
+  if (award.isNominee) return 'Nominee'
+  const position = (award.position || '').toLowerCase()
+  if (position.includes('winner')) return 'Winner'
+  if (position.includes('nominee')) return 'Nominee'
+  if (position.includes('recommended') || position.includes('special'))
+    return 'Special'
+  return 'Other'
+}
+
 // Debug helper: build per-year breakdown for an award type
 async function getAwardYearBreakdown(awardType: string) {
-  const supabase = await getSupabaseServerClient()
-
   try {
-    let searchPattern = awardType
-
-    if (awardType === 'Golden Geek Awards') {
-      searchPattern = '%Golden Geek%'
-    } else if (awardType === 'Charles S. Roberts') {
-      searchPattern = '%Charles S. Roberts%'
-    } else if (awardType === 'Spiel des Jahres') {
-      searchPattern = '%Spiel des Jahres%'
-    } else if (awardType === 'Kinderspiel des Jahres') {
-      searchPattern = '%Kinderspiel des Jahres%'
-    } else if (awardType === 'Kennerspiel des Jahres') {
-      searchPattern = '%Kennerspiel des Jahres%'
-    } else if (awardType === 'Deutscher Spiele Preis') {
-      searchPattern = '%Deutscher Spiele Preis%'
-    } else if (awardType === 'Origins Awards') {
-      searchPattern = '%Origins%'
-    } else if (awardType === 'The Dice Tower Gaming Awards') {
-      searchPattern = '%Dice Tower%'
-    } else if (awardType === "As d'Or - Jeu de l'Année") {
-      searchPattern = "%As d'Or%"
-    } else {
-      const mainName = awardType.split(' ')[0]
-      searchPattern = `%${mainName}%`
-    }
-
-    const { data: awards, error } = await supabase
-      .from('industry_awards')
-      .select(
-        `
-        id,
-        year,
-        award_set,
-        category,
-        status,
-        boardgames
-      `
-      )
-      .ilike('award_set', searchPattern)
-      .order('year', { ascending: false })
-
-    if (error) {
-      console.error('Error fetching award year breakdown:', error)
-      return []
-    }
-
-    if (!awards || awards.length === 0) {
+    const awards = await getAwardsForSet(awardType, async () => {
+      const res = await searchAwards({ search: awardType, award_set: awardType })
+      return res.Response === 'True' ? res.awards || [] : []
+    })
+    if (awards.length === 0) {
       return []
     }
 
@@ -86,25 +55,25 @@ async function getAwardYearBreakdown(awardType: string) {
       { winners: string[]; nominees: string[]; special: string[] }
     >()
 
-    awards.forEach((award: any) => {
+    awards.forEach((award) => {
+      const year = award.year
+      if (!year) return
+      if (!yearMap.has(year)) {
+        yearMap.set(year, { winners: [], nominees: [], special: [] })
+      }
+      const bucket = yearMap.get(year)!
+      const status = resolveAwardStatus(award)
       const boardgames = award.boardgames || []
 
-      boardgames.forEach((boardgame: any) => {
-        if (!yearMap.has(award.year)) {
-          yearMap.set(award.year, { winners: [], nominees: [], special: [] })
-        }
-
-        const bucket = yearMap.get(award.year)!
-
-        if (award.status === 'Winner') {
-          if (!bucket.winners.includes(boardgame.name))
-            bucket.winners.push(boardgame.name)
-        } else if (award.status === 'Nominee') {
-          if (!bucket.nominees.includes(boardgame.name))
-            bucket.nominees.push(boardgame.name)
+      boardgames.forEach((boardgame) => {
+        const name = boardgame?.name?.trim()
+        if (!name) return
+        if (status === 'Winner') {
+          if (!bucket.winners.includes(name)) bucket.winners.push(name)
+        } else if (status === 'Nominee') {
+          if (!bucket.nominees.includes(name)) bucket.nominees.push(name)
         } else {
-          if (!bucket.special.includes(boardgame.name))
-            bucket.special.push(boardgame.name)
+          if (!bucket.special.includes(name)) bucket.special.push(name)
         }
       })
     })
@@ -131,44 +100,11 @@ interface AwardStats {
 
 async function getAwardStats(awardType: string): Promise<AwardStats> {
   try {
-    const supabase = await getSupabaseServerClient()
-
-    let searchPattern = awardType
-
-    if (awardType === 'Golden Geek Awards') {
-      searchPattern = '%Golden Geek%'
-    } else if (awardType === 'Charles S. Roberts') {
-      searchPattern = '%Charles S. Roberts%'
-    } else if (awardType === 'Spiel des Jahres') {
-      searchPattern = '%Spiel des Jahres%'
-    } else if (awardType === 'Kinderspiel des Jahres') {
-      searchPattern = '%Kinderspiel des Jahres%'
-    } else if (awardType === 'Kennerspiel des Jahres') {
-      searchPattern = '%Kennerspiel des Jahres%'
-    } else if (awardType === 'Deutscher Spiele Preis') {
-      searchPattern = '%Deutscher Spiele Preis%'
-    } else if (awardType === 'Origins Awards') {
-      searchPattern = '%Origins%'
-    } else if (awardType === 'The Dice Tower Gaming Awards') {
-      searchPattern = '%Dice Tower%'
-    } else if (awardType === "As d'Or - Jeu de l'Année") {
-      searchPattern = "%As d'Or%"
-    } else {
-      const mainName = awardType.split(' ')[0]
-      searchPattern = `%${mainName}%`
-    }
-
-    const { data: awards, error } = await supabase
-      .from('industry_awards')
-      .select('year, status, category')
-      .ilike('award_set', searchPattern)
-
-    if (error) {
-      console.error('Error fetching award stats:', error)
-      return { categories: 0, winners: 0, nominees: 0, yearSpan: '' }
-    }
-
-    if (!awards || awards.length === 0) {
+    const awards = await getAwardsForSet(awardType, async () => {
+      const res = await searchAwards({ search: awardType, award_set: awardType })
+      return res.Response === 'True' ? res.awards || [] : []
+    })
+    if (awards.length === 0) {
       return { categories: 0, winners: 0, nominees: 0, yearSpan: '' }
     }
 
@@ -177,20 +113,23 @@ async function getAwardStats(awardType: string): Promise<AwardStats> {
     let nominees = 0
     const perYear = new Map<number, { cats: Set<string>; winners: number }>()
 
-    awards.forEach((award: { year: number; status: string; category?: string | null }) => {
-      years.add(award.year)
-      if (!perYear.has(award.year)) {
-        perYear.set(award.year, { cats: new Set<string>(), winners: 0 })
+    awards.forEach((award) => {
+      const year = award.year
+      if (!year) return
+      years.add(year)
+      if (!perYear.has(year)) {
+        perYear.set(year, { cats: new Set<string>(), winners: 0 })
       }
-      const entry = perYear.get(award.year)!
-      const cat = (award.category || '').toString().trim()
+      const entry = perYear.get(year)!
+      const cat = (award.title || '').toString().trim()
       if (cat && !/^(overall|game of the year)$/i.test(cat)) {
         entry.cats.add(cat)
       }
-      if (award.status === 'Winner') {
+      const status = resolveAwardStatus(award)
+      if (status === 'Winner') {
         winners += 1
         entry.winners += 1
-      } else if (/^(Nominee|Recommended|Special)$/i.test(award.status || '')) {
+      } else if (status === 'Nominee' || status === 'Special') {
         nominees += 1
       }
     })
@@ -243,7 +182,25 @@ export default async function AwardsPage({
   )
   const allStats = await Promise.all(statsPromises)
 
-  const debugEnabled = params?.debug === '1' || params?.debug === 'true'
+  // Debug mode is gated to admin users only
+  let debugEnabled = false
+  if (params?.debug === '1' || params?.debug === 'true') {
+    try {
+      const { getSupabaseServerClient } = await import('@/lib/supabaseServer')
+      const supabase = await getSupabaseServerClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('is_admin')
+          .eq('id', user.id)
+          .single()
+        debugEnabled = !!profile?.is_admin
+      }
+    } catch {
+      debugEnabled = false
+    }
+  }
   let debugData: Array<{
     id: string
     name: string
@@ -308,8 +265,7 @@ export default async function AwardsPage({
               <ZeroState
                 title="No awards found"
                 description="Try a different search to find awards or award categories."
-                ctaText="Clear search"
-                ctaLink="/awards"
+                action={{ label: 'Clear search', href: '/awards' }}
               />
             </div>
           )}
@@ -322,9 +278,9 @@ export default async function AwardsPage({
               Award Data
             </Heading>
             <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-              Showing per-year breakdown sourced directly from games.honors.
-              Duplicate game appearances in multiple categories are shown unless
-              de-duplicated in import logic.
+              Showing per-year breakdown sourced from AwardsAPI. Duplicate game
+              appearances in multiple categories are shown unless de-duplicated
+              in import logic.
             </p>
             <div className="space-y-10 text-left">
               {debugData.map((block) => (

@@ -14,7 +14,6 @@ const PUNCTUATION_REGEX = /[^A-Za-z0-9\s]/g
 // We purposely allow extra unknown keys but type the ones we use.
 interface RawSearchGame {
   id: string
-  bgg_id: number
   name: string
   year_published: number | null
   image_url: string | null
@@ -27,7 +26,6 @@ interface RawSearchGame {
   publisher: string | null
   description: string | null
   summary: string | null
-  rank: number | null
   rating: number | null
   num_ratings: number | null
   cached_at: string | null
@@ -78,9 +76,9 @@ export async function searchGamesDatabase(
         }
 
         const games: GameWithRanking[] = rawData
-          .map<GameWithRanking>((game) => {
+          .map((game) => {
             const ranking = rankings.find((r) => r.game_id === game.id) || null
-            return { ...game, ranking }
+            return { ...game, ranking } as GameWithRanking
           })
           .slice(offset, offset + limit)
 
@@ -211,14 +209,14 @@ export async function searchGamesFallback(
         (aNameLower === queryLower && bNameLower === queryLower) ||
         (aStartsWith && bStartsWith)
       ) {
-        const aRank = a.rank || 99999
-        const bRank = b.rank || 99999
+        const aRank = (a as any).rank || 99999
+        const bRank = (b as any).rank || 99999
         return aRank - bRank
       }
 
       // For partial matches, prioritize those with better ranks
-      const aRank = a.rank || 99999
-      const bRank = b.rank || 99999
+      const aRank = (a as any).rank || 99999
+      const bRank = (b as any).rank || 99999
 
       // If rank difference is significant, use that
       if (Math.abs(aRank - bRank) > 1000) {

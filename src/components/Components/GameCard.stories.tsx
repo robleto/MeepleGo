@@ -24,7 +24,6 @@ const RouterWrapper = ({ children }: { children: React.ReactNode }) => {
 
 const mockGame = {
   id: '1',
-  bgg_id: 12345,
   name: 'Wingspan',
   year_published: 2019,
   image_url:

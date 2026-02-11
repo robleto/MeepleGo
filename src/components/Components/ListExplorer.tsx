@@ -282,7 +282,7 @@ export default function ListExplorer({
               stickyHeader
                 ? `sticky top-0 z-20 pt-0 pb-2 sm:pb-3 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 backdrop-blur transition-colors duration-200 ${
                     isHeaderStuck
-                      ? 'bg-gray-50/96 border-b border-gray-200/70'
+                      ? 'bg-gray-50/96 dark:bg-slate-900/95 border-b border-gray-200/70 dark:border-slate-700/80'
                       : 'bg-transparent border-b border-transparent'
                   }`
                 : ''
@@ -312,12 +312,12 @@ export default function ListExplorer({
         </>
       )}
       {loading && (
-        <div className="flex items-center justify-center py-12 text-gray-500">
+        <div className="flex items-center justify-center py-12 text-gray-500 dark:text-gray-400">
           Loading…
         </div>
       )}
       {error && !loading && (
-        <div className="bg-red-50 border border-red-200 rounded-md p-4 text-red-800">
+        <div className="bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/60 rounded-md p-4 text-red-800 dark:text-red-300">
           {error}
         </div>
       )}
@@ -361,7 +361,7 @@ export default function ListExplorer({
                 })}
               </div>
             ) : (
-              <div className="divide-y divide-gray-100 bg-white overflow-hidden sm:rounded-lg sm:border sm:border-gray-200 sm:dark:border-gray-800">
+              <div className="divide-y divide-gray-100 dark:divide-slate-800 bg-white dark:bg-slate-900/70 overflow-hidden sm:rounded-lg sm:border sm:border-gray-200 sm:dark:border-slate-700">
                 {getListItemControls && hasExplicitListOrder && onReorder ? (
                   <DndContext
                     sensors={sensors}
@@ -455,13 +455,13 @@ export default function ListExplorer({
           </div>
         ))}
       {!loading && !error && filteredGames.length === 0 && (
-        <div className="py-16 text-center text-gray-500">
+        <div className="py-16 text-center text-gray-500 dark:text-gray-400">
           <div className="mb-4">{emptyMessage?.icon}</div>
-          <h3 className="text-lg font-semibold mb-2">
+          <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-gray-100">
             {emptyMessage?.title || 'No games found'}
           </h3>
           {emptyMessage?.body && (
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
               {emptyMessage.body}
             </p>
           )}

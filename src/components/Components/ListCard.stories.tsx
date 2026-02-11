@@ -5,7 +5,6 @@ import { GameListWithItems } from '@/types/supabase'
 const mockGames = [
   {
     id: '1',
-    bgg_id: 266192,
     name: 'Wingspan',
     year_published: 2019,
     image_url:
@@ -33,7 +32,6 @@ const mockGames = [
   },
   {
     id: '2',
-    bgg_id: 230802,
     name: 'Azul',
     year_published: 2017,
     image_url:
@@ -57,7 +55,6 @@ const mockGames = [
   },
   {
     id: '3',
-    bgg_id: 9209,
     name: 'Ticket to Ride',
     year_published: 2004,
     image_url:
@@ -81,7 +78,6 @@ const mockGames = [
   },
   {
     id: '4',
-    bgg_id: 148228,
     name: 'Splendor',
     year_published: 2014,
     image_url:
@@ -106,7 +102,6 @@ const mockGames = [
   },
   {
     id: '5',
-    bgg_id: 13,
     name: 'Catan',
     year_published: 1995,
     image_url:

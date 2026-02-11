@@ -18,20 +18,14 @@ export async function GET(req: NextRequest) {
 			const supabase = await getSupabaseServerClient()
 			const { error } = await supabase.auth.exchangeCodeForSession(code)
 			if (error) {
-				const errorUrl = new URL('/login', url.origin)
-				errorUrl.searchParams.set('error', error.message)
-				return NextResponse.redirect(errorUrl)
+				const redirectUrl = new URL('/login', url.origin)
+				redirectUrl.searchParams.set('error', error.message)
+				return NextResponse.redirect(redirectUrl)
 			}
 
 			const type = url.searchParams.get('type')
 			const next = url.searchParams.get('next')
 			const destination = type === 'recovery' ? '/update-password' : next || '/'
-
-			const forwardedHost = req.headers.get('x-forwarded-host')
-			const isLocalEnv = process.env.NODE_ENV === 'development'
-			if (!isLocalEnv && forwardedHost) {
-				return NextResponse.redirect(`https://${forwardedHost}${destination}`)
-			}
 			return NextResponse.redirect(new URL(destination, url.origin))
 		}
 	} catch {

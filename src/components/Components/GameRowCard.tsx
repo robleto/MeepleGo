@@ -332,13 +332,13 @@ export default function GameRowCard({
   return (
     <div
       className={cn(
-        'flex items-center gap-3 py-2 px-3 rounded-md relative',
-        index % 2 === 1 && 'bg-gray-50'
+        'flex items-center gap-2 sm:gap-3 py-2 px-2 sm:px-3 rounded-md relative text-gray-900 dark:text-gray-100',
+        index % 2 === 1 && 'bg-gray-50 dark:bg-slate-800/70'
       )}
     >
       {/* Left clickable region */}
       <div
-        className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer hover:bg-gray-50 rounded-md -m-1.5 p-1.5"
+        className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0 cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-800 rounded-md -m-1.5 p-1.5"
         onClick={() => {
           if (onClick) onClick()
           else {
@@ -363,7 +363,7 @@ export default function GameRowCard({
               type="button"
               title="Drag to reorder"
               aria-label="Drag to reorder"
-              className="flex items-center justify-center w-6 h-6 text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing"
+              className="flex items-center justify-center w-6 h-6 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 cursor-grab active:cursor-grabbing"
               onClick={(e) => e.stopPropagation()}
               ref={dragHandleProps?.setActivatorNodeRef as any}
               {...(dragHandleProps?.attributes || {})}
@@ -387,7 +387,7 @@ export default function GameRowCard({
             </button>
           )}
           {showIndex && (
-            <div className="w-8 text-xs font-semibold text-center text-gray-500 select-none tabular-nums">
+            <div className="w-7 sm:w-8 text-xs font-semibold text-center text-gray-500 dark:text-gray-400 select-none tabular-nums">
               {listRank != null ? listRank : index + 1}
             </div>
           )}
@@ -395,7 +395,7 @@ export default function GameRowCard({
 
         {/* Game thumbnail (consistent with GameCard proportions) */}
         <div
-          className={`relative ${imageSize} flex-shrink-0 rounded-md overflow-hidden bg-gray-100 border border-gray-200`}
+          className={`relative ${imageSize} flex-shrink-0 rounded-md overflow-hidden bg-gray-100 dark:bg-slate-800 border border-gray-200 dark:border-slate-700`}
         >
           <GameImage
             src={game.thumbnail_url}
@@ -411,18 +411,18 @@ export default function GameRowCard({
           <h3 className="flex items-center gap-2 text-sm font-semibold leading-tight">
             {game.name}
             {density === 'compact' && (
-              <span className="text-[11px] text-gray-400 font-medium tabular-nums">
+              <span className="text-[11px] text-gray-400 dark:text-gray-500 font-medium tabular-nums">
                 {formatYear(game.year_published)}
               </span>
             )}
           </h3>
           {density === 'expanded' && showTagline && game.tagline && (
-            <div className="text-xs text-gray-600 leading-snug mt-0.5">
+            <div className="text-xs text-gray-600 dark:text-gray-300 leading-snug mt-0.5">
               {game.tagline}
             </div>
           )}
           {density !== 'compact' && (
-            <div className="text-[10px] sm:text-xs text-gray-500 flex gap-3 mt-0.5 leading-tight">
+            <div className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 flex gap-2 sm:gap-3 mt-0.5 leading-tight">
               <span className="truncate">
                 {formatYear(game.year_published)}
               </span>
@@ -471,7 +471,7 @@ export default function GameRowCard({
         open={showQuickMenu}
         anchorRect={quickMenuAnchor}
         style={quickMenuStyle}
-        triggerRef={quickMenuButtonRef}
+        triggerRef={quickMenuButtonRef as React.RefObject<HTMLElement>}
         onRequestClose={() => setShowQuickMenu(false)}
         playedIt={playedIt}
         wantToPlayActive={wantToPlayActive}
@@ -519,7 +519,7 @@ export default function GameRowCard({
       />
 
       {/* Right-side actions (match GameCard overlay pill) */}
-      <div className="flex items-center gap-2 pl-2 ml-auto">
+      <div className="flex items-center gap-1 sm:gap-2 pl-1 sm:pl-2 ml-auto shrink-0">
         {hotTakeDelta != null && !Number.isNaN(hotTakeDelta) && (
           <GameCardDeltaBadge delta={hotTakeDelta} />
         )}
@@ -544,7 +544,7 @@ export default function GameRowCard({
                 variant="subtle"
               />
             ) : (
-              <span className="inline-flex items-center justify-center text-gray-400 bg-gray-100 rounded-full w-7 h-7 ring-1 ring-inset ring-gray-200">
+              <span className="inline-flex items-center justify-center text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-slate-800 rounded-full w-7 h-7 ring-1 ring-inset ring-gray-200 dark:ring-slate-700">
                 <StarIcon className="h-3.5 w-3.5" />
               </span>
             )}
@@ -561,7 +561,7 @@ export default function GameRowCard({
             ) : null}
           </div>
         )}
-        <div className="inline-flex items-center overflow-hidden border border-gray-200 rounded-lg shadow-sm bg-gray-50">
+        <div className="inline-flex items-center overflow-hidden border border-gray-200 dark:border-slate-700 rounded-lg shadow-sm bg-gray-50 dark:bg-slate-800">
           <button
             onClick={(e) => {
               e.stopPropagation()
@@ -573,8 +573,10 @@ export default function GameRowCard({
               }
             }}
             className={cn(
-              'w-8 h-7 flex items-center justify-center transition-colors',
-              playedIt ? 'text-gray-800' : 'text-gray-600 hover:text-gray-800'
+              'w-7 sm:w-8 h-7 flex items-center justify-center transition-colors',
+              playedIt
+                ? 'text-gray-800 dark:text-gray-100'
+                : 'text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100'
             )}
             title={playedIt ? 'Played' : 'Mark as played'}
             aria-label="Mark as played"
@@ -582,7 +584,7 @@ export default function GameRowCard({
             <span
               className={cn(
                 'w-5 h-5 rounded-md flex items-center justify-center',
-                playedIt ? 'bg-white/80' : 'bg-transparent'
+                playedIt ? 'bg-white/80 dark:bg-slate-700' : 'bg-transparent'
               )}
             >
               <PlayIcon className="w-3.5 h-3.5" />
@@ -595,10 +597,10 @@ export default function GameRowCard({
               await openCollectionStepper()
             }}
             className={cn(
-              'w-8 h-7 flex items-center justify-center transition-colors border-l border-gray-200',
+              'w-7 sm:w-8 h-7 flex items-center justify-center transition-colors border-l border-gray-200 dark:border-slate-700',
               membership.library
-                ? 'text-gray-800'
-                : 'text-gray-600 hover:text-gray-800'
+                ? 'text-gray-800 dark:text-gray-100'
+                : 'text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100'
             )}
             title={membership.library ? 'Owned' : 'Mark as owned'}
             aria-label="Mark as owned"
@@ -607,7 +609,7 @@ export default function GameRowCard({
             <span
               className={cn(
                 'w-5 h-5 rounded-md flex items-center justify-center',
-                membership.library ? 'bg-white/80' : 'bg-transparent'
+                membership.library ? 'bg-white/80 dark:bg-slate-700' : 'bg-transparent'
               )}
             >
               <BookOpenIcon className="w-3.5 h-3.5" />
@@ -620,8 +622,8 @@ export default function GameRowCard({
               openQuickMenu()
             }}
             className={cn(
-              'w-8 h-7 flex items-center justify-center transition-colors border-l border-gray-200',
-              'text-gray-600 hover:text-gray-800'
+              'w-7 sm:w-8 h-7 flex items-center justify-center transition-colors border-l border-gray-200 dark:border-slate-700',
+              'text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100'
             )}
             title="More actions"
             aria-label="More actions"
@@ -675,18 +677,18 @@ export default function GameRowCard({
       {showPlayLog && (
         <div className="fixed inset-0 z-[120] flex items-center justify-center">
           <div
-            className="absolute inset-0 bg-black/40"
+            className="absolute inset-0 bg-black/40 dark:bg-black/55"
             onClick={() => setShowPlayLog(false)}
           />
-          <div className="relative w-full max-w-lg mx-auto bg-white rounded-2xl shadow-xl p-6 overflow-y-auto max-h-[90vh]">
+          <div className="relative w-full max-w-lg mx-auto bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-slate-700 rounded-2xl shadow-xl p-6 overflow-y-auto max-h-[90vh]">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold">Log a Play</h2>
               <button
                 onClick={() => setShowPlayLog(false)}
-                className="p-2 rounded-md hover:bg-gray-100"
+                className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-slate-800"
                 aria-label="Close"
               >
-                <XMarkIcon className="w-6 h-6 text-gray-500" />
+                <XMarkIcon className="w-6 h-6 text-gray-500 dark:text-gray-300" />
               </button>
             </div>
             <PlayLogEditor

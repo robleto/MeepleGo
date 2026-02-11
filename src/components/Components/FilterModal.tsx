@@ -209,18 +209,18 @@ export const FilterModal: React.FC<FilterModalProps> = ({
           className="absolute top-4 right-4 z-10 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
           aria-label="Close"
         >
-          <XMarkIcon className="w-6 h-6 text-gray-500" />
+          <XMarkIcon className="w-6 h-6 text-gray-500 dark:text-gray-400" />
         </button>
-        <div className="p-6 space-y-6">
+        <div className="p-6 space-y-6 text-gray-900 dark:text-gray-100">
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-medium">Filters</h3>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Filters</h3>
             </div>
 
             {/* Active Filters Summary */}
             {hasActiveFilters && (
-              <div className="bg-gray-50 rounded-lg p-3 space-y-2 border border-gray-200">
-                <div className="text-xs font-medium text-gray-700 uppercase tracking-wide">
+              <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 space-y-2 dark:border-gray-700 dark:bg-gray-800">
+                <div className="text-xs font-medium text-gray-700 uppercase tracking-wide dark:text-gray-300">
                   Active Filters ({activeFilters.length})
                 </div>
                 <div className="flex flex-wrap gap-1.5">
@@ -229,7 +229,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({
                     <button
                       key={filter.id}
                       onClick={filter.onRemove}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs bg-white border border-gray-200 text-gray-700 shadow-sm hover:bg-red-50 hover:border-red-300 hover:text-red-700 transition-all duration-200 group cursor-pointer"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs bg-white border border-gray-200 text-gray-700 shadow-sm hover:bg-red-50 hover:border-red-300 hover:text-red-700 transition-all duration-200 group cursor-pointer dark:bg-gray-900 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-red-900/25 dark:hover:border-red-700 dark:hover:text-red-300"
                       title={`Remove: ${filter.label}`}
                     >
                       <span className="font-medium">{filter.label}</span>
@@ -253,10 +253,10 @@ export const FilterModal: React.FC<FilterModalProps> = ({
             )}
             <div>
               <label className="flex items-center gap-2 text-sm font-medium mb-2">
-                <ArrowsUpDownIcon className="w-4 h-4 text-gray-500" />
+                <ArrowsUpDownIcon className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                 Sort by{' '}
                 {sortBy === defaultSortBy && sortOrder === defaultSortOrder && (
-                  <span className="ml-1 text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 uppercase tracking-wide">
+                  <span className="ml-1 text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 uppercase tracking-wide dark:bg-gray-800 dark:text-gray-400">
                     Default
                   </span>
                 )}
@@ -265,7 +265,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as SortKey)}
-                  className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
+                  className="flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
                 >
                   {SORT_OPTIONS.map((o) => (
                     <option key={o.value} value={o.value}>
@@ -277,7 +277,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({
                   onClick={() =>
                     setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
                   }
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 text-sm"
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-300 text-sm text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-800"
                   title={sortOrder === 'asc' ? 'Ascending' : 'Descending'}
                 >
                   <ChevronUpDownIcon className="w-4 h-4" />{' '}
@@ -291,19 +291,19 @@ export const FilterModal: React.FC<FilterModalProps> = ({
                 <label className="block text-sm font-medium mb-2">
                   View{' '}
                   {viewMode === defaultViewMode && (
-                    <span className="ml-1 text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 uppercase tracking-wide">
+                    <span className="ml-1 text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 uppercase tracking-wide dark:bg-gray-800 dark:text-gray-400">
                       Default
                     </span>
                   )}
                 </label>
-                <div className="flex rounded-lg border border-gray-300 bg-gray-50 p-1">
+                <div className="flex rounded-lg border border-gray-300 bg-gray-50 p-1 dark:border-gray-600 dark:bg-gray-800">
                   <button
                     type="button"
                     onClick={() => setViewMode('grid')}
                     className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all ${
                       viewMode === 'grid'
-                        ? 'bg-white text-gray-900 shadow-sm'
-                        : 'text-gray-600 hover:text-gray-900'
+                        ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-700 dark:text-gray-100'
+                        : 'text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
                     }`}
                   >
                     <Squares2X2Icon className="w-4 h-4" /> Grid
@@ -313,8 +313,8 @@ export const FilterModal: React.FC<FilterModalProps> = ({
                     onClick={() => setViewMode('list')}
                     className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all ${
                       viewMode === 'list'
-                        ? 'bg-white text-gray-900 shadow-sm'
-                        : 'text-gray-600 hover:text-gray-900'
+                        ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-700 dark:text-gray-100'
+                        : 'text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'
                     }`}
                   >
                     <ListBulletIcon className="w-4 h-4" /> List
@@ -328,15 +328,15 @@ export const FilterModal: React.FC<FilterModalProps> = ({
                   <label className="block text-sm font-medium mb-2">
                     Density{' '}
                     {cardVariant === defaultCardVariant && (
-                      <span className="ml-1 text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 uppercase tracking-wide">
+                      <span className="ml-1 text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 uppercase tracking-wide dark:bg-gray-800 dark:text-gray-400">
                         Default
                       </span>
                     )}
                   </label>
-                  <div className="flex rounded-lg border border-gray-300 bg-gray-50 p-1">
+                  <div className="flex rounded-lg border border-gray-300 bg-gray-50 p-1 dark:border-gray-600 dark:bg-gray-800">
                     <button
                       type="button"
-                      className={`flex-1 flex items-center justify-center px-2 py-2 rounded-md text-sm font-medium transition-all ${cardVariant === 'detailed' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'}`}
+                      className={`flex-1 flex items-center justify-center px-2 py-2 rounded-md text-sm font-medium transition-all ${cardVariant === 'detailed' ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-700 dark:text-gray-100' : 'text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'}`}
                       onClick={() => setCardVariant('detailed')}
                       title="Detailed cards"
                     >
@@ -344,7 +344,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({
                     </button>
                     <button
                       type="button"
-                      className={`flex-1 flex items-center justify-center px-2 py-2 rounded-md text-sm font-medium transition-all ${cardVariant === 'balanced' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'}`}
+                      className={`flex-1 flex items-center justify-center px-2 py-2 rounded-md text-sm font-medium transition-all ${cardVariant === 'balanced' ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-700 dark:text-gray-100' : 'text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'}`}
                       onClick={() => setCardVariant('balanced')}
                       title="Balanced cards"
                     >
@@ -352,7 +352,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({
                     </button>
                     <button
                       type="button"
-                      className={`flex-1 flex items-center justify-center px-2 py-2 rounded-md text-sm font-medium transition-all ${cardVariant === 'compact' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'}`}
+                      className={`flex-1 flex items-center justify-center px-2 py-2 rounded-md text-sm font-medium transition-all ${cardVariant === 'compact' ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-700 dark:text-gray-100' : 'text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100'}`}
                       onClick={() => setCardVariant('compact')}
                       title="Compact cards"
                     >
@@ -364,10 +364,10 @@ export const FilterModal: React.FC<FilterModalProps> = ({
             </div>
             <div>
               <label className="flex items-center gap-2 text-sm font-medium mb-2">
-                <RectangleGroupIcon className="w-4 h-4 text-gray-500" />
+                <RectangleGroupIcon className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                 Group by{' '}
                 {groupBy === defaultGroupBy && (
-                  <span className="ml-1 text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 uppercase tracking-wide">
+                  <span className="ml-1 text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 uppercase tracking-wide dark:bg-gray-800 dark:text-gray-400">
                     Default
                   </span>
                 )}
@@ -376,7 +376,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({
                 <select
                   value={groupBy}
                   onChange={(e) => setGroupBy(e.target.value as GroupKey)}
-                  className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
+                  className="flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
                 >
                   {GROUP_OPTIONS.map((o) => (
                     <option key={o.value} value={o.value}>
@@ -391,7 +391,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({
                         groupSortOrder === 'asc' ? 'desc' : 'asc'
                       )
                     }
-                    className="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 text-sm"
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-300 text-sm text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-800"
                     title={`Groups: ${groupSortOrder === 'asc' ? 'A → Z' : 'Z → A'}`}
                   >
                     <ChevronUpDownIcon className="w-4 h-4" />{' '}
@@ -405,13 +405,13 @@ export const FilterModal: React.FC<FilterModalProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="flex items-center gap-2 text-sm font-medium mb-2">
-                  <FunnelIcon className="w-4 h-4 text-gray-500" />
+                  <FunnelIcon className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                   Filter by
                 </label>
                 <select
                   value={filterType}
                   onChange={(e) => setFilterType(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
+                  className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
                 >
                   <option value="none">No filter</option>
                   <option value="year">Year</option>
@@ -423,12 +423,12 @@ export const FilterModal: React.FC<FilterModalProps> = ({
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">Value</label>
+                <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">Value</label>
                 {filterType === 'year' && (
                   <select
                     value={filterValue}
                     onChange={(e) => setFilterValue(e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
+                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
                   >
                     \n<option value="all">All Years</option>
                     {uniqueYears.map((y) => (
@@ -443,7 +443,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({
                   <select
                     value={filterValue}
                     onChange={(e) => setFilterValue(e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
+                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
                   >
                     \n<option value="all">All Publishers</option>
                     {uniquePublishers.map((p) => (
@@ -458,7 +458,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({
                   <select
                     value={filterValue}
                     onChange={(e) => setFilterValue(e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
+                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
                   >
                     \n<option value="all">All Player Counts</option>
                     {uniquePlayerCounts.map((c) => (
@@ -473,7 +473,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({
                   <select
                     value={filterValue}
                     onChange={(e) => setFilterValue(e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
+                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
                   >
                     \n<option value="all">All Categories</option>
                     {uniqueCategories.map((c) => (
@@ -488,7 +488,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({
                   <select
                     value={filterValue}
                     onChange={(e) => setFilterValue(e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
+                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
                   >
                     \n<option value="all">All Mechanics</option>
                     {uniqueMechanics.map((m) => (
@@ -500,12 +500,12 @@ export const FilterModal: React.FC<FilterModalProps> = ({
                   </select>
                 )}
                 {filterType === 'award' && (
-                  <div className="flex items-center text-sm text-amber-600 font-medium px-3 py-2 rounded-lg bg-amber-50 border border-amber-200">
+                  <div className="flex items-center text-sm text-amber-600 font-medium px-3 py-2 rounded-lg bg-amber-50 border border-amber-200 dark:bg-amber-900/25 dark:border-amber-800 dark:text-amber-300">
                     Award-winning only
                   </div>
                 )}
                 {filterType === 'none' && (
-                  <div className="flex items-center text-sm text-gray-500 px-3 py-2 rounded-lg bg-gray-50 border border-gray-200">
+                  <div className="flex items-center text-sm text-gray-500 px-3 py-2 rounded-lg bg-gray-50 border border-gray-200 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400">
                     Choose a type above
                   </div>
                 )}

@@ -162,7 +162,6 @@ export function ListsContent({
       )
       .eq('is_public', true)
       .eq('list_type', 'custom')
-      .not('list_type', 'in', '(bgg_bestsellers,bgg_hotness,bgg_trendingplays,bgg_mostplayed)')
       .order('updated_at', { ascending: false })
       .limit(20)
 
@@ -566,7 +565,7 @@ export function ListsContent({
                                 created_at: new Date().toISOString(),
                                 game: g,
                               })),
-                            } as GameListWithItems}
+                            } as unknown as GameListWithItems}
                           />
                         )}
                         {discoveryLists.highestRanked.length > 0 && (
@@ -588,7 +587,7 @@ export function ListsContent({
                                 created_at: new Date().toISOString(),
                                 game: g,
                               })),
-                            } as GameListWithItems}
+                            } as unknown as GameListWithItems}
                           />
                         )}
                         {discoveryLists.sleeperHits.length > 0 && (
@@ -610,7 +609,7 @@ export function ListsContent({
                                 created_at: new Date().toISOString(),
                                 game: g,
                               })),
-                            } as GameListWithItems}
+                            } as unknown as GameListWithItems}
                           />
                         )}
                         {discoveryLists.hotTakes.length > 0 && (
@@ -632,7 +631,7 @@ export function ListsContent({
                                 created_at: new Date().toISOString(),
                                 game: g,
                               })),
-                            } as GameListWithItems}
+                            } as unknown as GameListWithItems}
                           />
                         )}
                         {discoveryLists.comebackGames.length > 0 && (
@@ -654,7 +653,7 @@ export function ListsContent({
                                 created_at: new Date().toISOString(),
                                 game: g,
                               })),
-                            } as GameListWithItems}
+                            } as unknown as GameListWithItems}
                           />
                         )}
                       </div>

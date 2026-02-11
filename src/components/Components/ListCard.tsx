@@ -162,7 +162,7 @@ export default function ListCard({
     <div className="relative">
       <Link
         href={getListHref()}
-        className="block bg-white dark:bg-gray-900 rounded-xl shadow hover:shadow-lg transition-shadow duration-200 group overflow-visible"
+        className="block rounded-xl border border-gray-200 bg-white shadow-sm ring-1 ring-black/5 hover:shadow-lg transition-shadow duration-200 group overflow-visible dark:border-gray-700 dark:bg-gray-900 dark:ring-white/10 dark:shadow-lg dark:shadow-black/30"
       >
         {/* Fanned Game Images Header */}
         <div className="relative h-24">

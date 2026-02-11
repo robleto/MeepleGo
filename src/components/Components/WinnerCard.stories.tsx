@@ -22,7 +22,6 @@ type Story = StoryObj<typeof meta>
 
 const mockGame: GameWithRanking = {
   id: '1',
-  bgg_id: 266192,
   name: 'Wingspan',
   year_published: 2019,
   image_url:

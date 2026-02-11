@@ -19,7 +19,7 @@ import supabase from '@/lib/supabase'
 import ListExplorer from '@/components/Components/ListExplorer'
 import { cn, getRatingLabel } from '@/utils/helpers'
 import { getRatingSubtleClass } from '@/components/Foundations/ratingColors'
-import { getSleepinessClassification } from '@/utils/sleepinessClassification'
+import { getSleepinessClassification, type SleepinessClassification } from '@/utils/sleepinessClassification'
 import PillTabs from '@/components/Components/PillTabs'
 import {
   HOT_TAKE_MIN_DELTA,
@@ -255,9 +255,8 @@ export function RankingsContent({
       const ratingCount =
         (game as any).num_ratings ??
         (game as any).game_num_ratings ??
-        (game as any).bgg_num_ratings ??
         null
-      const fallback = { level: 'unknown', label: 'Unknown', iconCount: 3 }
+      const fallback: SleepinessClassification = { level: 'unknown', label: 'Unknown', iconCount: 3 }
       const classification = getSleepinessClassification(ratingCount) || fallback
       return { game, classification }
     })
@@ -592,7 +591,7 @@ export function RankingsContent({
               viewMode={viewMode}
               setViewMode={setViewMode}
               filterType={filterType}
-              setFilterType={setFilterType}
+              setFilterType={(t: string) => setFilterType(t as typeof filterType)}
               filterValue={filterValue}
               setFilterValue={setFilterValue}
               uniqueYears={uniqueYears}
@@ -730,7 +729,7 @@ export function RankingsContent({
               viewMode={viewMode}
               setViewMode={setViewMode}
               filterType={filterType}
-              setFilterType={setFilterType}
+              setFilterType={(t: string) => setFilterType(t as typeof filterType)}
               filterValue={filterValue}
               setFilterValue={setFilterValue}
               uniqueYears={uniqueYears}

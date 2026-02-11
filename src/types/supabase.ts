@@ -4,7 +4,6 @@ export interface Database {
       games: {
         Row: {
           id: string
-          bgg_id: number
           name: string
           year_published: number | null
           image_url: string | null
@@ -17,7 +16,6 @@ export interface Database {
           publisher: string | null
           description: string | null
           summary: string | null
-          rank: number | null
           rating: number | null
           num_ratings: number | null
           source: string | null
@@ -30,7 +28,6 @@ export interface Database {
         }
         Insert: {
           id?: string
-          bgg_id: number
           name: string
           year_published?: number | null
           image_url?: string | null
@@ -43,7 +40,6 @@ export interface Database {
           publisher?: string | null
           description?: string | null
           summary?: string | null
-          rank?: number | null
           rating?: number | null
           num_ratings?: number | null
           source?: string | null
@@ -56,7 +52,6 @@ export interface Database {
         }
         Update: {
           id?: string
-          bgg_id?: number
           name?: string
           year_published?: number | null
           image_url?: string | null
@@ -69,7 +64,6 @@ export interface Database {
           publisher?: string | null
           description?: string | null
           summary?: string | null
-          rank?: number | null
           rating?: number | null
           num_ratings?: number | null
           source?: string | null
@@ -229,10 +223,6 @@ export interface Database {
             | 'library'
             | 'wishlist'
             | 'custom'
-            | 'bgg_bestsellers'
-            | 'bgg_hotness'
-            | 'bgg_trendingplays'
-            | 'bgg_mostplayed'
         }
         Update: {
           id?: string
@@ -246,10 +236,6 @@ export interface Database {
             | 'library'
             | 'wishlist'
             | 'custom'
-            | 'bgg_bestsellers'
-            | 'bgg_hotness'
-            | 'bgg_trendingplays'
-            | 'bgg_mostplayed'
         }
       }
       game_list_items: {
@@ -346,6 +332,62 @@ export interface Database {
           stale?: boolean | null
           created_at?: string | null
           updated_at?: string | null
+        }
+      }
+      awards_cache: {
+        Row: {
+          id: string
+          award_id: string
+          award_slug: string | null
+          award_url: string | null
+          award_set: string
+          year: number
+          title: string | null
+          position: string | null
+          is_winner: boolean | null
+          is_nominee: boolean | null
+          game_name: string
+          source: string
+          source_url: string | null
+          source_confidence: number | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          award_id: string
+          award_slug?: string | null
+          award_url?: string | null
+          award_set: string
+          year: number
+          title?: string | null
+          position?: string | null
+          is_winner?: boolean | null
+          is_nominee?: boolean | null
+          game_name: string
+          source?: string
+          source_url?: string | null
+          source_confidence?: number | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          award_id?: string
+          award_slug?: string | null
+          award_url?: string | null
+          award_set?: string
+          year?: number
+          title?: string | null
+          position?: string | null
+          is_winner?: boolean | null
+          is_nominee?: boolean | null
+          game_name?: string
+          source?: string
+          source_url?: string | null
+          source_confidence?: number | null
+          created_at?: string
+          updated_at?: string
         }
       }
       play_logs: {

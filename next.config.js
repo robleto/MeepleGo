@@ -1,5 +1,17 @@
 const { withSentryConfig } = require('@sentry/nextjs')
 
+const getSupabaseHostname = () => {
+  const rawUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  if (!rawUrl) return null
+  try {
+    return new URL(rawUrl).hostname
+  } catch {
+    return null
+  }
+}
+
+const supabaseHostname = getSupabaseHostname()
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   serverExternalPackages: ['@supabase/supabase-js'],
@@ -13,10 +25,32 @@ const nextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'cf.geekdo-static.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
         hostname: 'boardgamegeek.com',
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'via.placeholder.com',
+        port: '',
+        pathname: '/**',
+      },
+      ...(supabaseHostname
+        ? [
+            {
+              protocol: 'https',
+              hostname: supabaseHostname,
+              port: '',
+              pathname: '/storage/v1/object/public/**',
+            },
+          ]
+        : []),
     ],
   },
   eslint: {

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerClient } from '@supabase/ssr'
+import { createServerClient, type CookieOptions } from '@supabase/ssr'
 const listNameCache: Record<string, { slug: string; ts: number }> = {}
 
 const supabaseUrl =
@@ -10,13 +10,14 @@ const supabaseAnonKey =
 function createMiddlewareSupabaseClient(req: NextRequest, res: NextResponse) {
   return createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {
-      getAll() {
-        return req.cookies.getAll()
+      get(name: string) {
+        return req.cookies.get(name)?.value
       },
-      setAll(cookiesToSet) {
-        cookiesToSet.forEach(({ name, value, options }) => {
-          res.cookies.set(name, value, options)
-        })
+      set(name: string, value: string, options?: CookieOptions) {
+        res.cookies.set({ name, value, ...(options ?? {}) })
+      },
+      remove(name: string, options?: CookieOptions) {
+        res.cookies.set({ name, value: '', ...(options ?? {}), maxAge: 0 })
       },
     },
   })
@@ -87,28 +88,7 @@ export async function middleware(req: NextRequest) {
   const res = NextResponse.next()
   try {
     const supabase = createMiddlewareSupabaseClient(req, res)
-    const { data: { user } } = await supabase.auth.getUser()
-
-    // Protected routes: redirect unauthenticated users to login
-    const protectedPrefixes = ['/profile', '/settings', '/import']
-    const isProtected = protectedPrefixes.some((prefix) => pathname.startsWith(prefix))
-
-    if (isProtected && !user) {
-      const loginUrl = req.nextUrl.clone()
-      loginUrl.pathname = '/login'
-      loginUrl.searchParams.set('next', pathname)
-      return NextResponse.redirect(loginUrl)
-    }
-
-    // Auth pages: redirect authenticated users away from login/signup
-    const authPrefixes = ['/login', '/signup']
-    const isAuthPage = authPrefixes.some((prefix) => pathname.startsWith(prefix))
-
-    if (isAuthPage && user) {
-      const homeUrl = req.nextUrl.clone()
-      homeUrl.pathname = '/profile'
-      return NextResponse.redirect(homeUrl)
-    }
+    await supabase.auth.getUser()
   } catch {
     // Non-fatal: middleware should not block requests if Supabase is unavailable.
   }

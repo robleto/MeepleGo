@@ -28,7 +28,7 @@ export default function AwardNomineeGrid({
       {/* Single column on mobile, two columns from md up (sidebar gone = full width) */}
       <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
         {nominees.map((game, index) => (
-          <NomineeRow key={game.bgg_id ?? game.id ?? index} game={game} />
+          <NomineeRow key={game.id ?? game.name ?? index} game={game} />
         ))}
       </div>
     </div>

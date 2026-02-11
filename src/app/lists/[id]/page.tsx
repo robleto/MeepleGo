@@ -23,13 +23,6 @@ interface GameListItemWithGame {
   game: any
 }
 
-const bggDefaultDescriptions: Record<string, string> = {
-  bgg_bestsellers: 'Top-selling games on BoardGameGeek right now.',
-  bgg_hotness: 'What’s heating up on BoardGameGeek today.',
-  bgg_trendingplays: 'Games getting the most plays lately on BGG.',
-  bgg_mostplayed: 'All-time most played games on BoardGameGeek.',
-}
-
 export default function ListDetailPage() {
   const params = useParams()
   const router = useRouter()
@@ -72,7 +65,6 @@ export default function ListDetailPage() {
   const [guestActionsSincePrompt, setGuestActionsSincePrompt] = useState(0)
   const [selectedGameForGuest, setSelectedGameForGuest] = useState<SuggestionGame | null>(null)
   const [showGameModal, setShowGameModal] = useState(false)
-  const isBgg = list?.list_type?.startsWith('bgg_') ?? false
 
   useEffect(() => {
     if (!listId) return
@@ -218,7 +210,7 @@ export default function ListDetailPage() {
   if (!listId) {
     return (
       <PageLayout>
-        <div className="py-16 text-center text-gray-500">
+        <div className="py-16 text-center text-gray-500 dark:text-gray-400">
           Invalid list id.
         </div>
       </PageLayout>
@@ -228,7 +220,7 @@ export default function ListDetailPage() {
   if (loading) {
     return (
       <PageLayout>
-        <div className="py-16 text-center text-gray-500">
+        <div className="py-16 text-center text-gray-500 dark:text-gray-400">
           Loading list…
         </div>
       </PageLayout>
@@ -242,7 +234,7 @@ export default function ListDetailPage() {
           <Heading as="h1" size="lg" className="mb-4">
             List Not Found
           </Heading>
-          <p className="text-gray-600 mb-6">
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
             The list you are looking for doesn&apos;t exist or you don&apos;t
             have access.
           </p>
@@ -509,7 +501,7 @@ export default function ListDetailPage() {
         >
           {list.name}
         </Heading>
-        {!isBgg && canEdit && (
+        {canEdit && (
           <div className="ml-auto pt-1">
             <button
               onClick={() => setShowAddModal(true)}
@@ -519,20 +511,19 @@ export default function ListDetailPage() {
             </button>
             <button
               onClick={() => setEditing((e) => !e)}
-              className="inline-flex items-center gap-2 px-3 py-2 rounded-full border ml-2 text-sm font-medium bg-white hover:bg-gray-50 border-gray-200"
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-full border ml-2 text-sm font-medium bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700 border-gray-200 dark:border-slate-700 text-gray-700 dark:text-gray-200"
             >
               {editing ? 'Done' : 'Edit'}
             </button>
           </div>
         )}
       </div>
-      {(list.description ||
-        (isBgg && bggDefaultDescriptions[list.list_type as string])) && (
-        <p className="text-gray-700 text-sm max-w-3xl">
-          {list.description || bggDefaultDescriptions[list.list_type as string]}
+      {list.description && (
+        <p className="text-gray-700 dark:text-gray-300 text-sm max-w-3xl">
+          {list.description}
           <br />
           {(list.updated_at || list.created_at) && (
-            <span className="text-gray-400" suppressHydrationWarning>
+            <span className="text-gray-400 dark:text-gray-500" suppressHydrationWarning>
               Updated{' '}
               {new Date(
                 (list.updated_at || list.created_at) as string
@@ -546,8 +537,8 @@ export default function ListDetailPage() {
         </p>
       )}
       {/* Custom Order toggle under the Updated date, shown only in Edit mode */}
-      {editing && !isBgg && canEdit && (
-        <div className="mt-3 text-xs text-gray-600">
+      {editing && canEdit && (
+        <div className="mt-3 text-xs text-gray-600 dark:text-gray-400">
           <div className="inline-flex items-center gap-3 select-none">
             <label className="inline-flex items-center gap-2 select-none">
               <span>Custom Order</span>
@@ -571,7 +562,7 @@ export default function ListDetailPage() {
                   setSavingOrder('saved')
                   setTimeout(() => setSavingOrder('idle'), 1200)
                 }}
-                className={`relative inline-flex items-center h-5 w-9 rounded-full border transition-colors ${customOrder ? 'bg-sky-600 border-sky-600' : 'bg-gray-200 border-gray-300'}`}
+                className={`relative inline-flex items-center h-5 w-9 rounded-full border transition-colors ${customOrder ? 'bg-sky-600 border-sky-600' : 'bg-gray-200 dark:bg-slate-700 border-gray-300 dark:border-slate-600'}`}
                 aria-pressed={customOrder}
                 aria-label="Toggle custom order"
               >
@@ -581,13 +572,13 @@ export default function ListDetailPage() {
               </button>
             </label>
             {savingOrder !== 'idle' && (
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-gray-500 dark:text-gray-400">
                 {savingOrder === 'saving' ? 'Saving…' : 'Saved'}
               </span>
             )}
             {customOrder && (
               <button
-                className="text-xs text-gray-600 hover:text-gray-900 underline"
+                className="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 underline"
                 onClick={async () => {
                   if (!list) return
                   const snapshot = list.game_list_items
@@ -607,7 +598,7 @@ export default function ListDetailPage() {
             )}
             {customOrder && lastOrderSnapshot && (
               <button
-                className="text-xs text-gray-600 hover:text-gray-900 underline"
+                className="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 underline"
                 onClick={async () => {
                   if (!list || !lastOrderSnapshot) return
                   const byGameId = new Map((list.game_list_items || []).map((it: any) => [it.game_id, it]))
@@ -639,8 +630,8 @@ export default function ListDetailPage() {
           </div>
         </div>
       )}
-      {!isBgg && canEdit && addError && (
-        <div className="mt-2 text-xs text-red-600">{addError}</div>
+      {canEdit && addError && (
+        <div className="mt-2 text-xs text-red-600 dark:text-red-400">{addError}</div>
       )}
     </div>
   )
@@ -667,7 +658,7 @@ export default function ListDetailPage() {
           defaultViewMode="list"
           storageKeyPrefix={list?.id ? `list-${list.id}` : 'list-detail'}
           getListItemControls={
-            canEdit && editing && customOrder && !isBgg
+            canEdit && editing && customOrder
               ? (game) => {
                   const item = (sortedItems as any[]).find((i) => i.game_id === game.id)
                   if (!item) return {}
@@ -678,7 +669,7 @@ export default function ListDetailPage() {
               : undefined
           }
           onReorder={
-            canEdit && editing && customOrder && !isBgg
+            canEdit && editing && customOrder
               ? async (ids: string[]) => {
                   if (!list) return
                   // snapshot previous order for potential undo
@@ -714,37 +705,37 @@ export default function ListDetailPage() {
       </div>
 
       {/* Add to List Modal */}
-      {showAddModal && canEdit && !isBgg && (
+      {showAddModal && canEdit && (
         <Portal>
           <div
-            className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm p-0 sm:p-4"
+            className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center bg-black/40 dark:bg-black/55 backdrop-blur-sm p-0 sm:p-4"
             onClick={() => {
               setShowAddModal(false)
               setSelectedGameForAdd(null)
             }}
           >
             <div
-              className="bg-white w-full sm:max-w-xl rounded-t-2xl sm:rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[80vh]"
+              className="bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-slate-700 w-full sm:max-w-xl rounded-t-2xl sm:rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[80vh]"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header */}
-              <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-slate-700">
                 <h3 className="text-lg font-semibold">Add a Game to this List</h3>
                 <button
                   onClick={() => {
                     setShowAddModal(false)
                     setSelectedGameForAdd(null)
                   }}
-                  className="p-2 rounded-md hover:bg-gray-100"
+                  className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-slate-800"
                   aria-label="Close"
                 >
-                  <XMarkIcon className="w-6 h-6 text-gray-500" />
+                  <XMarkIcon className="w-6 h-6 text-gray-500 dark:text-gray-300" />
                 </button>
               </div>
               {/* Body */}
               <div className="p-6 flex-1 overflow-y-auto">
                 <div className="space-y-4">
-                  <p className="text-gray-600 text-sm mb-2">Search for a game to add:</p>
+                  <p className="text-gray-600 dark:text-gray-400 text-sm mb-2">Search for a game to add:</p>
                   <SearchDropdown
                     onSelect={async (game) => {
                       setSelectedGameForAdd({ id: game.id, name: game.name })
@@ -761,7 +752,7 @@ export default function ListDetailPage() {
                         setShowAddModal(false)
                         setSelectedGameForAdd(null)
                       }}
-                      className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                      className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100 transition-colors"
                     >
                       Cancel
                     </button>

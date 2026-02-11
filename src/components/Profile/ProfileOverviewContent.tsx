@@ -18,7 +18,6 @@ interface Game {
   mechanics?: string[] | null
   min_players?: number | null
   max_players?: number | null
-  bgg_rank?: number | null
 }
 
 interface RankedGame extends Game {

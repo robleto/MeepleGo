@@ -13,7 +13,6 @@ async function fetchCounts() {
     .from('games')
     .select('id', { count: 'exact', head: true })
     .is('tagline', null)
-    .not('bgg_id', 'is', null)
   const [total, tagged, missing] = await Promise.all([
     totalPromise,
     taggedPromise,
@@ -70,9 +69,8 @@ function Stat({ label, value }: { label: string; value: number }) {
 async function fetchRecentMissing(limit = 25) {
   const { data } = await supabase
     .from('games')
-    .select('id,name,bgg_id,summary')
+    .select('id,name,summary')
     .is('tagline', null)
-    .not('bgg_id', 'is', null)
     .order('updated_at', { ascending: false })
     .limit(limit)
   return data || []
@@ -92,20 +90,12 @@ async function RecentMissing() {
           <li key={r.id} className="p-3 flex items-start gap-3">
             <div className="flex-1 min-w-0">
               <div className="font-medium text-gray-800 truncate">{r.name}</div>
-              <div className="text-xs text-gray-500">BGG {r.bgg_id}</div>
               {r.summary && (
                 <div className="text-xs text-gray-400 line-clamp-2 mt-1">
                   {r.summary}
                 </div>
               )}
             </div>
-            <a
-              href={`https://boardgamegeek.com/boardgame/${r.bgg_id}`}
-              target="_blank"
-              className="text-xs text-sky-600 hover:underline"
-            >
-              BGG
-            </a>
           </li>
         ))}
       </ul>

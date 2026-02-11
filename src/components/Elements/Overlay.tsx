@@ -70,8 +70,9 @@ const Overlay = forwardRef<HTMLDivElement, OverlayProps>(
   ) => {
     if (!visible) return null
 
-    const variantClasses = {
+    const variantClasses: Record<string, string> = {
       default: 'bg-black/60',
+      dark: 'bg-black/60',
       light: 'bg-white/60',
       blur: 'bg-black/40 backdrop-blur-sm',
       transparent: 'bg-transparent',
