@@ -9,8 +9,12 @@ import { GameWithRanking } from '@/types'
 
 export function LibraryContent({
   embedded = false,
+  forcedUserId,
+  username,
 }: {
   embedded?: boolean
+  forcedUserId?: string
+  username?: string
 }) {
   const Wrapper = embedded
     ? (({ children }: { children: ReactNode }) => <>{children}</>)
@@ -26,15 +30,31 @@ export function LibraryContent({
   const fetchLibrary = async () => {
     setError(null)
     try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-      if (!session) {
-        setGames([])
-        return
+      let activeUserId: string | null = forcedUserId || null
+      if (!activeUserId) {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession()
+        if (!session) {
+          setGames([])
+          return
+        }
+        activeUserId = session.user.id
       }
-      const lists = await getOrCreateDefaultLists()
-      const libraryId = lists?.library
+      // When viewing another user's profile, look up their library list directly
+      let libraryId: string | null = null
+      if (forcedUserId) {
+        const { data: listRow } = await supabase
+          .from('game_lists')
+          .select('id')
+          .eq('user_id', forcedUserId)
+          .eq('list_type', 'library')
+          .maybeSingle()
+        libraryId = listRow?.id || null
+      } else {
+        const lists = await getOrCreateDefaultLists()
+        libraryId = lists?.library || null
+      }
       if (!libraryId) {
         setGames([])
         return
@@ -52,7 +72,7 @@ export function LibraryContent({
         const { data: rankingRows } = await supabase
           .from('rankings')
           .select('game_id, ranking, played_it')
-          .eq('user_id', session.user.id)
+          .eq('user_id', activeUserId!)
           .in('game_id', gameIds)
         rankingRows?.forEach((r) => {
           rankingsMap[r.game_id] = r
@@ -66,8 +86,10 @@ export function LibraryContent({
         list_membership: { library: true, wishlist: false },
       }))
       setGames(mapped)
-      const sets = await getMembershipSets()
-      if (sets) setMembershipSets(sets)
+      if (!forcedUserId) {
+        const sets = await getMembershipSets()
+        if (sets) setMembershipSets(sets)
+      }
     } catch (e: any) {
       console.error('Library fetch error', e)
       setError('Failed to load library.')
@@ -82,7 +104,7 @@ export function LibraryContent({
 
   const header = (
     <div>
-      <SectionHeader title="My Library" containerClassName="mb-0" />
+      <SectionHeader title={username ? `${username}'s Library` : 'My Library'} containerClassName="mb-0" />
     </div>
   )
 

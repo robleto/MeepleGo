@@ -21,12 +21,16 @@ export function ListsContent({
   showPublic = true,
   publicOnly = false,
   showDiscoveryLists = false,
+  forcedUserId,
+  username,
 }: {
   embedded?: boolean
   showDefaults?: boolean
   showPublic?: boolean
   publicOnly?: boolean
   showDiscoveryLists?: boolean
+  forcedUserId?: string
+  username?: string
 }) {
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -78,6 +82,21 @@ export function ListsContent({
         await fetchPublicLists()
         return
       }
+
+      // When viewing another user's profile, use forcedUserId directly
+      if (forcedUserId) {
+        setIsGuest(false)
+        setUserId(forcedUserId)
+        await Promise.all([
+          fetchUserLists(forcedUserId),
+          fetchPublicLists(),
+          fetchProfile(forcedUserId),
+          fetchPlayedCount(forcedUserId),
+          showDiscoveryLists ? fetchDiscoveryLists(forcedUserId) : Promise.resolve(),
+        ])
+        return
+      }
+
       const {
         data: { session },
       } = await supabase.auth.getSession()

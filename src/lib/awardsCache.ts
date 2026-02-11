@@ -50,7 +50,7 @@ export async function getAwardsCache(
       return null
     }
 
-    return (data || []) as AwardsCacheRow[]
+    return (data || []) as unknown as AwardsCacheRow[]
   } catch (error) {
     console.warn('Awards cache unavailable:', (error as Error)?.message)
     return null

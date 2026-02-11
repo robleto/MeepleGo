@@ -9,8 +9,12 @@ import { GameWithRanking } from '@/types'
 
 export function WishlistContent({
   embedded = false,
+  forcedUserId,
+  username,
 }: {
   embedded?: boolean
+  forcedUserId?: string
+  username?: string
 }) {
   const Wrapper = embedded
     ? (({ children }: { children: ReactNode }) => <>{children}</>)
@@ -26,15 +30,31 @@ export function WishlistContent({
   const fetchWishlist = async () => {
     setError(null)
     try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-      if (!session) {
-        setGames([])
-        return
+      let activeUserId: string | null = forcedUserId || null
+      if (!activeUserId) {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession()
+        if (!session) {
+          setGames([])
+          return
+        }
+        activeUserId = session.user.id
       }
-      const lists = await getOrCreateDefaultLists()
-      const wishlistId = lists?.wishlist
+      // When viewing another user's profile, look up their wishlist directly
+      let wishlistId: string | null = null
+      if (forcedUserId) {
+        const { data: listRow } = await supabase
+          .from('game_lists')
+          .select('id')
+          .eq('user_id', forcedUserId)
+          .eq('list_type', 'wishlist')
+          .maybeSingle()
+        wishlistId = listRow?.id || null
+      } else {
+        const lists = await getOrCreateDefaultLists()
+        wishlistId = lists?.wishlist || null
+      }
       if (!wishlistId) {
         setGames([])
         return
@@ -52,7 +72,7 @@ export function WishlistContent({
         const { data: rankingRows } = await supabase
           .from('rankings')
           .select('game_id, ranking, played_it')
-          .eq('user_id', session.user.id)
+          .eq('user_id', activeUserId!)
           .in('game_id', gameIds)
         rankingRows?.forEach((r) => {
           rankingsMap[r.game_id] = r
@@ -66,8 +86,10 @@ export function WishlistContent({
         list_membership: { library: false, wishlist: true },
       }))
       setGames(mapped)
-      const sets = await getMembershipSets()
-      if (sets) setMembershipSets(sets)
+      if (!forcedUserId) {
+        const sets = await getMembershipSets()
+        if (sets) setMembershipSets(sets)
+      }
     } catch (e: any) {
       console.error('Wishlist fetch error', e)
       setError('Failed to load wishlist.')
@@ -82,7 +104,7 @@ export function WishlistContent({
 
   const header = (
     <div>
-      <SectionHeader title="My Wishlist" containerClassName="mb-0" />
+      <SectionHeader title={username ? `${username}'s Wishlist` : 'My Wishlist'} containerClassName="mb-0" />
     </div>
   )
 

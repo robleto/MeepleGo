@@ -66,7 +66,11 @@ const TRENDING_GAMES: Game[] = Array.from({ length: 20 }, (_, i) => ({
   cached_at: null,
   created_at: '',
   updated_at: '',
-}))
+  source: null,
+  source_url: null,
+  source_notes: null,
+  source_confidence: null,
+})) as Game[]
 
 export default function HomepageContent() {
   const [user, setUser] = useState<any>(null)
@@ -425,7 +429,7 @@ export default function HomepageContent() {
                   recentTags: [],
                   listsCreated: 0,
                   awardsCreated: 0,
-                })
+                } as any)
               }
             }
 
@@ -493,7 +497,7 @@ export default function HomepageContent() {
                   }
                 )
 
-                setDiscoveryLists(merged)
+                setDiscoveryLists(merged as any)
                 const communityItems = (topCommunityRatedResult.data || []).map((g: any) => ({
                   game_id: g.game_id,
                   game_name: g.game_name,
@@ -558,7 +562,7 @@ export default function HomepageContent() {
                 }
 
                 // Sort by timestamp descending, take top 12
-                const topIds = [...latest.entries()]
+                const topIds = Array.from(latest.entries())
                   .sort((a, b) => b[1].localeCompare(a[1]))
                   .slice(0, 12)
                   .map(([id]) => id)

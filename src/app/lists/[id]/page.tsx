@@ -447,9 +447,9 @@ export default function ListDetailPage() {
         setSelectedGameForGuest({
           id: game.id,
           name: game.name,
-          yearPublished: game.year_published,
-          imageUrl: game.image_url,
-        })
+          year_published: game.year_published,
+          thumbnail_url: game.thumbnail_url ?? game.image_url,
+        } as any)
         setShowGameModal(true)
       }
       return
@@ -815,7 +815,7 @@ export default function ListDetailPage() {
       {selectedGameForGuest && (
         <GameOnboardingModal
           game={selectedGameForGuest}
-          visible={showGameModal}
+          open={showGameModal}
           onClose={() => {
             setShowGameModal(false)
             setSelectedGameForGuest(null)

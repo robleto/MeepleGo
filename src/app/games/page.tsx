@@ -983,7 +983,7 @@ function GamesPageContent() {
             : 'space-y-4'
           }>
             {Array.from({ length: 12 }).map((_, i) => (
-              <GameCardSkeleton key={i} viewMode={viewMode} variant={cardVariant} />
+              <GameCardSkeleton key={i} variant={viewMode} />
             ))}
           </div>
         )}

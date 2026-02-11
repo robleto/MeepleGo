@@ -488,8 +488,7 @@ export default function ProfileOverviewContent({
                 <div key={game.id} className="flex-shrink-0 w-40">
                   <div className="h-[320px]">
                     <GameCard
-                      game={game}
-                      showRating={!!game.ranking}
+                      game={game as any}
                       imageFit="contain"
                       viewMode="grid"
                       className="h-full"
@@ -529,8 +528,7 @@ export default function ProfileOverviewContent({
               {topGames.map((game) => (
                 <div key={game.id} className="flex-shrink-0 w-40 h-[320px]">
                   <GameCard
-                    game={game}
-                    showRating={true}
+                    game={game as any}
                     imageFit="contain"
                     viewMode="grid"
                     className="h-full"
@@ -561,8 +559,7 @@ export default function ProfileOverviewContent({
               {wishlistGames.map((game) => (
                 <div key={game.id} className="flex-shrink-0 w-40 h-[320px]">
                   <GameCard
-                    game={game}
-                    showRating={false}
+                    game={game as any}
                     imageFit="contain"
                     viewMode="grid"
                     className="h-full"
@@ -591,8 +588,7 @@ export default function ProfileOverviewContent({
                 <div key={game.id} className="flex-shrink-0 w-40">
                   <div className="h-[320px]">
                     <GameCard
-                      game={game}
-                      showRating={false}
+                      game={game as any}
                       imageFit="contain"
                       viewMode="grid"
                       className="h-full"

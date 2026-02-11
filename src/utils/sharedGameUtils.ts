@@ -40,7 +40,7 @@ interface LightweightRanking {
   updated_at?: string | null
 }
 
-export function useGameDataWithGuest() {
+export function useGameDataWithGuest(forcedUserId?: string) {
   const [games, setGames] = useState<GameWithRanking[]>([])
   const [loading, setLoading] = useState(true)
   const [userId, setUserId] = useState<string | null>(null)
@@ -49,17 +49,23 @@ export function useGameDataWithGuest() {
   const fetch = useCallback(async () => {
     setLoading(true)
     try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-      if (!session) {
-        setIsGuest(true)
-        setUserId(null)
-        setGames([])
-        return
+      let activeUserId: string | null = forcedUserId || null
+
+      if (!activeUserId) {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession()
+        if (!session) {
+          setIsGuest(true)
+          setUserId(null)
+          setGames([])
+          return
+        }
+        activeUserId = session.user.id
       }
+
       setIsGuest(false)
-      setUserId(session.user.id)
+      setUserId(activeUserId)
 
       // Fetch rankings with game data
       const { data, error } = await supabase
@@ -67,14 +73,14 @@ export function useGameDataWithGuest() {
         .select(
           'id, game:games(*), ranking, played_it, user_id, game_id, public_note'
         )
-        .eq('user_id', session.user.id)
+        .eq('user_id', activeUserId)
       if (error) throw error
 
       // Fetch library and wishlist memberships
       const { data: libraryData } = await supabase
         .from('game_list_items')
         .select('game_id, list:game_lists(list_type)')
-        .eq('list.user_id', session.user.id)
+        .eq('list.user_id', activeUserId)
         .in('list.list_type', ['library', 'wishlist'])
 
       // Create membership map
@@ -139,7 +145,7 @@ export function useGameDataWithGuest() {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [forcedUserId])
 
   useEffect(() => {
     fetch()
