@@ -1,18 +1,12 @@
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 import PageLayout from '@/components/Components/PageLayout'
-import Heading from '@/components/Components/Heading'
 import { getSupabaseServerClient } from '@/lib/supabaseServer'
-import { CATEGORY_CONFIGS } from '@/lib/awards/deriveUserAwards'
-import { deriveAwards } from '@/lib/awards/deriveUserAwards'
-// Updated import paths after component reorganization
+import { CATEGORY_CONFIGS, deriveAwards } from '@/lib/awards/deriveUserAwards'
 import AwardCategoryEditor from '@/components/Components/AwardCategoryEditor'
-// Replaced archived imports with new implementations
-import AwardYearSelect from '@/components/Components/Awards/AwardYearSelect'
 import AwardsRebuildButtons from '@/components/Components/Awards/AwardsRebuildButtons'
 import AwardsCustomOrderToggle from '@/components/Components/Awards/AwardsCustomOrderToggle'
 import AwardsDebugInfo from '@/components/Components/Awards/AwardsDebugInfo'
-import Link from 'next/link'
 import SessionFallback from './SessionFallback'
 
 interface AwardRow {
@@ -192,14 +186,14 @@ export default async function MyAwardsYearPage({
   return (
     <PageLayout>
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-4">
           <div>
-            <h1 className="text-xl font-semibold">My Awards {year}</h1>
-            <p className="text-xs text-gray-500">
-              Derived automatically from your rankings (played + rating ≥ 7)
+            <h1 className="font-display text-xl font-semibold text-gray-900">My Awards {year}</h1>
+            <p className="mt-0.5 text-xs text-gray-500">
+              Derived from your rankings (played + rated 7+). Edit any category below.
             </p>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 shrink-0">
             <div className="hidden sm:block">
               <AwardsCustomOrderToggle />
             </div>
@@ -216,23 +210,13 @@ export default async function MyAwardsYearPage({
               winner_id: null,
             }
             return (
-              <div
+              <AwardCategoryEditor
                 key={cfg.id}
-                className="border rounded p-4 bg-white"
-              >
-                <div className="mb-2 flex items-center justify-between">
-                  <h2 className="text-sm font-medium">{cfg.id}</h2>
-                  {'manual_override' in row && (row as any).manual_override && (
-                    <span className="text-[10px] text-amber-600">manual</span>
-                  )}
-                </div>
-                <AwardCategoryEditor
-                  year={Number(year)}
-                  row={row as any}
-                  categoryLabel={cfg.id}
-                  gameMap={gameMap}
-                />
-              </div>
+                year={Number(year)}
+                row={row as any}
+                categoryLabel={cfg.label}
+                gameMap={gameMap}
+              />
             )
           })}
         </div>

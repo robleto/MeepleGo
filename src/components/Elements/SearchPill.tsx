@@ -85,9 +85,9 @@ export default function SearchPill(props: SearchPillProps) {
 
   return (
     <div
-      className={`group flex items-center bg-white rounded-full border border-gray-300 transition shadow-sm px-3 h-11 ${className}`}
+      className={`group flex items-center rounded-full border border-gray-300 bg-white text-gray-900 transition shadow-sm px-3 h-11 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 ${className}`}
     >
-      <MagnifyingGlassIcon className="h-4 w-4 text-gray-400" />
+      <MagnifyingGlassIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
       <input
         ref={inputRef}
         type="text"
@@ -96,7 +96,7 @@ export default function SearchPill(props: SearchPillProps) {
         value={latest}
         onChange={(e) => handleImmediateEmit(e.target.value)}
         onKeyDown={handleKeyDown}
-        className="flex-1 bg-transparent outline-none px-2 text-sm placeholder:text-gray-400"
+        className="flex-1 bg-transparent px-2 text-sm text-gray-900 placeholder:text-gray-400 outline-none dark:text-gray-100 dark:placeholder:text-gray-500"
       />
       <button
         type="button"

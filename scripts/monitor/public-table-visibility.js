@@ -30,8 +30,7 @@ if (!url || !anonKey || !serviceKey) {
 // Tables expected to be publicly readable
 const PUBLIC_TABLES = [
   { name: 'games', minAnon: 1 },
-  { name: 'industry_awards', minAnon: 1 },
-  { name: 'industry_award_games', minAnon: 1 },
+  { name: 'awards_cache', minAnon: 1 },
 ]
 
 function format(n) {

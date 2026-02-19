@@ -15,7 +15,6 @@ interface Honor {
 }
 
 interface Game {
-  bgg_id: number
   honors: Honor[]
 }
 
@@ -26,7 +25,7 @@ async function getSummary() {
   while (true) {
     const { data, error } = await supabase
       .from('games')
-      .select('bgg_id, honors')
+      .select('honors')
       .range(page * pageSize, (page + 1) * pageSize - 1)
     if (error) break
     if (!data || data.length === 0) break

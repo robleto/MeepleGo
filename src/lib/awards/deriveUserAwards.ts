@@ -190,6 +190,15 @@ export const CATEGORY_CONFIGS: DerivedCategoryConfig[] = [
   },
 ]
 
+/**
+ * Resolve a human-readable label for a category ID.
+ * Returns the config label for known categories, or the raw string for custom awards.
+ */
+export function getCategoryLabel(categoryId: string): string {
+  const config = CATEGORY_CONFIGS.find((c) => c.id === categoryId)
+  return config ? config.label : categoryId
+}
+
 export interface ComputeParams {
   profileId: string
   year: number

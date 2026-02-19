@@ -98,11 +98,36 @@ function Navigation() {
   const [isCreatingList, setIsCreatingList] = useState(false)
 
   // Add game form state
-  const [gameName, setGameName] = useState('')
-  const [gameYear, setGameYear] = useState('')
-  const [gamePublisher, setGamePublisher] = useState('')
-  const [isSubmittingGame, setIsSubmittingGame] = useState(false)
-  const [gameSubmitted, setGameSubmitted] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchYear, setSearchYear] = useState('')
+  const [searching, setSearching] = useState(false)
+  const [searchResults, setSearchResults] = useState<
+    Array<{
+      wikidata_id: string
+      name: string
+      year_published?: number | null
+      publisher?: string | null
+      min_players?: number | null
+      max_players?: number | null
+      playtime_minutes?: number | null
+    }>
+  >([])
+  const [manualMode, setManualMode] = useState(false)
+  const [manualPublisher, setManualPublisher] = useState('')
+  const [manualMinPlayers, setManualMinPlayers] = useState('')
+  const [manualMaxPlayers, setManualMaxPlayers] = useState('')
+  const [manualPlaytime, setManualPlaytime] = useState('')
+  const [manualDescription, setManualDescription] = useState('')
+  const [manualImageFile, setManualImageFile] = useState<File | null>(null)
+  const [manualImageConfirmed, setManualImageConfirmed] = useState(false)
+  const [manualImageUploading, setManualImageUploading] = useState(false)
+  const [selectedToAdd, setSelectedToAdd] = useState<string | null>(null)
+  const [adding, setAdding] = useState(false)
+  const [addError, setAddError] = useState<string | null>(null)
+  const [addedGame, setAddedGame] = useState<{ id: string; name: string } | null>(
+    null
+  )
+  const [addedExisting, setAddedExisting] = useState(false)
 
   // Create list function
   const handleCreateList = async () => {
@@ -133,33 +158,389 @@ function Navigation() {
     }
   }
 
-  // Add game function
-  const handleAddGame = async () => {
-    if (!gameName.trim() || isSubmittingGame) return
+  const resetAddGameState = useCallback(() => {
+    setSearchQuery('')
+    setSearchYear('')
+    setSearching(false)
+    setSearchResults([])
+    setSelectedToAdd(null)
+    setAdding(false)
+    setAddError(null)
+    setAddedGame(null)
+    setAddedExisting(false)
+    setManualMode(false)
+    setManualPublisher('')
+    setManualMinPlayers('')
+    setManualMaxPlayers('')
+    setManualPlaytime('')
+    setManualDescription('')
+    setManualImageFile(null)
+    setManualImageConfirmed(false)
+    setManualImageUploading(false)
+  }, [])
 
-    setIsSubmittingGame(true)
+  const handleSearchAgain = useCallback(() => {
+    setAddedGame(null)
+    setAddedExisting(false)
+    setAddError(null)
+    setSelectedToAdd(null)
+    setAdding(false)
+  }, [])
+
+  const handleManualAdd = async () => {
+    if (!searchQuery.trim() || adding) return
+    setAdding(true)
+    setAddError(null)
+    setAddedGame(null)
+    setAddedExisting(false)
+
     try {
-      await fetch('/api/missing-game-request', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: gameName.trim(),
-          year: gameYear ? Number(gameYear) : null,
-          publisher: gamePublisher.trim() || null,
-        }),
-      }).catch(() => {})
-      setGameSubmitted(true)
-      setTimeout(() => {
-        setShowAddGameModal(false)
-        setGameName('')
-        setGameYear('')
-        setGamePublisher('')
-        setGameSubmitted(false)
-      }, 1100)
+      const cachedAt = new Date().toISOString()
+      const name = searchQuery.trim()
+      const year = searchYear.trim() ? Number(searchYear.trim()) : null
+
+      const existingQuery = supabase
+        .from('games')
+        .select(
+          'id, name, year_published, min_players, max_players, playtime_minutes, publisher, description, source'
+        )
+        .eq('name', name)
+
+      const { data: existing, error: existingError } = year
+        ? await existingQuery.eq('year_published', year).maybeSingle()
+        : await existingQuery.maybeSingle()
+
+      if (existingError) throw existingError
+
+      const payload = {
+        name,
+        year_published: year,
+        publisher: manualPublisher.trim() || null,
+        min_players: manualMinPlayers ? Number(manualMinPlayers) : null,
+        max_players: manualMaxPlayers ? Number(manualMaxPlayers) : null,
+        playtime_minutes: manualPlaytime ? Number(manualPlaytime) : null,
+        description: manualDescription.trim() || null,
+      }
+
+      const sourceConfidence = 0.8
+
+      if (existing) {
+        const updatePayload: Record<string, any> = {
+          cached_at: cachedAt,
+          is_active: true,
+        }
+
+        const fillIfEmpty = (field: string, value: any, allowLegacy = false) => {
+          if (value == null) return
+          const current = (existing as any)[field]
+          const emptyArray = Array.isArray(current) && current.length === 0
+          const emptyString =
+            typeof current === 'string' && current.trim().length === 0
+          const legacy =
+            allowLegacy && typeof current === 'string' && current === 'legacy_unknown'
+          if (current == null || emptyArray || emptyString || legacy) {
+            updatePayload[field] = value
+          }
+        }
+
+        Object.entries(payload).forEach(([field, value]) =>
+          fillIfEmpty(field, value)
+        )
+        fillIfEmpty('source', 'manual', true)
+        fillIfEmpty('source_confidence', sourceConfidence)
+
+        await supabase
+          .from('games')
+          .update(updatePayload as any)
+          .eq('id', existing.id)
+
+        setAddedGame({ id: existing.id, name: existing.name || name })
+        if (manualImageFile) {
+          await uploadManualImage(existing.id)
+        }
+        setAddedExisting(true)
+        return
+      }
+
+      const insertPayload = {
+        ...payload,
+        source: 'manual',
+        source_confidence: sourceConfidence,
+        cached_at: cachedAt,
+        is_active: true,
+      }
+
+      const { data: inserted, error: insertError } = await supabase
+        .from('games')
+        .insert(insertPayload as any)
+        .select('id, name')
+        .single()
+
+      if (insertError) throw insertError
+
+      setAddedGame({ id: inserted.id, name: inserted.name })
+      if (manualImageFile) {
+        await uploadManualImage(inserted.id)
+      }
+    } catch (error) {
+      console.error('Manual add error:', error)
+      setAddError('Could not add the game. Please try again.')
     } finally {
-      setIsSubmittingGame(false)
+      setAdding(false)
+      setSelectedToAdd(null)
     }
   }
+
+  const uploadManualImage = async (gameId: string) => {
+    if (!manualImageFile) return
+    if (!manualImageConfirmed) {
+      setAddError('Please confirm you have rights to upload this image.')
+      return
+    }
+
+    setManualImageUploading(true)
+    try {
+      const fileExt = manualImageFile.name.split('.').pop() || 'jpg'
+      const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`
+      const filePath = `manual/${gameId}/${fileName}`
+
+      const { error: uploadError } = await supabase.storage
+        .from('game-images')
+        .upload(filePath, manualImageFile, { upsert: true })
+
+      if (uploadError) {
+        throw uploadError
+      }
+
+      const { data: publicUrl } = supabase.storage
+        .from('game-images')
+        .getPublicUrl(filePath)
+
+      if (publicUrl?.publicUrl) {
+        await supabase
+          .from('games')
+          .update({
+            image_url: publicUrl.publicUrl,
+            thumbnail_url: publicUrl.publicUrl,
+            source: 'manual',
+            source_url: publicUrl.publicUrl,
+            source_notes: 'user-uploaded image (rights confirmed)',
+            source_confidence: 0.8,
+          } as any)
+          .eq('id', gameId)
+      }
+    } catch (error) {
+      console.error('Image upload error:', error)
+      setAddError('Image upload failed. You can retry after saving the game.')
+    } finally {
+      setManualImageUploading(false)
+    }
+  }
+
+  // Add game search
+  const handleSearch = async () => {
+    if (!searchQuery.trim() || searching) return
+
+    setSearching(true)
+    setAddError(null)
+    setSearchResults([])
+    setAddedGame(null)
+    setAddedExisting(false)
+
+    try {
+      const params = new URLSearchParams({
+        query: searchQuery.trim(),
+      })
+      if (searchYear.trim()) {
+        params.set('year', searchYear.trim())
+      }
+
+      const response = await fetch(`/api/wikidata/search?${params.toString()}`)
+      const payload = await response.json().catch(() => null)
+      if (!response.ok || !payload?.ok) {
+        const detail = payload?.status
+          ? `HTTP ${payload.status}${payload.details ? ` ${payload.details}` : ''}`
+          : null
+        const snippet = payload?.bodySnippet
+          ? ` — ${payload.bodySnippet}`
+          : null
+        setAddError(
+          payload?.error
+            ? `${payload.error}${detail ? ` (${detail})` : ''}${snippet ?? ''}`
+            : 'Search failed. Please try again.'
+        )
+        return
+      }
+
+      setSearchResults(payload.results || [])
+    } catch (error) {
+      console.error('Search error:', error)
+      setAddError('Search failed. Please try again.')
+    } finally {
+      setSearching(false)
+    }
+  }
+
+  const handleAddFromResult = async (result: {
+    wikidata_id: string
+    name: string
+  }) => {
+    if (adding) return
+    setAdding(true)
+    setSelectedToAdd(result.wikidata_id)
+    setAddError(null)
+    setAddedGame(null)
+    setAddedExisting(false)
+
+    try {
+      const response = await fetch(`/api/wikidata/entity?id=${result.wikidata_id}`)
+      const payload = await response.json().catch(() => null)
+      if (!response.ok || !payload?.ok || !payload?.game) {
+        const detail = payload?.status
+          ? `HTTP ${payload.status}${payload.details ? ` ${payload.details}` : ''}`
+          : null
+        const snippet = payload?.bodySnippet
+          ? ` — ${payload.bodySnippet}`
+          : null
+        setAddError(
+          payload?.error
+            ? `${payload.error}${detail ? ` (${detail})` : ''}${snippet ?? ''}`
+            : 'Could not load game details.'
+        )
+        return
+      }
+
+      const game = payload.game as {
+        wikidata_id: string
+        name: string
+        year_published?: number | null
+        description?: string | null
+        min_players?: number | null
+        max_players?: number | null
+        playtime_minutes?: number | null
+        publisher?: string | null
+      }
+      const sourceUrl = `https://www.wikidata.org/wiki/${game.wikidata_id}`
+      const sourceConfidence = 0.6
+
+      const cachedAt = new Date().toISOString()
+
+      const existingQuery = supabase
+        .from('games')
+        .select(
+          'id, name, year_published, image_url, thumbnail_url, categories, mechanics, min_players, max_players, playtime_minutes, publisher, description, rating, num_ratings'
+        )
+        .eq('name', game.name)
+
+      const { data: existing, error: existingError } = game.year_published
+        ? await existingQuery.eq('year_published', game.year_published).maybeSingle()
+        : await existingQuery.maybeSingle()
+
+      if (existingError) throw existingError
+
+      if (existing) {
+        const updatePayload: Record<string, any> = {
+          cached_at: cachedAt,
+          is_active: true,
+        }
+
+        const fillIfEmpty = (field: string, value: any, allowLegacy = false) => {
+          if (value == null) return
+          const current = (existing as any)[field]
+          const emptyArray = Array.isArray(current) && current.length === 0
+          const emptyString =
+            typeof current === 'string' && current.trim().length === 0
+          const legacy =
+            allowLegacy && typeof current === 'string' && current === 'legacy_unknown'
+          if (current == null || emptyArray || emptyString || legacy) {
+            updatePayload[field] = value
+          }
+        }
+
+        fillIfEmpty('name', game.name)
+        fillIfEmpty('year_published', game.year_published)
+        fillIfEmpty('min_players', game.min_players)
+        fillIfEmpty('max_players', game.max_players)
+        fillIfEmpty('playtime_minutes', game.playtime_minutes)
+        fillIfEmpty('publisher', game.publisher)
+        fillIfEmpty('description', game.description)
+        fillIfEmpty('source', 'wikidata', true)
+        fillIfEmpty('source_url', sourceUrl)
+        fillIfEmpty('source_confidence', sourceConfidence)
+
+        await supabase
+          .from('games')
+          .update(updatePayload as any)
+          .eq('id', existing.id)
+
+        setAddedGame({ id: existing.id, name: existing.name || game.name })
+        setAddedExisting(true)
+        return
+      }
+
+      const insertPayload: Record<string, any> = {
+        name: game.name,
+        year_published: game.year_published ?? null,
+        description: game.description ?? null,
+        min_players: game.min_players ?? null,
+        max_players: game.max_players ?? null,
+        playtime_minutes: game.playtime_minutes ?? null,
+        publisher: game.publisher ?? null,
+        source: 'wikidata',
+        source_url: sourceUrl,
+        source_confidence: sourceConfidence,
+        cached_at: cachedAt,
+        is_active: true,
+      }
+
+      const { data: inserted, error: insertError } = await supabase
+        .from('games')
+        .insert(insertPayload as any)
+        .select('id, name')
+        .single()
+
+      if (insertError) {
+        const fallbackQuery = supabase
+          .from('games')
+          .select('id, name')
+          .eq('name', game.name)
+
+        const { data: fallback } = game.year_published
+          ? await fallbackQuery
+              .eq('year_published', game.year_published)
+              .maybeSingle()
+          : await fallbackQuery.maybeSingle()
+        if (fallback) {
+          setAddedGame({ id: fallback.id, name: fallback.name })
+          setAddedExisting(true)
+          return
+        }
+        throw insertError
+      }
+
+      setAddedGame({ id: inserted.id, name: inserted.name })
+    } catch (error) {
+      console.error('Add game error:', error)
+      setAddError('Could not add the game. Please try again.')
+    } finally {
+      setAdding(false)
+      setSelectedToAdd(null)
+    }
+  }
+
+  useEffect(() => {
+    if (!showAddGameModal) return
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setShowAddGameModal(false)
+        resetAddGameState()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [showAddGameModal, resetAddGameState])
 
   // Scroll hide/show
   const [visible, setVisible] = useState(true)
@@ -680,10 +1061,7 @@ function Navigation() {
           onClick={(e) => {
             if (e.target === e.currentTarget) {
               setShowAddGameModal(false)
-              setGameName('')
-              setGameYear('')
-              setGamePublisher('')
-              setGameSubmitted(false)
+              resetAddGameState()
             }
           }}
         >
@@ -700,10 +1078,7 @@ function Navigation() {
                 <button
                   onClick={() => {
                     setShowAddGameModal(false)
-                    setGameName('')
-                    setGameYear('')
-                    setGamePublisher('')
-                    setGameSubmitted(false)
+                    resetAddGameState()
                   }}
                   className="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
                 >
@@ -712,7 +1087,7 @@ function Navigation() {
               </div>
 
               {/* Form Content */}
-              {!gameSubmitted ? (
+              {!addedGame ? (
                 <div className="space-y-4">
                   <div>
                     <label
@@ -724,13 +1099,17 @@ function Navigation() {
                     <input
                       id="gameName"
                       type="text"
-                      value={gameName}
-                      onChange={(e) => setGameName(e.target.value)}
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
                       placeholder="Game title"
                       className="w-full px-3 py-2 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 placeholder-gray-500 dark:placeholder-gray-400"
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') {
-                          handleAddGame()
+                          if (manualMode) {
+                            handleManualAdd()
+                          } else {
+                            handleSearch()
+                          }
                         }
                       }}
                       autoFocus
@@ -748,57 +1127,274 @@ function Navigation() {
                       <input
                         id="gameYear"
                         type="number"
-                        value={gameYear}
-                        onChange={(e) => setGameYear(e.target.value)}
+                        value={searchYear}
+                        onChange={(e) => setSearchYear(e.target.value)}
                         placeholder="2024"
                         className="w-full px-3 py-2 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 placeholder-gray-500 dark:placeholder-gray-400"
                       />
                     </div>
-
-                    <div>
-                      <label
-                        htmlFor="gamePublisher"
-                        className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300"
-                      >
-                        Publisher
-                      </label>
-                      <input
-                        id="gamePublisher"
-                        type="text"
-                        value={gamePublisher}
-                        onChange={(e) => setGamePublisher(e.target.value)}
-                        placeholder="Publisher"
-                        className="w-full px-3 py-2 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 placeholder-gray-500 dark:placeholder-gray-400"
-                      />
-                    </div>
                   </div>
+
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    Wikidata lookup (public domain)
+                  </p>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setManualMode(false)}
+                      className={cn(
+                        'px-3 py-1.5 text-xs rounded-full border',
+                        !manualMode
+                          ? 'bg-primary-600 text-white border-primary-600'
+                          : 'text-gray-600 dark:text-gray-300 border-gray-300 dark:border-gray-600'
+                      )}
+                    >
+                      Wikidata search
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setManualMode(true)}
+                      className={cn(
+                        'px-3 py-1.5 text-xs rounded-full border',
+                        manualMode
+                          ? 'bg-primary-600 text-white border-primary-600'
+                          : 'text-gray-600 dark:text-gray-300 border-gray-300 dark:border-gray-600'
+                      )}
+                    >
+                      Manual entry
+                    </button>
+                  </div>
+
+                  {addError && (
+                    <div className="p-3 text-sm text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800 rounded-lg bg-red-50 dark:bg-red-900/30">
+                      {addError}
+                    </div>
+                  )}
+
+                  {manualMode ? (
+                    <div className="space-y-3">
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block mb-1 text-xs font-medium text-gray-700 dark:text-gray-300">
+                            Publisher
+                          </label>
+                          <input
+                            type="text"
+                            value={manualPublisher}
+                            onChange={(e) => setManualPublisher(e.target.value)}
+                            placeholder="Publisher"
+                            className="w-full px-3 py-2 text-sm text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 placeholder-gray-500 dark:placeholder-gray-400"
+                          />
+                        </div>
+                        <div>
+                          <label className="block mb-1 text-xs font-medium text-gray-700 dark:text-gray-300">
+                            Playtime (min)
+                          </label>
+                          <input
+                            type="number"
+                            value={manualPlaytime}
+                            onChange={(e) => setManualPlaytime(e.target.value)}
+                            placeholder="90"
+                            className="w-full px-3 py-2 text-sm text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 placeholder-gray-500 dark:placeholder-gray-400"
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="block mb-1 text-xs font-medium text-gray-700 dark:text-gray-300">
+                          Game image (optional)
+                        </label>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0] || null
+                            setManualImageFile(file)
+                            if (!file) setManualImageConfirmed(false)
+                          }}
+                          className="block w-full text-sm text-gray-700 dark:text-gray-300 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 dark:file:bg-gray-800 dark:file:text-gray-200 dark:hover:file:bg-gray-700"
+                        />
+                        <label className="flex items-start gap-2 text-xs text-gray-600 dark:text-gray-400">
+                          <input
+                            type="checkbox"
+                            checked={manualImageConfirmed}
+                            onChange={(e) => setManualImageConfirmed(e.target.checked)}
+                            className="mt-0.5"
+                          />
+                          I confirm I have rights to upload and display this image.
+                        </label>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block mb-1 text-xs font-medium text-gray-700 dark:text-gray-300">
+                            Min players
+                          </label>
+                          <input
+                            type="number"
+                            value={manualMinPlayers}
+                            onChange={(e) => setManualMinPlayers(e.target.value)}
+                            placeholder="1"
+                            className="w-full px-3 py-2 text-sm text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 placeholder-gray-500 dark:placeholder-gray-400"
+                          />
+                        </div>
+                        <div>
+                          <label className="block mb-1 text-xs font-medium text-gray-700 dark:text-gray-300">
+                            Max players
+                          </label>
+                          <input
+                            type="number"
+                            value={manualMaxPlayers}
+                            onChange={(e) => setManualMaxPlayers(e.target.value)}
+                            placeholder="4"
+                            className="w-full px-3 py-2 text-sm text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 placeholder-gray-500 dark:placeholder-gray-400"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block mb-1 text-xs font-medium text-gray-700 dark:text-gray-300">
+                          Description
+                        </label>
+                        <textarea
+                          value={manualDescription}
+                          onChange={(e) => setManualDescription(e.target.value)}
+                          placeholder="Short description"
+                          rows={3}
+                          className="w-full px-3 py-2 text-sm text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 placeholder-gray-500 dark:placeholder-gray-400"
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="max-h-64 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-lg divide-y divide-gray-200 dark:divide-gray-700">
+                      {searching ? (
+                        <div className="px-3 py-4 text-sm text-gray-600 dark:text-gray-300">
+                          Searching…
+                        </div>
+                      ) : searchResults.length === 0 ? (
+                        <div className="px-3 py-4 text-sm text-gray-500 dark:text-gray-400">
+                          No results yet. Try a search.
+                        </div>
+                      ) : (
+                        searchResults.map((result) => {
+                          const playersLabel =
+                            result.min_players || result.max_players
+                              ? `${result.min_players ?? '?'}-${result.max_players ?? '?'} players`
+                              : null
+                          const playtimeLabel = result.playtime_minutes
+                            ? `${result.playtime_minutes} min`
+                            : null
+                          const metaParts = [
+                            result.year_published
+                              ? String(result.year_published)
+                              : null,
+                            result.publisher ?? null,
+                            playersLabel,
+                            playtimeLabel,
+                          ].filter(Boolean)
+
+                          return (
+                            <div
+                              key={result.wikidata_id}
+                              className="flex items-center gap-3 px-3 py-3"
+                            >
+                              <div className="w-10 h-10 rounded bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-xs text-gray-500">
+                                WD
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                                  {result.name}
+                                </div>
+                                <div className="text-xs text-gray-500 dark:text-gray-400">
+                                  {metaParts.length
+                                    ? metaParts.join(' • ')
+                                    : 'Metadata unavailable'}
+                                </div>
+                              </div>
+                              <button
+                                onClick={() => handleAddFromResult(result)}
+                                disabled={adding || searching}
+                                className="px-3 py-1.5 text-sm text-white rounded-lg bg-primary-600 hover:bg-primary-700 focus:ring-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                {adding && selectedToAdd === result.wikidata_id
+                                  ? 'Adding...'
+                                  : 'Add'}
+                              </button>
+                            </div>
+                          )
+                        })
+                      )}
+                    </div>
+                  )}
 
                   <div className="flex justify-end space-x-3">
                     <button
+                      onClick={handleSearchAgain}
+                      className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
+                    >
+                      Search again
+                    </button>
+                    <button
                       onClick={() => {
                         setShowAddGameModal(false)
-                        setGameName('')
-                        setGameYear('')
-                        setGamePublisher('')
-                        setGameSubmitted(false)
+                        resetAddGameState()
                       }}
                       className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
-                      disabled={isSubmittingGame}
+                      disabled={searching || adding}
                     >
                       Cancel
                     </button>
                     <button
-                      onClick={handleAddGame}
-                      disabled={!gameName.trim() || isSubmittingGame}
+                      onClick={manualMode ? handleManualAdd : handleSearch}
+                      disabled={
+                        !searchQuery.trim() ||
+                        searching ||
+                        adding ||
+                        (manualMode && manualImageFile && !manualImageConfirmed) ||
+                        manualImageUploading
+                      }
                       className="px-4 py-2 text-white rounded-lg bg-primary-600 hover:bg-primary-700 focus:ring-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {isSubmittingGame ? 'Submitting...' : 'Submit'}
+                      {manualMode
+                        ? manualImageUploading
+                          ? 'Uploading...'
+                          : adding
+                            ? 'Adding...'
+                            : 'Add'
+                        : searching
+                          ? 'Searching...'
+                          : 'Search'}
                     </button>
                   </div>
                 </div>
               ) : (
-                <div className="p-4 text-sm text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800 rounded-lg bg-green-50 dark:bg-green-900/30">
-                  Thanks! We'll review and import it soon.
+                <div className="space-y-4">
+                  <div className="p-4 text-sm text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800 rounded-lg bg-green-50 dark:bg-green-900/30">
+                    {addedExisting ? 'Already in MeepleGo.' : 'Added ✓'}
+                  </div>
+                  <div className="flex justify-end space-x-3">
+                    <button
+                      onClick={() => {
+                        setShowAddGameModal(false)
+                        resetAddGameState()
+                      }}
+                      className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
+                    >
+                      Close
+                    </button>
+                    <button
+                      onClick={() => {
+                        const url = getGameUrl({
+                          id: addedGame.id,
+                          name: addedGame.name,
+                        })
+                        setShowAddGameModal(false)
+                        resetAddGameState()
+                        router.push(url)
+                      }}
+                      className="px-4 py-2 text-white rounded-lg bg-primary-600 hover:bg-primary-700 focus:ring-2 focus:ring-primary-500"
+                    >
+                      View game
+                    </button>
+                  </div>
                 </div>
               )}
             </div>

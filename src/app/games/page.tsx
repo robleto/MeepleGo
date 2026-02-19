@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, Suspense } from 'react'
+import { useState, useEffect, Suspense, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import PageLayout from '@/components/Components/PageLayout'
 import Heading from '@/components/Components/Heading'
@@ -10,10 +10,56 @@ import FilterModal from '@/components/Components/FilterModal'
 import { GameWithRanking } from '@/types'
 import { useGameFilters, useViewMode } from '@/utils/gameFilters'
 import { searchGamesFallback } from '@/utils/databaseSearch'
+import {
+  computeAwardScoreMap,
+  computeAwardScoreMapByGameId,
+  normalizeAwardGameName,
+  type AwardScoreRow,
+} from '@/utils/awardScore'
 import { Squares2X2Icon } from '@heroicons/react/24/outline'
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import { getMembershipSets } from '@/lib/lists'
 import { GameCardSkeleton } from '@/components/Components/LoadingSkeletons'
+
+function normalizeAwardToTenPointScale(rawAwardScore: number) {
+  // Diminishing-returns curve so huge award totals do not fully dominate.
+  return 10 * (1 - Math.exp(-(rawAwardScore || 0) / 14))
+}
+
+function computeRankingsSignal(
+  averageRanking: number | null,
+  ratingCount: number
+): number | null {
+  if (!averageRanking || ratingCount <= 0) return null
+  // Bayesian shrinkage towards neutral quality to avoid tiny-sample spikes.
+  const priorMean = 7
+  const priorWeight = 6
+  return (
+    (averageRanking * ratingCount + priorMean * priorWeight) /
+    (ratingCount + priorWeight)
+  )
+}
+
+function computeBlendedDiscoveryScore(params: {
+  awardScore: number
+  averageRanking: number | null
+  ratingCount: number
+}) {
+  const { awardScore, averageRanking, ratingCount } = params
+  const awardSignal = normalizeAwardToTenPointScale(awardScore)
+  const rankingSignal = computeRankingsSignal(averageRanking, ratingCount)
+
+  if (rankingSignal === null) {
+    // If we have no community signal yet, default to awards only.
+    return awardSignal
+  }
+
+  // Trust community consensus more as vote count grows.
+  const confidence = Math.min(1, ratingCount / 10)
+  const rankingsWeight = 0.65 + 0.2 * confidence // 0.65 -> 0.85
+  const awardsWeight = 1 - rankingsWeight
+  return rankingSignal * rankingsWeight + awardSignal * awardsWeight
+}
 
 function GamesPageContent() {
   const [games, setGames] = useState<GameWithRanking[]>([])
@@ -65,11 +111,154 @@ function GamesPageContent() {
     uniqueMechanics,
   } = useGameFilters(games, {
     disableClientSorting: true, // Server handles sorting
+    forceClientSortKeys: ['award_score'],
     defaultViewMode: 'grid',
-    defaultSortBy: 'rating',
+    defaultSortBy: 'award_score',
     defaultSortOrder: 'desc',
     storageKeyPrefix: 'games',
   })
+
+  const awardScoreCacheRef = useRef<Map<string, number>>(new Map())
+
+  const hydrateAwardScores = async (gamesToScore: GameWithRanking[]) => {
+    if (sortBy !== 'award_score') return gamesToScore
+
+    const missingGames = gamesToScore.filter((game) => {
+      const idKey = game.id
+      const nameKey = normalizeAwardGameName(game.name)
+      return (
+        !awardScoreCacheRef.current.has(idKey) &&
+        !awardScoreCacheRef.current.has(nameKey)
+      )
+    })
+    if (missingGames.length === 0) return gamesToScore
+
+    const names = missingGames
+      .map((g) => g.name)
+      .filter((n): n is string => typeof n === 'string' && n.trim().length > 0)
+    const ids = missingGames.map((g) => g.id).filter(Boolean)
+    const normalizedNames = names.map(normalizeAwardGameName)
+    const missingNames = normalizedNames.filter((name) => Boolean(name))
+
+    if (missingGames.length > 0) {
+      const rows: AwardScoreRow[] = []
+      const chunkSize = 100
+      for (let i = 0; i < ids.length; i += chunkSize) {
+        const chunk = ids.slice(i, i + chunkSize)
+        if (chunk.length === 0) continue
+        const { data, error } = await supabase
+          .from('awards_cache')
+          .select(
+            'award_set,year,is_winner,is_nominee,position,game_name,game_id'
+          )
+          .in('game_id', chunk)
+        if (error) {
+          console.warn('awards_cache fetch error', error.message)
+          continue
+        }
+        rows.push(...((data as AwardScoreRow[]) || []))
+      }
+
+      const scoresById = computeAwardScoreMapByGameId(
+        rows,
+        new Date().getFullYear()
+      )
+
+      if (scoresById.size === 0 && missingNames.length > 0) {
+        for (let i = 0; i < missingNames.length; i += chunkSize) {
+          const chunkNormalized = missingNames.slice(i, i + chunkSize)
+          const chunkOriginal = names.filter((n) =>
+            chunkNormalized.includes(normalizeAwardGameName(n))
+          )
+          if (chunkOriginal.length === 0) continue
+          const { data, error } = await supabase
+            .from('awards_cache')
+            .select('award_set,year,is_winner,is_nominee,position,game_name')
+            .in('game_name', chunkOriginal)
+          if (error) {
+            console.warn('awards_cache fetch error', error.message)
+            continue
+          }
+          rows.push(...((data as AwardScoreRow[]) || []))
+        }
+        const scoresByName = computeAwardScoreMap(
+          rows,
+          new Date().getFullYear()
+        )
+        missingGames.forEach((game) => {
+          const nameKey = normalizeAwardGameName(game.name)
+          const score = scoresByName.get(nameKey) ?? 0
+          awardScoreCacheRef.current.set(game.id, score)
+          if (nameKey) awardScoreCacheRef.current.set(nameKey, score)
+        })
+      } else {
+        scoresById.forEach((value, id) => {
+          awardScoreCacheRef.current.set(id, value)
+        })
+      }
+
+      // Pull internal rankings signal and blend with award signal.
+      const rankingRows: Array<{ game_id: string; ranking: number }> = []
+      const rankingChunkSize = 100
+      for (let i = 0; i < ids.length; i += rankingChunkSize) {
+        const chunk = ids.slice(i, i + rankingChunkSize)
+        if (chunk.length === 0) continue
+        const { data, error } = await supabase
+          .from('rankings')
+          .select('game_id,ranking')
+          .in('game_id', chunk)
+          .gte('ranking', 1)
+          .lte('ranking', 10)
+        if (error) {
+          console.warn('rankings fetch error', error.message)
+          continue
+        }
+        rankingRows.push(
+          ...(((data as Array<{ game_id: string; ranking: number }> | null) ||
+            []) as Array<{ game_id: string; ranking: number }>)
+        )
+      }
+
+      const rankingAggById = new Map<string, { sum: number; count: number }>()
+      rankingRows.forEach((row) => {
+        const key = row.game_id
+        const prev = rankingAggById.get(key) || { sum: 0, count: 0 }
+        rankingAggById.set(key, {
+          sum: prev.sum + Number(row.ranking || 0),
+          count: prev.count + 1,
+        })
+      })
+
+      missingGames.forEach((game) => {
+        const nameKey = normalizeAwardGameName(game.name)
+        const rawAwardScore =
+          awardScoreCacheRef.current.get(game.id) ??
+          awardScoreCacheRef.current.get(nameKey) ??
+          0
+        const rankingAgg = rankingAggById.get(game.id)
+        const averageRanking =
+          rankingAgg && rankingAgg.count > 0
+            ? rankingAgg.sum / rankingAgg.count
+            : null
+        const blendedScore = computeBlendedDiscoveryScore({
+          awardScore: rawAwardScore,
+          averageRanking,
+          ratingCount: rankingAgg?.count || 0,
+        })
+
+        awardScoreCacheRef.current.set(game.id, blendedScore)
+        if (nameKey) awardScoreCacheRef.current.set(nameKey, blendedScore)
+      })
+    }
+
+    return gamesToScore.map((game) => ({
+      ...game,
+      award_score:
+        awardScoreCacheRef.current.get(game.id) ??
+        awardScoreCacheRef.current.get(normalizeAwardGameName(game.name)) ??
+        0,
+    }))
+  }
 
   // Read filter parameters from URL and set filter state
   useEffect(() => {
@@ -77,7 +266,6 @@ function GamesPageContent() {
 
     const categoryParam = searchParams.get('category')
     const mechanicParam = searchParams.get('mechanic')
-    const familyParam = searchParams.get('family')
     const yearParam = searchParams.get('year')
     const playersParam = searchParams.get('players')
     const playtimeParam = searchParams.get('playtime')
@@ -89,9 +277,6 @@ function GamesPageContent() {
     } else if (mechanicParam) {
       setFilterType('mechanic')
       setFilterValue(mechanicParam)
-    } else if (familyParam) {
-      setFilterType('family')
-      setFilterValue(familyParam)
     } else if (yearParam) {
       setFilterType('year')
       setFilterValue(yearParam)
@@ -133,13 +318,13 @@ function GamesPageContent() {
         return { column: 'name', ascending: order === 'asc' }
       case 'year_published':
         return { column: 'year_published', ascending: order === 'asc' }
-      case 'rank':
-        return { column: 'rank', ascending: order === 'asc' }
       case 'rating':
         return { column: 'rating', ascending: order === 'asc' }
       case 'ranking':
         // For user rankings, we'll need a different approach since it's in a different table
         return { column: 'name', ascending: order === 'asc' } // Fallback to name for now
+      case 'award_score':
+        return { column: 'name', ascending: order === 'asc' } // Client-side award scoring
       case 'playtime_minutes':
         return { column: 'playtime_minutes', ascending: order === 'asc' }
       case 'min_players':
@@ -169,8 +354,8 @@ function GamesPageContent() {
     }
     const single = buildOrderClause(sortField, order)
 
-    // For BGG rank/rating sorting, we need to handle nulls properly
-    if (sortField === 'rank' || sortField === 'rating') {
+    // For rating sorting, we need to handle nulls properly
+    if (sortField === 'rating') {
       return [
         {
           column: single.column,
@@ -192,10 +377,7 @@ function GamesPageContent() {
     // If a specific gameId is provided via top-nav dropdown selection, scope to that game
     const gameIdParam = searchParams.get('gameId')
     if (gameIdParam) {
-      const gid = Number(gameIdParam)
-      if (Number.isFinite(gid)) {
-        query = query.eq('id', gid)
-      }
+      query = query.eq('id', gameIdParam)
     }
 
     if (filterType === 'year' && filterValue !== 'all') {
@@ -226,9 +408,6 @@ function GamesPageContent() {
     }
     if (filterType === 'mechanic' && filterValue !== 'all') {
       query = query.contains('mechanics', [filterValue])
-    }
-    if (filterType === 'family' && filterValue !== 'all') {
-      query = query.contains('rank_families', [filterValue])
     }
     if (filterType === 'award') {
       // Filter to games that have at least one honor entry (winner refinement done client-side)
@@ -264,7 +443,8 @@ function GamesPageContent() {
           return
         }
 
-        setGames((prev) => [...prev, ...searchResults])
+        const scored = await hydrateAwardScores(searchResults)
+        setGames((prev) => [...prev, ...scored])
         setHasMore(searchResults.length === ITEMS_PER_LOAD)
         return
       }
@@ -286,7 +466,7 @@ function GamesPageContent() {
 
       // Add ordering based on current sort criteria (with grouping awareness)
       // Ensure we use the correct defaults if hook hasn't initialized yet
-      const effectiveSortBy = sortBy || 'rank'
+      const effectiveSortBy = sortBy || 'name'
       const effectiveSortOrder = sortOrder || 'asc'
       const effectiveGroupBy = groupBy || 'none'
 
@@ -324,8 +504,10 @@ function GamesPageContent() {
           ranking: game.rankings?.[0] || null,
         })) || []
 
+      const scored = await hydrateAwardScores(gamesWithRankings)
+
       // Append new games to existing ones
-      setGames((prev) => [...prev, ...gamesWithRankings])
+      setGames((prev) => [...prev, ...scored])
       setHasMore(gamesData?.length === ITEMS_PER_LOAD)
     } catch (err) {
       console.error('Error loading more games:', err)
@@ -363,66 +545,58 @@ function GamesPageContent() {
             return
           }
 
-          setGames(searchResults)
+          const scored = await hydrateAwardScores(searchResults)
+          setGames(scored)
           setHasMore(searchResults.length === ITEMS_PER_LOAD)
           return
         }
 
         // Regular query for non-search cases
-        // Enhanced logic: fetch non-null ranked games first to guarantee top BGG ranks appear
-        const noActiveFilter =
-          filterType === 'none' && groupBy === 'none' && !searchTerm.trim()
-
-        let gamesData: any[] = []
-        let rankedBatch: any[] = []
-        let unrankedBatch: any[] = []
-
-        if (noActiveFilter) {
-          // 1. Fetch ranked games (non-null rank) ordered ascending
-          let rankedQuery = supabase
-            .from('games')
-            .select(`*, rankings(*)`)
-            .not('rank', 'is', null)
-            .order('rank', { ascending: true, nullsFirst: false })
-            .range(0, ITEMS_PER_LOAD - 1)
-
-          if (userId) rankedQuery = rankedQuery.eq('rankings.user_id', userId)
-          rankedQuery = applyServerFilters(rankedQuery)
-
-          const { data: rankedData, error: rankedErr } = await rankedQuery
-          if (rankedErr) throw rankedErr
-          rankedBatch = rankedData || []
-
-          // If we didn't fill the page, top up with unranked ordered by name (stable fallback)
-          if (rankedBatch.length < ITEMS_PER_LOAD) {
-            const remaining = ITEMS_PER_LOAD - rankedBatch.length
-            let unrankedQuery = supabase
-              .from('games')
-              .select(`*, rankings(*)`)
-              .is('rank', null)
-              .order('name', { ascending: true })
-              .range(0, remaining - 1)
-            if (userId)
-              unrankedQuery = unrankedQuery.eq('rankings.user_id', userId)
-            unrankedQuery = applyServerFilters(unrankedQuery)
-            const { data: unrankedData, error: unrankedErr } =
-              await unrankedQuery
-            if (unrankedErr) throw unrankedErr
-            unrankedBatch = unrankedData || []
-          }
-          gamesData = [...rankedBatch, ...unrankedBatch]
-        } else {
-          // Fallback to single pass (filters/search complicate dual fetch)
+        const fetchGamesPage = async (start: number, end: number) => {
           let query = supabase
             .from('games')
             .select(`*, rankings(*)`)
-            .order('rank', { ascending: true, nullsFirst: false })
-            .range(0, ITEMS_PER_LOAD - 1)
+            .range(start, end)
           if (userId) query = query.eq('rankings.user_id', userId)
           query = applyServerFilters(query)
-          const { data: singleData, error: singleErr } = await query
-          if (singleErr) throw singleErr
-          gamesData = singleData || []
+          const orders = buildServerOrders(
+            sortBy || 'name',
+            sortOrder || 'asc',
+            groupBy || 'none'
+          )
+          orders.forEach((o) => {
+            if ('nullsFirst' in o && typeof o.nullsFirst === 'boolean') {
+              query = query.order(o.column as any, {
+                ascending: o.ascending,
+                nullsFirst: o.nullsFirst,
+              })
+            } else {
+              query = query.order(o.column as any, { ascending: o.ascending })
+            }
+          })
+          return query
+        }
+
+        // For smart ranking sort, load all filtered games up-front so sorting
+        // is truly global rather than limited to the first page.
+        const shouldLoadAllForSmartSort = (sortBy || 'name') === 'award_score'
+        let gamesData: any[] = []
+        if (shouldLoadAllForSmartSort) {
+          let start = 0
+          const maxPages = 24 // safety cap: 24 * 500 = 12k games
+          for (let page = 0; page < maxPages; page += 1) {
+            const end = start + ITEMS_PER_LOAD - 1
+            const { data, error } = await fetchGamesPage(start, end)
+            if (error) throw error
+            const batch = data || []
+            gamesData = [...gamesData, ...batch]
+            if (batch.length < ITEMS_PER_LOAD) break
+            start += ITEMS_PER_LOAD
+          }
+        } else {
+          const { data, error } = await fetchGamesPage(0, ITEMS_PER_LOAD - 1)
+          if (error) throw error
+          gamesData = data || []
         }
 
         // Diagnostics
@@ -434,7 +608,9 @@ function GamesPageContent() {
 
         // If grouping by year, ensure we include all games from the top year (e.g., 2025) before truncating
         let combined = gamesWithRankings
-        let moreAvailable = gamesData?.length === ITEMS_PER_LOAD
+        let moreAvailable =
+          !shouldLoadAllForSmartSort &&
+          gamesWithRankings?.length === ITEMS_PER_LOAD
         if (groupBy === 'year_published' && combined.length > 0) {
           const topYear = combined[0]?.year_published || null
           let lastYear = combined[combined.length - 1]?.year_published || null
@@ -502,7 +678,8 @@ function GamesPageContent() {
           }
         }
 
-        setGames(combined)
+        const scored = await hydrateAwardScores(combined)
+        setGames(scored)
         setHasMore(moreAvailable)
       } catch (err) {
         console.error('Error fetching games:', err)
@@ -783,49 +960,6 @@ function GamesPageContent() {
       }
     >
       <div className="space-y-6">
-        {/* Optional Rank Debug Panel (?debug=ranks) */}
-        {(() => {
-          const debugRanksEnabled = searchParams.get('debug') === 'ranks'
-          if (!debugRanksEnabled) return null
-          const first = games.slice(0, 25)
-          const nonNull = first.filter((g: any) => g.rank != null)
-          const nullCount = first.length - nonNull.length
-          const globalNonNull = games.filter((g: any) => g.rank != null)
-          const ranks = globalNonNull
-            .map((g: any) => g.rank)
-            .filter((r: any) => typeof r === 'number')
-          const minRank = ranks.length ? Math.min(...ranks) : '—'
-          const maxRank = ranks.length ? Math.max(...ranks) : '—'
-          return (
-            <div className="border border-amber-300 bg-amber-50 rounded-md p-4 text-sm space-y-2">
-              <div className="font-semibold text-amber-800">
-                Rank Debug (first {first.length} games in current list)
-              </div>
-              <div className="flex flex-wrap gap-2 font-mono">
-                {first.map((g: any) => (
-                  <span
-                    key={g.id}
-                    className="px-2 py-1 rounded bg-white border text-xs shadow-sm"
-                  >
-                    {(g.rank ?? '∅') + ':' + g.name.slice(0, 20)}
-                  </span>
-                ))}
-              </div>
-              <div className="text-amber-700 flex flex-wrap gap-x-4">
-                <span>Total loaded: {games.length}</span>
-                <span>First batch null ranks: {nullCount}</span>
-                <span>Overall non-null ranks: {globalNonNull.length}</span>
-                <span>Min rank seen: {minRank}</span>
-                <span>Max rank seen: {maxRank}</span>
-              </div>
-              <div className="text-amber-600">
-                Hide this panel by removing <code>?debug=ranks</code> from the
-                URL.
-              </div>
-            </div>
-          )
-        })()}
-
         {/* Filter Title - shown when filtering via URL params */}
         {filterTitle && (
           <div className="border-b border-gray-200 dark:border-gray-700 pb-4">
@@ -849,7 +983,7 @@ function GamesPageContent() {
             : 'space-y-4'
           }>
             {Array.from({ length: 12 }).map((_, i) => (
-              <GameCardSkeleton key={i} viewMode={viewMode} variant={cardVariant} />
+              <GameCardSkeleton key={i} variant={viewMode} />
             ))}
           </div>
         )}
@@ -1029,7 +1163,7 @@ function GamesPageContent() {
         uniquePlayerCounts={uniquePlayerCounts}
         uniqueCategories={uniqueCategories}
         uniqueMechanics={uniqueMechanics}
-        defaultSortBy="rank"
+        defaultSortBy="rating"
         defaultSortOrder="asc"
         defaultGroupBy="none"
         defaultGroupSortOrder="asc"

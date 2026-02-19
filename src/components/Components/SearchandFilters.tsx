@@ -48,9 +48,9 @@ export default function SearchandFilters(props: SearchandFiltersProps) {
   return (
     <div className={clsx('max-w-4xl mx-auto', className)}>
       {/* Search input and filters button */}
-      <div className="flex items-center justify-center gap-4">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-4">
         {/* Search pill */}
-        <div className="flex-1 max-w-md relative">
+        <div className="flex-1 max-w-md w-full relative">
           <SearchPill
             value={value}
             defaultValue={defaultValue}
@@ -70,16 +70,16 @@ export default function SearchandFilters(props: SearchandFiltersProps) {
               filtersCount ? `${filtersCount} filters active` : 'Open filters'
             }
             className={clsx(
-              'relative inline-flex items-center gap-2 h-11 px-4 rounded-full border text-sm font-medium transition shadow-sm',
+              'relative inline-flex items-center justify-center gap-2 h-11 px-4 rounded-full border text-sm font-medium transition shadow-sm w-full sm:w-auto',
               filtersCount
-                ? 'bg-primary-50 border-primary-300 text-primary-700 hover:bg-primary-100'
-                : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                ? 'bg-primary-50 border-primary-300 text-primary-700 hover:bg-primary-100 dark:bg-primary-900/30 dark:border-primary-700 dark:text-primary-300 dark:hover:bg-primary-900/40'
+                : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700'
             )}
           >
             <FunnelIcon className="h-4 w-4" />
             <span className="hidden sm:inline">Filters</span>
             {filtersCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold rounded-full h-5 min-w-[1.25rem] px-1 flex items-center justify-center shadow-lg ring-2 ring-white">
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold rounded-full h-5 min-w-[1.25rem] px-1 flex items-center justify-center shadow-lg ring-2 ring-white dark:ring-gray-800">
                 {filtersCount}
               </span>
             )}

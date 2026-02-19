@@ -1,5 +1,17 @@
 const { withSentryConfig } = require('@sentry/nextjs')
 
+const getSupabaseHostname = () => {
+  const rawUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  if (!rawUrl) return null
+  try {
+    return new URL(rawUrl).hostname
+  } catch {
+    return null
+  }
+}
+
+const supabaseHostname = getSupabaseHostname()
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   serverExternalPackages: ['@supabase/supabase-js'],
@@ -13,20 +25,42 @@ const nextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'cf.geekdo-static.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
         hostname: 'boardgamegeek.com',
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'via.placeholder.com',
+        port: '',
+        pathname: '/**',
+      },
+      ...(supabaseHostname
+        ? [
+            {
+              protocol: 'https',
+              hostname: supabaseHostname,
+              port: '',
+              pathname: '/storage/v1/object/public/**',
+            },
+          ]
+        : []),
     ],
   },
   eslint: {
-    // We temporarily ignore ESLint during production builds to allow shipping while
-    // we address the large backlog of warnings. Local "npm run lint" still shows them.
+    // ESLint warnings are non-blocking during builds.
+    // Run `npm run lint` locally to see warnings. Re-enable once warning count is under 50.
     ignoreDuringBuilds: true,
   },
   typescript: {
-    // We temporarily ignore TypeScript errors during builds
-    // The dev server and IDE will still show them for development
+    // 59 pre-existing TS errors (mostly Next.js async params pattern + type looseness).
+    // Re-enable once errors are fixed. Run `npx tsc --noEmit` to see current errors.
     ignoreBuildErrors: true,
   },
   // Performance optimizations

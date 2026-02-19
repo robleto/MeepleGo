@@ -24,7 +24,7 @@ import OnboardingModal from '@/components/Components/OnboardingModal'
 import SignupPrompt from '@/components/Components/SignupPrompt'
 import { shouldPromptSignup, getOnboardingState } from '@/lib/guestSession'
 import { getUserPhase, type UserPhaseResult } from '@/lib/userPhase'
-import { FOUNDATIONAL_GAMES_BGG_IDS } from '@/lib/constants'
+import { FOUNDATIONAL_GAMES_NAMES } from '@/lib/constants'
 import {
   hydrateDiscoveryListsWithUserMeta,
   hydrateItemsWithUserMeta,
@@ -49,7 +49,6 @@ const INDUSTRY_AWARDS = (awardsData as any).categories.map((c: any) => ({
 // Fallback games for loading state
 const TRENDING_GAMES: Game[] = Array.from({ length: 20 }, (_, i) => ({
   id: `trending-${i}`,
-  bgg_id: 0,
   name: `Trending Game ${i + 1}`,
   year_published: 2024,
   image_url: '/placeholder-game.svg',
@@ -62,13 +61,16 @@ const TRENDING_GAMES: Game[] = Array.from({ length: 20 }, (_, i) => ({
   publisher: null,
   description: null,
   summary: null,
-  rank: null,
   rating: null,
   num_ratings: null,
   cached_at: null,
   created_at: '',
   updated_at: '',
-}))
+  source: null,
+  source_url: null,
+  source_notes: null,
+  source_confidence: null,
+})) as Game[]
 
 export default function HomepageContent() {
   const [user, setUser] = useState<any>(null)
@@ -138,7 +140,9 @@ export default function HomepageContent() {
         // Featured games: API -> fallback
         let gotGames = false
         try {
-          const res = await fetch('/api/games?limit=20&sort=rank&orderBy=asc')
+          const res = await fetch(
+            '/api/games?limit=20&sort=award_score&orderBy=desc'
+          )
           if (res.ok) {
             const data = await res.json()
             if (data.games?.length) {
@@ -188,11 +192,6 @@ export default function HomepageContent() {
             `
             )
             .eq('is_public', true)
-            .not(
-              'list_type',
-              'in',
-              '(bgg_bestsellers,bgg_hotness,bgg_trendingplays,bgg_mostplayed)'
-            )
             .order('updated_at', { ascending: false })
             .limit(6)
 
@@ -326,9 +325,9 @@ export default function HomepageContent() {
                 const { data: foundationalData } = await supabase
                   .from('games')
                   .select(
-                    'id, name, thumbnail_url, image_url, year_published, min_players, max_players, playtime_minutes, bgg_id'
+                    'id, name, thumbnail_url, image_url, year_published, min_players, max_players, playtime_minutes'
                   )
-                  .in('bgg_id', FOUNDATIONAL_GAMES_BGG_IDS)
+                  .in('name', FOUNDATIONAL_GAMES_NAMES)
                 if (!cancelled && foundationalData && foundationalData.length > 0) {
                   const foundationalItems = foundationalData.map((g) => ({
                     game_id: g.id,
@@ -430,7 +429,7 @@ export default function HomepageContent() {
                   recentTags: [],
                   listsCreated: 0,
                   awardsCreated: 0,
-                })
+                } as any)
               }
             }
 
@@ -498,7 +497,7 @@ export default function HomepageContent() {
                   }
                 )
 
-                setDiscoveryLists(merged)
+                setDiscoveryLists(merged as any)
                 const communityItems = (topCommunityRatedResult.data || []).map((g: any) => ({
                   game_id: g.game_id,
                   game_name: g.game_name,
@@ -563,14 +562,14 @@ export default function HomepageContent() {
                 }
 
                 // Sort by timestamp descending, take top 12
-                const topIds = [...latest.entries()]
+                const topIds = Array.from(latest.entries())
                   .sort((a, b) => b[1].localeCompare(a[1]))
                   .slice(0, 12)
                   .map(([id]) => id)
                 if (topIds.length > 0) {
                   const { data: games } = await supabase
                     .from('games')
-                    .select('id, name, thumbnail_url, image_url, year_published, min_players, max_players, playtime_minutes, bgg_id')
+                    .select('id, name, thumbnail_url, image_url, year_published, min_players, max_players, playtime_minutes')
                     .in('id', topIds)
 
                   // Preserve recency order

@@ -19,7 +19,7 @@ import supabase from '@/lib/supabase'
 import ListExplorer from '@/components/Components/ListExplorer'
 import { cn, getRatingLabel } from '@/utils/helpers'
 import { getRatingSubtleClass } from '@/components/Foundations/ratingColors'
-import { getSleepinessClassification } from '@/utils/sleepinessClassification'
+import { getSleepinessClassification, type SleepinessClassification } from '@/utils/sleepinessClassification'
 import PillTabs from '@/components/Components/PillTabs'
 import {
   HOT_TAKE_MIN_DELTA,
@@ -37,13 +37,17 @@ const RANKING_VIEWS: Array<{ key: RankingsView; label: string }> = [
 
 export function RankingsContent({
   embedded = false,
+  forcedUserId,
+  username,
 }: {
   embedded?: boolean
+  forcedUserId?: string
+  username?: string
 }) {
   const Wrapper = embedded
     ? (({ children }: { children: ReactNode }) => <>{children}</>)
     : PageLayout
-  const { games, loading, isGuest, updateGameRanking } = useGameDataWithGuest()
+  const { games, loading, isGuest, updateGameRanking } = useGameDataWithGuest(forcedUserId)
   const [activeView, setActiveView] = useState<RankingsView>(() => {
     if (typeof window === 'undefined') return 'all'
     const stored = window.localStorage.getItem('rankingsActiveView') as RankingsView | null
@@ -255,9 +259,8 @@ export function RankingsContent({
       const ratingCount =
         (game as any).num_ratings ??
         (game as any).game_num_ratings ??
-        (game as any).bgg_num_ratings ??
         null
-      const fallback = { level: 'unknown', label: 'Unknown', iconCount: 3 }
+      const fallback: SleepinessClassification = { level: 'unknown', label: 'Unknown', iconCount: 3 }
       const classification = getSleepinessClassification(ratingCount) || fallback
       return { game, classification }
     })
@@ -305,16 +308,19 @@ export function RankingsContent({
   useEffect(() => {
     let cancelled = false
     ;(async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-      if (!session) return
-      const userId = session.user.id
+      let activeUserId: string | null = forcedUserId || null
+      if (!activeUserId) {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession()
+        if (!session) return
+        activeUserId = session.user.id
+      }
       // Load preference
       const { data: prefs } = await supabase
         .from('user_preferences')
         .select('rankings_custom_order_enabled')
-        .eq('user_id', userId)
+        .eq('user_id', activeUserId)
         .maybeSingle()
       const enabled = !!prefs?.rankings_custom_order_enabled
       if (!cancelled) {
@@ -325,7 +331,7 @@ export function RankingsContent({
       const { data: orderRows } = await supabase
         .from('ranking_order')
         .select('game_id, position')
-        .eq('user_id', userId)
+        .eq('user_id', activeUserId)
         .order('position', { ascending: true })
       const ids = (orderRows || []).map((r) => r.game_id)
       if (!cancelled) setOrderedGameIds(ids.length ? ids : null)
@@ -333,7 +339,7 @@ export function RankingsContent({
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [forcedUserId])
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -369,19 +375,22 @@ export function RankingsContent({
   useEffect(() => {
     let cancelled = false
     ;(async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-      if (!session) return
-      const noData = Promise.resolve({ data: [], error: null })
+      let activeUserId: string | null = forcedUserId || null
+      if (!activeUserId) {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession()
+        if (!session) return
+        activeUserId = session.user.id
+      }
 
       const [hotTakesResult, sleeperHitsResult] = await Promise.all([
         supabase.rpc('get_hot_takes', {
-          user_uuid: session.user.id,
+          user_uuid: activeUserId,
           min_num_ratings: HOT_TAKE_MIN_NUM_RATINGS,
         }),
         supabase.rpc('get_sleeper_hits', {
-          user_uuid: session.user.id,
+          user_uuid: activeUserId,
           max_num_ratings: SLEEPER_MAX_NUM_RATINGS,
         }),
       ])
@@ -413,7 +422,7 @@ export function RankingsContent({
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [forcedUserId])
 
   if (loading) {
     return (
@@ -592,7 +601,7 @@ export function RankingsContent({
               viewMode={viewMode}
               setViewMode={setViewMode}
               filterType={filterType}
-              setFilterType={setFilterType}
+              setFilterType={(t: string) => setFilterType(t as typeof filterType)}
               filterValue={filterValue}
               setFilterValue={setFilterValue}
               uniqueYears={uniqueYears}
@@ -730,7 +739,7 @@ export function RankingsContent({
               viewMode={viewMode}
               setViewMode={setViewMode}
               filterType={filterType}
-              setFilterType={setFilterType}
+              setFilterType={(t: string) => setFilterType(t as typeof filterType)}
               filterValue={filterValue}
               setFilterValue={setFilterValue}
               uniqueYears={uniqueYears}

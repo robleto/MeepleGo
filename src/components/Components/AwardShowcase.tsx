@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from 'react'
 import AwardCategoryEditor from '@/components/Components/AwardCategoryEditor'
 import { supabase } from '@/lib/supabase'
 import { CATEGORY_CONFIGS } from '@/lib/awards/deriveUserAwards'
+import { PencilSquareIcon } from '@heroicons/react/24/outline'
 
 interface AwardShowcaseProps {
   id: string
@@ -15,6 +16,7 @@ interface AwardShowcaseProps {
   editHref?: string
   editLabel?: string
   inlineEditable?: boolean
+  onEditorToggle?: (isOpen: boolean) => void
 }
 
 export default function AwardShowcase({
@@ -26,6 +28,7 @@ export default function AwardShowcase({
   editHref,
   editLabel = 'Edit',
   inlineEditable = false,
+  onEditorToggle,
 }: AwardShowcaseProps) {
   if (!games.length) return null
 
@@ -51,7 +54,6 @@ export default function AwardShowcase({
     if (!showEditor || !inlineEditable) return
     let cancelled = false
     async function load() {
-      // derive category id mapping (editor expects derive ids)
       const categoryMap: Record<string, string> = {
         best: 'best_overall',
         strategy: 'best_strategy',
@@ -71,10 +73,9 @@ export default function AwardShowcase({
       const editorCategory = categoryMap[id] || 'best_overall'
       const { data: sessionData } = await supabase.auth.getSession()
       if (!sessionData.session) return
-  const res = await fetch(`/api/awards/${currentYear}`)
+      const res = await fetch(`/api/awards/${currentYear}`)
       const js = await res.json().catch(() => null)
       const found = js?.awards?.find((a: any) => a.category === editorCategory)
-      // Build game map from the shown games (for names/thumbnails) as a baseline
       const gm: Record<string, any> = {}
       games.forEach((g) => {
         gm[String(g.id)] = {
@@ -87,7 +88,6 @@ export default function AwardShowcase({
       setGameMap(gm)
       if (!cancelled) setRow(found || { id: `temp-${editorCategory}`, category: editorCategory, nominees: [], winner_id: null })
 
-      // Build a larger seed pool from rankings for immediate options (beyond top 10)
       try {
         const cfg = CATEGORY_CONFIGS.find((c) => c.id === editorCategory)
         const { data: rankings } = await supabase
@@ -129,9 +129,9 @@ export default function AwardShowcase({
         matches.sort((a: any, b: any) => (b.ranking ?? 0) - (a.ranking ?? 0))
         const extras = matches
           .slice(0, 60)
-          .map((r: any) => ({ 
-            id: r.game!.id, 
-            name: r.game!.name, 
+          .map((r: any) => ({
+            id: r.game!.id,
+            name: r.game!.name,
             thumbnail_url: r.game!.thumbnail_url,
             rating: r.ranking,
           }))
@@ -189,18 +189,31 @@ export default function AwardShowcase({
   const nomineeGames = displayGames.slice(1)
 
   return (
-    <section id={`award-${id}`} className={className}>
+    <section id={`award-${id}`} className={className} style={{ scrollMarginTop: '120px' }}>
       {inlineEditable && showEditor && row ? (
-        <div className="panel">
-          <AwardCategoryEditor
-            year={currentYear}
-            row={row}
-            categoryLabel={title}
-            gameMap={gameMap}
-            seedGames={seedGames}
-            onChange={(patch) => setRow((r: any) => ({ ...r, ...patch }))}
-          />
-        </div>
+        <AwardCategoryEditor
+          year={currentYear}
+          row={row}
+          categoryLabel={title}
+          gameMap={gameMap}
+          seedGames={seedGames}
+          onChange={(patch) => setRow((r: any) => ({ ...r, ...patch }))}
+          onGameMapUpdate={(editorMap) => {
+            setGameMap((prev) => {
+              const next = { ...prev }
+              Object.entries(editorMap).forEach(([id, g]) => {
+                next[id] = {
+                  id: g.id,
+                  name: g.name,
+                  thumbnail_url: g.thumbnail_url ?? null,
+                  rating: (g as any).rating ?? null,
+                }
+              })
+              return next
+            })
+          }}
+          onClose={() => { setShowEditor(false); onEditorToggle?.(false) }}
+        />
       ) : (
         <AwardsPanelReadOnly
           title={title}
@@ -210,16 +223,18 @@ export default function AwardShowcase({
           headerExtra={
             inlineEditable ? (
               <button
-                onClick={() => setShowEditor((s) => !s)}
-                className="text-[11px] inline-flex items-center gap-1 px-2 py-1 rounded border border-gray-200 bg-white hover:bg-gray-50 text-gray-600"
+                onClick={() => { setShowEditor(true); onEditorToggle?.(true) }}
+                className="text-[11px] inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-gray-200 bg-white hover:bg-gray-50 text-gray-500 hover:text-gray-700 transition-colors"
               >
-                {showEditor ? 'Close' : editLabel}
+                <PencilSquareIcon className="w-3.5 h-3.5" />
+                {editLabel}
               </button>
             ) : editHref ? (
               <a
                 href={editHref}
-                className="text-[11px] inline-flex items-center gap-1 px-2 py-1 rounded border border-gray-200 bg-white hover:bg-gray-50 text-gray-600"
+                className="text-[11px] inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-gray-200 bg-white hover:bg-gray-50 text-gray-500 hover:text-gray-700 transition-colors"
               >
+                <PencilSquareIcon className="w-3.5 h-3.5" />
                 {editLabel}
               </a>
             ) : null

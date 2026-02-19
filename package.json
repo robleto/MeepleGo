@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "next dev",
     "dev:3001": "PORT=3001 next dev",
-    "build": "NEXT_DISABLE_ESLINT=1 next build",
+    "build": "next build",
     "build:analyze": "ANALYZE=true npm run build",
     "start": "next start",
     "lint": "next lint",
@@ -23,6 +23,7 @@
     "backfill:taglines": "node scripts/data-migration/backfill_bgg_taglines.js",
     "backfill:bgg-extended": "node scripts/data-migration/backfill_bgg_extended.js",
     "backfill:all": "node scripts/data-migration/backfill_all_metadata.js",
+    "seed:faux-ranker": "node scripts/data-migration/seed_faux_ranker_from_stars.js",
     "sync:bgg-trends": "node scripts/database-maintenance/sync_bgg_trends.js",
     "sync:bgg-trends:pw": "node scripts/sync_bgg_trends_playwright.js",
     "cleanup:test-email-users": "node scripts/deployment/cleanup-test-email-users.js",
@@ -52,6 +53,7 @@
   "license": "MIT",
   "description": "A full-stack board game ranking and management app",
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.993.0",
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",

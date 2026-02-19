@@ -17,7 +17,6 @@ type Story = StoryObj<typeof HomepageView>
 
 const sampleGames: any[] = Array.from({ length: 3 }).map((_, i) => ({
   id: `game-${i}`,
-  bgg_id: 1000 + i,
   name: ['Cascadia', 'Wingspan', 'Gloomhaven'][i] || `Game ${i + 1}`,
   year_published: 2021,
   image_url: null,
@@ -141,7 +140,7 @@ const sampleDiscoveryGames = Array.from({ length: 5 }).map((_, i) => ({
   plays_12mo: i + 1,
   last_played: '2025-06-01',
   game_num_ratings: 500 + i * 100,
-  bgg_rating: 7.2 + i * 0.2,
+  game_rating: 7.2 + i * 0.2,
   delta: 1.5 - i * 0.5,
   abs_delta: Math.abs(1.5 - i * 0.5),
   hot_take_type: i < 3 ? ('loved_more' as const) : ('liked_less' as const),

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerClient } from '@supabase/ssr'
+import { createServerClient, type CookieOptions } from '@supabase/ssr'
 const listNameCache: Record<string, { slug: string; ts: number }> = {}
 
 const supabaseUrl =
@@ -10,13 +10,14 @@ const supabaseAnonKey =
 function createMiddlewareSupabaseClient(req: NextRequest, res: NextResponse) {
   return createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {
-      getAll() {
-        return req.cookies.getAll()
+      get(name: string) {
+        return req.cookies.get(name)?.value
       },
-      setAll(cookiesToSet) {
-        cookiesToSet.forEach(({ name, value, options }) => {
-          res.cookies.set(name, value, options)
-        })
+      set(name: string, value: string, options?: CookieOptions) {
+        res.cookies.set({ name, value, ...(options ?? {}) })
+      },
+      remove(name: string, options?: CookieOptions) {
+        res.cookies.set({ name, value: '', ...(options ?? {}), maxAge: 0 })
       },
     },
   })

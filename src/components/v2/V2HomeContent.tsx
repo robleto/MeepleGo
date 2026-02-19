@@ -75,8 +75,8 @@ export default function V2HomeContent() {
         ),
       ])
 
-      const recentGameIds = Array.isArray(recentPlays?.logs)
-        ? Array.from(new Set(recentPlays.logs.map((log: any) => log.game_id)))
+      const recentGameIds: string[] = Array.isArray(recentPlays?.logs)
+        ? Array.from(new Set(recentPlays.logs.map((log: any) => log.game_id))) as string[]
         : []
 
       const recentGames = recentGameIds.length
@@ -90,15 +90,15 @@ export default function V2HomeContent() {
         },
         {
           ...baseRails[1],
-          games: mapGames(topRated?.games) || mapGames(mockGames),
+          games: mapGames(topRated?.games) || mapGames(mockGames) || [],
         },
         {
           ...baseRails[2],
-          games: mapGames(freshReleases?.games) || mapGames(mockGames),
+          games: mapGames(freshReleases?.games) || mapGames(mockGames) || [],
         },
         {
           ...baseRails[3],
-          games: mapGames(mockGames),
+          games: mapGames(mockGames) || [],
         },
       ]
 

@@ -338,8 +338,7 @@ export default function GameDetailModal({
     await upsertRanking({ ranking: rating, played_it: true })
     const listId = await ensurePlayedList()
     if (listId) await setCustomCollectionMembership(listId, true)
-    // close popup after selection
-    setRatingOpen(false)
+    // rating selection complete — no popup to close in this modal context
   }
 
   const handlePlayedToggle = async () => {
@@ -482,11 +481,7 @@ export default function GameDetailModal({
   const description = EG.description || EG.summary
   const summary = EG.summary || ''
   const tagline: string | null = EG.tagline || null
-  const needsExtended =
-    !EG.artists ||
-    !EG.bgg_type ||
-    !EG.rank_families ||
-    (Array.isArray(EG.rank_families) && EG.rank_families.length === 0)
+  const needsExtended = !EG.artists
   const SUMMARY_CLAMP = 170
   const summaryNeedsClamp = summary.length > SUMMARY_CLAMP
   const summaryDisplay =
@@ -625,14 +620,14 @@ export default function GameDetailModal({
       : { className: 'w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 max-w-6xl' }
   const panelClasses =
     variant === 'modal'
-      ? 'relative w-full max-w-xl md:h-[calc(100vh-6rem)] h-[100dvh] md:rounded-2xl rounded-none shadow-xl ring-1 ring-black/5 border border-gray-100 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm text-gray-900 dark:text-gray-100 focus:outline-none overflow-hidden flex flex-col z-10'
+      ? 'relative w-full max-w-xl md:h-[calc(100vh-6rem)] h-[100dvh] md:rounded-2xl rounded-none shadow-xl ring-1 ring-black/5 dark:ring-white/10 border border-gray-100 dark:border-white/20 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm text-gray-900 dark:text-gray-100 focus:outline-none overflow-hidden flex flex-col z-10'
       : 'relative w-full rounded-2xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 flex flex-col shadow-sm border border-gray-100'
 
   return (
     <Container {...outerProps}>
       {variant === 'modal' && (
         <div
-          className="absolute inset-0 bg-black/40 backdrop-blur-[2px] cursor-pointer"
+          className="absolute inset-0 bg-black/35 dark:bg-black/30 backdrop-blur-[1px] cursor-pointer"
           aria-hidden="true"
           onMouseDown={(e) => {
             e.stopPropagation()
@@ -649,7 +644,7 @@ export default function GameDetailModal({
         onClick={(e) => variant === 'modal' && e.stopPropagation()}
       >
         {/* Header simplified for readability */}
-        <div className="relative flex-shrink-0 px-4 pt-4 pb-3 border-b border-gray-200 dark:border-gray-700 sm:px-8 sm:pt-8 sm:pb-4">
+        <div className="relative flex-shrink-0 px-4 pt-4 pb-3 border-b border-gray-200 dark:border-white/20 sm:px-8 sm:pt-8 sm:pb-4">
           {variant === 'page' && (
             <div className="mb-3">
               <span className="inline-flex items-center rounded-full bg-emerald-50 text-emerald-700 px-2.5 py-1 text-[11px] font-semibold ring-1 ring-emerald-100">
@@ -675,7 +670,7 @@ export default function GameDetailModal({
                 aria-label="Open full page"
                 title="Open full page"
               >
-                <ArrowsPointingOutIcon className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+                <ArrowsPointingOutIcon className="w-5 h-5 text-gray-500 dark:text-gray-300" />
               </button>
               <button
                 onClick={(e) => {
@@ -685,7 +680,7 @@ export default function GameDetailModal({
                 className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
                 aria-label="Close"
               >
-                <XMarkIcon className="w-6 h-6 text-gray-500 dark:text-gray-400" />
+                <XMarkIcon className="w-6 h-6 text-gray-500 dark:text-gray-300" />
               </button>
             </div>
           )}
@@ -718,7 +713,7 @@ export default function GameDetailModal({
                     </div>
                   </div>
                   {(tagline || summary || description) && (
-                    <p className="text-sm leading-snug text-gray-600 dark:text-gray-400">
+                    <p className="text-sm leading-snug text-gray-600 dark:text-gray-300">
                       {tagline ||
                         summaryDisplay ||
                         (description
@@ -741,7 +736,7 @@ export default function GameDetailModal({
                             router.push(`/games?year=${EG.year_published}`)
                             if (variant === 'modal') onClose?.()
                           }}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 text-xs font-medium ring-1 ring-gray-200 dark:ring-gray-700 transition-colors"
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-50 dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-600 dark:text-slate-200 hover:text-gray-700 dark:hover:text-slate-100 text-xs font-medium ring-1 ring-gray-200 dark:ring-white/20 transition-colors"
                         >
                           <CalendarIcon className="w-3 h-3" />
                           {EG.year_published}
@@ -760,7 +755,7 @@ export default function GameDetailModal({
                                 router.push(`/games?weight=${w.toFixed(2)}`)
                                 if (variant === 'modal') onClose?.()
                               }}
-                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 text-xs font-medium ring-1 ring-gray-200 dark:ring-gray-700 transition-colors"
+                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-50 dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-600 dark:text-slate-200 hover:text-gray-700 dark:hover:text-slate-100 text-xs font-medium ring-1 ring-gray-200 dark:ring-white/20 transition-colors"
                             >
                               <ChartBarIcon className="w-3 h-3" />
                               {w.toFixed(2)}
@@ -774,7 +769,7 @@ export default function GameDetailModal({
                             router.push(`/games?players=${EG.max_players}`)
                             if (variant === 'modal') onClose?.()
                           }}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 text-xs font-medium ring-1 ring-gray-200 dark:ring-gray-700 transition-colors"
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-50 dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-600 dark:text-slate-200 hover:text-gray-700 dark:hover:text-slate-100 text-xs font-medium ring-1 ring-gray-200 dark:ring-white/20 transition-colors"
                         >
                           <UsersIcon className="w-3 h-3" />
                           {formatPlayerCount(EG.min_players, EG.max_players)}
@@ -787,7 +782,7 @@ export default function GameDetailModal({
                             router.push(`/games?playtime=${EG.playtime_minutes}`)
                             if (variant === 'modal') onClose?.()
                           }}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 text-xs font-medium ring-1 ring-gray-200 dark:ring-gray-700 transition-colors"
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-50 dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-600 dark:text-slate-200 hover:text-gray-700 dark:hover:text-slate-100 text-xs font-medium ring-1 ring-gray-200 dark:ring-white/20 transition-colors"
                         >
                           <TimeIcon className="w-3 h-3" />
                           {formatPlayingTime(EG.playtime_minutes)}
@@ -839,7 +834,7 @@ export default function GameDetailModal({
               !wantToPlayActive &&
               !localRanking?.played_it &&
               !playedCollectionActive && (
-                <span className="text-[11px] text-gray-400 dark:text-gray-500">
+                <span className="text-[11px] text-gray-400 dark:text-gray-300">
                   No status yet
                 </span>
               )}
@@ -847,7 +842,7 @@ export default function GameDetailModal({
         </div>
 
         {/* Tabs */}
-        <div className="px-4 sm:px-8 border-b border-gray-200 dark:border-gray-700">
+        <div className="px-4 sm:px-8 border-b border-gray-200 dark:border-white/20">
           <div className="flex items-center gap-2 py-3">
             {[
               { id: 'gamelog', label: 'GameLog' },
@@ -866,10 +861,10 @@ export default function GameDetailModal({
                         | 'details'
                     )
                   }
-                  className={`px-3 py-1.5 text-xs font-semibold tracking-wide rounded-full transition-colors ${
+                  className={`px-3 py-1.5 text-xs font-semibold tracking-wide rounded-full border transition-colors ${
                     isActive
-                      ? 'bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900'
-                      : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+                      ? 'bg-gray-900 border-gray-900 text-white dark:bg-sky-500/20 dark:border-sky-400/40 dark:text-sky-200'
+                      : 'bg-gray-100 border-gray-200 text-gray-600 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-700'
                   }`}
                 >
                   {tab.label}
@@ -1194,38 +1189,6 @@ export default function GameDetailModal({
                     <TagIcon className="w-5 h-5 text-gray-400 dark:text-gray-500" />{' '}
                     Classifications
                   </h3>
-                  {/* Type */}
-                  {game.bgg_type && (
-                    <div>
-                      <h4 className="mb-2 text-xs font-semibold tracking-wide text-gray-500 dark:text-gray-400 uppercase">
-                        Type
-                      </h4>
-                      <div className="flex flex-wrap gap-2">
-                        {(() => {
-                          const active =
-                            searchParamsNav?.get('type') === game.bgg_type
-                          return (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                router.push(
-                                  `/games?type=${encodeURIComponent(game.bgg_type)}`
-                                )
-                                if (variant === 'modal') onClose?.()
-                              }}
-                              className={`px-2.5 py-1 rounded-full text-xs font-medium shadow-sm border ${active ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border-indigo-100'}`}
-                            >
-                              {game.bgg_type
-                                .replace(/_/g, ' ')
-                                .replace(/\b\w/g, (c: string) =>
-                                  c.toUpperCase()
-                                )}
-                            </button>
-                          )
-                        })()}
-                      </div>
-                    </div>
-                  )}
                   {/* Categories */}
                   <div>
                     <h4 className="mb-2 text-xs font-semibold tracking-wide text-gray-500 dark:text-gray-400 uppercase">
@@ -1246,7 +1209,7 @@ export default function GameDetailModal({
                                 )
                                 if (variant === 'modal') onClose?.()
                               }}
-                              className={`px-2.5 py-1 rounded-full text-xs font-medium shadow-sm border ${active ? 'bg-blue-600 text-white border-blue-600' : 'bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-100'}`}
+                              className={`px-2.5 py-1 rounded-full text-xs font-medium shadow-sm border transition-colors ${active ? 'bg-blue-600 text-white border-blue-600 dark:bg-blue-500/25 dark:text-blue-200 dark:border-blue-400/40' : 'bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-100 dark:bg-blue-500/10 dark:hover:bg-blue-500/20 dark:text-blue-200 dark:border-blue-400/30'}`}
                             >
                               {c}
                             </button>
@@ -1277,7 +1240,7 @@ export default function GameDetailModal({
                                 )
                                 if (variant === 'modal') onClose?.()
                               }}
-                              className={`px-2.5 py-1 rounded-full text-xs font-medium shadow-sm border ${active ? 'bg-violet-600 text-white border-violet-600' : 'bg-violet-50 hover:bg-violet-100 text-violet-700 border-violet-100'}`}
+                              className={`px-2.5 py-1 rounded-full text-xs font-medium shadow-sm border transition-colors ${active ? 'bg-violet-600 text-white border-violet-600 dark:bg-violet-500/25 dark:text-violet-200 dark:border-violet-400/40' : 'bg-violet-50 hover:bg-violet-100 text-violet-700 border-violet-100 dark:bg-violet-500/10 dark:hover:bg-violet-500/20 dark:text-violet-200 dark:border-violet-400/30'}`}
                             >
                               {m}
                             </button>
@@ -1311,7 +1274,7 @@ export default function GameDetailModal({
                                 )
                                 if (variant === 'modal') onClose?.()
                               }}
-                              className={`px-2.5 py-1 rounded-full text-xs font-medium shadow-sm border ${active ? 'bg-sky-600 text-white border-sky-600' : 'bg-sky-50 hover:bg-sky-100 text-sky-700 border-sky-100'}`}
+                              className={`px-2.5 py-1 rounded-full text-xs font-medium shadow-sm border transition-colors ${active ? 'bg-sky-600 text-white border-sky-600 dark:bg-sky-500/25 dark:text-sky-200 dark:border-sky-400/40' : 'bg-sky-50 hover:bg-sky-100 text-sky-700 border-sky-100 dark:bg-sky-500/10 dark:hover:bg-sky-500/20 dark:text-sky-200 dark:border-sky-400/30'}`}
                             >
                               {label}
                             </button>
@@ -1337,7 +1300,6 @@ interface RelationGridProps {
   games: {
     id: string
     name: string
-    bgg_id?: number
     thumbnail_url?: string | null
   }[]
   onNavigate: (g: { id: string }) => void

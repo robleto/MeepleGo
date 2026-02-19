@@ -72,7 +72,7 @@ export function Logo({
             styles.text
           )}
         >
-          <span className="text-gray-900">Meeple</span>
+          <span className="text-gray-900 dark:text-white">Meeple</span>
           <span className="ml-0.5 text-[#096EC2]">Go</span>
         </span>
       )}

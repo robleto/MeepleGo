@@ -21,6 +21,7 @@ import {
   BookOpenIcon,
   XMarkIcon,
   EllipsisHorizontalIcon,
+  TrophyIcon,
 } from '@heroicons/react/24/outline'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
@@ -64,6 +65,18 @@ interface GameCardProps {
   imageFit?: 'cover' | 'contain'
   // Optional metadata configuration for controlling what info to display
   metadata?: GameCardMetadata
+  // Allow winner badge display in list view mode
+  allowWinnerBadgeInListView?: boolean
+  // Show drag handle for reorderable lists
+  showDragHandle?: boolean
+  // Drag handle props from dnd-kit or similar
+  dragHandleProps?: {
+    setActivatorNodeRef?: React.Ref<any>
+    attributes?: Record<string, any>
+    listeners?: Record<string, any>
+  }
+  // Callback for removing game from the current list context
+  onRemoveFromCurrentList?: () => void
 }
 
 export default function GameCard({
@@ -80,6 +93,10 @@ export default function GameCard({
   listRank = null,
   imageFit = 'cover',
   metadata,
+  allowWinnerBadgeInListView = false,
+  showDragHandle = false,
+  dragHandleProps,
+  onRemoveFromCurrentList,
 }: GameCardProps) {
   const router = useRouter()
   void viewMode
@@ -121,7 +138,7 @@ export default function GameCard({
   >('status')
   const [collectionStepperStyle, setCollectionStepperStyle] =
     useState<React.CSSProperties>()
-  const quickMenuButtonRef = useRef<HTMLButtonElement | null>(null)
+  const quickMenuButtonRef = useRef<HTMLElement>(null)
   const [saving, setSaving] = useState(false)
   const [showPlayLog, setShowPlayLog] = useState(false)
   const [wantToPlayActive, setWantToPlayActive] = useState(false)
@@ -240,7 +257,7 @@ export default function GameCard({
   }
 
   const handleRatingClick = async (rating: number | null) => {
-    const normalized = rating && rating > 0 ? rating : null
+    const normalized = rating && rating > 0 ? rating : undefined
     await upsertRanking({ ranking: normalized })
     setIsRating(false)
   }
@@ -545,46 +562,38 @@ export default function GameCard({
           </div>
 
           {/* Right side actions */}
-          <GameCardListActions
-            game={game}
-            ratingValue={ratingValue}
-            saving={saving}
-            playedIt={localRanking?.played_it ?? false}
-            membership={membership}
-            onRateClick={(event: React.MouseEvent<HTMLButtonElement>) => {
-              event.stopPropagation()
-              const rect = event.currentTarget.getBoundingClientRect()
-              setRatingPosition({
-                x: rect.left + rect.width / 2,
-                y: rect.bottom + 8,
-              })
-              setIsRating(true)
-            }}
-            onTogglePlayed={(e: React.MouseEvent<HTMLButtonElement>) => {
-              e.stopPropagation()
-              handlePlayedToggle()
-            }}
-            onToggleLibrary={(e: React.MouseEvent<HTMLButtonElement>) => {
-              e.stopPropagation()
-              if (onMembershipChange) {
-                onMembershipChange(game.id, { library: !membership.library })
-              }
-            }}
-            onToggleWishlist={(e: React.MouseEvent<HTMLButtonElement>) => {
-              e.stopPropagation()
-              if (onMembershipChange) {
-                onMembershipChange(game.id, { wishlist: !membership.wishlist })
-              }
-            }}
-            onRemoveFromCurrentList={
-              onRemoveFromCurrentList
-                ? (e: React.MouseEvent<HTMLButtonElement>) => {
-                    e.stopPropagation()
-                    onRemoveFromCurrentList()
-                  }
-                : undefined
-            }
-          />
+          <div className="flex items-center gap-1 flex-shrink-0">
+            {/* Rating */}
+            {ratingValue != null && ratingValue > 0 && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  const rect = e.currentTarget.getBoundingClientRect()
+                  setRatingPosition({
+                    x: rect.left + rect.width / 2,
+                    y: rect.bottom + 8,
+                  })
+                  setIsRating(true)
+                }}
+                className="px-2 py-1 text-xs font-semibold rounded bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300"
+              >
+                {ratingValue}
+              </button>
+            )}
+            {/* Remove from list */}
+            {onRemoveFromCurrentList && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onRemoveFromCurrentList()
+                }}
+                className="p-1 text-gray-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400"
+                title="Remove from list"
+              >
+                <XMarkIcon className="w-4 h-4" />
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Game Detail Modal (only mount when open to prevent Next router hook errors in Storybook) */}
@@ -754,7 +763,7 @@ export default function GameCard({
 
               <div className="relative">
                 <button
-                  ref={quickMenuButtonRef}
+                  ref={quickMenuButtonRef as React.Ref<HTMLButtonElement>}
                   onClick={(e) => {
                     e.stopPropagation()
                     const rect = e.currentTarget.getBoundingClientRect()
@@ -776,7 +785,7 @@ export default function GameCard({
                   open={showQuickMenu}
                   anchorRect={quickMenuAnchor}
                   style={quickMenuStyle}
-                  triggerRef={quickMenuButtonRef}
+                  triggerRef={quickMenuButtonRef as React.RefObject<HTMLElement>}
                   onRequestClose={() => setShowQuickMenu(false)}
                   playedIt={Boolean(localRanking?.played_it)}
                   wantToPlayActive={wantToPlayActive}

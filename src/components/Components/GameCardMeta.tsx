@@ -27,7 +27,7 @@ export default function GameCardMeta({
       <div className="flex-shrink-0">
         {metaConfig.showTitle !== false && (
           <h3
-            className={`font-bold text-gray-900 leading-tight line-clamp-2 ${
+            className={`font-bold text-gray-900 dark:text-gray-100 leading-tight line-clamp-2 ${
               titleClassName || ''
             } ${variant === 'compact' ? 'text-[0.737rem]' : 'text-[0.814rem]'} `}
           >
@@ -35,7 +35,7 @@ export default function GameCardMeta({
               ? `${(game.name || 'Untitled Game').substring(0, 48)}...`
               : (game.name || 'Untitled Game')}
             {variant === 'compact' && metaConfig.showYear !== false && (
-              <span className="ml-2 text-xs font-normal text-gray-500 tabular-nums">
+              <span className="ml-2 text-xs font-normal text-gray-500 dark:text-gray-400 tabular-nums">
                 {formatYear(game.year_published)}
               </span>
             )}
@@ -43,7 +43,7 @@ export default function GameCardMeta({
         )}
 
         {variant === 'detailed' && metaConfig.showTagline !== false && (game as any).tagline && (
-          <p className="mt-0.5 text-[0.8rem] leading-snug text-gray-600 line-clamp-2 min-h-[1.2rem]">
+          <p className="mt-0.5 text-[0.8rem] leading-snug text-gray-600 dark:text-gray-400 line-clamp-2 min-h-[1.2rem]">
             {truncate(game.tagline || '', 90)}
           </p>
         )}
@@ -52,7 +52,7 @@ export default function GameCardMeta({
         {(variant === 'balanced' || variant === 'detailed') && (metaConfig.showYear !== false || hasBadge) && (
           <div className="flex items-center mt-0.5 gap-1">
             {metaConfig.showYear !== false && (
-              <span className="text-[0.7rem] text-gray-500 tabular-nums">
+              <span className="text-[0.7rem] text-gray-500 dark:text-gray-400 tabular-nums">
                 {formatYear(game.year_published)}
               </span>
             )}
@@ -74,7 +74,7 @@ export default function GameCardMeta({
         )}
 
         {metaConfig.customSubtext && (
-          <p className="mt-1.5 text-[0.7rem] text-gray-600 line-clamp-1">
+          <p className="mt-1.5 text-[0.7rem] text-gray-600 dark:text-gray-400 line-clamp-1">
             {metaConfig.customSubtext}
           </p>
         )}
@@ -84,7 +84,9 @@ export default function GameCardMeta({
         (metaConfig.showPlayerCount === true || metaConfig.showPlaytime === true) && (
           <div
             className={`mt-auto pt-2 space-y-1 ${
-              emphasizeMeta ? 'text-gray-700' : 'text-gray-500'
+              emphasizeMeta
+                ? 'text-gray-700 dark:text-gray-300'
+                : 'text-gray-500 dark:text-gray-400'
             } flex-shrink-0 text-[0.7rem]`}
           >
             <div className="flex items-center justify-between text-xs">

@@ -12,15 +12,43 @@ interface HonorLike {
   derived_result?: string | null
 }
 
+function compareByAwardScore(
+  a: GameWithRanking,
+  b: GameWithRanking,
+  sortOrder: SortOrder
+) {
+  const direction = sortOrder === 'asc' ? 1 : -1
+  const aScore = a.award_score ?? 0
+  const bScore = b.award_score ?? 0
+  if (aScore !== bScore) {
+    return (aScore - bScore) * direction
+  }
+
+  const aRating = (a as any).rating ?? -Infinity
+  const bRating = (b as any).rating ?? -Infinity
+  if (aRating !== bRating) {
+    return (aRating - bRating) * direction
+  }
+
+  const aYear = a.year_published || 0
+  const bYear = b.year_published || 0
+  if (aYear !== bYear) {
+    return (aYear - bYear) * direction
+  }
+
+  return a.name.localeCompare(b.name)
+}
+
 export type SortKey =
   | 'name'
   | 'year_published'
-  | 'rank'
   | 'rating'
   | 'ranking'
+  | 'rank'
   | 'playtime_minutes'
   | 'min_players'
   | 'max_players'
+  | 'award_score'
 export type SortOrder = 'asc' | 'desc'
 export type GroupKey =
   | 'none'
@@ -36,9 +64,9 @@ export type GroupSortOrder = 'asc' | 'desc'
 export const SORT_OPTIONS = [
   { value: 'name' as SortKey, label: 'Name' },
   { value: 'year_published' as SortKey, label: 'Year' },
-  { value: 'rank' as SortKey, label: 'BGG Rank' },
-  { value: 'rating' as SortKey, label: 'BGG Rating' },
+  { value: 'rating' as SortKey, label: 'Rating' },
   { value: 'ranking' as SortKey, label: 'My Rating' },
+  { value: 'award_score' as SortKey, label: 'Smart' },
   { value: 'playtime_minutes' as SortKey, label: 'Play Time' },
   { value: 'min_players' as SortKey, label: 'Min Players' },
   { value: 'max_players' as SortKey, label: 'Max Players' },
@@ -77,6 +105,7 @@ export function useGameFilters(
   games: GameWithRanking[],
   options?: {
     disableClientSorting?: boolean
+    forceClientSortKeys?: SortKey[]
     defaultViewMode?: 'grid' | 'list'
     defaultSortBy?: SortKey
     defaultSortOrder?: SortOrder
@@ -87,8 +116,9 @@ export function useGameFilters(
 ) {
   const {
     disableClientSorting = false,
+    forceClientSortKeys = [],
     defaultViewMode = 'grid',
-    defaultSortBy = 'rank',
+    defaultSortBy = 'name',
     defaultSortOrder = 'asc',
     defaultGroupBy = 'none',
     defaultGroupSortOrder = 'asc',
@@ -284,11 +314,6 @@ export function useGameFilters(
         const mechs = game.mechanics || []
         return mechs.includes(filterValue)
       }
-      if (filterType === 'family') {
-        if (filterValue === 'all') return true
-        const families = (game as any).rank_families || []
-        return families.includes(filterValue)
-      }
       if (filterType === 'game') {
         return String(game.id) === filterValue
       }
@@ -335,6 +360,9 @@ export function useGameFilters(
           const bRank = b.ranking?.ranking || 0
           return sortOrder === 'asc' ? aRank - bRank : bRank - aRank
         }
+        if (sortBy === 'award_score') {
+          return compareByAwardScore(a, b, sortOrder)
+        }
         if (sortBy === 'name') {
           return sortOrder === 'asc'
             ? a.name.localeCompare(b.name)
@@ -344,11 +372,6 @@ export function useGameFilters(
           const aYear = a.year_published || 0
           const bYear = b.year_published || 0
           return sortOrder === 'asc' ? aYear - bYear : bYear - aYear
-        }
-        if (sortBy === 'rank') {
-          const aRating = (a as any).rank || Infinity
-          const bRating = (b as any).rank || Infinity
-          return sortOrder === 'asc' ? aRating - bRating : bRating - aRating
         }
         if (sortBy === 'rating') {
           const aRating = (a as any).rating ?? -Infinity
@@ -375,7 +398,9 @@ export function useGameFilters(
     }
 
     if (groupBy === 'none') {
-      if (disableClientSorting) {
+      const shouldClientSort =
+        !disableClientSorting || forceClientSortKeys.includes(sortBy)
+      if (!shouldClientSort) {
         // Server handles sorting, just return filtered games as-is
         return [{ key: 'All Games', games: filteredGames }]
       }
@@ -456,12 +481,9 @@ export function useGameFilters(
         .filter((k) => groups.has(k))
         .map((k) => ({
           key: k,
-          games: [...groups.get(k)!].sort((a, b) => {
-            // Always sort by BGG rank ascending inside rating buckets for default experience
-            const aRank = (a as any).rank || Infinity,
-              bRank = (b as any).rank || Infinity
-            return aRank - bRank
-          }),
+          games: [...groups.get(k)!].sort((a, b) =>
+            a.name.localeCompare(b.name)
+          ),
         }))
     }
 
@@ -712,6 +734,7 @@ export function useRankingsFilters(
     | 'players'
     | 'category'
     | 'mechanic'
+    | 'family'
     | 'game'
     | 'award'
     | 'playtime'
@@ -875,6 +898,9 @@ export function useRankingsFilters(
           const bRank = b.ranking?.ranking || 0
           return sortOrder === 'asc' ? aRank - bRank : bRank - aRank
         }
+        if (sortBy === 'award_score') {
+          return compareByAwardScore(a, b, sortOrder)
+        }
         if (sortBy === 'name') {
           return sortOrder === 'asc'
             ? a.name.localeCompare(b.name)
@@ -996,12 +1022,9 @@ export function useRankingsFilters(
         .filter((k) => groups.has(k))
         .map((k) => ({
           key: k,
-          games: [...groups.get(k)!].sort((a, b) => {
-            // Always sort by BGG rank ascending inside rating buckets
-            const aRank = (a as any).rank || Infinity,
-              bRank = (b as any).rank || Infinity
-            return aRank - bRank
-          }),
+          games: [...groups.get(k)!].sort((a, b) =>
+            a.name.localeCompare(b.name)
+          ),
         }))
     }
 

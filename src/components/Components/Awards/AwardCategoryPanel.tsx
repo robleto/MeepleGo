@@ -7,7 +7,6 @@ import type { ReactNode } from 'react'
 
 export interface AwardCategoryGame {
   id?: string | number
-  bgg_id?: number
   name: string
   year_published?: number | null
   image_url?: string | null
@@ -115,7 +114,7 @@ export default function AwardCategoryPanel({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {combinedNominees.map((game) => (
                 <div
-                  key={`${game.bgg_id ?? game.id}-nominee`}
+                  key={`${game.id ?? game.name}-nominee`}
                   className="flex items-center gap-3 p-2 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
                 >
                   <div className="w-12 h-12 rounded border border-gray-200 flex-shrink-0 bg-gray-50 overflow-hidden">

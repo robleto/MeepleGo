@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import PageLayout from '@/components/Components/PageLayout'
 import ProfileLayout from '@/components/Components/ProfileLayout'
@@ -46,7 +46,15 @@ export default function UserListsPage({ params }: Props) {
   return (
     <PageLayout>
       <ProfileLayout userId={userId} username={username}>
-        <ListsContent embedded forcedUserId={userId} username={username} />
+        <Suspense
+          fallback={
+            <div className="flex items-center justify-center min-h-[40vh]">
+              <div className="animate-pulse text-sm text-gray-400">Loading lists…</div>
+            </div>
+          }
+        >
+          <ListsContent embedded forcedUserId={userId} username={username} />
+        </Suspense>
       </ProfileLayout>
     </PageLayout>
   )

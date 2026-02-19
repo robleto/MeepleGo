@@ -96,7 +96,7 @@ function mapHotTakes(games: HotTakeGame[]): HighlightGameItem[] {
       game_id: g.game_id,
       game_name: g.game_name,
       game_thumbnail_url: g.game_thumbnail_url,
-      subtitle: `You: ${g.user_ranking}/10 · BGG: ${Number(g.bgg_rating).toFixed(1)} · \u0394 ${sign}${Number(g.delta).toFixed(1)}`,
+      subtitle: `You: ${g.user_ranking}/10 · Avg: ${Number(g.game_rating).toFixed(1)} · \u0394 ${sign}${Number(g.delta).toFixed(1)}`,
       subtitleNode: (
         <span className="inline-flex items-center gap-2">
           <span className={`inline-flex items-center gap-1 font-medium ${deltaTone}`}>
@@ -104,7 +104,7 @@ function mapHotTakes(games: HotTakeGame[]): HighlightGameItem[] {
             <ArrowIcon className="w-4 h-4" aria-hidden="true" />
             <span>{deltaValue}</span>
           </span>
-          <span className="text-gray-400">vs BGG</span>
+          <span className="text-gray-400">vs avg</span>
         </span>
       ),
     }

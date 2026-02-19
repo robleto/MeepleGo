@@ -3,7 +3,6 @@ import GameRowCard from './GameRowCard'
 
 const mockGame = {
   id: 'g-row-1',
-  bgg_id: 2222,
   name: 'Ark Nova',
   year_published: 2021,
   image_url:

@@ -12,6 +12,7 @@ export type SortOption =
 export type GameWithRanking = Game & {
   ranking?: Ranking | null
   list_membership?: { library: boolean; wishlist: boolean }
+  award_score?: number
 }
 
 export type FilterState = {
@@ -98,7 +99,7 @@ export type HotTakeGame = {
   game_thumbnail_url: string | null
   game_year_published: number | null
   user_ranking: number
-  bgg_rating: number
+  game_rating: number
   delta: number
   abs_delta: number
   hot_take_type: 'loved_more' | 'liked_less'

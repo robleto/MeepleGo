@@ -1,0 +1,29 @@
+{
+  "generated_at": "2026-02-11T04:42:51.401Z",
+  "input": "data/critic_ranking_sources.seed.json",
+  "output": "data/critic_rankings.generated.csv",
+  "total_sources": 2,
+  "total_rows": 9,
+  "matched_rows": 0,
+  "unmatched_rows": 9,
+  "sources": [
+    {
+      "source_name": "The Dice Tower",
+      "critic_name": "Ambie Valdes",
+      "year": 2020,
+      "source_url": "https://www.youtube.com/playlist?list=PLOlRvTbmD6tIqT5tirgRCVpaSjsB1A-K9",
+      "parsed_rows": 1,
+      "matched_rows": 0,
+      "error": null
+    },
+    {
+      "source_name": "The Dice Tower",
+      "critic_name": "Tom Vasel",
+      "year": 2020,
+      "source_url": "https://www.youtube.com/watch?v=bUjrc3g1SZ8&list=PLOlRvTbmD6tLL7_qrI0nAjb45j64_24Ll",
+      "parsed_rows": 8,
+      "matched_rows": 0,
+      "error": null
+    }
+  ]
+}
