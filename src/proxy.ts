@@ -13,9 +13,9 @@ function createMiddlewareSupabaseClient(req: NextRequest, res: NextResponse) {
       getAll() {
         return req.cookies.getAll()
       },
-      setAll(cookiesToSet) {
+      setAll(cookiesToSet: { name: string; value: string; options?: Record<string, unknown> }[]) {
         cookiesToSet.forEach(({ name, value, options }) => {
-          res.cookies.set(name, value, options)
+          res.cookies.set(name, value, options as Parameters<typeof res.cookies.set>[2])
         })
       },
     },
@@ -23,7 +23,7 @@ function createMiddlewareSupabaseClient(req: NextRequest, res: NextResponse) {
 }
 
 // Redirect legacy /lists/:uuid to /lists/:slugified-name-:uuid
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl
   // Match /lists/<uuid>
   const listUuidMatch = pathname.match(/^\/lists\/([0-9a-fA-F-]{36})$/)
