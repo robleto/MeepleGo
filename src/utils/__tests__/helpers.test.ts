@@ -24,9 +24,9 @@ describe('formatYear', () => {
 
 describe('formatPlayingTime', () => {
   it('formats minutes under 60', () => {
-    expect(formatPlayingTime(30)).toBe('30 min')
-    expect(formatPlayingTime(45)).toBe('45 min')
-    expect(formatPlayingTime(1)).toBe('1 min')
+    expect(formatPlayingTime(30)).toBe('30m')
+    expect(formatPlayingTime(45)).toBe('45m')
+    expect(formatPlayingTime(1)).toBe('1m')
   })
 
   it('formats exact hours', () => {
@@ -49,26 +49,25 @@ describe('formatPlayingTime', () => {
 
 describe('formatPlayerCount', () => {
   it('formats single player count', () => {
-    expect(formatPlayerCount(1, 1)).toBe('1 player')
-    expect(formatPlayerCount(2, 2)).toBe('2 players')
-    expect(formatPlayerCount(4, null)).toBe('4 players')
+    expect(formatPlayerCount(1, 1)).toBe('1')
+    expect(formatPlayerCount(2, 2)).toBe('2')
+    expect(formatPlayerCount(4, null)).toBe('4')
   })
 
   it('formats player ranges', () => {
-    expect(formatPlayerCount(2, 4)).toBe('2–4 players')
-    expect(formatPlayerCount(1, 6)).toBe('1–6 players')
-    expect(formatPlayerCount(3, 8)).toBe('3–8 players')
+    expect(formatPlayerCount(2, 4)).toBe('2–4')
+    expect(formatPlayerCount(1, 6)).toBe('1–6')
+    expect(formatPlayerCount(3, 8)).toBe('3–8')
   })
 
   it('handles null/undefined', () => {
     expect(formatPlayerCount(null, null)).toBe('Unknown')
-    // When min is null but max has value, it still shows range
-    expect(formatPlayerCount(null, 4)).toBe('null–4 players')
+    expect(formatPlayerCount(null, 4)).toBe('null–4')
   })
 
   it('handles edge cases', () => {
-    expect(formatPlayerCount(0, 0)).toBe('Unknown') // 0 is falsy, treated as no value
-    expect(formatPlayerCount(1, null)).toBe('1 player')
+    expect(formatPlayerCount(0, 0)).toBe('Unknown')
+    expect(formatPlayerCount(1, null)).toBe('1')
   })
 })
 
