@@ -1,12 +1,17 @@
 'use client'
 
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { cn } from '@/utils/helpers'
-import PageLayout from '@/components/Components/PageLayout'
-import ProfileHeader from '@/components/Components/ProfileHeader'
+import Heading from '@/components/Components/Heading'
+import {
+  BookmarkIcon,
+  CubeIcon,
+  StarIcon,
+  ListBulletIcon,
+} from '@heroicons/react/24/outline'
 
 interface Profile {
   id: string
@@ -55,6 +60,10 @@ export default function ProfileLayout({
   const [loading, setLoading] = useState(true)
   const [isOwnProfile, setIsOwnProfile] = useState(false)
 
+  const tabContainerRef = useRef<HTMLDivElement | null>(null)
+  const tabHighlighterRef = useRef<HTMLDivElement | null>(null)
+  const tabLinkRefs = useRef<Record<string, HTMLAnchorElement | null>>({})
+
   const baseUrl = username ? `/${username}` : '/profile'
 
   const tabs = [
@@ -69,7 +78,6 @@ export default function ProfileLayout({
     { key: 'stats', label: 'Stats', href: `${baseUrl}/stats` },
   ]
 
-  // Determine active tab from pathname
   const getActiveTab = () => {
     if (pathname.endsWith('/activity')) return 'activity'
     if (pathname.endsWith('/games')) return 'games'
@@ -84,10 +92,34 @@ export default function ProfileLayout({
 
   const activeTab = getActiveTab()
 
+  const moveTabHighlighterTo = (el: HTMLAnchorElement | null) => {
+    const highlighter = tabHighlighterRef.current
+    const container = tabContainerRef.current
+    if (!highlighter || !container || !el) {
+      if (highlighter) highlighter.style.opacity = '0'
+      return
+    }
+    const linkRect = el.getBoundingClientRect()
+    const containerRect = container.getBoundingClientRect()
+    const left = linkRect.left - containerRect.left
+    const width = linkRect.width
+    highlighter.style.opacity = '1'
+    highlighter.style.transform = `translateX(${left}px)`
+    highlighter.style.width = `${width}px`
+  }
+
   useEffect(() => {
     loadProfile()
     loadStats()
   }, [userId])
+
+  useEffect(() => {
+    const activeLink = tabLinkRefs.current[activeTab] || null
+    requestAnimationFrame(() => moveTabHighlighterTo(activeLink))
+    const onResize = () => moveTabHighlighterTo(activeLink)
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [activeTab, loading])
 
   const loadProfile = async () => {
     try {
@@ -95,7 +127,6 @@ export default function ProfileLayout({
         data: { session },
       } = await supabase.auth.getSession()
 
-      // Determine which user's profile to load
       const targetUserId = userId || session?.user?.id
       if (!targetUserId) {
         setLoading(false)
@@ -141,32 +172,31 @@ export default function ProfileLayout({
         wishlistResult,
         followingResult,
         followersResult,
-      ] =
-        await Promise.all([
-          supabase
-            .from('rankings')
-            .select('ranking, played_it')
-            .eq('user_id', targetUserId),
-          supabase.from('game_lists').select('id').eq('user_id', targetUserId),
-          supabase
-            .from('game_list_items')
-            .select('game_id, game_lists!inner(name)')
-            .eq('game_lists.user_id', targetUserId)
-            .eq('game_lists.name', 'Library'),
-          supabase
-            .from('game_list_items')
-            .select('game_id, game_lists!inner(name)')
-            .eq('game_lists.user_id', targetUserId)
-            .eq('game_lists.name', 'Wishlist'),
-          supabase
-            .from('user_follows')
-            .select('id', { count: 'exact', head: true })
-            .eq('follower_id', targetUserId),
-          supabase
-            .from('user_follows')
-            .select('id', { count: 'exact', head: true })
-            .eq('following_id', targetUserId),
-        ])
+      ] = await Promise.all([
+        supabase
+          .from('rankings')
+          .select('ranking, played_it')
+          .eq('user_id', targetUserId),
+        supabase.from('game_lists').select('id').eq('user_id', targetUserId),
+        supabase
+          .from('game_list_items')
+          .select('game_id, game_lists!inner(name)')
+          .eq('game_lists.user_id', targetUserId)
+          .eq('game_lists.name', 'Library'),
+        supabase
+          .from('game_list_items')
+          .select('game_id, game_lists!inner(name)')
+          .eq('game_lists.user_id', targetUserId)
+          .eq('game_lists.name', 'Wishlist'),
+        supabase
+          .from('user_follows')
+          .select('id', { count: 'exact', head: true })
+          .eq('follower_id', targetUserId),
+        supabase
+          .from('user_follows')
+          .select('id', { count: 'exact', head: true })
+          .eq('following_id', targetUserId),
+      ])
 
       const rankings = rankingsResult.data || []
       const lists = listsResult.data || []
@@ -200,75 +230,183 @@ export default function ProfileLayout({
 
   if (loading) {
     return (
-      <PageLayout>
-        <div className="flex items-center justify-center py-12">
-          <div className="w-8 h-8 border-b-4 rounded-full animate-spin border-primary-600"></div>
-        </div>
-      </PageLayout>
+      <div className="flex items-center justify-center py-12">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+      </div>
     )
   }
 
   if (!profile) {
     return (
-      <PageLayout>
-        <div className="py-12 text-center">
-          <p className="text-gray-600">Profile not found</p>
-        </div>
-      </PageLayout>
+      <div className="py-12 text-center">
+        <p className="text-gray-600">Profile not found</p>
+      </div>
     )
   }
 
-  const headerAndNav = (
-    <div>
-      {/* Profile header section with opaque background */}
-      <div className="px-4 pt-2 pb-4 bg-gray-50 dark:bg-gray-950 sm:pt-4 sm:pb-5 sm:px-6 lg:px-8">
-        <ProfileHeader
-          profile={profile}
-          stats={{
-            gamesOwned: stats.gamesOwned,
-            gamesPlayed: stats.gamesPlayed,
-            listsCreated: stats.listsCreated,
-            followers: stats.followers,
-            following: stats.following,
-          }}
-          isOwnProfile={isOwnProfile}
-          showBanner={Boolean(profile?.banner_url)}
-        />
-      </div>
-
-      {/* Navigation tabs - sticky with opaque bg on scroll */}
-      <div className="sticky z-30 px-4 bg-transparent border-b top-14 border-gray-200/70 dark:border-gray-700/70 sm:px-6 lg:px-8">
-        <nav
-          className="flex gap-1 -mb-px overflow-x-auto scrollbar-hide"
-          aria-label="Profile tabs"
-        >
-          {tabs.map((tab) => {
-            const isActive = activeTab === tab.key
-            return (
-              <Link
-                key={tab.key}
-                href={tab.href}
-                className={cn(
-                  'unstyled relative py-3 px-3 text-sm font-medium whitespace-nowrap transition-colors duration-150 border-b-4',
-                  isActive
-                    ? 'text-primary-600 border-primary-600'
-                    : 'text-gray-500 dark:text-gray-400 border-transparent hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-300'
-                )}
-              >
-                {tab.label}
-              </Link>
-            )
-          })}
-        </nav>
-      </div>
-    </div>
-  )
-
   return (
-    <PageLayout subHeader={headerAndNav} subHeaderSpacing={false}>
-      <div className="-mt-10 space-y-3 sm:-mt-12 lg:-mt-12">
-        {children}
+    <div className="space-y-3">
+      {/* Profile Header */}
+      <div className="bg-white sm:rounded-2xl sm:shadow-sm sm:border sm:border-gray-100 p-3 sm:p-4">
+        <div className="sm:flex sm:items-center sm:gap-6">
+          {/* Left: Avatar + Name */}
+          <div className="sm:flex-1 sm:min-w-0">
+            <div className="flex items-center gap-3">
+              <Link
+                href={isOwnProfile ? '/settings' : '#'}
+                className={cn(
+                  'group relative h-12 w-12 aspect-square rounded-full overflow-hidden bg-gray-200 flex items-center justify-center flex-shrink-0',
+                  isOwnProfile ? 'cursor-pointer' : 'cursor-default'
+                )}
+                aria-label={isOwnProfile ? 'Edit profile photo' : 'Profile photo'}
+              >
+                {profile.avatar_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={profile.avatar_url}
+                    alt="Profile"
+                    className="w-full h-full aspect-square object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full aspect-square bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white text-lg sm:text-xl font-semibold">
+                    {(
+                      profile.username ||
+                      profile.full_name ||
+                      profile.email ||
+                      'U'
+                    )
+                      .charAt(0)
+                      .toUpperCase()}
+                  </div>
+                )}
+                {isOwnProfile && (
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-xs font-medium text-white">
+                    Edit
+                  </div>
+                )}
+              </Link>
+              <div className="flex-1 min-w-0">
+                <Heading
+                  as="h1"
+                  size="lg"
+                  className="font-medium truncate text-lg sm:text-2xl"
+                >
+                  {profile.username || profile.full_name || 'User Profile'}
+                </Heading>
+                {profile.full_name && (
+                  <p className="text-xs sm:text-sm text-gray-600 mt-0.5 truncate">
+                    {profile.full_name}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Right (Desktop) / Below (Mobile): Stats */}
+          <div className="mt-3 sm:mt-0 grid grid-cols-4 gap-2 sm:flex sm:flex-wrap lg:flex-nowrap sm:gap-2 sm:flex-shrink-0">
+            {[
+              {
+                iconBg: 'bg-blue-500',
+                Icon: BookmarkIcon,
+                label: 'Owned',
+                value: stats.gamesOwned,
+              },
+              {
+                iconBg: 'bg-green-500',
+                Icon: CubeIcon,
+                label: 'Played',
+                value: stats.gamesPlayed,
+              },
+              {
+                iconBg: 'bg-yellow-500',
+                Icon: StarIcon,
+                label: 'Avg Rating',
+                value: stats.avgRating || '—',
+              },
+              {
+                iconBg: 'bg-purple-500',
+                Icon: ListBulletIcon,
+                label: 'Lists',
+                value: stats.listsCreated,
+              },
+            ].map((item) => (
+              <div
+                key={item.label}
+                className="text-center sm:bg-gray-50 sm:rounded-lg sm:p-2 sm:flex sm:items-center sm:gap-2 sm:text-left sm:min-w-[110px] lg:min-w-[120px]"
+              >
+                <div
+                  className={cn(
+                    'hidden sm:flex items-center justify-center w-8 h-8 rounded-lg flex-shrink-0',
+                    item.iconBg
+                  )}
+                >
+                  <item.Icon className="w-4 h-4 text-white" />
+                </div>
+                <div className="sm:min-w-0 sm:flex-1">
+                  <div className="text-lg sm:text-base font-medium text-gray-900 truncate">
+                    {item.value}
+                  </div>
+                  <div className="text-[10px] sm:text-xs font-medium text-gray-500 uppercase sm:normal-case truncate mt-0.5 sm:mt-0">
+                    {item.label}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
-    </PageLayout>
+
+      {/* Navigation - Sliding glass highlighter */}
+      <div className="relative -mx-4 px-4 sm:mx-0 sm:px-0 overflow-x-auto scrollbar-hide">
+        <div
+          ref={tabContainerRef}
+          className="relative inline-flex rounded-3xl px-2 backdrop-blur-xl shadow-[0_6px_30px_rgba(0,0,0,0.06)] border bg-white/60 border-gray-200/60 min-w-max"
+          onMouseLeave={() => moveTabHighlighterTo(tabLinkRefs.current[activeTab] || null)}
+        >
+          <div
+            ref={tabHighlighterRef}
+            className="absolute left-0 rounded-2xl pointer-events-none border transition-all duration-300 ease-out will-change-[transform,width]"
+            style={{
+              top: 6,
+              bottom: 6,
+              opacity: 0,
+              width: 0,
+              transform: 'translate3d(0,0,0)',
+              backgroundColor: 'rgba(224, 242, 254, 0.7)',
+              borderColor: 'rgba(186, 230, 253, 0.6)',
+              boxShadow:
+                'inset 0 1px 0 rgba(255,255,255,0.6), 0 6px 12px rgba(0,0,0,0.06)',
+            }}
+            aria-hidden="true"
+          />
+          <ul className="flex items-center font-medium text-xs gap-1 relative z-10">
+            {tabs.map((tab) => {
+              const isActive = activeTab === tab.key
+              return (
+                <li key={tab.key}>
+                  <Link
+                    ref={(el) => { tabLinkRefs.current[tab.key] = el }}
+                    onMouseEnter={(e) => moveTabHighlighterTo(e.currentTarget)}
+                    href={tab.href}
+                    aria-current={isActive ? 'page' : undefined}
+                    className={cn(
+                      'unstyled block px-4 py-2.5 rounded-xl text-center whitespace-nowrap transition-colors duration-200',
+                      isActive
+                        ? '!text-gray-900'
+                        : '!text-gray-600 hover:!text-gray-900'
+                    )}
+                  >
+                    {tab.label}
+                  </Link>
+                </li>
+              )
+            })}
+          </ul>
+        </div>
+      </div>
+
+      {/* Page Content */}
+      {children}
+    </div>
   )
 }
