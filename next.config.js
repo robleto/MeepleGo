@@ -23,6 +23,13 @@ const nextConfig = {
         port: '',
         pathname: '/**',
       },
+      // Cloudflare R2 public buckets (game thumbnails migrated from Supabase)
+      {
+        protocol: 'https',
+        hostname: '**.r2.dev',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
   eslint: {

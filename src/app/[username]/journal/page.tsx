@@ -44,12 +44,10 @@ export default function UserJournalPage({ params }: Props) {
   }
 
   return (
-    <PageLayout>
-      <ProfileLayout userId={userId} username={username}>
-        <div className="mt-6">
-          <PlaysClientPage forcedUserId={userId} readOnly embedded />
-        </div>
-      </ProfileLayout>
-    </PageLayout>
+    <ProfileLayout userId={userId} username={username}>
+      <div className="mt-6">
+        <PlaysClientPage forcedUserId={userId} readOnly embedded />
+      </div>
+    </ProfileLayout>
   )
 }

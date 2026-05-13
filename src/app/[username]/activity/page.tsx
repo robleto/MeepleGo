@@ -45,19 +45,17 @@ export default function UserActivityPage({ params }: Props) {
   }
 
   return (
-    <PageLayout>
-      <ProfileLayout userId={userId} username={username}>
-        <Heading as="h2" variant="section" className="mb-3">
-          Activity
-        </Heading>
-        <ActivityFeed
-          forcedUserId={userId}
-          username={username}
-          limit={50}
-          showHeader={false}
-          showViewAll={false}
-        />
-      </ProfileLayout>
-    </PageLayout>
+    <ProfileLayout userId={userId} username={username}>
+      <Heading as="h2" variant="section" className="mb-3">
+        Activity
+      </Heading>
+      <ActivityFeed
+        forcedUserId={userId}
+        username={username}
+        limit={50}
+        showHeader={false}
+        showViewAll={false}
+      />
+    </ProfileLayout>
   )
 }

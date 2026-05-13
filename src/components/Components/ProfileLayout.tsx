@@ -6,12 +6,7 @@ import { usePathname } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { cn } from '@/utils/helpers'
 import Heading from '@/components/Components/Heading'
-import {
-  BookmarkIcon,
-  CubeIcon,
-  StarIcon,
-  ListBulletIcon,
-} from '@heroicons/react/24/outline'
+import PageLayout from '@/components/Components/PageLayout'
 
 interface Profile {
   id: string
@@ -216,7 +211,7 @@ export default function ProfileLayout({
       setStats({
         gamesOwned: libraryItems.length,
         gamesRated: totalRatings.length,
-        gamesPlayed: rankings.length,
+        gamesPlayed,
         avgRating: Math.round(avgRating * 10) / 10,
         listsCreated: lists.length,
         wishlistItems: wishlistItems.length,
@@ -230,22 +225,27 @@ export default function ProfileLayout({
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-      </div>
+      <PageLayout>
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+        </div>
+      </PageLayout>
     )
   }
 
   if (!profile) {
     return (
-      <div className="py-12 text-center">
-        <p className="text-gray-600">Profile not found</p>
-      </div>
+      <PageLayout>
+        <div className="py-12 text-center">
+          <p className="text-gray-600">Profile not found</p>
+        </div>
+      </PageLayout>
     )
   }
 
   return (
-    <div className="space-y-3">
+    <PageLayout>
+      <div className="space-y-3">
       {/* Profile Header */}
       <div className="bg-white sm:rounded-2xl sm:shadow-sm sm:border sm:border-gray-100 p-3 sm:p-4">
         <div className="sm:flex sm:items-center sm:gap-6">
@@ -303,52 +303,24 @@ export default function ProfileLayout({
           </div>
 
           {/* Right (Desktop) / Below (Mobile): Stats */}
-          <div className="mt-3 sm:mt-0 grid grid-cols-4 gap-2 sm:flex sm:flex-wrap lg:flex-nowrap sm:gap-2 sm:flex-shrink-0">
+          <div className="mt-3 sm:mt-0 grid grid-cols-4 gap-2 sm:flex sm:items-baseline sm:gap-6 sm:flex-shrink-0">
             {[
-              {
-                iconBg: 'bg-blue-500',
-                Icon: BookmarkIcon,
-                label: 'Owned',
-                value: stats.gamesOwned,
-              },
-              {
-                iconBg: 'bg-green-500',
-                Icon: CubeIcon,
-                label: 'Played',
-                value: stats.gamesPlayed,
-              },
-              {
-                iconBg: 'bg-yellow-500',
-                Icon: StarIcon,
-                label: 'Avg Rating',
-                value: stats.avgRating || '—',
-              },
-              {
-                iconBg: 'bg-purple-500',
-                Icon: ListBulletIcon,
-                label: 'Lists',
-                value: stats.listsCreated,
-              },
+              { label: 'Owned', value: stats.gamesOwned },
+              { label: 'Played', value: stats.gamesPlayed },
+              { label: 'Avg Rating', value: stats.avgRating || '—', emphasis: true },
+              { label: 'Lists', value: stats.listsCreated },
             ].map((item) => (
-              <div
-                key={item.label}
-                className="text-center sm:bg-gray-50 sm:rounded-lg sm:p-2 sm:flex sm:items-center sm:gap-2 sm:text-left sm:min-w-[110px] lg:min-w-[120px]"
-              >
+              <div key={item.label} className="text-center sm:text-left">
                 <div
                   className={cn(
-                    'hidden sm:flex items-center justify-center w-8 h-8 rounded-lg flex-shrink-0',
-                    item.iconBg
+                    'text-lg sm:text-xl font-semibold tabular-nums leading-none',
+                    item.emphasis ? 'text-brand' : 'text-gray-900'
                   )}
                 >
-                  <item.Icon className="w-4 h-4 text-white" />
+                  {item.value}
                 </div>
-                <div className="sm:min-w-0 sm:flex-1">
-                  <div className="text-lg sm:text-base font-medium text-gray-900 truncate">
-                    {item.value}
-                  </div>
-                  <div className="text-[10px] sm:text-xs font-medium text-gray-500 uppercase sm:normal-case truncate mt-0.5 sm:mt-0">
-                    {item.label}
-                  </div>
+                <div className="text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wide mt-1">
+                  {item.label}
                 </div>
               </div>
             ))}
@@ -407,6 +379,7 @@ export default function ProfileLayout({
 
       {/* Page Content */}
       {children}
-    </div>
+      </div>
+    </PageLayout>
   )
 }

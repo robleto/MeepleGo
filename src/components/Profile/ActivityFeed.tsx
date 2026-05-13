@@ -86,6 +86,7 @@ export default function ActivityFeed({
 
       if (!ratingsError && ratings) {
         ratings.forEach((r: any) => {
+          if (!r.game) return
           entries.push({
             id: `rating-${r.game.id}`,
             type: 'rating',
@@ -106,6 +107,7 @@ export default function ActivityFeed({
 
       if (!playsError && plays) {
         plays.forEach((p: any) => {
+          if (!p.game) return
           entries.push({
             id: `play-${p.id}`,
             type: 'play',
@@ -125,9 +127,10 @@ export default function ActivityFeed({
 
       if (!listItemsError && listItems) {
         listItems.forEach((item: any) => {
+          if (!item.game) return
           const listName = item.game_list?.name
           if (!listName) return
-          
+
           if (listName === 'Library') {
             entries.push({
               id: `library-${item.game.id}`,

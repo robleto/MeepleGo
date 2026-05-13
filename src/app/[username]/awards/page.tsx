@@ -44,10 +44,8 @@ export default function UserAwardsPage({ params }: Props) {
   }
 
   return (
-    <PageLayout>
-      <ProfileLayout userId={userId} username={username}>
-        <PersonalAwardsAuto forcedUserId={userId} username={username} />
-      </ProfileLayout>
-    </PageLayout>
+    <ProfileLayout userId={userId} username={username}>
+      <PersonalAwardsAuto forcedUserId={userId} username={username} />
+    </ProfileLayout>
   )
 }

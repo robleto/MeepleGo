@@ -44,10 +44,8 @@ export default function UserFriendsPage({ params }: Props) {
   }
 
   return (
-    <PageLayout>
-      <ProfileLayout userId={userId} username={username}>
-        <FriendsContent embedded forcedUserId={userId} username={username} />
-      </ProfileLayout>
-    </PageLayout>
+    <ProfileLayout userId={userId} username={username}>
+      <FriendsContent embedded forcedUserId={userId} username={username} />
+    </ProfileLayout>
   )
 }

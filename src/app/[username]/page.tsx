@@ -72,10 +72,8 @@ export default function UserProfilePage({ params }: Props) {
   }
 
   return (
-    <PageLayout>
-      <ProfileLayout userId={userId} username={username}>
-        <ProfileOverviewContent forcedUserId={userId} username={username} />
-      </ProfileLayout>
-    </PageLayout>
+    <ProfileLayout userId={userId} username={username}>
+      <ProfileOverviewContent forcedUserId={userId} username={username} />
+    </ProfileLayout>
   )
 }

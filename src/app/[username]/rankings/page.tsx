@@ -44,10 +44,8 @@ export default function UserRankingsPage({ params }: Props) {
   }
 
   return (
-    <PageLayout>
-      <ProfileLayout userId={userId} username={username}>
-        <RankingsContent embedded forcedUserId={userId} username={username} />
-      </ProfileLayout>
-    </PageLayout>
+    <ProfileLayout userId={userId} username={username}>
+      <RankingsContent embedded forcedUserId={userId} username={username} />
+    </ProfileLayout>
   )
 }

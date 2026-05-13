@@ -44,10 +44,8 @@ export default function UserLibraryPage({ params }: Props) {
   }
 
   return (
-    <PageLayout>
-      <ProfileLayout userId={userId} username={username}>
-        <LibraryContent embedded forcedUserId={userId} username={username} />
-      </ProfileLayout>
-    </PageLayout>
+    <ProfileLayout userId={userId} username={username}>
+      <LibraryContent embedded forcedUserId={userId} username={username} />
+    </ProfileLayout>
   )
 }

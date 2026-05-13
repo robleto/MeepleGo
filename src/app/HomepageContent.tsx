@@ -20,9 +20,8 @@ import type {
   ComebackGame,
 } from '@/types'
 import awardsData from '@/data/awards.json'
-import OnboardingModal from '@/components/Components/OnboardingModal'
 import SignupPrompt from '@/components/Components/SignupPrompt'
-import { shouldPromptSignup, getOnboardingState } from '@/lib/guestSession'
+import { shouldPromptSignup } from '@/lib/guestSession'
 import { getUserPhase, type UserPhaseResult } from '@/lib/userPhase'
 import { FOUNDATIONAL_GAMES_BGG_IDS } from '@/lib/constants'
 import {
@@ -104,25 +103,17 @@ export default function HomepageContent() {
   })
   const [discoveryLoading, setDiscoveryLoading] = useState(false)
 
-  // Onboarding state
-  const [showOnboarding, setShowOnboarding] = useState(false)
+  // Signup prompt state (shown to active guests after enough activity)
   const [showSignupPrompt, setShowSignupPrompt] = useState(false)
 
-  // Check if we should show onboarding or signup prompt
   useEffect(() => {
-    const onboardingState = getOnboardingState()
-
-    if (!onboardingState.welcomed && !user && !userStats) {
-      setShowOnboarding(true)
-    }
-
     if (!user && shouldPromptSignup()) {
       const timer = setTimeout(() => {
         setShowSignupPrompt(true)
       }, 2000)
       return () => clearTimeout(timer)
     }
-  }, [user, userStats])
+  }, [user])
 
   useEffect(() => {
     let cancelled = false
@@ -685,13 +676,6 @@ export default function HomepageContent() {
           recentlyPlayed={recentlyPlayed}
         />
       </PageLayout>
-
-      {/* Onboarding for new users */}
-      <OnboardingModal
-        visible={showOnboarding}
-        onClose={() => setShowOnboarding(false)}
-        onComplete={() => setShowOnboarding(false)}
-      />
 
       {/* Signup prompt for active guests */}
       <SignupPrompt

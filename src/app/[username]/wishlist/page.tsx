@@ -44,10 +44,8 @@ export default function UserWishlistPage({ params }: Props) {
   }
 
   return (
-    <PageLayout>
-      <ProfileLayout userId={userId} username={username}>
-        <WishlistContent embedded forcedUserId={userId} username={username} />
-      </ProfileLayout>
-    </PageLayout>
+    <ProfileLayout userId={userId} username={username}>
+      <WishlistContent embedded forcedUserId={userId} username={username} />
+    </ProfileLayout>
   )
 }

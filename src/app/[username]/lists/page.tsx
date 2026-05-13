@@ -44,10 +44,8 @@ export default function UserListsPage({ params }: Props) {
   }
 
   return (
-    <PageLayout>
-      <ProfileLayout userId={userId} username={username}>
-        <ListsContent embedded forcedUserId={userId} username={username} />
-      </ProfileLayout>
-    </PageLayout>
+    <ProfileLayout userId={userId} username={username}>
+      <ListsContent embedded forcedUserId={userId} username={username} />
+    </ProfileLayout>
   )
 }

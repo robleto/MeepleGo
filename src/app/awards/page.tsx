@@ -164,7 +164,14 @@ async function getAwardStats(awardType: string): Promise<AwardStats> {
       .ilike('award_set', searchPattern)
 
     if (error) {
-      console.error('Error fetching award stats:', error)
+      console.error('Error fetching award stats:', {
+        awardType,
+        searchPattern,
+        message: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint,
+      })
       return { categories: 0, winners: 0, nominees: 0, yearSpan: '' }
     }
 
