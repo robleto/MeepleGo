@@ -33,7 +33,14 @@ export function GameImage({
   )
   const [showFallback, setShowFallback] = useState(!src)
 
-  const handleImageLoad = () => {
+  const handleImageLoad = (img?: HTMLImageElement) => {
+    // Cloudflare R2 can return 200 OK with an empty body for missing keys,
+    // and the Next.js image optimizer occasionally returns a corrupt
+    // response without triggering onError. Treat 0×0 results as failures.
+    if (img && (img.naturalWidth === 0 || img.naturalHeight === 0)) {
+      handleImageError()
+      return
+    }
     setImageState('loaded')
     onLoad?.()
   }
@@ -117,7 +124,7 @@ export function GameImage({
             : '(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 256px')
         }
         decoding="async"
-        onLoadingComplete={handleImageLoad}
+        onLoadingComplete={(img) => handleImageLoad(img)}
         onError={handleImageError as any}
       />
     </div>

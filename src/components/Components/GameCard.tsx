@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from 'react'
 import dynamic from 'next/dynamic'
-import Image from 'next/image'
 import { GameImage } from '../Elements/GameImage'
 import { GameWithRanking } from '@/types'
 import { Game, Ranking } from '@/types/supabase'
@@ -648,22 +647,16 @@ export default function GameCard({
         className={`aspect-square relative w-full mx-auto rounded-t-lg overflow-visible border border-gray-200 dark:border-gray-700 cursor-pointer ${variant === 'compact' ? 'bg-gradient-to-b from-gray-200 dark:from-gray-700 to-gray-100 dark:to-gray-800' : 'bg-gradient-to-b from-gray-300 dark:from-gray-700 to-gray-200 dark:to-gray-800'}`}
       >
         <div className="absolute inset-0 overflow-hidden rounded-t-lg">
-          {game.image_url || game.thumbnail_url ? (
-            <Image
-              src={(game.image_url || game.thumbnail_url) as string}
-              alt={game.name}
-              fill
-              className={imageFit === 'contain' ? 'object-contain p-1' : 'object-cover'}
-              sizes="(max-width: 640px) 150px, (max-width: 768px) 150px, (max-width: 1024px) 150px, 150px"
-            />
-          ) : (
-            <GameImage
-              src={null}
-              alt={game.name}
-              name={game.name}
-              variant="square"
-            />
-          )}
+          {/* Always route through GameImage so 404s / broken R2 keys land
+              on the proper initials fallback instead of leaking alt text. */}
+          <GameImage
+            src={game.image_url || game.thumbnail_url || null}
+            alt={game.name}
+            name={game.name}
+            variant="square"
+            fit={imageFit}
+            sizes="(max-width: 640px) 150px, (max-width: 768px) 150px, (max-width: 1024px) 150px, 150px"
+          />
         </div>
 
         {/* Grid view rank badge (top-left), if provided */}
