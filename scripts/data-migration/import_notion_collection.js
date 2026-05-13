@@ -116,6 +116,8 @@ function normalizeName(s) {
     .toLowerCase()
     .normalize('NFKD')
     .replace(/[̀-ͯ]/g, '') // strip diacritics
+    // Treat & and "and" as the same, before stripping punctuation.
+    .replace(/\s*&\s*/g, ' and ')
     .replace(/^the\s+/, '')
     .replace(/[^\p{Letter}\p{Number}\s]/gu, '') // strip punctuation
     .replace(/\s+/g, ' ')
