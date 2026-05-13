@@ -66,7 +66,9 @@ function GamesPageContent() {
   } = useGameFilters(games, {
     disableClientSorting: true, // Server handles sorting
     defaultViewMode: 'grid',
-    defaultSortBy: 'rating',
+    // BGG rank/rating are no longer reliably populated; default to most
+    // recently published among curated games.
+    defaultSortBy: 'year_published',
     defaultSortOrder: 'desc',
     storageKeyPrefix: 'games',
   })
@@ -270,11 +272,14 @@ function GamesPageContent() {
       }
 
       // Regular load more for non-search cases
-      // Build query with search
-      let query = supabase.from('games').select(`
+      // Curated catalog only: long-tail games are hidden from browse.
+      let query = supabase
+        .from('games')
+        .select(`
           *,
           rankings(*)
         `)
+        .eq('is_curated', true)
 
       // Filter rankings by current user if logged in
       if (userId) {
@@ -377,53 +382,26 @@ function GamesPageContent() {
         let rankedBatch: any[] = []
         let unrankedBatch: any[] = []
 
-        if (noActiveFilter) {
-          // 1. Fetch ranked games (non-null rank) ordered ascending
-          let rankedQuery = supabase
-            .from('games')
-            .select(`*, rankings(*)`)
-            .not('rank', 'is', null)
-            .order('rank', { ascending: true, nullsFirst: false })
-            .range(0, ITEMS_PER_LOAD - 1)
-
-          if (userId) rankedQuery = rankedQuery.eq('rankings.user_id', userId)
-          rankedQuery = applyServerFilters(rankedQuery)
-
-          const { data: rankedData, error: rankedErr } = await rankedQuery
-          if (rankedErr) throw rankedErr
-          rankedBatch = rankedData || []
-
-          // If we didn't fill the page, top up with unranked ordered by name (stable fallback)
-          if (rankedBatch.length < ITEMS_PER_LOAD) {
-            const remaining = ITEMS_PER_LOAD - rankedBatch.length
-            let unrankedQuery = supabase
-              .from('games')
-              .select(`*, rankings(*)`)
-              .is('rank', null)
-              .order('name', { ascending: true })
-              .range(0, remaining - 1)
-            if (userId)
-              unrankedQuery = unrankedQuery.eq('rankings.user_id', userId)
-            unrankedQuery = applyServerFilters(unrankedQuery)
-            const { data: unrankedData, error: unrankedErr } =
-              await unrankedQuery
-            if (unrankedErr) throw unrankedErr
-            unrankedBatch = unrankedData || []
-          }
-          gamesData = [...rankedBatch, ...unrankedBatch]
-        } else {
-          // Fallback to single pass (filters/search complicate dual fetch)
-          let query = supabase
-            .from('games')
-            .select(`*, rankings(*)`)
-            .order('rank', { ascending: true, nullsFirst: false })
-            .range(0, ITEMS_PER_LOAD - 1)
-          if (userId) query = query.eq('rankings.user_id', userId)
-          query = applyServerFilters(query)
-          const { data: singleData, error: singleErr } = await query
-          if (singleErr) throw singleErr
-          gamesData = singleData || []
-        }
+        // Curated browse: only games enriched via Wikidata (is_curated=true).
+        // Long-tail games stay in the DB for award linking but don't show up
+        // in browse. Default sort: most recently published first, since BGG
+        // rank is no longer available.
+        let query = supabase
+          .from('games')
+          .select(`*, rankings(*)`)
+          .eq('is_curated', true)
+          .order('year_published', { ascending: false, nullsFirst: false })
+          .order('name', { ascending: true })
+          .range(0, ITEMS_PER_LOAD - 1)
+        if (userId) query = query.eq('rankings.user_id', userId)
+        query = applyServerFilters(query)
+        const { data: singleData, error: singleErr } = await query
+        if (singleErr) throw singleErr
+        gamesData = singleData || []
+        rankedBatch = gamesData
+        // Suppress unused-var warnings in the rare paths that still reference these
+        void noActiveFilter
+        void unrankedBatch
 
         // Diagnostics
         // Transform to internal type
@@ -442,10 +420,13 @@ function GamesPageContent() {
 
           // Helper to fetch additional pages with the exact same query ordering
           const fetchNextBatch = async (start: number, end: number) => {
-            let q = supabase.from('games').select(`
+            let q = supabase
+              .from('games')
+              .select(`
                 *,
                 rankings(*)
               `)
+              .eq('is_curated', true)
             // Filter rankings by current user if logged in
             if (userId) {
               q = q.eq('rankings.user_id', userId)
@@ -1029,8 +1010,8 @@ function GamesPageContent() {
         uniquePlayerCounts={uniquePlayerCounts}
         uniqueCategories={uniqueCategories}
         uniqueMechanics={uniqueMechanics}
-        defaultSortBy="rank"
-        defaultSortOrder="asc"
+        defaultSortBy="year_published"
+        defaultSortOrder="desc"
         defaultGroupBy="none"
         defaultGroupSortOrder="asc"
         defaultViewMode="grid"
