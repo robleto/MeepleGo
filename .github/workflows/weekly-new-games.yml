@@ -1,0 +1,106 @@
+name: Weekly New Games
+
+permissions:
+  contents: read
+  actions: write
+
+on:
+  schedule:
+    - cron: '0 3 * * 0' # 3 AM UTC every Sunday
+  workflow_dispatch: # Manual trigger for testing
+
+jobs:
+  new-games:
+    concurrency:
+      group: weekly-new-games-${{ github.ref }}
+      cancel-in-progress: false
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      # Future: Add step here to fetch new games before enqueuing
+      # - name: Fetch new games from source
+      #   run: |
+      #     # Implementation for fetching new games
+      
+      - name: Enqueue new games for enrichment
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          set -e
+          echo "Enqueueing new games for enrichment..."
+          
+          # Call enqueue_game_enrichment Edge Function
+          RESPONSE=$(curl -s -w "\n%{http_code}" --fail --max-time 60 -X POST \
+            "${SUPABASE_URL}/functions/v1/enqueue_game_enrichment" \
+            -H "Authorization: Bearer ${SUPABASE_SERVICE_ROLE_KEY}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "run_type": "new_games",
+              "source": "bga",
+              "limit": 500
+            }')
+          
+          # Parse response
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+          BODY=$(echo "$RESPONSE" | sed '$d')
+          
+          echo "HTTP Status: $HTTP_CODE"
+          echo "Response Body:"
+          echo "$BODY" | jq '.' 2>/dev/null || echo "$BODY"
+          
+          # Check for success
+          if [ "$HTTP_CODE" -ne 200 ]; then
+            echo "::error::Failed to enqueue new games. HTTP status: $HTTP_CODE"
+            exit 1
+          fi
+          
+          echo "✅ Successfully enqueued new games for enrichment"
+      
+      - name: Process game enrichment (10 iterations)
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          TOTAL_ITERATIONS=10
+          LIMIT_PER_ITERATION=50
+          DELAY_SECONDS=10
+          
+          echo "Starting processing loop: $TOTAL_ITERATIONS iterations with limit=$LIMIT_PER_ITERATION"
+          
+          for i in $(seq 1 $TOTAL_ITERATIONS); do
+            echo ""
+            echo "Processing iteration $i/$TOTAL_ITERATIONS..."
+            
+            # Call process_game_enrichment Edge Function
+            RESPONSE=$(curl -s -w "\n%{http_code}" --max-time 60 -X POST \
+              "${SUPABASE_URL}/functions/v1/process_game_enrichment" \
+              -H "Authorization: Bearer ${SUPABASE_SERVICE_ROLE_KEY}" \
+              -H "Content-Type: application/json" \
+              -d "{\"limit\": $LIMIT_PER_ITERATION}")
+            
+            # Parse response
+            HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+            BODY=$(echo "$RESPONSE" | sed '$d')
+            
+            echo "HTTP Status: $HTTP_CODE"
+            echo "Response Body:"
+            echo "$BODY" | jq '.' 2>/dev/null || echo "$BODY"
+            
+            # Check for success but continue on failure
+            if [ "$HTTP_CODE" -ne 200 ]; then
+              echo "::warning::Iteration $i failed with HTTP status: $HTTP_CODE"
+              echo "Continuing to next iteration..."
+            else
+              echo "✅ Iteration $i completed successfully"
+            fi
+            
+            # Delay before next iteration (except on last iteration)
+            if [ $i -lt $TOTAL_ITERATIONS ]; then
+              echo "Waiting ${DELAY_SECONDS}s before next iteration..."
+              sleep $DELAY_SECONDS
+            fi
+          done
+          
+          echo ""
+          echo "✅ Completed all $TOTAL_ITERATIONS iterations"
